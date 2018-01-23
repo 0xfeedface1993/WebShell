@@ -13,6 +13,7 @@
 		27448B2E20170ABA001FC925 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 27448B2C20170ABA001FC925 /* Main.storyboard */; };
 		27448B3A20170ABA001FC925 /* CCCHOOOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B3920170ABA001FC925 /* CCCHOOOTests.swift */; };
 		27448B4520170ABA001FC925 /* CCCHOOOUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B4420170ABA001FC925 /* CCCHOOOUITests.swift */; };
+		27448B532017112D001FC925 /* WebBullet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B522017112D001FC925 /* WebBullet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +47,7 @@
 		27448B4020170ABA001FC925 /* CCCHOOOUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CCCHOOOUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		27448B4420170ABA001FC925 /* CCCHOOOUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CCCHOOOUITests.swift; sourceTree = "<group>"; };
 		27448B4620170ABA001FC925 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		27448B522017112D001FC925 /* WebBullet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebBullet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +100,7 @@
 			children = (
 				27448B2620170ABA001FC925 /* AppDelegate.swift */,
 				27448B2820170ABA001FC925 /* ViewController.swift */,
+				27448B522017112D001FC925 /* WebBullet.swift */,
 				27448B2A20170ABA001FC925 /* Assets.xcassets */,
 				27448B2C20170ABA001FC925 /* Main.storyboard */,
 				27448B2F20170ABA001FC925 /* Info.plist */,
@@ -259,6 +262,7 @@
 			files = (
 				27448B2920170ABA001FC925 /* ViewController.swift in Sources */,
 				27448B2720170ABA001FC925 /* AppDelegate.swift in Sources */,
+				27448B532017112D001FC925 /* WebBullet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

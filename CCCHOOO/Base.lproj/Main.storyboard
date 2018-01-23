@@ -1,7 +1,9 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="11134" systemVersion="15F34" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="13771" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11134"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13771"/>
+        <plugIn identifier="com.apple.WebKit2IBPlugin" version="13771"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
         <!--Application-->
@@ -673,7 +675,7 @@
                         <outlet property="delegate" destination="Voe-Tx-rLC" id="PrD-fu-P6m"/>
                     </connections>
                 </application>
-                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModuleProvider="target"/>
+                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="CCCHOOO" customModuleProvider="target"/>
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -688,7 +690,7 @@
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="196" y="240" width="480" height="270"/>
                         <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1027"/>
-			<connections>
+                        <connections>
                             <outlet property="delegate" destination="B8D-0N-5wS" id="98r-iN-zZc"/>
                         </connections>
                     </window>
@@ -703,15 +705,70 @@
         <!--View Controller-->
         <scene sceneID="hIz-AP-VOD">
             <objects>
-                <viewController id="XfG-lQ-9wD" customClass="ViewController" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="XfG-lQ-9wD" customClass="ViewController" customModule="CCCHOOO" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" wantsLayer="YES" id="m2S-Jp-Qdl">
-                        <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                        <rect key="frame" x="0.0" y="0.0" width="655" height="615"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <wkWebView wantsLayer="YES" translatesAutoresizingMaskIntoConstraints="NO" id="uNH-VG-icF">
+                                <rect key="frame" x="0.0" y="100" width="655" height="516"/>
+                                <wkWebViewConfiguration key="configuration">
+                                    <audiovisualMediaTypes key="mediaTypesRequiringUserActionForPlayback" none="YES"/>
+                                    <wkPreferences key="preferences"/>
+                                </wkWebViewConfiguration>
+                            </wkWebView>
+                            <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="VtA-8i-qpD">
+                                <rect key="frame" x="20" y="12" width="300" height="80"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="300" id="7bJ-B2-30F"/>
+                                    <constraint firstAttribute="height" constant="80" id="asf-cs-GIj"/>
+                                </constraints>
+                                <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="E0u-fm-bNW"/>
+                            </imageView>
+                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="63Y-eZ-5pf">
+                                <rect key="frame" x="328" y="70" width="165" height="22"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="165" id="V0D-lU-66p"/>
+                                </constraints>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="WRL-jJ-erU">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="rbS-Lf-jkm">
+                                <rect key="frame" x="357" y="13" width="107" height="32"/>
+                                <buttonCell key="cell" type="push" title="提交验证码" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Ic3-Pr-Zip">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" usesAppearanceFont="YES"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="uploadTextField:" target="XfG-lQ-9wD" id="ruo-sm-J4a"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="uNH-VG-icF" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="-1" id="7lr-Dc-zZB"/>
+                            <constraint firstItem="VtA-8i-qpD" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" id="8Uk-De-RpQ"/>
+                            <constraint firstItem="63Y-eZ-5pf" firstAttribute="leading" secondItem="VtA-8i-qpD" secondAttribute="trailing" constant="8" id="9Ax-Ig-s3A"/>
+                            <constraint firstAttribute="trailing" secondItem="uNH-VG-icF" secondAttribute="trailing" id="Fgq-vo-ppA"/>
+                            <constraint firstItem="rbS-Lf-jkm" firstAttribute="top" secondItem="63Y-eZ-5pf" secondAttribute="bottom" constant="29" id="NrA-Vp-ZNe"/>
+                            <constraint firstItem="uNH-VG-icF" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="UcS-YL-reZ"/>
+                            <constraint firstAttribute="bottom" secondItem="VtA-8i-qpD" secondAttribute="bottom" constant="12" id="ZbH-P6-hTP"/>
+                            <constraint firstItem="rbS-Lf-jkm" firstAttribute="centerX" secondItem="63Y-eZ-5pf" secondAttribute="centerX" id="jmf-4k-9wa"/>
+                            <constraint firstItem="63Y-eZ-5pf" firstAttribute="top" secondItem="VtA-8i-qpD" secondAttribute="top" id="nQs-gv-ShN"/>
+                            <constraint firstAttribute="bottom" secondItem="uNH-VG-icF" secondAttribute="bottom" constant="100" id="qOO-PS-uSg"/>
+                        </constraints>
                     </view>
+                    <connections>
+                        <outlet property="code" destination="VtA-8i-qpD" id="jHW-2J-Icg"/>
+                        <outlet property="textField" destination="63Y-eZ-5pf" id="BGB-b6-fVU"/>
+                        <outlet property="webview" destination="uNH-VG-icF" id="vsE-Qi-tLY"/>
+                    </connections>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="75" y="655"/>
+            <point key="canvasLocation" x="162.5" y="827.5"/>
         </scene>
     </scenes>
 </document>
