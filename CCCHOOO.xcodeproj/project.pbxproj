@@ -14,6 +14,9 @@
 		27448B3A20170ABA001FC925 /* CCCHOOOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B3920170ABA001FC925 /* CCCHOOOTests.swift */; };
 		27448B4520170ABA001FC925 /* CCCHOOOUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B4420170ABA001FC925 /* CCCHOOOUITests.swift */; };
 		27448B532017112D001FC925 /* WebBullet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B522017112D001FC925 /* WebBullet.swift */; };
+		27448B5520176CFE001FC925 /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B5420176CFE001FC925 /* DownloadManager.swift */; };
+		27448B5720176E34001FC925 /* DownloadTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B5620176E34001FC925 /* DownloadTask.swift */; };
+		27448B5A2018387A001FC925 /* ccchooo.js in Resources */ = {isa = PBXBuildFile; fileRef = 27448B592018387A001FC925 /* ccchooo.js */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +51,9 @@
 		27448B4420170ABA001FC925 /* CCCHOOOUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CCCHOOOUITests.swift; sourceTree = "<group>"; };
 		27448B4620170ABA001FC925 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		27448B522017112D001FC925 /* WebBullet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebBullet.swift; sourceTree = "<group>"; };
+		27448B5420176CFE001FC925 /* DownloadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadManager.swift; sourceTree = "<group>"; };
+		27448B5620176E34001FC925 /* DownloadTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadTask.swift; sourceTree = "<group>"; };
+		27448B592018387A001FC925 /* ccchooo.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = ccchooo.js; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,9 +104,12 @@
 		27448B2520170ABA001FC925 /* CCCHOOO */ = {
 			isa = PBXGroup;
 			children = (
+				27448B58201837AD001FC925 /* Script */,
 				27448B2620170ABA001FC925 /* AppDelegate.swift */,
 				27448B2820170ABA001FC925 /* ViewController.swift */,
 				27448B522017112D001FC925 /* WebBullet.swift */,
+				27448B5420176CFE001FC925 /* DownloadManager.swift */,
+				27448B5620176E34001FC925 /* DownloadTask.swift */,
 				27448B2A20170ABA001FC925 /* Assets.xcassets */,
 				27448B2C20170ABA001FC925 /* Main.storyboard */,
 				27448B2F20170ABA001FC925 /* Info.plist */,
@@ -125,6 +134,14 @@
 				27448B4620170ABA001FC925 /* Info.plist */,
 			);
 			path = CCCHOOOUITests;
+			sourceTree = "<group>";
+		};
+		27448B58201837AD001FC925 /* Script */ = {
+			isa = PBXGroup;
+			children = (
+				27448B592018387A001FC925 /* ccchooo.js */,
+			);
+			path = Script;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -234,6 +251,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				27448B5A2018387A001FC925 /* ccchooo.js in Resources */,
 				27448B2B20170ABA001FC925 /* Assets.xcassets in Resources */,
 				27448B2E20170ABA001FC925 /* Main.storyboard in Resources */,
 			);
@@ -260,9 +278,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				27448B5720176E34001FC925 /* DownloadTask.swift in Sources */,
 				27448B2920170ABA001FC925 /* ViewController.swift in Sources */,
 				27448B2720170ABA001FC925 /* AppDelegate.swift in Sources */,
 				27448B532017112D001FC925 /* WebBullet.swift in Sources */,
+				27448B5520176CFE001FC925 /* DownloadManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -16,6 +16,21 @@ class ViewController: NSViewController {
     let userController = WKUserContentController()
     var bullets = [WebBullet]()
     var bulletsIterator : IndexingIterator<[WebBullet]>?
+    let fileNumber = "50044"
+    var downloadLink : URL?
+    lazy var functionScript : String = {
+        if let file = Bundle.main.url(forResource: "ccchooo", withExtension: "js") {
+            do {
+                let str = try String(contentsOf: file)
+                return str
+            }   catch {
+                print(error)
+                return ""
+            }
+        }
+        return ""
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -37,7 +52,31 @@ class ViewController: NSViewController {
     }
     
     @IBAction func uploadTextField(_ sender: Any) {
-        let codeUpload = WebBullet(successAction: nil, failedAction: nil, method: .post, headFields: ["Referer":"http://www.ccchoo.com/file-38355.html",
+        //http://www.ccchoo.com/file-51406.html
+        let codeUpload = WebBullet(successAction: {
+            dat in
+            if let url = self.downloadLink {
+                DownloadManager.share.add(request: DownloadRequest(label: "test", fileName: "dragdemo.zip", downloadStateUpdate: { pack in
+                    print("--------- name: \(pack.request.fileName)\n--------- progress: \(pack.progress)")
+                }, downloadFinished: { pack in
+                    print(pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
+                    if let data = pack.revData, let str = String(data: data, encoding: .utf8) {
+                        print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%\n")
+                        print(str)
+                        print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%")
+                    }
+                }, headFields: ["Referer":"http://www.ccchoo.com/down-\(self.fileNumber).html",
+                    "Accept-Language":"zh-cn",
+                    "Upgrade-Insecure-Requests":"1",
+                    "Accept-Encoding":"gzip, deflate",
+                    "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                    "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: url))
+                let pasteBoard = NSPasteboard.general
+                pasteBoard.clearContents()
+                pasteBoard.writeObjects([self.downloadLink!.absoluteString] as [NSPasteboardWriting])
+                print(">>>>>>>>> copy url done ! <<<<<<<<<")
+            }
+        }, failedAction: nil, method: .post, headFields: ["Referer":"http://www.ccchoo.com/file-\(fileNumber).html",
                                                                                                      "Origin":"http://www.ccchoo.com",
                                                                                                     "Accept-Language":"zh-cn",
                                                                                                     "Upgrade-Insecure-Requests":"1",
@@ -50,7 +89,7 @@ class ViewController: NSViewController {
                                              "code":textField.stringValue,
                                              "vipd":"0"],
                                   url: URL(string: "http://www.ccchoo.com/ajax.php")!,
-                                  injectJavaScript: "var yyy=6;")
+                                  injectJavaScript: "")
         bullets = [codeUpload]
         currentResult = codeUpload
         bulletsIterator = bullets.makeIterator()
@@ -60,41 +99,42 @@ class ViewController: NSViewController {
     
     func loadSequenceBullet() {
         let mainPage = WebBullet(successAction: nil, failedAction: nil, method: .get, headFields: [:], formData: [:],
-                                 url: URL(string: "http://www.ccchoo.com/down-38355.html")!,
-                                 injectJavaScript: "var xxx=0;")
+                                 url: URL(string: "http://www.ccchoo.com/down-\(fileNumber).html")!,
+                                 injectJavaScript: "")
         
-        let main2Page = WebBullet(successAction: nil, failedAction: nil, method: .get, headFields: ["Referer":"http://www.ccchoo.com/file-38355.html",
+        let main2Page = WebBullet(successAction: nil, failedAction: nil, method: .get, headFields: ["Referer":"http://www.ccchoo.com/file-\(fileNumber).html",
                                                                                                     "Accept-Language":"zh-cn",
                                                                                                     "Upgrade-Insecure-Requests":"1",
                                                                                                     "Accept-Encoding":"gzip, deflate",
                                                                                                     "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                                                                                                     "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"],
                                  formData: [:],
-                                 url: URL(string: "http://www.ccchoo.com/down2-38355.html")!,
-                                 injectJavaScript: "var yyy=2;")
+                                 url: URL(string: "http://www.ccchoo.com/down2-\(fileNumber).html")!,
+                                 injectJavaScript: "")
         let main3Page = WebBullet(successAction: {
             dat in
-            guard let data = dat as? String else {
+            guard let dic = dat as? [String:String] else {
                 print("no data!")
                 return
             }
             
-//            if let imageData = Data(base64Encoded: data), let img = NSImage(data: imageData) {
-//                self.code.image = img
-//            }
-            print(data)
-        }, failedAction: nil, method: .get, headFields: ["Referer":"http://www.ccchoo.com/down2-38355.html",
+            if let url = URL(string: dic["link"] ?? "") {
+                self.downloadLink = url
+                print("link: \(url.absoluteString)")
+            }
+            
+            if let base64 = dic["image"], let data = Data(base64Encoded: base64), let img = NSImage(data: data) {
+                self.code.image = img
+            }
+        }, failedAction: nil, method: .get, headFields: ["Referer":"http://www.ccchoo.com/down2-\(fileNumber).html",
                                                                                                     "Accept-Language":"zh-cn",
                                                                                                     "Upgrade-Insecure-Requests":"1",
                                                                                                     "Accept-Encoding":"gzip, deflate",
                                                                                                     "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                                                                                                     "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"],
                                   formData: [:],
-                                  url: URL(string: "http://www.ccchoo.com/down-38355.html")!,
-                                  injectJavaScript: "function getDowloadLink(){ return document.body.innerHTML.match(/http:\\/\\/down4\\.ccchoo\\.com[^\"]+\"/g)[0] } getDowloadLink();")
-        //document.body.innerHTML.match(/http:\/\/down4\.ccchoo\.com[^"]+"/g)
-        //function getBase64Image(img) { var canvas = document.createElement(\"canvas\"); canvas.width = img.width;canvas.height = img.height; var ctx = canvas.getContext(\"2d\"); ctx.drawImage(img, 0, 0, img.width, img.height); var dataURL = canvas.toDataURL(\"image/png\"); return dataURL.replace(\"data:image/png;base64,\", \"\");} getBase64Image(document.getElementById('imgcode'));
-        
+                                  url: URL(string: "http://www.ccchoo.com/down-\(fileNumber).html")!,
+                                  injectJavaScript: "\(functionScript) getImageAndLink();")
         bullets = [mainPage, main2Page, main3Page]
         currentResult = mainPage
         bulletsIterator = bullets.makeIterator()
@@ -106,13 +146,19 @@ extension ViewController : WKScriptMessageHandler {
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         print("receive : \(message)")
     }
+    
+    func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
+        print("+++++++++++++++++++++ didReceiveServerRedirectForProvisionalNavigation +++++++++++++++++++++")
+        print(navigation.debugDescription)
+        print("+++++++++++++++++++++ didReceiveServerRedirectForProvisionalNavigation +++++++++++++++++++++")
+    }
 }
 
 var currentResult : WebBullet?
 
 extension ViewController : WKNavigationDelegate {
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        print("finish load: \(navigation)")
+        print("finish load: \(navigation.debugDescription)")
         execNextCommand()
     }
     
