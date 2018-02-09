@@ -24,6 +24,7 @@ class DownloadManager : NSObject {
 //        let config = URLSessionConfiguration.background(withIdentifier: "download")
         let config = URLSessionConfiguration.default
 //        config.isDiscretionary = true
+//        Data().write(to: NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!)
         session = URLSession(configuration: config, delegate: self, delegateQueue: OperationQueue.main)
     }
     
@@ -54,11 +55,16 @@ extension DownloadManager : URLSessionDownloadDelegate {
         print("didBecomeInvalidWithError: \(error != nil ? error!.localizedDescription : "no error")")
     }
     
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        print("didCompleteWithError: \(error.debugDescription)")
+    }
+    
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
         var task = tasks.first(where: { $0.task == downloadTask })
         task?.totalBytes = totalBytesExpectedToWrite
         task?.revBytes = totalBytesWritten
         if let tk = task {
+            print("------ name: \(tk.request.fileName) ------ progress: \(tk.progress) ------")
             task?.request.downloadStateUpdate?(tk)
         }
     }

@@ -15,8 +15,10 @@ class ViewController: NSViewController {
     @IBOutlet weak var textField: NSTextField!
     let userController = WKUserContentController()
     var bullets = [WebBullet]()
+    var currentResult : WebBullet?
     var bulletsIterator : IndexingIterator<[WebBullet]>?
-    let fileNumber = "50044"
+    let fileNumber = "51745"
+    var fileName = ""
     var downloadLink : URL?
     lazy var functionScript : String = {
         if let file = Bundle.main.url(forResource: "ccchooo", withExtension: "js") {
@@ -37,10 +39,11 @@ class ViewController: NSViewController {
         // Do any additional setup after loading the view.
         
         userController.add(self, name: "fetchDlLink")
+        userController.addUserScript(WKUserScript(source: functionScript, injectionTime: .atDocumentStart, forMainFrameOnly: true))
         webview.configuration.userContentController = userController
         webview.navigationDelegate = self
         
-        loadSequenceBullet()
+        loadCCCHOOOSequenceBullet()
         
         webview.load(bullets.first!.request)
     }
@@ -52,18 +55,27 @@ class ViewController: NSViewController {
     }
     
     @IBAction func uploadTextField(_ sender: Any) {
-        //http://www.ccchoo.com/file-51406.html
         let codeUpload = WebBullet(successAction: {
             dat in
             if let url = self.downloadLink {
-                DownloadManager.share.add(request: DownloadRequest(label: "test", fileName: "dragdemo.zip", downloadStateUpdate: { pack in
-                    print("--------- name: \(pack.request.fileName)\n--------- progress: \(pack.progress)")
+                DownloadManager.share.add(request: DownloadRequest(label: "test", fileName: self.fileName, downloadStateUpdate: { pack in
+                    
                 }, downloadFinished: { pack in
                     print(pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
                     if let data = pack.revData, let str = String(data: data, encoding: .utf8) {
                         print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%\n")
                         print(str)
                         print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%")
+                    }
+                    
+                    if let urlString = NSSearchPathForDirectoriesInDomains(.downloadsDirectory, .userDomainMask, true).first {
+                        let url = URL(fileURLWithPath: urlString).appendingPathComponent(pack.request.fileName)
+                        do {
+                            try pack.revData?.write(to: url)
+                            print(">>>>>> file saved! <<<<<<")
+                        } catch {
+                            print(error)
+                        }
                     }
                 }, headFields: ["Referer":"http://www.ccchoo.com/down-\(self.fileNumber).html",
                     "Accept-Language":"zh-cn",
@@ -97,10 +109,20 @@ class ViewController: NSViewController {
         webview.load(currentResult!.request)
     }
     
-    func loadSequenceBullet() {
-        let mainPage = WebBullet(successAction: nil, failedAction: nil, method: .get, headFields: [:], formData: [:],
+    func loadCCCHOOOSequenceBullet() {
+        let mainPage = WebBullet(successAction: {
+            dat in
+            guard let name = dat as? String else {
+                print("no name!")
+                self.fileName = UUID().uuidString + ".ccchooo"
+                return
+            }
+            
+            self.fileName = name
+            print("file name: \(name)")
+        }, failedAction: nil, method: .get, headFields: [:], formData: [:],
                                  url: URL(string: "http://www.ccchoo.com/down-\(fileNumber).html")!,
-                                 injectJavaScript: "")
+                                 injectJavaScript: "\(functionScript) getFileName();")
         
         let main2Page = WebBullet(successAction: nil, failedAction: nil, method: .get, headFields: ["Referer":"http://www.ccchoo.com/file-\(fileNumber).html",
                                                                                                     "Accept-Language":"zh-cn",
@@ -126,7 +148,9 @@ class ViewController: NSViewController {
             if let base64 = dic["image"], let data = Data(base64Encoded: base64), let img = NSImage(data: data) {
                 self.code.image = img
             }
-        }, failedAction: nil, method: .get, headFields: ["Referer":"http://www.ccchoo.com/down2-\(fileNumber).html",
+        }, failedAction: { e in
+            
+        }, method: .get, headFields: ["Referer":"http://www.ccchoo.com/down2-\(fileNumber).html",
                                                                                                     "Accept-Language":"zh-cn",
                                                                                                     "Upgrade-Insecure-Requests":"1",
                                                                                                     "Accept-Encoding":"gzip, deflate",
@@ -154,8 +178,6 @@ extension ViewController : WKScriptMessageHandler {
     }
 }
 
-var currentResult : WebBullet?
-
 extension ViewController : WKNavigationDelegate {
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         print("finish load: \(navigation.debugDescription)")
@@ -164,7 +186,7 @@ extension ViewController : WKNavigationDelegate {
     
     func execNextCommand() {
         DispatchQueue.global().async {
-            if let result = currentResult {
+            if let result = self.currentResult {
                 let sem = DispatchSemaphore(value: 0)
                 DispatchQueue.main.async {
                     self.webview.evaluateJavaScript(result.injectJavaScript, completionHandler: { (data, err) in
@@ -175,13 +197,13 @@ extension ViewController : WKNavigationDelegate {
                             return
                         }
                         result.successAction?(data)
-                        print("sucess : \(result.injectJavaScript)")
+                        print("sucess : \(result.method)")
                         sem.signal()
                     })
                 }
                 sem.wait()
-                currentResult = self.bulletsIterator?.next()
-                if let result = currentResult {
+                self.currentResult = self.bulletsIterator?.next()
+                if let result = self.currentResult {
                     DispatchQueue.main.async {
                         self.webview.load(result.request)
                     }
