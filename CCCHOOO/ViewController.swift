@@ -32,6 +32,7 @@ class ViewController: NSViewController {
         }
         return ""
     }()
+    @IBOutlet var DownloadStateController: NSArrayController!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -58,8 +59,24 @@ class ViewController: NSViewController {
         let codeUpload = WebBullet(successAction: {
             dat in
             if let url = self.downloadLink {
-                DownloadManager.share.add(request: DownloadRequest(label: "test", fileName: self.fileName, downloadStateUpdate: { pack in
-                    
+                let label = UUID().uuidString
+                DownloadManager.share.add(request: DownloadRequest(label: label, fileName: self.fileName, downloadStateUpdate: { pack in
+                    var items = self.DownloadStateController.content as! [DownloadInfo]
+                    if let index = items.index(where: { $0.uuid == label }) {
+                        items[index].progress = "\(pack.progress * 100)%"
+                        items[index].totalBytes = "\(pack.totalBytes / 1024 / 1024)M"
+                        items[index].site = pack.request.url.host!
+                        self.DownloadStateController.content = items
+                        return
+                    }
+                    let info = DownloadInfo()
+                    info.uuid = label
+                    info.name = self.fileName
+                    info.progress = "\(pack.progress * 100)%"
+                    info.totalBytes = "\(pack.totalBytes / 1024 / 1024)M"
+                    info.site = pack.request.url.host!
+                    items.append(info)
+                    self.DownloadStateController.content = items
                 }, downloadFinished: { pack in
                     print(pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
                     if let data = pack.revData, let str = String(data: data, encoding: .utf8) {

@@ -8,6 +8,18 @@
 
 import Foundation
 
+class DownloadInfo : NSObject {
+    var uuid = ""
+    @objc dynamic var name = ""
+    @objc dynamic var progress = ""
+    @objc dynamic var totalBytes = ""
+    @objc dynamic var site = ""
+    @objc dynamic var state = ""
+    override init() {
+        super.init()
+    }
+}
+
 class DownloadManager : NSObject {
     private static let _manager = DownloadManager()
     static var share : DownloadManager {
