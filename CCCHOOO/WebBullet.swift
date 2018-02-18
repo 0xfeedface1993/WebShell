@@ -17,8 +17,8 @@ struct WebBullet {
                 req.addValue(item.value, forHTTPHeaderField: item.key)
             }
             var body = ""
-            for item in formData {
-                body += "\(item.key)=\(item.value)&"
+            for (index, item) in formData.enumerated() {
+                body += "\(item.key)=\(item.value)\(index < formData.count - 1 ? "&":"")"
             }
             if body != "" {
                 req.httpBody = body.data(using: .utf8)

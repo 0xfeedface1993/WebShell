@@ -34,13 +34,17 @@ struct DownloadRequest {
     var downloadFinished : ((DownloadTask) -> ())?
     var headFields : [String:String]
     var url : URL
+    var method : HTTPMethod
+    var body : Data?
     var request : URLRequest {
         get {
             var req = URLRequest(url: url)
-            req.httpMethod = "GET"
+            req.httpShouldHandleCookies = true
+            req.httpMethod = method.rawValue
             for item in headFields {
                 req.addValue(item.value, forHTTPHeaderField: item.key)
             }
+            req.httpBody = body
             return req
         }
     }

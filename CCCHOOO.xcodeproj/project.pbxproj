@@ -17,6 +17,8 @@
 		27448B5520176CFE001FC925 /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B5420176CFE001FC925 /* DownloadManager.swift */; };
 		27448B5720176E34001FC925 /* DownloadTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B5620176E34001FC925 /* DownloadTask.swift */; };
 		27448B5A2018387A001FC925 /* ccchooo.js in Resources */ = {isa = PBXBuildFile; fileRef = 27448B592018387A001FC925 /* ccchooo.js */; };
+		27E4C12F2037011E0003A38D /* Feemoo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27E4C12E2037011E0003A38D /* Feemoo.swift */; };
+		27E4C131203703610003A38D /* feemoo.js in Resources */ = {isa = PBXBuildFile; fileRef = 27E4C130203703610003A38D /* feemoo.js */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +56,8 @@
 		27448B5420176CFE001FC925 /* DownloadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadManager.swift; sourceTree = "<group>"; };
 		27448B5620176E34001FC925 /* DownloadTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadTask.swift; sourceTree = "<group>"; };
 		27448B592018387A001FC925 /* ccchooo.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = ccchooo.js; sourceTree = "<group>"; };
+		27E4C12E2037011E0003A38D /* Feemoo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Feemoo.swift; sourceTree = "<group>"; };
+		27E4C130203703610003A38D /* feemoo.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = feemoo.js; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,6 +88,7 @@
 		27448B1A20170ABA001FC925 = {
 			isa = PBXGroup;
 			children = (
+				27E4C12D203701040003A38D /* Feemoo */,
 				27448B2520170ABA001FC925 /* CCCHOOO */,
 				27448B3820170ABA001FC925 /* CCCHOOOTests */,
 				27448B4320170ABA001FC925 /* CCCHOOOUITests */,
@@ -139,9 +144,18 @@
 		27448B58201837AD001FC925 /* Script */ = {
 			isa = PBXGroup;
 			children = (
+				27E4C130203703610003A38D /* feemoo.js */,
 				27448B592018387A001FC925 /* ccchooo.js */,
 			);
 			path = Script;
+			sourceTree = "<group>";
+		};
+		27E4C12D203701040003A38D /* Feemoo */ = {
+			isa = PBXGroup;
+			children = (
+				27E4C12E2037011E0003A38D /* Feemoo.swift */,
+			);
+			path = Feemoo;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -254,6 +268,7 @@
 				27448B5A2018387A001FC925 /* ccchooo.js in Resources */,
 				27448B2B20170ABA001FC925 /* Assets.xcassets in Resources */,
 				27448B2E20170ABA001FC925 /* Main.storyboard in Resources */,
+				27E4C131203703610003A38D /* feemoo.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -280,6 +295,7 @@
 			files = (
 				27448B5720176E34001FC925 /* DownloadTask.swift in Sources */,
 				27448B2920170ABA001FC925 /* ViewController.swift in Sources */,
+				27E4C12F2037011E0003A38D /* Feemoo.swift in Sources */,
 				27448B2720170ABA001FC925 /* AppDelegate.swift in Sources */,
 				27448B532017112D001FC925 /* WebBullet.swift in Sources */,
 				27448B5520176CFE001FC925 /* DownloadManager.swift in Sources */,
