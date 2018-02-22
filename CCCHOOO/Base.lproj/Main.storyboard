@@ -812,11 +812,11 @@
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
                                                         <tableCellView id="oqT-gB-w9u">
-                                                            <rect key="frame" x="96" y="1" width="230" height="17"/>
+                                                            <rect key="frame" x="96" y="1" width="229" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0ET-KU-DVa">
-                                                                    <rect key="frame" x="0.0" y="0.0" width="230" height="17"/>
+                                                                    <rect key="frame" x="0.0" y="0.0" width="229" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                     <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="SyA-eE-25q">
                                                                         <font key="font" metaFont="system"/>

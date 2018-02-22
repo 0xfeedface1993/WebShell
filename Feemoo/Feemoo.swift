@@ -10,6 +10,7 @@ import AppKit
 // http://www.feemoo.com/s/v2j0z15j
 extension ViewController {
     func loadFeemooSequenceBullet() {
+        scriptName = "feemoo"
         let mainJSUnit = InjectUnit(script: "\(functionScript) getSecondPageLinkAndFileName();", successAction: {
             dat in
             guard let dic = dat as? [String:String] else {
