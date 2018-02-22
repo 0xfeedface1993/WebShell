@@ -135,7 +135,7 @@ class ViewController: NSViewController {
     }
     
     func loadCCCHOOOSequenceBullet() {
-        let mainPage = WebBullet(successAction: {
+        let mainJSUnit = InjectUnit(script: "\(functionScript) getFileName();", successAction: {
             dat in
             guard let name = dat as? String else {
                 print("no name!")
@@ -145,11 +145,13 @@ class ViewController: NSViewController {
             
             self.fileName = name
             print("file name: \(name)")
-        }, failedAction: nil, method: .get, headFields: [:], formData: [:],
+        }, failedAction: nil, isAutomaticallyPass: true)
+        let mainPage = WebBullet(method: .get,
+                                 headFields: [:],
+                                 formData: [:],
                                  url: URL(string: "http://www.ccchoo.com/down-\(fileNumber).html")!,
-                                 injectJavaScript: "\(functionScript) getFileName();")
-        
-        let main2Page = WebBullet(successAction: nil, failedAction: nil, method: .get, headFields: ["Referer":"http://www.ccchoo.com/file-\(fileNumber).html",
+                                 injectJavaScript: [mainJSUnit])
+        let main2Page = WebBullet(method: .get, headFields: ["Referer":"http://www.ccchoo.com/file-\(fileNumber).html",
                                                                                                     "Accept-Language":"zh-cn",
                                                                                                     "Upgrade-Insecure-Requests":"1",
                                                                                                     "Accept-Encoding":"gzip, deflate",
@@ -157,8 +159,8 @@ class ViewController: NSViewController {
                                                                                                     "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"],
                                  formData: [:],
                                  url: URL(string: "http://www.ccchoo.com/down2-\(fileNumber).html")!,
-                                 injectJavaScript: "")
-        let main3Page = WebBullet(successAction: {
+                                 injectJavaScript: [])
+        let main3JSUnit = InjectUnit(script: "\(functionScript) getImageAndLink();", successAction: {
             dat in
             guard let dic = dat as? [String:String] else {
                 print("no data!")
@@ -173,9 +175,8 @@ class ViewController: NSViewController {
             if let base64 = dic["image"], let data = Data(base64Encoded: base64), let img = NSImage(data: data) {
                 self.code.image = img
             }
-        }, failedAction: { e in
-            
-        }, method: .get, headFields: ["Referer":"http://www.ccchoo.com/down2-\(fileNumber).html",
+        }, failedAction: nil, isAutomaticallyPass: true)
+        let main3Page = WebBullet(method: .get, headFields: ["Referer":"http://www.ccchoo.com/down2-\(fileNumber).html",
                                                                                                     "Accept-Language":"zh-cn",
                                                                                                     "Upgrade-Insecure-Requests":"1",
                                                                                                     "Accept-Encoding":"gzip, deflate",
@@ -183,7 +184,7 @@ class ViewController: NSViewController {
                                                                                                     "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"],
                                   formData: [:],
                                   url: URL(string: "http://www.ccchoo.com/down-\(fileNumber).html")!,
-                                  injectJavaScript: "\(functionScript) getImageAndLink();")
+                                  injectJavaScript: [main3JSUnit])
         bullets = [mainPage, main2Page, main3Page]
         currentResult = mainPage
         bulletsIterator = bullets.makeIterator()
@@ -212,21 +213,28 @@ extension ViewController : WKNavigationDelegate {
     func execNextCommand() {
         DispatchQueue.global().async {
             if let result = self.currentResult {
-                let sem = DispatchSemaphore(value: 0)
-                DispatchQueue.main.async {
-                    self.webview.evaluateJavaScript(result.injectJavaScript, completionHandler: { (data, err) in
-                        if let e = err {
-                            result.failedAction?(e)
-                            print("error : \(e)")
+                for js in result.injectJavaScript {
+                    let sem = DispatchSemaphore(value: 0)
+                    DispatchQueue.main.async {
+                        self.webview.evaluateJavaScript(js.script, completionHandler: { (data, err) in
+                            if let e = err {
+                                js.failedAction?(e)
+                                print("error : \(e)")
+                                sem.signal()
+                                return
+                            }
+                            js.successAction?(data)
+                            print("sucess : \(result.method)")
                             sem.signal()
-                            return
-                        }
-                        result.successAction?(data)
-                        print("sucess : \(result.method)")
-                        sem.signal()
-                    })
+                        })
+                    }
+                    sem.wait()
+                    let _ = self.currentResult?.injectJavaScript.removeFirst()
+                    if !js.isAutomaticallyPass {
+                        print("pause")
+                        return
+                    }
                 }
-                sem.wait()
                 self.currentResult = self.bulletsIterator?.next()
                 if let result = self.currentResult {
                     DispatchQueue.main.async {
