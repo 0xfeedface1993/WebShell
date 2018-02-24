@@ -11,11 +11,11 @@ import WebKit
 
 let RiffleFinishedOneDownloadTaskNotificationName = NSNotification.Name("com.ascp.finish.download.one.task")
 
-protocol WebRiffleProtocol {
+public protocol WebRiffleProtocol {
     func begin()
 }
 
-class WebRiffle : NSObject, WebRiffleProtocol {
+public class WebRiffle : NSObject, WebRiffleProtocol {
     /// webview实例, 不需要展示给用户，每个站点都独自拥有一个实例，方便并行下载和管理
     var webView : WKWebView!
     /// WebBullet数组，按执行顺序排列
@@ -32,7 +32,7 @@ class WebRiffle : NSObject, WebRiffleProtocol {
     }
     /// js脚本, 包含基础自定义页面方法
     lazy var functionScript : String = {
-        if let file = Bundle.main.url(forResource: scriptName, withExtension: "js") {
+        if let file = Bundle(for: type(of: self)).url(forResource: scriptName, withExtension: "js") {
             do {
                 let str = try String(contentsOf: file)
                 return str
@@ -91,21 +91,21 @@ class WebRiffle : NSObject, WebRiffleProtocol {
         NotificationCenter.default.post(name: RiffleFinishedOneDownloadTaskNotificationName, object: task)
     }
     
-    func begin() {
+    public func begin() {
         assertionFailure("Class WebRiffle is abstract class, you should use it's subclass, then confirm WebRiffleProtocol!")
     }
 }
 
 extension WebRiffle : WKNavigationDelegate {
-    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+    public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         print("didFail navigation withError: \(error)")
     }
     
-    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+    public func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         print("didFailProvisionalNavigation navigation withError: \(error)")
     }
     
-    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+    public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         print("finish load: \(navigation.debugDescription)")
         execNextCommand()
     }

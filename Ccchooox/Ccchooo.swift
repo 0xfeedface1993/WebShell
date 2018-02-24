@@ -9,13 +9,13 @@
 import Cocoa
 
 /// 彩虹盘
-class Ccchooo: WebRiffle {
+public class Ccchooo: WebRiffle {
     /// 文件名，从页面获取
     var fileName = ""
     /// 文件ID
     var fileNumber = ""
     /// 下载列表绑定的数据，针对于使用视图绑定的情况，如果是其他情况请声明其他变量并进行控制
-    weak var downloadStateController : NSArrayController?
+    public weak var downloadStateController : NSArrayController?
     override var scriptName : String {
         return "ccchooo"
     }
@@ -23,7 +23,7 @@ class Ccchooo: WebRiffle {
     /// 初始化
     ///
     /// - Parameter urlString: 下载首页地址
-    init(urlString: String) {
+    public init(urlString: String) {
         super.init()
         /// 从地址中截取文件id
         let regx = try? NSRegularExpression(pattern: "\\d{5,}", options: NSRegularExpression.Options.caseInsensitive)
@@ -34,7 +34,7 @@ class Ccchooo: WebRiffle {
         }
     }
     
-    override func begin() {
+    override public func begin() {
         loadCCCHOOOSequenceBullet()
     }
     

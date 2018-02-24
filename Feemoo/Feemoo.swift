@@ -9,7 +9,7 @@
 import AppKit
 
 /// 飞猫网盘，只需要传入首页链接和输入正确验证码即可下载
-class Feemoo: WebRiffle {
+public class Feemoo: WebRiffle {
     /// 文件id，从页面获取，有的页面链接不包含文件id
     var fileid = ""
     /// 文件名，从页面获取
@@ -22,14 +22,14 @@ class Feemoo: WebRiffle {
         return "feemoo"
     }
     /// 下载列表绑定的数据，针对于使用视图绑定的情况，如果是其他情况请声明其他变量并进行控制
-    weak var downloadStateController : NSArrayController?
+    public weak var downloadStateController : NSArrayController?
     
-    init(urlString: String) {
+    public init(urlString: String) {
         super.init()
         mainURL = URL(string: urlString)
     }
     
-    override func begin() {
+    override public func begin() {
         loadFeemooSequenceBullet()
     }
     

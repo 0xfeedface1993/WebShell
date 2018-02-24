@@ -43,8 +43,8 @@ function getCodeImageAndCodeEncry() {
 }
 
 function getFileName() {
-    var name = document.querySelector('p.down_one_lf_tl>span').innerText;
-    return uuid(8, 10) + name;
+    var name = document.querySelector('title').innerText.split(' ')[0];//document.querySelector('p.down_one_lf_tl>span').innerText;
+    return uuid(8, 10) + name + ".rar";
 }
 
 function uuid(len, radix) {

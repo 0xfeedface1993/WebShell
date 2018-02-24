@@ -29,7 +29,7 @@ class VerifyCodeViewController: NSViewController {
     weak var presentingRiffle : WebRiffle?
     
     init(riffle: WebRiffle?) {
-        super.init(nibName: NSNib.Name.init("VerifyCodeViewController"), bundle: Bundle.main)
+        super.init(nibName: NSNib.Name.init("VerifyCodeViewController"), bundle: Bundle(for: type(of: self)))
         self.presentingRiffle = riffle
     }
     

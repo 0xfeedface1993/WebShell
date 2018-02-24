@@ -898,6 +898,7 @@
                         <outlet property="DownloadStateController" destination="TMQ-JV-5ol" id="eMc-qR-tSi"/>
                         <outlet property="downloadStateController" destination="TMQ-JV-5ol" id="4Nf-Db-y5N"/>
                         <outlet property="downloadTableView" destination="h0L-fR-VjI" id="anX-Vt-AO3"/>
+                        <outlet property="tableView" destination="h0L-fR-VjI" id="jdd-0r-iPi"/>
                     </connections>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
