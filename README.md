@@ -1,0 +1,2 @@
+# WebShell [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
+A shell could opreate WKWebView in Swift &amp; JS, it run like internet worm, but not in harm way.
