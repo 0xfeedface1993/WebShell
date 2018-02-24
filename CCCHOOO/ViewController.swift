@@ -88,6 +88,7 @@ class ViewController: NSViewController {
 //        presentViewControllerAsModalWindow(vc)
         
         let feemoo = Feemoo(urlString: "http://www.feemoo.com/s/v2j0z15j")
+        feemoo.downloadStateController = DownloadStateController
         feemoo.begin()
     }
 
