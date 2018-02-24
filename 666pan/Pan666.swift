@@ -225,6 +225,8 @@ class Pan666 : WebRiffle {
                                 print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%")
                             }
                             
+                            self.downloadFinished(task: pack)
+                            // 保存到下载文件夹下
                             if let urlString = NSSearchPathForDirectoriesInDomains(.downloadsDirectory, .userDomainMask, true).first {
                                 let urly = URL(fileURLWithPath: urlString).appendingPathComponent(pack.request.fileName)
                                 do {
@@ -240,10 +242,6 @@ class Pan666 : WebRiffle {
                                         "Accept-Encoding":"gzip, deflate",
                                         "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                                         "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: urlx, method: .get, body: nil))
-                        let pasteBoard = NSPasteboard.general
-                        pasteBoard.clearContents()
-                        pasteBoard.writeObjects([link] as [NSPasteboardWriting])
-                        print(">>>>>>>>> copy url done ! <<<<<<<<<")
                     }
                 }
             }   catch   {

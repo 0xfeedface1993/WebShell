@@ -24,6 +24,7 @@
 		27C9DBB02041094500A87E9E /* VerifyCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C9DBAF2041094500A87E9E /* VerifyCodeViewController.swift */; };
 		27C9DBB220410E9700A87E9E /* 0a1f-26-01-37.png in Resources */ = {isa = PBXBuildFile; fileRef = 27C9DBB120410E9700A87E9E /* 0a1f-26-01-37.png */; };
 		27C9DBB420410F0900A87E9E /* VerifyCodeViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 27C9DBB320410F0900A87E9E /* VerifyCodeViewController.xib */; };
+		27C9DBB620413F7300A87E9E /* Ccchooo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C9DBB520413F7300A87E9E /* Ccchooo.swift */; };
 		27E4C12F2037011E0003A38D /* Feemoo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27E4C12E2037011E0003A38D /* Feemoo.swift */; };
 		27E4C131203703610003A38D /* feemoo.js in Resources */ = {isa = PBXBuildFile; fileRef = 27E4C130203703610003A38D /* feemoo.js */; };
 /* End PBXBuildFile section */
@@ -46,17 +47,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		27448B2320170ABA001FC925 /* CCCHOOO.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CCCHOOO.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		27448B2320170ABA001FC925 /* WebShellExsample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WebShellExsample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		27448B2620170ABA001FC925 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		27448B2820170ABA001FC925 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		27448B2A20170ABA001FC925 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		27448B2D20170ABA001FC925 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		27448B2F20170ABA001FC925 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		27448B3020170ABA001FC925 /* CCCHOOO.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CCCHOOO.entitlements; sourceTree = "<group>"; };
-		27448B3520170ABA001FC925 /* CCCHOOOTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CCCHOOOTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		27448B3520170ABA001FC925 /* WebShellExsampleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WebShellExsampleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		27448B3920170ABA001FC925 /* CCCHOOOTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CCCHOOOTests.swift; sourceTree = "<group>"; };
 		27448B3B20170ABA001FC925 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		27448B4020170ABA001FC925 /* CCCHOOOUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CCCHOOOUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		27448B4020170ABA001FC925 /* WebShellExsampleUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WebShellExsampleUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		27448B4420170ABA001FC925 /* CCCHOOOUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CCCHOOOUITests.swift; sourceTree = "<group>"; };
 		27448B4620170ABA001FC925 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		27448B522017112D001FC925 /* WebBullet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebBullet.swift; sourceTree = "<group>"; };
@@ -70,6 +71,7 @@
 		27C9DBAF2041094500A87E9E /* VerifyCodeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyCodeViewController.swift; sourceTree = "<group>"; };
 		27C9DBB120410E9700A87E9E /* 0a1f-26-01-37.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "0a1f-26-01-37.png"; sourceTree = "<group>"; };
 		27C9DBB320410F0900A87E9E /* VerifyCodeViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = VerifyCodeViewController.xib; sourceTree = "<group>"; };
+		27C9DBB520413F7300A87E9E /* Ccchooo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ccchooo.swift; sourceTree = "<group>"; };
 		27E4C12E2037011E0003A38D /* Feemoo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Feemoo.swift; sourceTree = "<group>"; };
 		27E4C130203703610003A38D /* feemoo.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = feemoo.js; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -114,9 +116,9 @@
 		27448B2420170ABA001FC925 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				27448B2320170ABA001FC925 /* CCCHOOO.app */,
-				27448B3520170ABA001FC925 /* CCCHOOOTests.xctest */,
-				27448B4020170ABA001FC925 /* CCCHOOOUITests.xctest */,
+				27448B2320170ABA001FC925 /* WebShellExsample.app */,
+				27448B3520170ABA001FC925 /* WebShellExsampleTests.xctest */,
+				27448B4020170ABA001FC925 /* WebShellExsampleUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -138,6 +140,7 @@
 				27448B2C20170ABA001FC925 /* Main.storyboard */,
 				27448B2F20170ABA001FC925 /* Info.plist */,
 				27448B3020170ABA001FC925 /* CCCHOOO.entitlements */,
+				27C9DBB520413F7300A87E9E /* Ccchooo.swift */,
 			);
 			path = CCCHOOO;
 			sourceTree = "<group>";
@@ -190,9 +193,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		27448B2220170ABA001FC925 /* CCCHOOO */ = {
+		27448B2220170ABA001FC925 /* WebShellExsample */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 27448B4920170ABA001FC925 /* Build configuration list for PBXNativeTarget "CCCHOOO" */;
+			buildConfigurationList = 27448B4920170ABA001FC925 /* Build configuration list for PBXNativeTarget "WebShellExsample" */;
 			buildPhases = (
 				27448B1F20170ABA001FC925 /* Sources */,
 				27448B2020170ABA001FC925 /* Frameworks */,
@@ -202,14 +205,14 @@
 			);
 			dependencies = (
 			);
-			name = CCCHOOO;
+			name = WebShellExsample;
 			productName = CCCHOOO;
-			productReference = 27448B2320170ABA001FC925 /* CCCHOOO.app */;
+			productReference = 27448B2320170ABA001FC925 /* WebShellExsample.app */;
 			productType = "com.apple.product-type.application";
 		};
-		27448B3420170ABA001FC925 /* CCCHOOOTests */ = {
+		27448B3420170ABA001FC925 /* WebShellExsampleTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 27448B4C20170ABA001FC925 /* Build configuration list for PBXNativeTarget "CCCHOOOTests" */;
+			buildConfigurationList = 27448B4C20170ABA001FC925 /* Build configuration list for PBXNativeTarget "WebShellExsampleTests" */;
 			buildPhases = (
 				27448B3120170ABA001FC925 /* Sources */,
 				27448B3220170ABA001FC925 /* Frameworks */,
@@ -220,14 +223,14 @@
 			dependencies = (
 				27448B3720170ABA001FC925 /* PBXTargetDependency */,
 			);
-			name = CCCHOOOTests;
+			name = WebShellExsampleTests;
 			productName = CCCHOOOTests;
-			productReference = 27448B3520170ABA001FC925 /* CCCHOOOTests.xctest */;
+			productReference = 27448B3520170ABA001FC925 /* WebShellExsampleTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		27448B3F20170ABA001FC925 /* CCCHOOOUITests */ = {
+		27448B3F20170ABA001FC925 /* WebShellExsampleUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 27448B4F20170ABA001FC925 /* Build configuration list for PBXNativeTarget "CCCHOOOUITests" */;
+			buildConfigurationList = 27448B4F20170ABA001FC925 /* Build configuration list for PBXNativeTarget "WebShellExsampleUITests" */;
 			buildPhases = (
 				27448B3C20170ABA001FC925 /* Sources */,
 				27448B3D20170ABA001FC925 /* Frameworks */,
@@ -238,9 +241,9 @@
 			dependencies = (
 				27448B4220170ABA001FC925 /* PBXTargetDependency */,
 			);
-			name = CCCHOOOUITests;
+			name = WebShellExsampleUITests;
 			productName = CCCHOOOUITests;
-			productReference = 27448B4020170ABA001FC925 /* CCCHOOOUITests.xctest */;
+			productReference = 27448B4020170ABA001FC925 /* WebShellExsampleUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -269,7 +272,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 27448B1E20170ABA001FC925 /* Build configuration list for PBXProject "CCCHOOO" */;
+			buildConfigurationList = 27448B1E20170ABA001FC925 /* Build configuration list for PBXProject "WebShellExsample" */;
 			compatibilityVersion = "Xcode 8.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -282,9 +285,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				27448B2220170ABA001FC925 /* CCCHOOO */,
-				27448B3420170ABA001FC925 /* CCCHOOOTests */,
-				27448B3F20170ABA001FC925 /* CCCHOOOUITests */,
+				27448B2220170ABA001FC925 /* WebShellExsample */,
+				27448B3420170ABA001FC925 /* WebShellExsampleTests */,
+				27448B3F20170ABA001FC925 /* WebShellExsampleUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -326,6 +329,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				27C9DBAC2040FAE400A87E9E /* WebRiffle.swift in Sources */,
+				27C9DBB620413F7300A87E9E /* Ccchooo.swift in Sources */,
 				27448B5720176E34001FC925 /* DownloadTask.swift in Sources */,
 				27448B2920170ABA001FC925 /* ViewController.swift in Sources */,
 				27E4C12F2037011E0003A38D /* Feemoo.swift in Sources */,
@@ -359,12 +363,12 @@
 /* Begin PBXTargetDependency section */
 		27448B3720170ABA001FC925 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 27448B2220170ABA001FC925 /* CCCHOOO */;
+			target = 27448B2220170ABA001FC925 /* WebShellExsample */;
 			targetProxy = 27448B3620170ABA001FC925 /* PBXContainerItemProxy */;
 		};
 		27448B4220170ABA001FC925 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 27448B2220170ABA001FC925 /* CCCHOOO */;
+			target = 27448B2220170ABA001FC925 /* WebShellExsample */;
 			targetProxy = 27448B4120170ABA001FC925 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -532,7 +536,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.ascp.CCCHOOOTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CCCHOOO.app/Contents/MacOS/CCCHOOO";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/WebShellExsample.app/Contents/MacOS/WebShellExsample";
 			};
 			name = Debug;
 		};
@@ -549,7 +553,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.ascp.CCCHOOOTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CCCHOOO.app/Contents/MacOS/CCCHOOO";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/WebShellExsample.app/Contents/MacOS/WebShellExsample";
 			};
 			name = Release;
 		};
@@ -588,7 +592,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		27448B1E20170ABA001FC925 /* Build configuration list for PBXProject "CCCHOOO" */ = {
+		27448B1E20170ABA001FC925 /* Build configuration list for PBXProject "WebShellExsample" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				27448B4720170ABA001FC925 /* Debug */,
@@ -597,7 +601,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		27448B4920170ABA001FC925 /* Build configuration list for PBXNativeTarget "CCCHOOO" */ = {
+		27448B4920170ABA001FC925 /* Build configuration list for PBXNativeTarget "WebShellExsample" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				27448B4A20170ABA001FC925 /* Debug */,
@@ -606,7 +610,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		27448B4C20170ABA001FC925 /* Build configuration list for PBXNativeTarget "CCCHOOOTests" */ = {
+		27448B4C20170ABA001FC925 /* Build configuration list for PBXNativeTarget "WebShellExsampleTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				27448B4D20170ABA001FC925 /* Debug */,
@@ -615,7 +619,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		27448B4F20170ABA001FC925 /* Build configuration list for PBXNativeTarget "CCCHOOOUITests" */ = {
+		27448B4F20170ABA001FC925 /* Build configuration list for PBXNativeTarget "WebShellExsampleUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				27448B5020170ABA001FC925 /* Debug */,
