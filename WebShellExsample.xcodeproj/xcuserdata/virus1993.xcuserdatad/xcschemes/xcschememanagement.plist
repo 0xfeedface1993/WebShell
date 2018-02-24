@@ -4,12 +4,12 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>Example.xcscheme_^#shared#^_</key>
+		<key>Example.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
-		<key>WebShell.xcscheme</key>
+		<key>WebShell-macOS.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>1</integer>
@@ -28,6 +28,11 @@
 			<true/>
 		</dict>
 		<key>27448B3F20170ABA001FC925</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>27C9DBBB204146A100A87E9E</key>
 		<dict>
 			<key>primary</key>
 			<true/>
