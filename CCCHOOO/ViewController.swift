@@ -25,6 +25,17 @@ class ViewController: NSViewController {
     var fileid = ""
     var feemooURL : URL?
     var feemooCookie : String = ""
+    var pan666Name = ""
+    var pan666FileNumber = "530009"
+    var pan6661URL : URL {
+        return URL(string: "http://www.88pan.cc/file-\(pan666FileNumber).html")!
+    }
+    var pan6662URL : URL {
+        return URL(string: "http://www.88pan.cc/down2-\(pan666FileNumber).html")!
+    }
+    var pan6663URL : URL {
+        return URL(string: "http://www.88pan.cc/down-\(pan666FileNumber).html")!
+    }
     var scriptName = ""
     var functionScript : String {
         if let file = Bundle.main.url(forResource: scriptName, withExtension: "js") {
@@ -49,12 +60,13 @@ class ViewController: NSViewController {
         userController.addUserScript(WKUserScript(source: functionScript, injectionTime: .atDocumentStart, forMainFrameOnly: true))
         webview.configuration.userContentController = userController
         webview.navigationDelegate = self
-        webview.isHidden = true
+//        webview.isHidden = true
         
 //        loadCCCHOOOSequenceBullet()
-        loadFeemooSequenceBullet()
+//        loadFeemooSequenceBullet()
         
-        webview.load(currentResult!.request)
+//        webview.load(currentResult!.request)
+        load666PanSequence(urlString: "")
     }
 
     override var representedObject: Any? {
@@ -64,12 +76,13 @@ class ViewController: NSViewController {
     }
     
     @IBAction func uploadTextField(_ sender: Any) {
-        loadFeemooDownloadLink(code: self.textField.stringValue)
+//        loadFeemooDownloadLink(code: self.textField.stringValue)
 //        loadCCCHOOODownloadLink()
+        load666PanDownloadLink()
     }
     
     func loadCCCHOOOSequenceBullet() {
-        scriptName = "feemoo"
+        scriptName = "ccchooo"
         let mainJSUnit = InjectUnit(script: "\(functionScript) getFileName();", successAction: {
             dat in
             guard let name = dat as? String else {
@@ -121,7 +134,6 @@ class ViewController: NSViewController {
                                   url: URL(string: "http://www.ccchoo.com/down-\(fileNumber).html")!,
                                   injectJavaScript: [main3JSUnit])
         bullets = [mainPage, main2Page, main3Page]
-        currentResult = mainPage
         bulletsIterator = bullets.makeIterator()
         currentResult = bulletsIterator?.next()
         webview.load(currentResult!.request)
@@ -179,7 +191,7 @@ class ViewController: NSViewController {
             }
         }, failedAction: nil, isAutomaticallyPass: true)
         
-        let codeUpload = WebBullet(method: .post, headFields: ["Referer":"http://www.ccchoo.com/file-\(fileNumber).html",
+        let codeUpload = WebBullet(method: .post, headFields: ["Referer":"http://www.ccchoo.com/down-\(fileNumber).html",
             "Origin":"http://www.ccchoo.com",
             "Accept-Language":"zh-cn",
             "Upgrade-Insecure-Requests":"1",

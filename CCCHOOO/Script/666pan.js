@@ -5,6 +5,9 @@ function getDowloadLink() {
     }
     return "";
 }
+                                                                              function selfHTML() {
+                                                                              return document.body.innerHTML;
+                                                                              }
 
 function getBase64Image(img) {
     var canvas = document.createElement("canvas");
@@ -15,19 +18,23 @@ function getBase64Image(img) {
     var dataURL = canvas.toDataURL("image/png");
     return dataURL.replace("data:image/png;base64,", "");
 }
+                                                                              
+                                                                              function getMiddleLink(){
+                                                                              return document.querySelector('div[class="d0"]>div>a[class="down_btn"]').href;
+                                                                              }
 
-function getImageAndLink() {
+                                                                              
+function getImage() {
     var code = document.getElementById('imgcode');
     var imgx = "";
     if (code != null) {
         imgx = getBase64Image(code);
     }
-    var link = getDowloadLink();
-    return { "image": imgx, "link": (link != null ? link : "") };
+    return { "image": imgx};
 }
 
 function getFileName() {
-    var name = document.getElementsByClassName('down_one_lf_tl')[0].children[0].innerText;
+    var name = document.querySelector('div.fb_l.f14.txtgray>.file_item>li').innerText + '.rar';
     return uuid(8, 10) + name;
 }
 
