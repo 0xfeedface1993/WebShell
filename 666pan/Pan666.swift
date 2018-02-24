@@ -83,8 +83,10 @@ extension ViewController {
     func load666PanDownloadLink() {
         let codeVerifyUnit = InjectUnit(script: "\(functionScript) selfHTML();", successAction: { (dat) in
             guard let str = dat as? String, str == "true" else {
-                print("worong data or worong paasword!")
-                self.reload666PanImagePage()
+                print("worong data or worong paasword! but can download!")
+//                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1, execute: {
+//                    self.reload666PanImagePage()
+//                })
                 return
             }
         }, failedAction: nil, isAutomaticallyPass: true)
@@ -98,22 +100,22 @@ extension ViewController {
         }, failedAction: nil, isAutomaticallyPass: true)
         let codeVerifyPage = WebBullet(method: .post, headFields: ["Referer":pan6663URL.absoluteString,
                                                                    "Accept-Language":"zh-cn",
-                                                                   "Origin":"http://www.88pan.cc",
+                                                                   "Origin":"http://\(pan6663URL.host!)",
                                                                    "Accept":"*/*",
                                                                    "X-Requested-With":"XMLHttpRequest",
                                                                    "Content-Type":"application/x-www-form-urlencoded; charset=UTF-8",
                                                                    "Accept-Encoding":"gzip, deflate",
-                                                                   "User-Agen":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6"], formData: ["action":"check_code", "code":self.textField.stringValue], url: URL(string: "http://www.88pan.cc/ajax.php")!, injectJavaScript: [codeVerifyUnit])
+                                                                   "User-Agen":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6"], formData: ["action":"check_code", "code":self.textField.stringValue], url: URL(string: "http://\(pan6663URL.host!)/ajax.php")!, injectJavaScript: [codeVerifyUnit])
         let downloadListPage = WebBullet(method: .post, headFields: ["Connection":"keep-alive",
                                                                      "Referer":pan6663URL.absoluteString,
                                                                      "Accept-Language":"zh-cn",
-                                                                     "Origin":"http://www.88pan.cc",
+                                                                     "Origin":"http://\(pan6663URL.host!)",
                                                                      "Accept":"text/plain, */*; q=0.01",
                                                                      "X-Requested-With":"XMLHttpRequest",
                                                                      "Content-Type":"application/x-www-form-urlencoded; charset=UTF-8",
                                                                      "Accept-Encoding":"gzip, deflate",
                                                                      "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6",
-                                                                     "Host":"www.88pan.cc"], formData: ["action":"load_down_addr2", "file_id":pan666FileNumber], url: URL(string: "http://www.88pan.cc/ajax.php")!, injectJavaScript: [downloadListUnit])
+                                                                     "Host":pan6663URL.host!], formData: ["action":"load_down_addr2", "file_id":pan666FileNumber], url: URL(string: "http://\(pan6663URL.host!)/ajax.php")!, injectJavaScript: [downloadListUnit])
         
         bullets = [codeVerifyPage, downloadListPage]
         bulletsIterator = bullets.makeIterator()

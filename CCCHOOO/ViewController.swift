@@ -26,7 +26,7 @@ class ViewController: NSViewController {
     var feemooURL : URL?
     var feemooCookie : String = ""
     var pan666Name = ""
-    var pan666FileNumber = "530009"
+    var pan666FileNumber = "529876"
     var pan6661URL : URL {
         return URL(string: "http://www.88pan.cc/file-\(pan666FileNumber).html")!
     }
@@ -66,7 +66,29 @@ class ViewController: NSViewController {
 //        loadFeemooSequenceBullet()
         
 //        webview.load(currentResult!.request)
-        load666PanSequence(urlString: "")
+//        load666PanSequence(urlString: "")
+//        var vc = VerifyCodeViewController(riffle: nil)
+//        vc.tap = { code in
+//            print(code)
+//        }
+//        vc.reloadImage = { image in
+//            image.image = nil
+//        }
+//        vc.codeView.imageView.image = NSImage(named: NSImage.Name.init("0a1f-26-01-37"))
+//        presentViewControllerAsModalWindow(vc)
+//
+//        vc = VerifyCodeViewController(riffle: nil)
+//        vc.tap = { code in
+//            print(code)
+//        }
+//        vc.reloadImage = { image in
+//            image.image = nil
+//        }
+//        vc.codeView.imageView.image = NSImage(named: NSImage.Name.init("0a1f-26-01-37"))
+//        presentViewControllerAsModalWindow(vc)
+        
+        let feemoo = Feemoo(urlString: "http://www.feemoo.com/s/v2j0z15j")
+        feemoo.begin()
     }
 
     override var representedObject: Any? {

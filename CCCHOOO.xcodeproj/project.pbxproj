@@ -19,6 +19,11 @@
 		27448B5A2018387A001FC925 /* ccchooo.js in Resources */ = {isa = PBXBuildFile; fileRef = 27448B592018387A001FC925 /* ccchooo.js */; };
 		277BFBD6203EA876009EE51B /* Pan666.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277BFBD5203EA876009EE51B /* Pan666.swift */; };
 		277BFBD8203EA974009EE51B /* 666pan.js in Resources */ = {isa = PBXBuildFile; fileRef = 277BFBD7203EA974009EE51B /* 666pan.js */; };
+		27C9DBAC2040FAE400A87E9E /* WebRiffle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C9DBAB2040FAE400A87E9E /* WebRiffle.swift */; };
+		27C9DBAE204105B000A87E9E /* VerifyCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C9DBAD204105B000A87E9E /* VerifyCodeView.swift */; };
+		27C9DBB02041094500A87E9E /* VerifyCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C9DBAF2041094500A87E9E /* VerifyCodeViewController.swift */; };
+		27C9DBB220410E9700A87E9E /* 0a1f-26-01-37.png in Resources */ = {isa = PBXBuildFile; fileRef = 27C9DBB120410E9700A87E9E /* 0a1f-26-01-37.png */; };
+		27C9DBB420410F0900A87E9E /* VerifyCodeViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 27C9DBB320410F0900A87E9E /* VerifyCodeViewController.xib */; };
 		27E4C12F2037011E0003A38D /* Feemoo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27E4C12E2037011E0003A38D /* Feemoo.swift */; };
 		27E4C131203703610003A38D /* feemoo.js in Resources */ = {isa = PBXBuildFile; fileRef = 27E4C130203703610003A38D /* feemoo.js */; };
 /* End PBXBuildFile section */
@@ -60,6 +65,11 @@
 		27448B592018387A001FC925 /* ccchooo.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = ccchooo.js; sourceTree = "<group>"; };
 		277BFBD5203EA876009EE51B /* Pan666.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pan666.swift; sourceTree = "<group>"; };
 		277BFBD7203EA974009EE51B /* 666pan.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = 666pan.js; sourceTree = "<group>"; };
+		27C9DBAB2040FAE400A87E9E /* WebRiffle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRiffle.swift; sourceTree = "<group>"; };
+		27C9DBAD204105B000A87E9E /* VerifyCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyCodeView.swift; sourceTree = "<group>"; };
+		27C9DBAF2041094500A87E9E /* VerifyCodeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyCodeViewController.swift; sourceTree = "<group>"; };
+		27C9DBB120410E9700A87E9E /* 0a1f-26-01-37.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "0a1f-26-01-37.png"; sourceTree = "<group>"; };
+		27C9DBB320410F0900A87E9E /* VerifyCodeViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = VerifyCodeViewController.xib; sourceTree = "<group>"; };
 		27E4C12E2037011E0003A38D /* Feemoo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Feemoo.swift; sourceTree = "<group>"; };
 		27E4C130203703610003A38D /* feemoo.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = feemoo.js; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -118,6 +128,10 @@
 				27448B2620170ABA001FC925 /* AppDelegate.swift */,
 				27448B2820170ABA001FC925 /* ViewController.swift */,
 				27448B522017112D001FC925 /* WebBullet.swift */,
+				27C9DBAB2040FAE400A87E9E /* WebRiffle.swift */,
+				27C9DBAD204105B000A87E9E /* VerifyCodeView.swift */,
+				27C9DBAF2041094500A87E9E /* VerifyCodeViewController.swift */,
+				27C9DBB320410F0900A87E9E /* VerifyCodeViewController.xib */,
 				27448B5420176CFE001FC925 /* DownloadManager.swift */,
 				27448B5620176E34001FC925 /* DownloadTask.swift */,
 				27448B2A20170ABA001FC925 /* Assets.xcassets */,
@@ -131,6 +145,7 @@
 		27448B3820170ABA001FC925 /* CCCHOOOTests */ = {
 			isa = PBXGroup;
 			children = (
+				27C9DBB120410E9700A87E9E /* 0a1f-26-01-37.png */,
 				27448B3920170ABA001FC925 /* CCCHOOOTests.swift */,
 				27448B3B20170ABA001FC925 /* Info.plist */,
 			);
@@ -279,7 +294,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				27C9DBB220410E9700A87E9E /* 0a1f-26-01-37.png in Resources */,
 				27448B5A2018387A001FC925 /* ccchooo.js in Resources */,
+				27C9DBB420410F0900A87E9E /* VerifyCodeViewController.xib in Resources */,
 				27448B2B20170ABA001FC925 /* Assets.xcassets in Resources */,
 				277BFBD8203EA974009EE51B /* 666pan.js in Resources */,
 				27448B2E20170ABA001FC925 /* Main.storyboard in Resources */,
@@ -308,11 +325,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				27C9DBAC2040FAE400A87E9E /* WebRiffle.swift in Sources */,
 				27448B5720176E34001FC925 /* DownloadTask.swift in Sources */,
 				27448B2920170ABA001FC925 /* ViewController.swift in Sources */,
 				27E4C12F2037011E0003A38D /* Feemoo.swift in Sources */,
 				27448B2720170ABA001FC925 /* AppDelegate.swift in Sources */,
 				27448B532017112D001FC925 /* WebBullet.swift in Sources */,
+				27C9DBB02041094500A87E9E /* VerifyCodeViewController.swift in Sources */,
+				27C9DBAE204105B000A87E9E /* VerifyCodeView.swift in Sources */,
 				27448B5520176CFE001FC925 /* DownloadManager.swift in Sources */,
 				277BFBD6203EA876009EE51B /* Pan666.swift in Sources */,
 			);
