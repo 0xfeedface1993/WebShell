@@ -76,14 +76,8 @@ class Feemoo: WebRiffle {
                             return
                         }
                         DispatchQueue.main.async {
-                            if let promotViewController = NSApp.windows.first(where: { (w) -> Bool in
-                                guard w.contentViewController?.isKind(of: VerifyCodeViewController.self) ?? false else {
-                                    return false
-                                }
-                                let vc = w.contentViewController as! VerifyCodeViewController
-                                return vc.presentingRiffle == self
-                            })?.contentViewController as? VerifyCodeViewController {
-                                promotViewController.codeView.imageView.image = image
+                            if let promot = self.promotViewController {
+                                promot.codeView.imageView.image = image
                             }   else    {
                                 self.show(verifyCode: image, confirm: { (code) in
                                     self.loadFeemooDownloadLink(code: code)
@@ -107,20 +101,16 @@ class Feemoo: WebRiffle {
             dat in
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1, execute: {
                 self.webView.evaluateJavaScript("function callFetchImage() {return { \"img\": getBase64Image(document.getElementById('verityImgtag')), \"codeencry\": codeencry} } callFetchImage();", completionHandler: { (datx, err) in
-                    guard let dic = datx as? [String:String] else {
+                    guard let dic = datx as? [String:String], let img = dic["img"], let _ = dic["codeencry"], let base64 = Data(base64Encoded: img), let image = NSImage(data: base64) else {
                         print("wrong data!")
                         return
                     }
-                    if let img = dic["img"], let _ = dic["codeencry"] {
-                        if let base64 = Data(base64Encoded: img), let image = NSImage(data: base64) {
-                            DispatchQueue.main.async {
-                                self.show(verifyCode: image, confirm: { (code) in
-                                    self.loadFeemooDownloadLink(code: code)
-                                }, reloadWay: { (imageView) in
-                                    reloadCodeImage()
-                                }, withRiffle: self)
-                            }
-                        }
+                    DispatchQueue.main.async {
+                        self.show(verifyCode: image, confirm: { (code) in
+                            self.loadFeemooDownloadLink(code: code)
+                        }, reloadWay: { (imageView) in
+                            reloadCodeImage()
+                        }, withRiffle: self)
                     }
                 })
             })

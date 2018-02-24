@@ -44,6 +44,17 @@ class WebRiffle : NSObject, WebRiffleProtocol {
         return ""
     }()
     
+    /// 当前验证码窗口
+    var promotViewController : VerifyCodeViewController? {
+        return NSApp.windows.first(where: { (w) -> Bool in
+            guard w.contentViewController?.isKind(of: VerifyCodeViewController.self) ?? false else {
+                return false
+            }
+            let vc = w.contentViewController as! VerifyCodeViewController
+            return vc.presentingRiffle == self
+        })?.contentViewController as? VerifyCodeViewController
+    }
+    
     
     /// 初始化，webview实例创建，js脚本注入
     override init() {

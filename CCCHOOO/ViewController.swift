@@ -26,7 +26,7 @@ class ViewController: NSViewController {
     var feemooURL : URL?
     var feemooCookie : String = ""
     var pan666Name = ""
-    var pan666FileNumber = "529876"
+    var pan666FileNumber = "530009"//529876"
     var pan6661URL : URL {
         return URL(string: "http://www.88pan.cc/file-\(pan666FileNumber).html")!
     }
@@ -87,7 +87,11 @@ class ViewController: NSViewController {
 //        vc.codeView.imageView.image = NSImage(named: NSImage.Name.init("0a1f-26-01-37"))
 //        presentViewControllerAsModalWindow(vc)
         
-        let feemoo = Feemoo(urlString: "http://www.feemoo.com/s/v2j0z15j")
+//        let feemoo = Feemoo(urlString: "http://www.feemoo.com/s/v2j0z15j")
+//        feemoo.downloadStateController = DownloadStateController
+//        feemoo.begin()
+        
+        let feemoo = Pan666(urlString: "http://www.88pan.cc/file-530009.html")
         feemoo.downloadStateController = DownloadStateController
         feemoo.begin()
     }
@@ -101,7 +105,7 @@ class ViewController: NSViewController {
     @IBAction func uploadTextField(_ sender: Any) {
 //        loadFeemooDownloadLink(code: self.textField.stringValue)
 //        loadCCCHOOODownloadLink()
-        load666PanDownloadLink()
+//        load666PanDownloadLink()
     }
     
     func loadCCCHOOOSequenceBullet() {

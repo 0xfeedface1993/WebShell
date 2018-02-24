@@ -8,28 +8,73 @@
 
 import AppKit
 
-extension ViewController {
-    func load666PanSequence(urlString: String) {
-        scriptName = "666pan"
+/// 666盘，提供下载首页地址即可
+class Pan666 : WebRiffle {
+    override var scriptName: String {
+        return "666pan"
+    }
+    
+    /// 文件名，从页面获取
+    var fileName = ""
+    /// 文件ID
+    var fileNumber = ""
+    /// 首页，因为会出现重定向的问题，先写死，后期解决这个问题
+    var pan6661URL : URL {
+        return URL(string: "http://www.88pan.cc/file-\(fileNumber).html")!
+    }
+    /// 中转页面，重定向问题
+    var pan6662URL : URL {
+        return URL(string: "http://www.88pan.cc/down2-\(fileNumber).html")!
+    }
+    /// 验证码输入页面，重定向问题
+    var pan6663URL : URL {
+        return URL(string: "http://www.88pan.cc/down-\(fileNumber).html")!
+    }
+    /// 下载列表绑定的数据，针对于使用视图绑定的情况，如果是其他情况请声明其他变量并进行控制
+    weak var downloadStateController : NSArrayController?
+    
+    /// 初始化
+    ///
+    /// - Parameter urlString: 下载首页地址
+    init(urlString: String) {
+        super.init()
+        /// 从地址中截取文件id
+        let regx = try? NSRegularExpression(pattern: "\\d{5,}", options: NSRegularExpression.Options.caseInsensitive)
+        let strNS = urlString as NSString
+        if let result = regx?.firstMatch(in: urlString, options: NSRegularExpression.MatchingOptions.reportProgress, range: NSRange(location: 0, length: strNS.length)) {
+            fileNumber = strNS.substring(with: result.range)
+            print("fileNumber: \(fileNumber)")
+        }
+    }
+    
+    override func begin() {
+        load666PanSequence()
+    }
+    
+    /// 启动序列
+    func load666PanSequence() {
         let main1Unit = InjectUnit(script: "\(functionScript) getFileName();", successAction: { (dat) in
             guard let name = dat as? String else {
                 print("worong data!")
                 return
             }
             print("fetch file name: \(name)")
-            self.pan666Name = name
+            self.fileName = name
         }, failedAction: nil, isAutomaticallyPass: true)
         let main3Unit = InjectUnit(script: "\(functionScript) getImage();", successAction: { (dat) in
-            guard let items = dat as? [String:String] else {
-                print("worong data!")
-                return
-            }
-            
-            if let img = items["image"], let base64Data = Data(base64Encoded: img) {
-                DispatchQueue.main.async {
-                    self.code.image = NSImage(data: base64Data)
-                }
-            }
+//            guard let items = dat as? [String:String], let img = items["image"], let base64Data = Data(base64Encoded: img), let image = NSImage(data: base64Data) else {
+//                print("worong data!")
+//                return
+//            }
+//
+//            DispatchQueue.main.async {
+//                self.show(verifyCode: image, confirm: { (code) in
+//                    self.load666PanDownloadLink(code: code)
+//                }, reloadWay: { (imageView) in
+//                    self.reload666PanImagePage()
+//                }, withRiffle: self)
+//            }
+            self.load666PanDownloadLink(code: "1234")
         }, failedAction: nil, isAutomaticallyPass: true)
         
         let main1Page = WebBullet(method: .get, headFields: ["Accept-Language":"zh-cn",
@@ -52,21 +97,30 @@ extension ViewController {
         bullets = [main1Page, main2Page, main3Page]
         bulletsIterator = bullets.makeIterator()
         currentResult = bulletsIterator?.next()
-        webview.load(currentResult!.request)
+        webView.load(currentResult!.request)
     }
     
+    
+    /// 重新获取验证码，暂时不需要
     func reload666PanImagePage() {
         let main3Unit = InjectUnit(script: "\(functionScript) getImage();", successAction: { (dat) in
-            guard let items = dat as? [String:String] else {
-                print("worong data!")
-                return
-            }
-            
-            if let img = items["image"], let base64Data = Data(base64Encoded: img) {
-                DispatchQueue.main.async {
-                    self.code.image = NSImage(data: base64Data)
-                }
-            }
+//            guard let items = dat as? [String:String], let img = items["image"], let base64Data = Data(base64Encoded: img), let image = NSImage(data: base64Data) else {
+//                print("worong data!")
+//                return
+//            }
+//
+//            DispatchQueue.main.async {
+//                if let promot = self.promotViewController {
+//                    promot.codeView.imageView.image = image
+//                }   else    {
+//                    self.show(verifyCode: image, confirm: { (code) in
+//                        self.load666PanDownloadLink(code: code)
+//                    }, reloadWay: { (imageView) in
+//                        self.reload666PanImagePage()
+//                    }, withRiffle: self)
+//                }
+//            }
+            self.load666PanDownloadLink(code: "1234")
         }, failedAction: nil, isAutomaticallyPass: true)
         let main3Page = WebBullet(method: .get, headFields: ["Accept-Language":"zh-cn",
                                                              "Upgrade-Insecure-Requests":"1",
@@ -77,10 +131,14 @@ extension ViewController {
         bullets = [main3Page]
         bulletsIterator = bullets.makeIterator()
         currentResult = bulletsIterator?.next()
-        webview.load(currentResult!.request)
+        webView.load(currentResult!.request)
     }
     
-    func load666PanDownloadLink() {
+    
+    /// 获取下载中转地址，非真实下载地址
+    ///
+    /// - Parameter code: 验证码文本，目前验证码可以是错误的
+    func load666PanDownloadLink(code: String) {
         let codeVerifyUnit = InjectUnit(script: "\(functionScript) selfHTML();", successAction: { (dat) in
             guard let str = dat as? String, str == "true" else {
                 print("worong data or worong paasword! but can download!")
@@ -101,30 +159,34 @@ extension ViewController {
         let codeVerifyPage = WebBullet(method: .post, headFields: ["Referer":pan6663URL.absoluteString,
                                                                    "Accept-Language":"zh-cn",
                                                                    "Origin":"http://\(pan6663URL.host!)",
-                                                                   "Accept":"*/*",
-                                                                   "X-Requested-With":"XMLHttpRequest",
-                                                                   "Content-Type":"application/x-www-form-urlencoded; charset=UTF-8",
-                                                                   "Accept-Encoding":"gzip, deflate",
-                                                                   "User-Agen":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6"], formData: ["action":"check_code", "code":self.textField.stringValue], url: URL(string: "http://\(pan6663URL.host!)/ajax.php")!, injectJavaScript: [codeVerifyUnit])
+            "Accept":"*/*",
+            "X-Requested-With":"XMLHttpRequest",
+            "Content-Type":"application/x-www-form-urlencoded; charset=UTF-8",
+            "Accept-Encoding":"gzip, deflate",
+            "User-Agen":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6"], formData: ["action":"check_code", "code":code], url: URL(string: "http://\(pan6663URL.host!)/ajax.php")!, injectJavaScript: [codeVerifyUnit])
         let downloadListPage = WebBullet(method: .post, headFields: ["Connection":"keep-alive",
                                                                      "Referer":pan6663URL.absoluteString,
                                                                      "Accept-Language":"zh-cn",
                                                                      "Origin":"http://\(pan6663URL.host!)",
-                                                                     "Accept":"text/plain, */*; q=0.01",
-                                                                     "X-Requested-With":"XMLHttpRequest",
-                                                                     "Content-Type":"application/x-www-form-urlencoded; charset=UTF-8",
-                                                                     "Accept-Encoding":"gzip, deflate",
-                                                                     "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6",
-                                                                     "Host":pan6663URL.host!], formData: ["action":"load_down_addr2", "file_id":pan666FileNumber], url: URL(string: "http://\(pan6663URL.host!)/ajax.php")!, injectJavaScript: [downloadListUnit])
+            "Accept":"text/plain, */*; q=0.01",
+            "X-Requested-With":"XMLHttpRequest",
+            "Content-Type":"application/x-www-form-urlencoded; charset=UTF-8",
+            "Accept-Encoding":"gzip, deflate",
+            "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6",
+            "Host":pan6663URL.host!], formData: ["action":"load_down_addr2", "file_id":fileNumber], url: URL(string: "http://\(pan6663URL.host!)/ajax.php")!, injectJavaScript: [downloadListUnit])
         
         bullets = [codeVerifyPage, downloadListPage]
         bulletsIterator = bullets.makeIterator()
         currentResult = bulletsIterator?.next()
-        webview.load(currentResult!.request)
+        webView.load(currentResult!.request)
     }
     
+    
+    /// 获取下载地址，666盘的下载地址不能从webview里面取，实际上返回的是一个js代码，会延时跳转到实际下载地址，所以要用下载功能下载页面并做字符串截取获取地址
+    ///
+    /// - Parameter url: 下载地址中转页面
     func readDownloadLink(url: URL) {
-        let request = DownloadRequest(label: UUID().uuidString, fileName: self.pan666Name, downloadStateUpdate: nil, downloadFinished: { (tk) in
+        let request = DownloadRequest(label: UUID().uuidString, fileName: self.fileName, downloadStateUpdate: nil, downloadFinished: { (tk) in
             guard let dat = tk.revData, let str = String.init(data: dat, encoding: .utf8) else {
                 print("worong data!")
                 return
@@ -137,23 +199,24 @@ extension ViewController {
                     print(link)
                     if let urlx = URL(string: link) {
                         let label = UUID().uuidString
-                        DownloadManager.share.add(request: DownloadRequest(label: label, fileName: self.pan666Name, downloadStateUpdate: { pack in
-                            var items = self.DownloadStateController.content as! [DownloadInfo]
+                        DownloadManager.share.add(request: DownloadRequest(label: label, fileName: self.fileName, downloadStateUpdate: { pack in
+                            guard let controller = self.downloadStateController else {   return  }
+                            var items = controller.content as! [DownloadInfo]
                             if let index = items.index(where: { $0.uuid == label }) {
                                 items[index].progress = "\(pack.progress * 100)%"
                                 items[index].totalBytes = "\(pack.totalBytes / 1024 / 1024)M"
                                 items[index].site = pack.request.url.host!
-                                self.DownloadStateController.content = items
+                                controller.content = items
                                 return
                             }
                             let info = DownloadInfo()
                             info.uuid = label
-                            info.name = self.pan666Name
+                            info.name = self.fileName
                             info.progress = "\(pack.progress * 100)%"
                             info.totalBytes = "\(pack.totalBytes / 1024 / 1024)M"
                             info.site = pack.request.url.host!
                             items.append(info)
-                            self.DownloadStateController.content = items
+                            controller.content = items
                         }, downloadFinished: { pack in
                             print(pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
                             if let data = pack.revData, let str = String(data: data, encoding: .utf8) {
@@ -190,8 +253,4 @@ extension ViewController {
         }, headFields: [:], url: url, method: .get, body: nil)
         DownloadManager.share.add(request: request)
     }
-}
-
-extension ViewController {
-    
 }
