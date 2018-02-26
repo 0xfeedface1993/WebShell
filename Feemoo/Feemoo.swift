@@ -26,7 +26,7 @@ public class Feemoo: WebRiffle {
     
     public init(urlString: String) {
         super.init()
-        mainURL = URL(string: urlString)
+        mainURL = URL(string: urlString)        
     }
     
     override public func begin() {
@@ -132,7 +132,7 @@ public class Feemoo: WebRiffle {
                 self.execNextCommand()
             })
         }, failedAction: { (err) in
-            print(err.localizedDescription)
+            print("download link fetch js error: " + err.localizedDescription)
             self.execNextCommand()
         }, isAutomaticallyPass: false)
         

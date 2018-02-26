@@ -43,6 +43,10 @@ public class WebRiffle : NSObject, WebRiffleProtocol {
         }
         return ""
     }()
+    /// 站点类别
+    var host : WebHostSite = .unknowsite
+    /// web序列是否执行完成
+    var isFinished = false
     
     /// 当前验证码窗口
     var promotViewController : VerifyCodeViewController? {
@@ -88,6 +92,7 @@ public class WebRiffle : NSObject, WebRiffleProtocol {
     
     //MARK: - 通知事件
     func downloadFinished(task: DownloadTask) {
+        self.isFinished = true
         NotificationCenter.default.post(name: RiffleFinishedOneDownloadTaskNotificationName, object: task)
     }
     

@@ -87,9 +87,9 @@ function com_down(file_id, verycode, event) {
            success: function(msg) {
            layer.close(c1);
            if (msg.status) {
-           downloadfilelink = msg.str;
+                downloadfilelink = msg.str;
            }    else    {
-           downloadfilelink = 'bad boy';
+                downloadfilelink = 'fetch download link failed: ' + msg.str;
            }
            },
            error: function() {}
