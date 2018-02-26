@@ -34,6 +34,8 @@ feemoo.begin()
 
 You just need pass `feemoo.com`'s resouce URL string to Feemoo class, assigned your Value-Binding ArrayControllr to `downloadStateController`, the final step is begin hack & download.
 
+The file will download at your `Downloads` folder.
+
 ##
 As you can see, this project need more work, so if you want join me, any pull request will be helpful!
 
