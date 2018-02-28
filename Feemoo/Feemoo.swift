@@ -58,67 +58,53 @@ public class Feemoo: WebRiffle {
             
         }, failedAction: nil, isAutomaticallyPass: true)
         let mainPage = WebBullet(method: .get, headFields: [:], formData: [:], url: url, injectJavaScript: [mainJSUnit])
-        
-        /// 只获取验证码页面
-        func reloadCodeImage(){
-            let secondJSUnit = InjectUnit(script: "\(functionScript) getCodeImageAndCodeEncry();", successAction: {
-                dat in
-                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1, execute: {
-                    self.webView.evaluateJavaScript("function callFetchImage() {return { \"img\": getBase64Image(document.getElementById('verityImgtag')), \"codeencry\": codeencry} } callFetchImage();", completionHandler: { (datx, err) in
-                        guard let dic = datx as? [String:String],
-                            let img = dic["img"],
-                            let _ = dic["codeencry"],
-                            let base64 = Data(base64Encoded: img),
-                            let image = NSImage(data: base64) else {
-                            print("wrong data!")
-                            return
-                        }
-                        DispatchQueue.main.async {
-                            if let promot = self.promotViewController {
-                                promot.codeView.imageView.image = image
-                            }   else    {
-                                self.show(verifyCode: image, confirm: { (code) in
-                                    self.loadFeemooDownloadLink(code: code)
-                                }, reloadWay: { (imageView) in
-                                    reloadCodeImage()
-                                }, withRiffle: self)
-                            }
-                        }
-                    })
-                })
-            }, failedAction: nil, isAutomaticallyPass: false)
-            let secondPage = WebBullet(method: .get, headFields: [:], formData: [:], url: url, injectJavaScript: [secondJSUnit])
-            
-            bullets = [secondPage]
-            bulletsIterator = bullets.makeIterator()
-            currentResult = bulletsIterator?.next()
-            webView.load(currentResult!.request)
-        }
-        
-        let secondJSUnit = InjectUnit(script: "\(functionScript) getCodeImageAndCodeEncry();", successAction: {
-            dat in
-            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1, execute: {
-                self.webView.evaluateJavaScript("function callFetchImage() {return { \"img\": getBase64Image(document.getElementById('verityImgtag')), \"codeencry\": codeencry} } callFetchImage();", completionHandler: { (datx, err) in
-                    guard let dic = datx as? [String:String], let img = dic["img"], let _ = dic["codeencry"], let base64 = Data(base64Encoded: img), let image = NSImage(data: base64) else {
-                        print("wrong data!")
-                        return
-                    }
-                    DispatchQueue.main.async {
-                        self.show(verifyCode: image, confirm: { (code) in
-                            self.loadFeemooDownloadLink(code: code)
-                        }, reloadWay: { (imageView) in
-                            reloadCodeImage()
-                        }, withRiffle: self)
-                    }
-                })
-            })
-        }, failedAction: nil, isAutomaticallyPass: false)
-        let secondPage = WebBullet(method: .get, headFields: [:], formData: [:], url: url, injectJavaScript: [secondJSUnit])
+        let secondPage = reloadCodeImageMaker(url: url)
         
         bullets = [mainPage, secondPage]
         bulletsIterator = bullets.makeIterator()
         currentResult = bulletsIterator?.next()
         webView.load(currentResult!.request)
+    }
+    
+    /// 只获取验证码页面
+    ///
+    /// - Parameter url: 验证码页面url
+    func reloadCodeImage(url: URL) {
+        let secondPage = reloadCodeImageMaker(url: url)
+        
+        bullets = [secondPage]
+        bulletsIterator = bullets.makeIterator()
+        currentResult = bulletsIterator?.next()
+        webView.load(currentResult!.request)
+    }
+    
+    /// 验证码页面配置
+    ///
+    /// - Parameter url: 验证码页面url
+    /// - Returns: WebBullet实例，主要用于从新获取验证码
+    func reloadCodeImageMaker(url: URL) -> WebBullet {
+        let secondJSUnit = InjectUnit(script: "\(functionScript) getCodeImageAndCodeEncry();", successAction: {
+            dat in
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1, execute: {
+                self.webView.evaluateJavaScript("function callFetchImage() {return { \"img\": getBase64Image(document.getElementById('verityImgtag')), \"codeencry\": codeencry} } callFetchImage();", completionHandler: { (datx, err) in
+                    guard let dic = datx as? [String:String],
+                        let img = dic["img"],
+                        let _ = dic["codeencry"],
+                        let base64 = Data(base64Encoded: img),
+                        let image = NSImage(data: base64) else {
+                            print("wrong data!")
+                            return
+                    }
+                    AIBot.recognize(codeImage: image, completion: { (labels) in
+                        let code = labels.first + labels.second + labels.third + labels.four
+                        print("************ found code: \(code)")
+                        self.loadFeemooDownloadLink(code: code)
+                    })
+                })
+            })
+        }, failedAction: nil, isAutomaticallyPass: false)
+        let secondPage = WebBullet(method: .get, headFields: [:], formData: [:], url: url, injectJavaScript: [secondJSUnit])
+        return secondPage
     }
     
     /// 抓取下载链接，并开始下载
@@ -143,7 +129,14 @@ public class Feemoo: WebRiffle {
             
             guard let url = URL(string: str) else {
                 print("+++++ Link not url string: \(str)")
-                self.downloadFinished()
+                if let url = self.mainURL, let _ = str.range(of: " failed") {
+                    self.verifyCodeParserErrorCount += 1
+                    DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2, execute: {
+                        self.reloadCodeImage(url: url)
+                    })
+                }   else    {
+                    self.downloadFinished()
+                }
                 return
             }
             

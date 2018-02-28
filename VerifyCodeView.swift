@@ -36,7 +36,7 @@ class VerifyCodeView: NSView {
         button.translatesAutoresizingMaskIntoConstraints = false
         
         let views = ["im":imageView, "tf":textField, "bt":button] as [String:Any]
-        let metrics = ["lsps":10, "imh":80, "imw":300, "btw":80, "bth":20] as [String : NSNumber]
+        let metrics = ["lsps":10, "imh":80, "imw":300, "btw":80, "bth":40] as [String : NSNumber]
         addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-lsps-[im(imw)]-lsps-|", options: [], metrics: metrics, views: views))
         addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-lsps-[tf]-[bt(btw)]-lsps-|", options: [.alignAllCenterY], metrics: metrics, views: views))
         addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-lsps-[im(imh)]-[tf(bth)]-lsps-|", options: [], metrics: metrics, views: views))

@@ -41,13 +41,22 @@ class ViewController: NSViewController {
 //        presentViewControllerAsModalWindow(vc)
         
         let pipline = Pipeline.share
-        let items = ["http://www.ccchoo.com/file-40052.html",
-                     "http://www.ccchoo.com/file-40053.html",
-                     "http://www.ccchoo.com/file-40055.html",
-                     "http://www.666pan.cc/file-533064.html",
+//        let items = ["http://www.ccchoo.com/file-40052.html",
+//                     "http://www.ccchoo.com/file-40053.html",
+//                     "http://www.ccchoo.com/file-40055.html",
+//                     "http://www.666pan.cc/file-533064.html",
+//                     "http://www.666pan.cc/file-532273.html",
+//                     "http://www.88pan.cc/file-532359.html",
+//                     "http://www.666pan.cc/file-532687.html"]
+        let items = ["http://www.feemoo.com/s/1htfnfyn",
+                     "http://www.feemoo.com/file-1897522.html",
+                     "http://www.feemoo.com/file-1892482.html",
                      "http://www.666pan.cc/file-532273.html",
                      "http://www.88pan.cc/file-532359.html",
-                     "http://www.666pan.cc/file-532687.html"]
+                     "http://www.666pan.cc/file-532687.html",
+                     "http://www.ccchoo.com/file-40053.html",
+                     "http://www.ccchoo.com/file-40055.html"]
+//        let items = ["http://www.feemoo.com/s/1htfnfyn"]
         for item in items {
             guard let fx = pipline.add(url: item) else { continue }
             if let f = fx as? Feemoo {
@@ -62,6 +71,10 @@ class ViewController: NSViewController {
                 f.downloadStateController = DownloadStateController
                 continue
             }
+        }
+        
+        func avater<T: WebRiffle>() -> T? {
+            return Feemoo(urlString: "") as? T
         }
         
 //        let f1 = pipline.add(url: "http://www.feemoo.com/s/v2j0z15j") as? Feemoo

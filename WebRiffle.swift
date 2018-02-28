@@ -54,6 +54,12 @@ public class WebRiffle : NSObject, WebRiffleProtocol {
     var host : WebHostSite = .unknowsite
     /// web序列是否执行完成
     var isFinished = false
+    /// 验证码错误次数
+    var verifyCodeParserErrorCount : Int {
+        didSet {
+            print("\(mainURL?.host ?? "") Verify Code Error Count: \(verifyCodeParserErrorCount)")
+        }
+    }
     
     /// 当前验证码窗口
     var promotViewController : VerifyCodeViewController? {
@@ -69,6 +75,7 @@ public class WebRiffle : NSObject, WebRiffleProtocol {
     
     /// 初始化，webview实例创建，js脚本注入
     override init() {
+        verifyCodeParserErrorCount = 0
         super.init()
         let userController = WKUserContentController()
         let script = WKUserScript(source: functionScript, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
