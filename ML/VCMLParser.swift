@@ -27,18 +27,18 @@ struct CodeLabel {
 typealias AILabelsCallBack = ((CodeLabel)->())?
 
 class AIBot {
+    private static let _share = AIBot()
+    static var share : AIBot {
+        return _share
+    }
     var originImage : NSImage?
     typealias FoundLabelCallBack = ((String)->())?
-    
-    init() {
-        
-    }
     
     func makeImage(completion: AILabelsCallBack) {
         if let image = originImage {
             let imgs = image.crop4Images()
-            //            let image = NSImage.init(named: NSImage.Name.init("h"))!.cgImage(forProposedRect: nil, context: nil, hints: nil)
             DispatchQueue.global(qos: .userInitiated).async {
+                [unowned self] in
                 var labels = CodeLabel(images: imgs)
                 self.parser(image: imgs.0, message: "--- 第1位 ---", callback: { label in
                     labels.first = label
@@ -61,7 +61,7 @@ class AIBot {
         let handler = VNImageRequestHandler(cgImage: image)
         print(message)
         do {
-            try handler.perform([self.classificationRequest(callback: callback)])
+            try handler.perform([classificationRequest(callback: callback)])
         } catch {
             /*
              This handler catches general image processing errors. The `classificationRequest`'s
@@ -74,7 +74,6 @@ class AIBot {
     
     func classificationRequest(callback: FoundLabelCallBack) -> VNCoreMLRequest {
         let model = try? VNCoreMLModel(for: Four().model)
-        
         let request = VNCoreMLRequest(model: model!, completionHandler: { req, error in
             guard let results = req.results else {
                 print("Unable to classify image.\n\(error!.localizedDescription)")
@@ -90,7 +89,14 @@ class AIBot {
             }
         })
         request.imageCropAndScaleOption = .scaleFill
+        
+//        #if TARGET_OS_OSX
+//        request.usesCPUOnly = true
+//        #elseif TARGET_OS_IOS
+//        request.usesCPUOnly = false
+//        #endif
         request.usesCPUOnly = true
+        
         return request
     }
     
@@ -100,7 +106,7 @@ class AIBot {
             print("$$$$$ no code image! $$$$$")
             return
         }
-        let bot = AIBot()
+        let bot = AIBot.share
         bot.originImage = img
         bot.makeImage(completion: completion)
     }
@@ -170,7 +176,7 @@ extension NSImage {
         //        let x = [30, 95, 150, 207]
         
         var array = [CGImage]()
-        let cgImageX = self.cgImage(forProposedRect: nil, context: nil, hints: nil)
+        let cgImageX = cgImage(forProposedRect: nil, context: nil, hints: nil)
         for i in 0...3 {
             let width = w[i]
             let ox = x[i]

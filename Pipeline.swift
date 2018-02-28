@@ -40,13 +40,13 @@ public class PiplineSeat {
     /// - Parameter notification: 通知
     @objc func taskFinished(notification: Notification) {
         print("Recive Task download Finish Notification!")
-        guard currentRiffle?.isFinished ?? false else {
-            print("^^^^^^^^^^^ current Riffle is not finished: \(currentRiffle?.mainURL?.absoluteString ?? "no main url") ^^^^^^^^^^^")
+        guard let finishedRiffle = notification.object as? WebRiffle, finishedRiffle.mainURL == currentRiffle?.mainURL else {
+            print("^^^^^^^^^^^ Not a valid WebRiffle notification: \(notification.object ?? "no object rev") ^^^^^^^^^^^")
             return
         }
         
-        guard let finishedRiffle = notification.object as? WebRiffle, finishedRiffle == currentRiffle else {
-            print("^^^^^^^^^^^ Not a valid WebRiffle notification: \(notification.object ?? "no object rev") ^^^^^^^^^^^")
+        guard finishedRiffle.isFinished else {
+            print("^^^^^^^^^^^ current Riffle is not finished: \(currentRiffle?.mainURL?.absoluteString ?? "no main url") ^^^^^^^^^^^")
             return
         }
         
