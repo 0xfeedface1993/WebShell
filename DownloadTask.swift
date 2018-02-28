@@ -58,6 +58,7 @@ struct DownloadRequest {
             var req = URLRequest(url: url)
             req.httpShouldHandleCookies = true
             req.httpMethod = method.rawValue
+            req.timeoutInterval = 5 * 60
             for item in headFields {
                 req.addValue(item.value, forHTTPHeaderField: item.key)
             }
