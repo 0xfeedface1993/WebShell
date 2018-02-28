@@ -41,11 +41,34 @@ class ViewController: NSViewController {
 //        presentViewControllerAsModalWindow(vc)
         
         let pipline = Pipeline.share
-        let f1 = pipline.add(url: "http://www.feemoo.com/s/v2j0z15j") as? Feemoo
-        f1?.downloadStateController = DownloadStateController
+        let items = ["http://www.ccchoo.com/file-40052.html",
+                     "http://www.ccchoo.com/file-40053.html",
+                     "http://www.ccchoo.com/file-40055.html",
+                     "http://www.666pan.cc/file-533064.html",
+                     "http://www.666pan.cc/file-532273.html",
+                     "http://www.88pan.cc/file-532359.html",
+                     "http://www.666pan.cc/file-532687.html"]
+        for item in items {
+            guard let fx = pipline.add(url: item) else { continue }
+            if let f = fx as? Feemoo {
+                f.downloadStateController = DownloadStateController
+                continue
+            }
+            if let f = fx as? Pan666 {
+                f.downloadStateController = DownloadStateController
+                continue
+            }
+            if let f = fx as? Ccchooo {
+                f.downloadStateController = DownloadStateController
+                continue
+            }
+        }
+        
+//        let f1 = pipline.add(url: "http://www.feemoo.com/s/v2j0z15j") as? Feemoo
+//        f1?.downloadStateController = DownloadStateController
 //        print(f1)
-        let f2 = pipline.add(url: "http://www.feemoo.com/s/313qof7s") as? Feemoo
-        f2?.downloadStateController = DownloadStateController
+//        let f2 = pipline.add(url: "http://www.feemoo.com/s/313qof7s") as? Feemoo
+//        f2?.downloadStateController = DownloadStateController
 //        print(f2)
         //
         
@@ -54,11 +77,11 @@ class ViewController: NSViewController {
 //        pipline.add(riffle: feemoo)
 //        feemoo.begin()
         
-        let fz1 = pipline.add(url: "http://www.88pan.cc/file-532641.html") as? Pan666
-        fz1?.downloadStateController = DownloadStateController
+//        let fz1 = pipline.add(url: "http://www.88pan.cc/file-532641.html") as? Pan666
+//        fz1?.downloadStateController = DownloadStateController
 //        print(fz1)
-        let fz2 = pipline.add(url: "http://www.88pan.cc/file-530009.html") as? Pan666
-        fz2?.downloadStateController = DownloadStateController
+//        let fz2 = pipline.add(url: "http://www.88pan.cc/file-530009.html") as? Pan666
+//        fz2?.downloadStateController = DownloadStateController
 //        print(fz2)
         
 //        let feemoo2 = Pan666(urlString: "http://www.88pan.cc/file-532641.html")

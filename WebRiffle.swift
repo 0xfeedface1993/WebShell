@@ -11,11 +11,18 @@ import WebKit
 
 let RiffleFinishedOneDownloadTaskNotificationName = NSNotification.Name("com.ascp.finish.download.one.task")
 
+enum NotificationDownloadFinishedState {
+    case normal
+    case parserError
+}
+
 public protocol WebRiffleProtocol {
     func begin()
 }
 
 public class WebRiffle : NSObject, WebRiffleProtocol {
+    /// 下载首页url
+    var mainURL : URL?
     /// webview实例, 不需要展示给用户，每个站点都独自拥有一个实例，方便并行下载和管理
     var webView : WKWebView!
     /// WebBullet数组，按执行顺序排列
@@ -91,9 +98,9 @@ public class WebRiffle : NSObject, WebRiffleProtocol {
     }
     
     //MARK: - 通知事件
-    func downloadFinished(task: DownloadTask) {
-        self.isFinished = true
-        NotificationCenter.default.post(name: RiffleFinishedOneDownloadTaskNotificationName, object: task)
+    func downloadFinished() {
+        isFinished = true
+        NotificationCenter.default.post(name: RiffleFinishedOneDownloadTaskNotificationName, object: self)
     }
     
     public func begin() {

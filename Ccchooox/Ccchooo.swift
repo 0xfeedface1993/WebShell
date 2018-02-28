@@ -25,6 +25,7 @@ public class Ccchooo: WebRiffle {
     /// - Parameter urlString: 下载首页地址
     public init(urlString: String) {
         super.init()
+        mainURL = URL(string: urlString)
         /// 从地址中截取文件id
         let regx = try? NSRegularExpression(pattern: "\\d{5,}", options: NSRegularExpression.Options.caseInsensitive)
         let strNS = urlString as NSString
@@ -105,7 +106,7 @@ public class Ccchooo: WebRiffle {
     ///   - code: 验证码，目前可以是错误的
     ///   - downloadLink: 下载链接，调用验证码服务再下载
     func loadCCCHOOODownloadLink(code: String, downloadLink: URL) {
-        let codeUploadUnit = InjectUnit(script: "", successAction: {
+        let codeUploadUnit = InjectUnit(script: "var code=0;", successAction: {
             dat in
             let url = downloadLink
             let label = UUID().uuidString
@@ -135,7 +136,10 @@ public class Ccchooo: WebRiffle {
                     print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%")
                 }
                 
-                self.downloadFinished(task: pack)
+                defer {
+                    self.downloadFinished()
+                }
+                
                 // 保存到下载文件夹下
                 if let urlString = NSSearchPathForDirectoriesInDomains(.downloadsDirectory, .userDomainMask, true).first {
                     let url = URL(fileURLWithPath: urlString).appendingPathComponent(pack.request.fileName)

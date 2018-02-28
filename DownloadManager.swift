@@ -79,7 +79,11 @@ extension DownloadManager : URLSessionDownloadDelegate {
     }
     
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        print("didCompleteWithError: \(error.debugDescription)")
+        guard let e = error else { return }
+        print("didCompleteWithError: \(e)")
+        guard let tk = tasks.first(where: { $0.task == task }) else { return }
+        print("download \(tk.request.fileName) with error finished!")
+        tk.request.downloadFinished?(tk)
     }
     
     /// 下载进度更新代理方法

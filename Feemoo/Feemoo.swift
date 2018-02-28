@@ -16,8 +16,6 @@ public class Feemoo: WebRiffle {
     var fileName = ""
     /// 验证码页面url地址
     var feemooRefer = ""
-    /// 下载首页url
-    var mainURL : URL?
     override var scriptName : String {
         return "feemoo"
     }
@@ -141,53 +139,62 @@ public class Feemoo: WebRiffle {
                 print("ooops! not string!")
                 return
             }
-            print(str)
-            if let url = URL(string: str) {
-                let label = UUID().uuidString
-                DownloadManager.share.add(request: DownloadRequest(label: label, fileName: self.fileName, downloadStateUpdate: { pack in
-                    guard let controller = self.downloadStateController else {   return  }
-                    var items = controller.content as! [DownloadInfo]
-                    if let index = items.index(where: { $0.uuid == label }) {
-                        items[index].progress = "\(pack.progress * 100)%"
-                        items[index].totalBytes = "\(pack.totalBytes / 1024 / 1024)M"
-                        items[index].site = pack.request.url.host!
-                        controller.content = items
-                        return
-                    }
-                    let info = DownloadInfo()
-                    info.uuid = label
-                    info.name = self.fileName
-                    info.progress = "\(pack.progress * 100)%"
-                    info.totalBytes = "\(pack.totalBytes / 1024 / 1024)M"
-                    info.site = pack.request.url.host!
-                    items.append(info)
-                    controller.content = items
-                }, downloadFinished: { pack in
-                    print(pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
-                    if let data = pack.revData, let str = String(data: data, encoding: .utf8) {
-                        print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%\n")
-                        print(str)
-                        print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%")
-                    }
-                    
-                    self.downloadFinished(task: pack)
-                    // 保存到下载文件夹下
-                    if let urlString = NSSearchPathForDirectoriesInDomains(.downloadsDirectory, .userDomainMask, true).first {
-                        let url = URL(fileURLWithPath: urlString).appendingPathComponent(pack.request.fileName)
-                        do {
-                            try pack.revData?.write(to: url)
-                            print(">>>>>> file saved! <<<<<<")
-                        } catch {
-                            print(error)
-                        }
-                    }
-                }, headFields: ["Referer":self.feemooRefer,
-                                "Accept-Language":"zh-cn",
-                                "Upgrade-Insecure-Requests":"1",
-                                "Accept-Encoding":"gzip, deflate",
-                                "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                                "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: url, method: .get, body: nil))
+            print("+++++ Parser string success: \(str)")
+            
+            guard let url = URL(string: str) else {
+                print("+++++ Link not url string: \(str)")
+                self.downloadFinished()
+                return
             }
+            
+            let label = UUID().uuidString
+            DownloadManager.share.add(request: DownloadRequest(label: label, fileName: self.fileName, downloadStateUpdate: { pack in
+                guard let controller = self.downloadStateController else {   return  }
+                var items = controller.content as! [DownloadInfo]
+                if let index = items.index(where: { $0.uuid == label }) {
+                    items[index].progress = "\(pack.progress * 100)%"
+                    items[index].totalBytes = "\(pack.totalBytes / 1024 / 1024)M"
+                    items[index].site = pack.request.url.host!
+                    controller.content = items
+                    return
+                }
+                let info = DownloadInfo()
+                info.uuid = label
+                info.name = self.fileName
+                info.progress = "\(pack.progress * 100)%"
+                info.totalBytes = "\(pack.totalBytes / 1024 / 1024)M"
+                info.site = pack.request.url.host!
+                items.append(info)
+                controller.content = items
+            }, downloadFinished: { pack in
+                print(pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
+                
+                defer {
+                    self.downloadFinished()
+                }
+                
+                if let data = pack.revData, let str = String(data: data, encoding: .utf8) {
+                    print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%\n")
+                    print(str)
+                    print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%")
+                }
+                
+                // 保存到下载文件夹下
+                if let urlString = NSSearchPathForDirectoriesInDomains(.downloadsDirectory, .userDomainMask, true).first {
+                    let url = URL(fileURLWithPath: urlString).appendingPathComponent(pack.request.fileName)
+                    do {
+                        try pack.revData?.write(to: url)
+                        print(">>>>>> file saved! <<<<<<")
+                    } catch {
+                        print(error)
+                    }
+                }
+            }, headFields: ["Referer":self.feemooRefer,
+                            "Accept-Language":"zh-cn",
+                            "Upgrade-Insecure-Requests":"1",
+                            "Accept-Encoding":"gzip, deflate",
+                            "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                            "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: url, method: .get, body: nil))
         }, failedAction: { (e) in
             print(e)
         }, isAutomaticallyPass: true)

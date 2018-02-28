@@ -40,7 +40,16 @@ public class PiplineSeat {
     /// - Parameter notification: 通知
     @objc func taskFinished(notification: Notification) {
         print("Recive Task download Finish Notification!")
-        guard let _ = notification.object as? DownloadTask else { return }
+        guard currentRiffle?.isFinished ?? false else {
+            print("^^^^^^^^^^^ current Riffle is not finished: \(currentRiffle?.mainURL?.absoluteString ?? "no main url") ^^^^^^^^^^^")
+            return
+        }
+        
+        guard let finishedRiffle = notification.object as? WebRiffle, finishedRiffle == currentRiffle else {
+            print("^^^^^^^^^^^ Not a valid WebRiffle notification: \(notification.object ?? "no object rev") ^^^^^^^^^^^")
+            return
+        }
+        
         run()
     }
     
@@ -52,11 +61,13 @@ public class PiplineSeat {
             guard let index = riffles.index(where: { crq == $0 }), index != riffles.index(before: riffles.endIndex) else { return }
             let nextIndex = riffles.index(after: index)
             currentRiffle = riffles[nextIndex]
+            print("+++++++++ Next riffle is \(currentRiffle?.mainURL?.absoluteString ?? "no main url")")
             currentRiffle?.begin()
         }   else    {
             /// 第一次下载
             if let riffle = riffles.first {
                 currentRiffle = riffle
+                print("+++++++++ First riffle is \(riffle.mainURL?.absoluteString ?? "no main url")")
                 currentRiffle?.begin()
             }
         }

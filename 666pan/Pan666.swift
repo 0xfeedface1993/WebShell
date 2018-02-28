@@ -38,6 +38,7 @@ public class Pan666 : WebRiffle {
     /// - Parameter urlString: 下载首页地址
     public init(urlString: String) {
         super.init()
+        mainURL = URL(string: urlString)
         /// 从地址中截取文件id
         let regx = try? NSRegularExpression(pattern: "\\d{5,}", options: NSRegularExpression.Options.caseInsensitive)
         let strNS = urlString as NSString
@@ -187,62 +188,71 @@ public class Pan666 : WebRiffle {
     /// - Parameter url: 下载地址中转页面
     func readDownloadLink(url: URL) {
         let request = DownloadRequest(label: UUID().uuidString, fileName: self.fileName, downloadStateUpdate: nil, downloadFinished: { (tk) in
-            guard let dat = tk.revData, let str = String.init(data: dat, encoding: .utf8) else {
+            guard let dat = tk.revData, let str = String(data: dat, encoding: .utf8) else {
                 print("worong data!")
                 return
             }
-            print(str)
+            print("+++++ Parser string success: \(str)")
+            
             do {
                 let regx = try NSRegularExpression(pattern: "http://\\w+\\.\\w+.\\w+:\\w+/\\w+\\.php\\?[^\"]+", options: NSRegularExpression.Options.caseInsensitive)
                 if let result = regx.firstMatch(in: str, options: .reportProgress, range: NSRange(location: 0, length: (str as NSString).length)) {
                     let link = (str as NSString).substring(with: result.range)
-                    print(link)
-                    if let urlx = URL(string: link) {
-                        let label = UUID().uuidString
-                        DownloadManager.share.add(request: DownloadRequest(label: label, fileName: self.fileName, downloadStateUpdate: { pack in
-                            guard let controller = self.downloadStateController else {   return  }
-                            var items = controller.content as! [DownloadInfo]
-                            if let index = items.index(where: { $0.uuid == label }) {
-                                items[index].progress = "\(pack.progress * 100)%"
-                                items[index].totalBytes = "\(pack.totalBytes / 1024 / 1024)M"
-                                items[index].site = pack.request.url.host!
-                                controller.content = items
-                                return
-                            }
-                            let info = DownloadInfo()
-                            info.uuid = label
-                            info.name = self.fileName
-                            info.progress = "\(pack.progress * 100)%"
-                            info.totalBytes = "\(pack.totalBytes / 1024 / 1024)M"
-                            info.site = pack.request.url.host!
-                            items.append(info)
-                            controller.content = items
-                        }, downloadFinished: { pack in
-                            print(pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
-                            if let data = pack.revData, let str = String(data: data, encoding: .utf8) {
-                                print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%\n")
-                                print(str)
-                                print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%")
-                            }
-                            
-                            self.downloadFinished(task: pack)
-                            // 保存到下载文件夹下
-                            if let urlString = NSSearchPathForDirectoriesInDomains(.downloadsDirectory, .userDomainMask, true).first {
-                                let urly = URL(fileURLWithPath: urlString).appendingPathComponent(pack.request.fileName)
-                                do {
-                                    try pack.revData?.write(to: urly)
-                                    print(">>>>>> file saved! <<<<<<")
-                                } catch {
-                                    print(error)
-                                }
-                            }
-                        }, headFields: ["Referer":self.pan6663URL.absoluteString,
-                                        "Accept-Language":"zh-cn",
-                                        "Upgrade-Insecure-Requests":"1",
-                                        "Accept-Encoding":"gzip, deflate",
-                                        "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                                        "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: urlx, method: .get, body: nil))
+                    print("++++++ find download link: \(link)")
+                    
+                    guard let urlx = URL(string: link) else {
+                        print("+++++ Link not url string: \(link)")
+                        self.downloadFinished()
+                        return
                     }
+                    
+                    let label = UUID().uuidString
+                    DownloadManager.share.add(request: DownloadRequest(label: label, fileName: self.fileName, downloadStateUpdate: { pack in
+                        guard let controller = self.downloadStateController else {   return  }
+                        var items = controller.content as! [DownloadInfo]
+                        if let index = items.index(where: { $0.uuid == label }) {
+                            items[index].progress = "\(pack.progress * 100)%"
+                            items[index].totalBytes = "\(pack.totalBytes / 1024 / 1024)M"
+                            items[index].site = pack.request.url.host!
+                            controller.content = items
+                            return
+                        }
+                        let info = DownloadInfo()
+                        info.uuid = label
+                        info.name = self.fileName
+                        info.progress = "\(pack.progress * 100)%"
+                        info.totalBytes = "\(pack.totalBytes / 1024 / 1024)M"
+                        info.site = pack.request.url.host!
+                        items.append(info)
+                        controller.content = items
+                    }, downloadFinished: { pack in
+                        print(pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
+                        if let data = pack.revData, let str = String(data: data, encoding: .utf8) {
+                            print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%\n")
+                            print(str)
+                            print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%")
+                        }
+                        
+                        defer {
+                            self.downloadFinished()
+                        }
+                        
+                        // 保存到下载文件夹下
+                        if let urlString = NSSearchPathForDirectoriesInDomains(.downloadsDirectory, .userDomainMask, true).first {
+                            let urly = URL(fileURLWithPath: urlString).appendingPathComponent(pack.request.fileName)
+                            do {
+                                try pack.revData?.write(to: urly)
+                                print(">>>>>> file saved! <<<<<<")
+                            } catch {
+                                print(error)
+                            }
+                        }
+                    }, headFields: ["Referer":self.pan6663URL.absoluteString,
+                                    "Accept-Language":"zh-cn",
+                                    "Upgrade-Insecure-Requests":"1",
+                                    "Accept-Encoding":"gzip, deflate",
+                                    "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                                    "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: urlx, method: .get, body: nil))
                 }
             }   catch   {
                 print(error)
