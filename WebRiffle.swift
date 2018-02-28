@@ -60,6 +60,8 @@ public class WebRiffle : NSObject, WebRiffleProtocol {
             print("\(mainURL?.host ?? "") Verify Code Error Count: \(verifyCodeParserErrorCount)")
         }
     }
+    /// 下载列表绑定的数据，针对于使用视图绑定的情况，如果是其他情况请声明其他变量并进行控制
+    public weak var downloadStateController : NSArrayController?
     
     /// 当前验证码窗口
     var promotViewController : VerifyCodeViewController? {

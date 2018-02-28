@@ -30,8 +30,6 @@ public class Pan666 : WebRiffle {
     var pan6663URL : URL {
         return URL(string: "http://www.88pan.cc/down-\(fileNumber).html")!
     }
-    /// 下载列表绑定的数据，针对于使用视图绑定的情况，如果是其他情况请声明其他变量并进行控制
-    public weak var downloadStateController : NSArrayController?
     
     /// 初始化
     ///

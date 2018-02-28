@@ -58,23 +58,8 @@ class ViewController: NSViewController {
                      "http://www.ccchoo.com/file-40055.html"]
 //        let items = ["http://www.feemoo.com/s/1htfnfyn"]
         for item in items {
-            guard let fx = pipline.add(url: item) else { continue }
-            if let f = fx as? Feemoo {
-                f.downloadStateController = DownloadStateController
-                continue
-            }
-            if let f = fx as? Pan666 {
-                f.downloadStateController = DownloadStateController
-                continue
-            }
-            if let f = fx as? Ccchooo {
-                f.downloadStateController = DownloadStateController
-                continue
-            }
-        }
-        
-        func avater<T: WebRiffle>() -> T? {
-            return Feemoo(urlString: "") as? T
+            guard let fx = pipline.add(url: item) else { return }
+            fx.downloadStateController = DownloadStateController
         }
         
 //        let f1 = pipline.add(url: "http://www.feemoo.com/s/v2j0z15j") as? Feemoo

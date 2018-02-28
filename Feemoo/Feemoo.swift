@@ -19,8 +19,6 @@ public class Feemoo: WebRiffle {
     override var scriptName : String {
         return "feemoo"
     }
-    /// 下载列表绑定的数据，针对于使用视图绑定的情况，如果是其他情况请声明其他变量并进行控制
-    public weak var downloadStateController : NSArrayController?
     
     public init(urlString: String) {
         super.init()

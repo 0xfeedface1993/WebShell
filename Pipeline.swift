@@ -127,7 +127,7 @@ public class Pipeline {
         }
     }
     
-    public func add(url: String) -> AnyObject? {
+    public func add<T: WebRiffle>(url: String) -> T? {
         guard let host = URL(string: url) else {
             return nil
         }
@@ -138,17 +138,17 @@ public class Pipeline {
             let riffle = Feemoo(urlString: url)
             riffle.host = type
             add(riffle: riffle)
-            return riffle
+            return riffle as? T
         case .pan666:
             let riffle = Pan666(urlString: url)
             riffle.host = type
             add(riffle: riffle)
-            return riffle
+            return riffle as? T
         case .cchooo:
             let riffle = Ccchooo(urlString: url)
             riffle.host = type
             add(riffle: riffle)
-            return riffle
+            return riffle as? T
         case .unknowsite:
             print("unkown site!")
             return nil
