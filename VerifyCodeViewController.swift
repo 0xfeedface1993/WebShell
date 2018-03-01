@@ -6,7 +6,11 @@
 //  Copyright © 2018年 ascp. All rights reserved.
 //
 
-import Cocoa
+#if TARGET_OS_MAC
+    import Cocoa
+#elseif TARGET_OS_IPHONE
+    import UIKit
+#endif
 
 class VerifyCodeViewController: NSViewController {
     let codeView = VerifyCodeView()

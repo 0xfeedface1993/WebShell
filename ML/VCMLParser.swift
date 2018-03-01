@@ -6,7 +6,14 @@
 //  Copyright © 2018年 ascp. All rights reserved.
 //
 
-import AppKit
+#if TARGET_OS_MAC
+    import Cocoa
+    public let ImageBubble = NS
+#elseif TARGET_OS_IPHONE
+    import UIKit
+    public let ImageBubble = UIImage()
+#endif
+
 import Vision
 
 struct CodeLabel {
@@ -31,12 +38,13 @@ class AIBot {
     static var share : AIBot {
         return _share
     }
-    var originImage : NSImage?
+    
+    public var originImage : ImageMaker?
+    
     typealias FoundLabelCallBack = ((String)->())?
     
     func makeImage(completion: AILabelsCallBack) {
-        if let image = originImage {
-            let imgs = image.crop4Images()
+        if let imgs = originImage?.crop4Images() {
             DispatchQueue.global(qos: .userInitiated).async {
                 [unowned self] in
                 var labels = CodeLabel(images: imgs)
@@ -90,18 +98,17 @@ class AIBot {
         })
         request.imageCropAndScaleOption = .scaleFill
         
-//        #if TARGET_OS_OSX
-//        request.usesCPUOnly = true
-//        #elseif TARGET_OS_IOS
-//        request.usesCPUOnly = false
-//        #endif
-        request.usesCPUOnly = true
+        #if os(macOS)
+            request.usesCPUOnly = true
+        #elseif os(iOS)
+            request.usesCPUOnly = false
+        #endif
         
         return request
     }
     
     //MARK: - Parser Function
-    static func recognize(codeImage: NSImage?, completion: AILabelsCallBack) {
+    static func recognize(codeImage: ImageMaker?, completion: AILabelsCallBack) {
         guard let img = codeImage else {
             print("$$$$$ no code image! $$$$$")
             return
@@ -109,115 +116,6 @@ class AIBot {
         let bot = AIBot.share
         bot.originImage = img
         bot.makeImage(completion: completion)
-    }
-}
-
-extension NSImage {
-    func convertRGBSpace() -> NSImage? {
-        let width = size.width
-        let height = size.height
-        
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue)
-        guard let context = CGContext(data: nil, width: Int(width), height: Int(height), bitsPerComponent: 8, bytesPerRow: 0, space: colorSpace, bitmapInfo: bitmapInfo.rawValue) else {
-            print("Context Create Failed！")
-            return nil
-        }
-        
-        let rect = CGRect(x: 0, y: 0, width: width, height: height)
-        guard let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
-            print("CGImage Create Failed!")
-            return nil
-        }
-        
-        context.draw(cgImage, in: rect)
-        
-        if let newCGImage = context.makeImage() {
-            return NSImage(cgImage: newCGImage, size: rect.size)
-        }
-        
-        return nil
-    }
-    
-    func convertGraySpace() -> NSImage? {
-        let width = size.width
-        let height = size.height
-        
-        let colorSpace = CGColorSpaceCreateDeviceGray()
-        let bitmapInfo = CGBitmapInfo.init(rawValue: CGImageAlphaInfo.none.rawValue)
-        guard let context = CGContext(data: nil, width: Int(width), height: Int(height), bitsPerComponent: 8, bytesPerRow: 0, space: colorSpace, bitmapInfo: bitmapInfo.rawValue) else {
-            print("Context Create Failed！")
-            return nil
-        }
-        
-        let rect = CGRect(x: 0, y: 0, width: width, height: height)
-        guard let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
-            print("CGImage Create Failed!")
-            return nil
-        }
-        
-        context.draw(cgImage, in: rect)
-        
-        if let newCGImage = context.makeImage() {
-            return NSImage(cgImage: newCGImage, size: rect.size)
-        }
-        
-        return nil
-    }
-    
-    func crop4Images() -> (CGImage, CGImage, CGImage, CGImage) {
-        let w = [70, 65, 65, 70]
-        let h = 80
-        let y = 0
-        let x = [35, 95, 155, 210]
-        //        let w = [75, 60, 60, 75]
-        //        let h = 80
-        //        let y = 0
-        //        let x = [30, 95, 150, 207]
-        
-        var array = [CGImage]()
-        let cgImageX = cgImage(forProposedRect: nil, context: nil, hints: nil)
-        for i in 0...3 {
-            let width = w[i]
-            let ox = x[i]
-            let size = CGSize(width: width, height: h)
-            let origin = CGPoint(x: ox, y: y)
-            let cropImage = cgImageX!.cropping(to: CGRect(origin: origin, size: size))!
-            let img = cropImage
-            array.append(img)
-        }
-        
-        array = array.map { $0.scale(toSise: CGSize(width: 224, height: 224)) }
-        
-        return (array[0], array[1], array[2], array[3])
-    }
-    
-    func convertBlackWhite() -> CGImage? {
-        let width = 300
-        let height = 80
-        
-        //width = 300, height = 80, bpc = 8, bpp = 8, row bytes = 300
-        guard let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
-            print("CGImage Create Failed!")
-            return nil
-        }
-        
-        let mnutableData = CFDataCreateMutableCopy(nil, cgImage.width * cgImage.bytesPerRow * cgImage.height, cgImage.dataProvider!.data)
-        let bitmapDataPtr = CFDataGetMutableBytePtr(mnutableData)!
-        
-        for row in 0..<cgImage.height {
-            for col in 0..<cgImage.width {
-                let pixel = bitmapDataPtr + (row * cgImage.bytesPerRow + col * cgImage.bitsPerPixel / cgImage.bitsPerComponent)
-                pixel[0] = (pixel[0] >= 160) ? 0:255
-            }
-        }
-        
-        let colorSpace = CGColorSpaceCreateDeviceGray()
-        let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue)
-        
-        let hightPassData = CGDataProvider(data: mnutableData!)
-        let cgPower = CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: 8, bytesPerRow: 300, space: colorSpace, bitmapInfo: bitmapInfo, provider: hightPassData!, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
-        return cgPower
     }
 }
 

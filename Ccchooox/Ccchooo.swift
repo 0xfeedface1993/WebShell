@@ -6,7 +6,11 @@
 //  Copyright © 2018年 ascp. All rights reserved.
 //
 
-import Cocoa
+#if TARGET_OS_MAC
+    import Cocoa
+#elseif TARGET_OS_IPHONE
+    import UIKit
+#endif
 
 /// 彩虹盘
 public class Ccchooo: WebRiffle {
@@ -108,24 +112,22 @@ public class Ccchooo: WebRiffle {
             dat in
             let url = downloadLink
             let label = UUID().uuidString
-            DownloadManager.share.add(request: DownloadRequest(label: label, fileName: self.fileName, downloadStateUpdate: { pack in
-                guard let controller = self.downloadStateController else {   return  }
-                var items = controller.content as! [DownloadInfo]
-                if let index = items.index(where: { $0.uuid == label }) {
-                    items[index].progress = "\(pack.progress * 100)%"
-                    items[index].totalBytes = "\(pack.totalBytes / 1024 / 1024)M"
-                    items[index].site = pack.request.url.host!
+            self.fileDownloadRequest = DownloadRequest(label: label, fileName: self.fileName, downloadStateUpdate: { pack in
+                #if os(macOS)
+                    guard let controller = self.downloadStateController else {   return  }
+                    var items = controller.content as! [DownloadInfo]
+                    if let index = items.index(where: { $0.uuid == label }) {
+                        items[index].progress = "\(pack.progress * 100)%"
+                        items[index].totalBytes = "\(Float(pack.totalBytes) / 1024.0 / 1024.0)M"
+                        items[index].site = pack.request.url.host!
+                        controller.content = items
+                        return
+                    }
+                    items.append(DownloadInfo(task: pack))
                     controller.content = items
-                    return
-                }
-                let info = DownloadInfo()
-                info.uuid = label
-                info.name = self.fileName
-                info.progress = "\(pack.progress * 100)%"
-                info.totalBytes = "\(pack.totalBytes / 1024 / 1024)M"
-                info.site = pack.request.url.host!
-                items.append(info)
-                controller.content = items
+                #elseif os(iOS)
+                    NotificationCenter.default.post(name: WebRiffle.UpdateRiffleDownloadNotification, object: Pipeline.share.downloadStateData)
+                #endif
             }, downloadFinished: { pack in
                 print(pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
                 if let data = pack.revData, let str = String(data: data, encoding: .utf8) {
@@ -139,21 +141,23 @@ public class Ccchooo: WebRiffle {
                 }
                 
                 // 保存到下载文件夹下
-                if let urlString = NSSearchPathForDirectoriesInDomains(.downloadsDirectory, .userDomainMask, true).first {
-                    let url = URL(fileURLWithPath: urlString).appendingPathComponent(pack.request.fileName)
-                    do {
-                        try pack.revData?.write(to: url)
-                        print(">>>>>> file saved! <<<<<<")
-                    } catch {
-                        print(error)
-                    }
-                }
+//                if let urlString = NSSearchPathForDirectoriesInDomains(.downloadsDirectory, .userDomainMask, true).first {
+//                    let url = URL(fileURLWithPath: urlString).appendingPathComponent(pack.request.fileName)
+//                    do {
+//                        try pack.revData?.write(to: url)
+//                        print(">>>>>> file saved! <<<<<<")
+//                    } catch {
+//                        print(error)
+//                    }
+//                }
+                FileManager.default.save(pack: pack)
             }, headFields: ["Referer":"http://www.ccchoo.com/down-\(self.fileNumber).html",
                 "Accept-Language":"zh-cn",
                 "Upgrade-Insecure-Requests":"1",
                 "Accept-Encoding":"gzip, deflate",
                 "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: url, method: .post, body: nil))
+                "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: url, method: .post, body: nil)
+            DownloadManager.share.add(request: self.fileDownloadRequest!)
         }, failedAction: nil, isAutomaticallyPass: true)
         
         let codeUpload = WebBullet(method: .post, headFields: ["Referer":"http://www.ccchoo.com/down-\(fileNumber).html",

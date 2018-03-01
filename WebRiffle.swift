@@ -6,10 +6,15 @@
 //  Copyright © 2018年 ascp. All rights reserved.
 //
 
-import AppKit
+#if os(macOS)
+    import Cocoa
+#elseif os(iOS)
+    import UIKit
+#endif
+
 import WebKit
 
-let RiffleFinishedOneDownloadTaskNotificationName = NSNotification.Name("com.ascp.finish.download.one.task")
+public let RiffleFinishedOneDownloadTaskNotificationName = NSNotification.Name("com.ascp.finish.download.one.task")
 
 enum NotificationDownloadFinishedState {
     case normal
@@ -21,6 +26,7 @@ public protocol WebRiffleProtocol {
 }
 
 public class WebRiffle : NSObject, WebRiffleProtocol {
+    public static let UpdateRiffleDownloadNotification = Notification.Name("com.ascp.update.riffle.download.state")
     /// 下载首页url
     var mainURL : URL?
     /// webview实例, 不需要展示给用户，每个站点都独自拥有一个实例，方便并行下载和管理
@@ -60,9 +66,11 @@ public class WebRiffle : NSObject, WebRiffleProtocol {
             print("\(mainURL?.host ?? "") Verify Code Error Count: \(verifyCodeParserErrorCount)")
         }
     }
-    /// 下载列表绑定的数据，针对于使用视图绑定的情况，如果是其他情况请声明其他变量并进行控制
-    public weak var downloadStateController : NSArrayController?
+    var fileDownloadRequest : DownloadRequest?
     
+#if os(macOS)
+/// 下载列表绑定的数据，针对于使用视图绑定的情况，如果是其他情况请声明其他变量并进行控制
+    public weak var downloadStateController : NSArrayController?
     /// 当前验证码窗口
     var promotViewController : VerifyCodeViewController? {
         return NSApp.windows.first(where: { (w) -> Bool in
@@ -73,7 +81,9 @@ public class WebRiffle : NSObject, WebRiffleProtocol {
             return vc.presentingRiffle == self
         })?.contentViewController as? VerifyCodeViewController
     }
+#elseif os(iOS)
     
+#endif
     
     /// 初始化，webview实例创建，js脚本注入
     override init() {
@@ -94,17 +104,17 @@ public class WebRiffle : NSObject, WebRiffleProtocol {
     }
     
     //MARK: - 验证码页面
-    func show(verifyCode: NSImage, confirm: ((String)->())?, reloadWay: ((NSImageView)->())?, withRiffle riffle: WebRiffle?) {
-        let vc = VerifyCodeViewController(riffle: riffle)
-        vc.tap = { code in
-            confirm?(code)
-            vc.dismiss(nil)
-        }
-        vc.reloadImage = reloadWay
-        vc.codeView.imageView.image = verifyCode
-        let topViewController = NSApp.mainWindow?.contentViewController
-        topViewController?.presentViewControllerAsModalWindow(vc)
-    }
+//    func show(verifyCode: NSImage, confirm: ((String)->())?, reloadWay: ((NSImageView)->())?, withRiffle riffle: WebRiffle?) {
+//        let vc = VerifyCodeViewController(riffle: riffle)
+//        vc.tap = { code in
+//            confirm?(code)
+//            vc.dismiss(nil)
+//        }
+//        vc.reloadImage = reloadWay
+//        vc.codeView.imageView.image = verifyCode
+//        let topViewController = NSApp.mainWindow?.contentViewController
+//        topViewController?.presentViewControllerAsModalWindow(vc)
+//    }
     
     //MARK: - 通知事件
     func downloadFinished() {

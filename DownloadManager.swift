@@ -9,15 +9,26 @@
 import Foundation
 
 /// 下载状态数据模型，用于视图数据绑定
-class DownloadInfo : NSObject {
-    var uuid = ""
-    @objc dynamic var name = ""
-    @objc dynamic var progress = ""
-    @objc dynamic var totalBytes = ""
-    @objc dynamic var site = ""
-    @objc dynamic var state = ""
+public class DownloadInfo : NSObject {
+    public var uuid = ""
+    public var createTime = Date(timeIntervalSince1970: 0)
+    @objc public dynamic var name = ""
+    @objc public dynamic var progress = ""
+    @objc public dynamic var totalBytes = ""
+    @objc public dynamic var site = ""
+    @objc public dynamic var state = ""
     override init() {
         super.init()
+    }
+    
+    init(task: DownloadTask) {
+        super.init()
+        uuid = task.request.label
+        name = task.request.fileName
+        progress = "\(task.progress * 100)%"
+        totalBytes = "\(Float(task.totalBytes) / 1024.0 / 1024.0)M"
+        site = task.request.url.host!
+        createTime = task.createTime
     }
 }
 
@@ -95,13 +106,12 @@ extension DownloadManager : URLSessionDownloadDelegate {
     ///   - totalBytesWritten: 已经下载多少字节
     ///   - totalBytesExpectedToWrite: 一共需要下载多少字节
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
-        var task = tasks.first(where: { $0.task == downloadTask })
-        task?.totalBytes = totalBytesExpectedToWrite
-        task?.revBytes = totalBytesWritten
-        if let tk = task {
-            print("------ name: \(tk.request.fileName) ------ progress: \(tk.progress) ------")
+        if let index = tasks.index(where: { $0.task == downloadTask }) {
+            tasks[index].totalBytes = totalBytesExpectedToWrite
+            tasks[index].revBytes = totalBytesWritten
+            print("------ name: \(tasks[index].request.fileName) ------ progress: \(tasks[index].progress) ------")
             // 调用下载更新回调
-            task?.request.downloadStateUpdate?(tk)
+            tasks[index].request.downloadStateUpdate?(tasks[index])
         }
     }
 }

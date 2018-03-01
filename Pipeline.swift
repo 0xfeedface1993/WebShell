@@ -6,7 +6,11 @@
 //  Copyright © 2018年 ascp. All rights reserved.
 //
 
-import Cocoa
+#if TARGET_OS_MAC
+    import Cocoa
+#elseif TARGET_OS_IPHONE
+    import UIKit
+#endif
 
 let unkonwGroupName = "unkown-site-group"
 let GroupDefaultRule = "\\.[^\\.]+\\."
@@ -111,6 +115,12 @@ public class Pipeline {
     }
     /// 分类，每个woker管理一个站点下的所有WebRiffle
     var workers = [PiplineSeat]()
+    var downloadStateData : [DownloadInfo] {
+        let requests = workers.map({ $0.riffles }).flatMap({ $0 }).map({ $0.fileDownloadRequest }).filter({ $0 != nil }).map({ $0! })
+        let runningTasks = DownloadManager.share.tasks.filter({ tk in requests.contains(where: { tk.request.request == $0.request }) })
+        let infos = runningTasks.map({ DownloadInfo(task: $0) })
+        return infos.sorted(by: { $0.createTime > $1.createTime })
+    }
     
     /// 添加WebRiffle，自动按序列顺序执行
     ///

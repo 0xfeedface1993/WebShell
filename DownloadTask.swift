@@ -24,6 +24,8 @@ struct DownloadTask {
     var revBytes : Int64
     /// 接受到的数据
     var revData : Data?
+    /// 创建时间
+    let createTime = Date()
     
     init(request newRequest: DownloadRequest, task newTask: URLSessionDownloadTask) {
         self.request = newRequest
