@@ -90,7 +90,7 @@ public struct SitePack {
     var site : WebHostSite
     public static let allSite = [SitePack(regulerExpression: "feemoo", site: .feemoo),
                           SitePack(regulerExpression: "\\.\\d{2,}pan\\.", site: .pan666),
-                          SitePack(regulerExpression: "ccchoo", site: .cchooo)]
+                          SitePack(regulerExpression: "(ccchoo)|(chooyun)", site: .cchooo)]
 }
 
 public func site(url: URL) -> WebHostSite {

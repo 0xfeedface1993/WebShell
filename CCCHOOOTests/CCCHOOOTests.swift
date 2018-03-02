@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import CCCHOOO
+@testable import WebShell
 
 class CCCHOOOTests: XCTestCase {
     
@@ -32,5 +32,33 @@ class CCCHOOOTests: XCTestCase {
             // Put the code you want to measure the time of here.
         }
     }
+    
+    func testSiteRecognize() {
+        var url : URL!
+        var result : WebHostSite!
+        
+        var items = ["http://www.ccchoo.com/file-72598.html", "http://www.chooyun.com/file-72598.html"]
+        items.forEach({
+            url = URL(string: $0)!
+            result = site(url: url)
+            XCTAssertTrue(result == .cchooo, "Can't match feemoo!")
+        })
+        
+        
+        items = ["http://www.feemoo.com/file-1897522.html", "http://www.feemoo.com/s/1htfnfyn"]
+        items.forEach({
+            url = URL(string: $0)!
+            result = site(url: url)
+            XCTAssertTrue(result == .feemoo, "Can't match feemoo!")
+        })
+        
+        items = ["http://www.666pan.cc/file-533064.html", "http://www.88pan.cc/file-532359.html"]
+        items.forEach({
+            url = URL(string: $0)!
+            result = site(url: url)
+            XCTAssertTrue(result == .pan666, "Can't match 666pan!")
+        })
+    }
+    
     
 }
