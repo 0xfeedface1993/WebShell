@@ -96,6 +96,7 @@ public class WebRiffle : NSObject, WebRiffleProtocol {
         config.userContentController = userController
         webView = WKWebView(frame: CGRect.zero, configuration: config)
         webView.navigationDelegate = self
+        webView.customUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6"
     }
     
     deinit {

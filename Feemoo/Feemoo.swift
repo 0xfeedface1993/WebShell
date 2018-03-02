@@ -59,7 +59,14 @@ public class Feemoo: WebRiffle {
             }
             
         }, failedAction: nil, isAutomaticallyPass: true)
-        let mainPage = WebBullet(method: .get, headFields: [:], formData: [:], url: url, injectJavaScript: [mainJSUnit])
+        
+        let mainPage = WebBullet(method: .get, headFields: ["Connection": "keep-alive",
+                                                            "Accept-Language": "zh-cn",
+                                                            "Upgrade-Insecure-Requests": "1",
+                                                            "Accept-Encoding": "gzip, deflate",
+                                                            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                                                            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6",
+                                                            "Host": "www.feemoo.com"], formData: [:], url: url, injectJavaScript: [mainJSUnit])
         let secondPage = reloadCodeImageMaker(url: url)
         
         bullets = [mainPage, secondPage]
@@ -105,7 +112,7 @@ public class Feemoo: WebRiffle {
                 })
             })
         }, failedAction: nil, isAutomaticallyPass: false)
-        let secondPage = WebBullet(method: .get, headFields: [:], formData: [:], url: url, injectJavaScript: [secondJSUnit])
+        let secondPage = WebBullet(method: .get, headFields: ["User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], formData: [:], url: url, injectJavaScript: [secondJSUnit])
         return secondPage
     }
     
