@@ -15,10 +15,17 @@
 let unkonwGroupName = "unkown-site-group"
 let GroupDefaultRule = "\\.[^\\.]+\\."
 
+@objc public protocol PiplineDelegate {
+    @objc optional func pipline(didAddRiffle riffle: WebRiffle)
+    @objc optional func pipline(didBeginRiffle riffle: WebRiffle)
+    @objc optional func pipline(didFinishedRiffle riffle: WebRiffle)
+}
+
 public class PiplineSeat {
     var site : WebHostSite = .unknowsite
     var riffles = [WebRiffle]()
     private var currentRiffle : WebRiffle?
+    weak var pipline : Pipeline?
     
     init(site: WebHostSite) {
         self.site = site
@@ -54,6 +61,8 @@ public class PiplineSeat {
             return
         }
         
+        pipline?.delegate?.pipline?(didBeginRiffle: finishedRiffle)
+        
         run()
     }
     
@@ -62,17 +71,23 @@ public class PiplineSeat {
         if let crq = currentRiffle {
             guard crq.isFinished else { return }
             /// 非本序列的任务和最后一个任务执行完时不执行任何操作
-            guard let index = riffles.index(where: { crq == $0 }), index != riffles.index(before: riffles.endIndex) else { return }
+            guard let index = riffles.index(where: { crq == $0 }) else { return }
+            guard index != riffles.index(before: riffles.endIndex) else {
+                print("+++++++++ Last riffle \(currentRiffle?.mainURL?.absoluteString ?? "no main url")")
+                return
+            }
             let nextIndex = riffles.index(after: index)
             currentRiffle = riffles[nextIndex]
             print("+++++++++ Next riffle is \(currentRiffle?.mainURL?.absoluteString ?? "no main url")")
             currentRiffle?.begin()
+            pipline?.delegate?.pipline?(didFinishedRiffle: currentRiffle!)
         }   else    {
             /// 第一次下载
             if let riffle = riffles.first {
                 currentRiffle = riffle
                 print("+++++++++ First riffle is \(riffle.mainURL?.absoluteString ?? "no main url")")
                 currentRiffle?.begin()
+                pipline?.delegate?.pipline?(didFinishedRiffle: riffle)
             }
         }
     }
@@ -121,6 +136,7 @@ public class Pipeline {
         let infos = runningTasks.map({ DownloadInfo(task: $0) })
         return infos.sorted(by: { $0.createTime > $1.createTime })
     }
+    weak var delegate : PiplineDelegate?
     
     /// 添加WebRiffle，自动按序列顺序执行
     ///
@@ -130,10 +146,13 @@ public class Pipeline {
             return (seat.riffles.first(where: { $0.host == riffle.host }) != nil)
         }) {
             target.add(riffle: riffle)
+            delegate?.pipline?(didAddRiffle: riffle)
         }   else    {            
             let seat = PiplineSeat(site: riffle.host)
+            seat.pipline = self
             workers.append(seat)
             seat.add(riffle: riffle)
+            delegate?.pipline?(didAddRiffle: riffle)
         }
     }
     
