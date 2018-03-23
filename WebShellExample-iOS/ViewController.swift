@@ -22,7 +22,7 @@ class ViewController: UITableViewController {
 //                     "http://www.88pan.cc/file-532359.html",
 //                     "http://www.ccchoo.com/file-40055.html",
 //                     "http://www.ccchoo.com/file-40053.html"]
-        let items = ["http://www.ccchoo.com/file-40055.html"]
+        let items = ["http://www.ccchoo.com/file-40052.html"]
         for item in items {
             guard let _ = Pipeline.share.add(url: item) else { continue }
         }

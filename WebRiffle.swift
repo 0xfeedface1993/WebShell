@@ -14,6 +14,12 @@
 
 import WebKit
 
+public protocol WebRiffleDelegate {
+    func webRiffle(didAddRiffle riffle: WebRiffle)
+    func webRiffle(didUpdateRiffle riffle: WebRiffle, task:DownloadTask)
+    func webRiffle(didFinishedRiffle riffle: WebRiffle, task:DownloadTask)
+}
+
 public let RiffleFinishedOneDownloadTaskNotificationName = NSNotification.Name("com.ascp.finish.download.one.task")
 
 enum NotificationDownloadFinishedState {
@@ -67,6 +73,8 @@ public class WebRiffle : NSObject, WebRiffleProtocol {
         }
     }
     var fileDownloadRequest : DownloadRequest?
+    /// 代理，用来提示更新和结束
+    var delegate : WebRiffleDelegate?
     
 #if os(macOS)
 /// 下载列表绑定的数据，针对于使用视图绑定的情况，如果是其他情况请声明其他变量并进行控制

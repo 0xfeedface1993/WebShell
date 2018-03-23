@@ -41,6 +41,7 @@ class ViewController: NSViewController {
 //        presentViewControllerAsModalWindow(vc)
         
         let pipline = Pipeline.share
+        pipline.delegate = self
 //        let items = ["http://www.ccchoo.com/file-40052.html",
 //                     "http://www.ccchoo.com/file-40053.html",
 //                     "http://www.ccchoo.com/file-40055.html",
@@ -48,15 +49,15 @@ class ViewController: NSViewController {
 //                     "http://www.666pan.cc/file-532273.html",
 //                     "http://www.88pan.cc/file-532359.html",
 //                     "http://www.666pan.cc/file-532687.html"]
-        let items = ["http://www.feemoo.com/file-1892482.html",
-                     "http://www.feemoo.com/s/1htfnfyn",
-                     "http://www.feemoo.com/file-1897522.html",
-                     "http://www.666pan.cc/file-532687.html",
-                     "http://www.666pan.cc/file-532273.html",
-                     "http://www.88pan.cc/file-532359.html",
-                     "http://www.ccchoo.com/file-40055.html",
-                     "http://www.ccchoo.com/file-40053.html"]
-//        let items = ["http://www.feemoo.com/s/1htfnfyn"]
+//        let items = ["http://www.feemoo.com/file-1892482.html",
+//                     "http://www.feemoo.com/s/1htfnfyn",
+//                     "http://www.feemoo.com/file-1897522.html",
+//                     "http://www.666pan.cc/file-532687.html",
+//                     "http://www.666pan.cc/file-532273.html",
+//                     "http://www.88pan.cc/file-532359.html",
+//                     "http://www.ccchoo.com/file-40055.html",
+//                     "http://www.ccchoo.com/file-40053.html"]
+        let items = ["http://www.feemoo.com/file-1897522.html"]
         for item in items {
             guard let fx = pipline.add(url: item) else { return }
             fx.downloadStateController = DownloadStateController
@@ -101,5 +102,19 @@ class ViewController: NSViewController {
         didSet {
         // Update the view, if already loaded.
         }
+    }
+}
+
+extension ViewController : PiplineDelegate {
+    func pipline(didAddRiffle riffle: WebRiffle) {
+        
+    }
+    
+    func pipline(didBeginRiffle riffle: WebRiffle) {
+        
+    }
+    
+    func pipline(didFinishedRiffle riffle: WebRiffle) {
+        
     }
 }

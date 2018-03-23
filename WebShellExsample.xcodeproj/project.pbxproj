@@ -689,6 +689,11 @@
 					277C845B2047971D00D7B2B1 = {
 						CreatedOnToolsVersion = 9.2;
 						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+						};
 					};
 					277C846E2047971D00D7B2B1 = {
 						CreatedOnToolsVersion = 9.2;

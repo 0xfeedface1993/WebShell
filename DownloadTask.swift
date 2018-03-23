@@ -9,7 +9,7 @@
 import Foundation
 
 /// 下载任务
-struct DownloadTask {
+public struct DownloadTask {
     /// 请求配置
     var request : DownloadRequest
     /// http任务

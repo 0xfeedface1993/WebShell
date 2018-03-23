@@ -15,12 +15,14 @@
 let unkonwGroupName = "unkown-site-group"
 let GroupDefaultRule = "\\.[^\\.]+\\."
 
+/// 流水线情况代理，状态更新调用
 @objc public protocol PiplineDelegate {
     @objc optional func pipline(didAddRiffle riffle: WebRiffle)
     @objc optional func pipline(didBeginRiffle riffle: WebRiffle)
     @objc optional func pipline(didFinishedRiffle riffle: WebRiffle)
 }
 
+/// 流水线上的一道产品线，管理一个站点下所有的任务
 public class PiplineSeat {
     var site : WebHostSite = .unknowsite
     var riffles = [WebRiffle]()
@@ -136,7 +138,7 @@ public class Pipeline {
         let infos = runningTasks.map({ DownloadInfo(task: $0) })
         return infos.sorted(by: { $0.createTime > $1.createTime })
     }
-    weak var delegate : PiplineDelegate?
+    public weak var delegate : PiplineDelegate?
     
     /// 添加WebRiffle，自动按序列顺序执行
     ///
@@ -181,6 +183,27 @@ public class Pipeline {
         case .unknowsite:
             print("unkown site!")
             return nil
+        }
+    }
+    
+    /// 移除任务，下载失败或者用户重新下载
+    ///
+    /// - Parameter riffle: 要删除停止的任务
+    public func remove(riffle: WebRiffle) {
+        if let seatIndex = workers.index(where: { $0.site == riffle.host }), let index = workers[seatIndex].riffles.index(of: riffle) {
+            let riffles = workers[seatIndex].riffles
+            let tasks = DownloadManager.share.tasks.filter({ tk in
+                riffles.first(where: { $0.fileDownloadRequest?.request == tk.request.request && tk.task.state != .running }) != nil
+            })
+            tasks.forEach({ $0.task.cancel() })
+            tasks.forEach({ tk in
+                if let tkIndex = DownloadManager.share.tasks.index(where: { dmTask in
+                    dmTask.request.request == tk.request.request
+                }) {
+                    DownloadManager.share.tasks.remove(at: tkIndex)
+                }
+            })
+            workers.remove(at: index)
         }
     }
 }
