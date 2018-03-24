@@ -9,7 +9,7 @@ A shell could opreate WKWebView in Swift &amp; JS, it run like internet worm, bu
 Specify WebShell into your project's `Cartfile`:
 
 ```ogdl
-github "0xfeedface1993/WebShell" ~> 0.2
+github "0xfeedface1993/WebShell" ~> 2.0
 ```
 
 ## How to use it?
