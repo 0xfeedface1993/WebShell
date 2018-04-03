@@ -6,6 +6,14 @@
 //  Copyright © 2018年 ascp. All rights reserved.
 //
 
+//#if TARGET_OS_IPHONE
+//#import <UIkit/UIKit.h>
+//#elif TARGET_IPHONE_SIMULATOR
+//#import <UIkit/UIKit.h>
+//#elif TARGET_OS_MAC
+//#import <Cocoa/Cocoa.h>
+//#endif
+
 #import <Cocoa/Cocoa.h>
 
 //! Project version number for WebShell.
