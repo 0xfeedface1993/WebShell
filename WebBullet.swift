@@ -50,7 +50,7 @@ struct InjectUnit {
     var isAutomaticallyPass : Bool
 }
 
-enum HTTPMethod : String {
+public enum HTTPMethod : String {
     case post = "POST"
     case get = "GET"
 }

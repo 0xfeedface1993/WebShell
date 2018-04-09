@@ -9,11 +9,11 @@
 import Foundation
 
 /// 下载任务
-public struct DownloadTask {
+public class DownloadTask : NSObject {
     /// 请求配置
-    var request : DownloadRequest
+    public var request : DownloadRequest
     /// http任务
-    var task : URLSessionDownloadTask
+    public var task : URLSessionDownloadTask
     /// 下载进度，1.0为100%
     var progress : Float {
         return totalBytes > 0 ? Float(revBytes) / Float(totalBytes) : 0
@@ -33,15 +33,16 @@ public struct DownloadTask {
         self.totalBytes = 0
         self.revBytes = 0
         self.revData = nil
+        super.init()
     }
 }
 
 /// 请求配置
-struct DownloadRequest {
+public struct DownloadRequest {
     /// 唯一标签
-    var label : String
+    public var label : String
     /// 文件名
-    var fileName : String
+    public var fileName : String
     /// 下载进度更新回调
     var downloadStateUpdate : ((DownloadTask) -> ())?
     /// 下载完成回调
@@ -49,13 +50,13 @@ struct DownloadRequest {
     /// http报文头部键值对
     var headFields : [String:String]
     /// 地址
-    var url : URL
+    public var url : URL
     /// http报文方法
-    var method : HTTPMethod
+    public var method : HTTPMethod
     /// httpBody，post的时候放参数
     var body : Data?
     /// 用于URLSession, 启动下载任务
-    var request : URLRequest {
+    public var request : URLRequest {
         get {
             var req = URLRequest(url: url)
             req.httpShouldHandleCookies = true

@@ -57,7 +57,7 @@ class ViewController: NSViewController {
 //                     "http://www.88pan.cc/file-532359.html",
 //                     "http://www.ccchoo.com/file-40055.html",
 //                     "http://www.ccchoo.com/file-40053.html"]
-        let items = ["http://www.feemoo.com/file-1897522.html"]
+        let items = ["http://www.ccchoo.com/file-40055.html"]
         for item in items {
             guard let fx = pipline.add(url: item) else { return }
             fx.downloadStateController = DownloadStateController
@@ -116,5 +116,13 @@ extension ViewController : PiplineDelegate {
     
     func pipline(didFinishedRiffle riffle: WebRiffle) {
         
+    }
+    
+    func pipline(didUpdateTask task: DownloadTask) {
+        print("+++++||||||||||||||||+++++ \(task.request.fileName) +++++||||||||||||||||+++++")
+    }
+    
+    func pipline(didFinishedTask task: DownloadTask, withError error: Error?) {
+        print("\\\\\\\\\\\\\\\\\\ \(task.request.fileName) Fnished ////////////////")
     }
 }

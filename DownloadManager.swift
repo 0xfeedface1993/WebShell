@@ -72,16 +72,17 @@ extension DownloadManager : URLSessionDownloadDelegate {
     ///   - downloadTask: http下载任务对象
     ///   - location: 临时下载文件本地地址
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
-        var task = tasks.first(where: { $0.task == downloadTask })
+        guard let task = tasks.first(where: { $0.task == downloadTask }) else { return }
+        let pipline = Pipeline.share
         do {
-            task?.revData = try Data(contentsOf: location)
-            print("download \(task?.request.fileName ?? "") finish!")
-            if let tk = task {
-                // 调用下载完成回调
-                task?.request.downloadFinished?(tk)
-            }
+            task.revData = try Data(contentsOf: location)
+            print("download \(task.request.fileName) finish!")
+            // 调用下载完成回调
+            task.request.downloadFinished?(task)
+            pipline.delegate?.pipline?(didFinishedTask: task, withError: nil)
         } catch {
             print("Download Save Error: \(error)")
+            pipline.delegate?.pipline?(didFinishedTask: task, withError: nil)
         }
     }
     
@@ -95,6 +96,8 @@ extension DownloadManager : URLSessionDownloadDelegate {
         guard let tk = tasks.first(where: { $0.task == task }) else { return }
         print("download \(tk.request.fileName) with error finished!")
         tk.request.downloadFinished?(tk)
+        let pipline = Pipeline.share
+        pipline.delegate?.pipline?(didFinishedTask: tk, withError: error)
     }
     
     /// 下载进度更新代理方法
@@ -112,6 +115,8 @@ extension DownloadManager : URLSessionDownloadDelegate {
             print("------ name: \(tasks[index].request.fileName) ------ progress: \(tasks[index].progress) ------")
             // 调用下载更新回调
             tasks[index].request.downloadStateUpdate?(tasks[index])
+            let pipline = Pipeline.share
+            pipline.delegate?.pipline?(didUpdateTask: tasks[index])
         }
     }
 }

@@ -20,6 +20,8 @@ let GroupDefaultRule = "\\.[^\\.]+\\."
     @objc optional func pipline(didAddRiffle riffle: WebRiffle)
     @objc optional func pipline(didBeginRiffle riffle: WebRiffle)
     @objc optional func pipline(didFinishedRiffle riffle: WebRiffle)
+    @objc optional func pipline(didUpdateTask task: DownloadTask)
+    @objc optional func pipline(didFinishedTask task: DownloadTask, withError error: Error?)
 }
 
 /// 流水线上的一道产品线，管理一个站点下所有的任务
