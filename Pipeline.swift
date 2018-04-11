@@ -208,6 +208,27 @@ public class Pipeline {
             workers.remove(at: index)
         }
     }
+    
+    public func remove(task: DownloadTask) {
+        guard let mainURL = task.request.mainURL else { return }
+        if let seatIndex = workers.index(where: { $0.site == siteType(url: mainURL) }), let index = workers[seatIndex].riffles.index(where: { r in
+            return r.fileDownloadRequest?.mainURL == mainURL
+        }) {
+            let riffles = workers[seatIndex].riffles
+            let tasks = DownloadManager.share.tasks.filter({ tk in
+                riffles.first(where: { $0.fileDownloadRequest?.request == tk.request.request }) != nil
+            })
+            tasks.forEach({ $0.task.cancel() })
+            tasks.forEach({ tk in
+                if let tkIndex = DownloadManager.share.tasks.index(where: { dmTask in
+                    dmTask.request.request == tk.request.request
+                }) {
+                    DownloadManager.share.tasks.remove(at: tkIndex)
+                }
+            })
+            workers.remove(at: index)
+        }
+    }
 }
 
 extension String {
