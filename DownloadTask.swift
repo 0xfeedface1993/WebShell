@@ -15,17 +15,17 @@ public class DownloadTask : NSObject {
     /// http任务
     public var task : URLSessionDownloadTask
     /// 下载进度，1.0为100%
-    var progress : Float {
+    public var progress : Float {
         return totalBytes > 0 ? Float(revBytes) / Float(totalBytes) : 0
     }
     /// 总共需要下载的字节数
-    var totalBytes : Int64
+    public var totalBytes : Int64
     /// 已经接收到的字节数
-    var revBytes : Int64
+    public var revBytes : Int64
     /// 接受到的数据
-    var revData : Data?
+    public var revData : Data?
     /// 创建时间
-    let createTime = Date()
+    public let createTime = Date()
     
     init(request newRequest: DownloadRequest, task newTask: URLSessionDownloadTask) {
         self.request = newRequest
@@ -48,13 +48,13 @@ public struct DownloadRequest {
     /// 下载完成回调
     var downloadFinished : ((DownloadTask) -> ())?
     /// http报文头部键值对
-    var headFields : [String:String]
+    public var headFields : [String:String]
     /// 地址
     public var url : URL
     /// http报文方法
     public var method : HTTPMethod
     /// httpBody，post的时候放参数
-    var body : Data?
+    public var body : Data?
     /// 用于URLSession, 启动下载任务
     public var request : URLRequest {
         get {
