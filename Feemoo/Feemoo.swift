@@ -20,7 +20,7 @@ public class Feemoo: WebRiffle {
     var fileName = ""
     /// 验证码页面url地址
     var feemooRefer = ""
-    override var scriptName : String {
+    override public var scriptName : String {
         return "feemoo"
     }
     
@@ -150,7 +150,7 @@ public class Feemoo: WebRiffle {
             }
             
             let label = UUID().uuidString
-            self.fileDownloadRequest =  DownloadRequest(label: label, fileName: self.fileName, downloadStateUpdate: { pack in
+            self.fileDownloadRequest =  DownloadRequest(mainURL: self.mainURL, label: label, fileName: self.fileName, downloadStateUpdate: { pack in
                 #if os(macOS)
                     guard let controller = self.downloadStateController else {   return  }
                     var items = controller.content as! [DownloadInfo]

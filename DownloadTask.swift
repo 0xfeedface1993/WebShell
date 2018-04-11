@@ -39,6 +39,8 @@ public class DownloadTask : NSObject {
 
 /// 请求配置
 public struct DownloadRequest {
+    /// 下载页面
+    public var mainURL : URL?
     /// 唯一标签
     public var label : String
     /// 文件名

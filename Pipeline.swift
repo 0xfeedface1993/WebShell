@@ -112,7 +112,7 @@ public struct SitePack {
                           SitePack(regulerExpression: "(ccchoo)|(chooyun)", site: .cchooo)]
 }
 
-public func site(url: URL) -> WebHostSite {
+public func siteType(url: URL) -> WebHostSite {
     guard let host = url.host else {
         return .unknowsite
     }
@@ -165,7 +165,7 @@ public class Pipeline {
             return nil
         }
         
-        let type = site(url: host)
+        let type = siteType(url: host)
         switch type {
         case .feemoo:
             let riffle = Feemoo(urlString: url)

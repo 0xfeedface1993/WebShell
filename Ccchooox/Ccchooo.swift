@@ -18,7 +18,7 @@ public class Ccchooo: WebRiffle {
     var fileName = ""
     /// 文件ID
     var fileNumber = ""
-    override var scriptName : String {
+    override public var scriptName : String {
         return "ccchooo"
     }
     
@@ -112,7 +112,7 @@ public class Ccchooo: WebRiffle {
             dat in
             let url = downloadLink
             let label = UUID().uuidString
-            self.fileDownloadRequest = DownloadRequest(label: label, fileName: self.fileName, downloadStateUpdate: { pack in
+            self.fileDownloadRequest = DownloadRequest(mainURL: self.mainURL, label: label, fileName: self.fileName, downloadStateUpdate: { pack in
                 #if os(macOS)
                     guard let controller = self.downloadStateController else {   return  }
                     var items = controller.content as! [DownloadInfo]

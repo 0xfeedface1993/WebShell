@@ -34,7 +34,7 @@ public protocol WebRiffleProtocol {
 public class WebRiffle : NSObject, WebRiffleProtocol {
     public static let UpdateRiffleDownloadNotification = Notification.Name("com.ascp.update.riffle.download.state")
     /// 下载首页url
-    var mainURL : URL?
+    public var mainURL : URL?
     /// webview实例, 不需要展示给用户，每个站点都独自拥有一个实例，方便并行下载和管理
     var webView : WKWebView!
     /// WebBullet数组，按执行顺序排列
@@ -44,9 +44,9 @@ public class WebRiffle : NSObject, WebRiffleProtocol {
     /// 迭代器，用于获取下一个页面WebBullet实例
     var bulletsIterator : IndexingIterator<[WebBullet]>?
     /// 是否需要验证码，有些站点错误的验证码也能下载，默认是true
-    var isVerifyCodeRequire = true
+    public var isVerifyCodeRequire = true
     /// 对应js脚本名称
-    var scriptName : String {
+    public var scriptName : String {
         return ""
     }
     /// js脚本, 包含基础自定义页面方法
@@ -63,18 +63,18 @@ public class WebRiffle : NSObject, WebRiffleProtocol {
         return ""
     }()
     /// 站点类别
-    var host : WebHostSite = .unknowsite
+    public var host : WebHostSite = .unknowsite
     /// web序列是否执行完成
-    var isFinished = false
+    public var isFinished = false
     /// 验证码错误次数
-    var verifyCodeParserErrorCount : Int {
+    public var verifyCodeParserErrorCount : Int {
         didSet {
             print("\(mainURL?.host ?? "") Verify Code Error Count: \(verifyCodeParserErrorCount)")
         }
     }
-    var fileDownloadRequest : DownloadRequest?
+    public var fileDownloadRequest : DownloadRequest?
     /// 代理，用来提示更新和结束
-    var delegate : WebRiffleDelegate?
+    public var delegate : WebRiffleDelegate?
     
 #if os(macOS)
 /// 下载列表绑定的数据，针对于使用视图绑定的情况，如果是其他情况请声明其他变量并进行控制

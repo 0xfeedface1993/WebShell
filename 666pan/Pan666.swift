@@ -14,7 +14,7 @@
 
 /// 666盘，提供下载首页地址即可
 public class Pan666 : WebRiffle {
-    override var scriptName: String {
+    override public var scriptName: String {
         return "666pan"
     }
     
@@ -189,7 +189,7 @@ public class Pan666 : WebRiffle {
     ///
     /// - Parameter url: 下载地址中转页面
     func readDownloadLink(url: URL) {
-        let request = DownloadRequest(label: UUID().uuidString, fileName: self.fileName, downloadStateUpdate: nil, downloadFinished: { (tk) in
+        let request = DownloadRequest(mainURL: mainURL, label: UUID().uuidString, fileName: self.fileName, downloadStateUpdate: nil, downloadFinished: { (tk) in
             guard let dat = tk.revData, let str = String(data: dat, encoding: .utf8) else {
                 print("worong data!")
                 return
@@ -209,7 +209,7 @@ public class Pan666 : WebRiffle {
                     }
                     
                     let label = UUID().uuidString
-                    self.fileDownloadRequest = DownloadRequest(label: label, fileName: self.fileName, downloadStateUpdate: { pack in
+                    self.fileDownloadRequest = DownloadRequest(mainURL: self.mainURL, label: label, fileName: self.fileName, downloadStateUpdate: { pack in
                         #if os(macOS)
                             guard let controller = self.downloadStateController else {   return  }
                             var items = controller.content as! [DownloadInfo]
