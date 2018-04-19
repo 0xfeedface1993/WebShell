@@ -79,9 +79,17 @@ extension DownloadManager : URLSessionDownloadDelegate {
             print("download \(task.request.fileName) finish!")
             // 调用下载完成回调
             task.request.downloadFinished?(task)
+            guard task.request.isDelegateEnable else {
+                print("None File Download Task! No Delegate Excute")
+                return
+            }
             pipline.delegate?.pipline?(didFinishedTask: task, withError: nil)
         } catch {
             print("Download Save Error: \(error)")
+            guard task.request.isDelegateEnable else {
+                print("None File Download Task! No Delegate Excute")
+                return
+            }
             pipline.delegate?.pipline?(didFinishedTask: task, withError: nil)
         }
     }
@@ -96,6 +104,10 @@ extension DownloadManager : URLSessionDownloadDelegate {
         guard let tk = tasks.first(where: { $0.task == task }) else { return }
         print("download \(tk.request.fileName) with error finished!")
         tk.request.downloadFinished?(tk)
+        guard tk.request.isDelegateEnable else {
+            print("None File Download Task! No Delegate Excute")
+            return
+        }
         let pipline = Pipeline.share
         pipline.delegate?.pipline?(didFinishedTask: tk, withError: error)
     }
@@ -115,6 +127,10 @@ extension DownloadManager : URLSessionDownloadDelegate {
             print("------ name: \(tasks[index].request.fileName) ------ progress: \(tasks[index].progress) ------")
             // 调用下载更新回调
             tasks[index].request.downloadStateUpdate?(tasks[index])
+            guard tasks[index].request.isDelegateEnable else {
+                print("None File Download Task! No Delegate Excute")
+                return
+            }
             let pipline = Pipeline.share
             pipline.delegate?.pipline?(didUpdateTask: tasks[index])
         }

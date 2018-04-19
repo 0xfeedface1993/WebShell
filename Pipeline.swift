@@ -60,14 +60,16 @@ public class PiplineSeat {
             return
         }
         
-        guard finishedRiffle.isFinished else {
-            print("^^^^^^^^^^^ current Riffle is not finished: \(currentRiffle?.mainURL?.absoluteString ?? "no main url") ^^^^^^^^^^^")
-            return
+        if finishedRiffle.downloadTask?.request.isDelegateEnable == true {
+            guard finishedRiffle.isFinished else {
+                print("^^^^^^^^^^^ current Riffle is not finished: \(currentRiffle?.mainURL?.absoluteString ?? "no main url") ^^^^^^^^^^^")
+                return
+            }
         }
         
-        pipline?.delegate?.pipline?(didBeginRiffle: finishedRiffle)
-        
         run()
+        
+//        pipline?.delegate?.pipline?(didBeginRiffle: finishedRiffle)
     }
     
     /// 执行下一个下载任务
@@ -77,7 +79,7 @@ public class PiplineSeat {
             /// 非本序列的任务和最后一个任务执行完时不执行任何操作
             guard let index = riffles.index(where: { crq == $0 }) else { return }
             guard index != riffles.index(before: riffles.endIndex) else {
-                print("+++++++++ Last riffle \(currentRiffle?.mainURL?.absoluteString ?? "no main url")")
+                print("+++++++++ Last riffle \(crq.mainURL?.absoluteString ?? "no main url")")
                 return
             }
             let nextIndex = riffles.index(after: index)
@@ -223,10 +225,13 @@ public class Pipeline {
                 if let tkIndex = DownloadManager.share.tasks.index(where: { dmTask in
                     dmTask.request.request == tk.request.request
                 }) {
+                    print("Remove Task: \(DownloadManager.share.tasks[tkIndex])")
                     DownloadManager.share.tasks.remove(at: tkIndex)
                 }
             })
             workers.remove(at: index)
+        }   else    {
+            print("Not found woker: \(mainURL)")
         }
     }
 }

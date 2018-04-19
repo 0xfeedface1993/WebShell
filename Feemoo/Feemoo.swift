@@ -179,23 +179,13 @@ public class Feemoo: WebRiffle {
                     print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%")
                 }
                 
-                // 保存到下载文件夹下
-//                if let urlString = NSSearchPathForDirectoriesInDomains(.downloadsDirectory, .userDomainMask, true).first {
-//                    let url = URL(fileURLWithPath: urlString).appendingPathComponent(pack.request.fileName)
-//                    do {
-//                        try pack.revData?.write(to: url)
-//                        print(">>>>>> file saved! <<<<<<")
-//                    } catch {
-//                        print(error)
-//                    }
-//                }
                 FileManager.default.save(pack: pack)
             }, headFields: ["Referer":self.feemooRefer,
                             "Accept-Language":"zh-cn",
                             "Upgrade-Insecure-Requests":"1",
                             "Accept-Encoding":"gzip, deflate",
                             "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                            "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: url, method: .get, body: nil)
+                            "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: url, method: .get, body: nil, riffle: self, isDelegateEnable: true)
             DownloadManager.share.add(request: self.fileDownloadRequest!)
         }, failedAction: { (e) in
             print(e)

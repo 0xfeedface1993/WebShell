@@ -196,8 +196,15 @@ public class Pan666 : WebRiffle {
             }
             print("+++++ Parser string success: \(str)")
             
+            defer {
+                if let index = DownloadManager.share.tasks.index(where: { $0.request.url == tk.request.url }) {
+                    print("Remove Download task: \(tk.request)")
+                    DownloadManager.share.tasks.remove(at: index)
+                }
+            }
+            
             do {
-                let regx = try NSRegularExpression(pattern: "http://\\w+\\.\\w+.\\w+:\\w+/\\w+\\.php\\?[^\"]+", options: NSRegularExpression.Options.caseInsensitive)
+                let regx = try NSRegularExpression(pattern: "http://\\w+\\.\\w+.\\w+[:\\w]+/\\w+\\.\\w+\\?[^\"]+", options: NSRegularExpression.Options.caseInsensitive)
                 if let result = regx.firstMatch(in: str, options: .reportProgress, range: NSRange(location: 0, length: (str as NSString).length)) {
                     let link = (str as NSString).substring(with: result.range)
                     print("++++++ find download link: \(link)")
@@ -238,30 +245,22 @@ public class Pan666 : WebRiffle {
                             self.downloadFinished()
                         }
                         
-                        // 保存到下载文件夹下
-//                        if let urlString = NSSearchPathForDirectoriesInDomains(.downloadsDirectory, .userDomainMask, true).first {
-//                            let urly = URL(fileURLWithPath: urlString).appendingPathComponent(pack.request.fileName)
-//                            do {
-//                                try pack.revData?.write(to: urly)
-//                                print(">>>>>> file saved! <<<<<<")
-//                            } catch {
-//                                print(error)
-//                            }
-//                        }
                         FileManager.default.save(pack: pack)
                     }, headFields: ["Referer":self.pan6663URL.absoluteString,
                                     "Accept-Language":"zh-cn",
                                     "Upgrade-Insecure-Requests":"1",
                                     "Accept-Encoding":"gzip, deflate",
                                     "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                                    "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: urlx, method: .get, body: nil)
+                                    "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: urlx, method: .get, body: nil, riffle: self, isDelegateEnable: true)
                     DownloadManager.share.add(request: self.fileDownloadRequest!)
+                }   else    {
+                    self.downloadFinished()
                 }
             }   catch   {
                 print(error)
             }
             
-        }, headFields: [:], url: url, method: .get, body: nil)
+        }, headFields: [:], url: url, method: .get, body: nil, riffle: self, isDelegateEnable: false)
         DownloadManager.share.add(request: request)
     }
 }

@@ -71,4 +71,9 @@ public struct DownloadRequest {
             return req
         }
     }
+    
+    /// 该下载任务所属的网盘任务
+    public weak var riffle: WebRiffle?
+    /// 当任务非资源下载任务时，置为false
+    public var isDelegateEnable = true
 }
