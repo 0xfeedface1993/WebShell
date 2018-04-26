@@ -149,7 +149,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		2730DEB42043DB4F009B4B87 /* Pipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pipeline.swift; sourceTree = "<group>"; };
 		27448B2320170ABA001FC925 /* WebShellExsample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WebShellExsample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		27448B2620170ABA001FC925 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		27448B2820170ABA001FC925 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -163,9 +162,6 @@
 		27448B4020170ABA001FC925 /* WebShellExsampleUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WebShellExsampleUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		27448B4420170ABA001FC925 /* CCCHOOOUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CCCHOOOUITests.swift; sourceTree = "<group>"; };
 		27448B4620170ABA001FC925 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		27448B522017112D001FC925 /* WebBullet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebBullet.swift; sourceTree = "<group>"; };
-		27448B5420176CFE001FC925 /* DownloadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadManager.swift; sourceTree = "<group>"; };
-		27448B5620176E34001FC925 /* DownloadTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadTask.swift; sourceTree = "<group>"; };
 		27448B592018387A001FC925 /* ccchooo.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = ccchooo.js; sourceTree = "<group>"; };
 		2749698920886BBE009A1E1B /* PCDownloadTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCDownloadTask.swift; sourceTree = "<group>"; };
 		2749698B20886F9B009A1E1B /* PCDownloadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCDownloadManager.swift; sourceTree = "<group>"; };
@@ -194,7 +190,6 @@
 		277C847E2047971D00D7B2B1 /* WebShellExample_iOSUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebShellExample_iOSUITests.swift; sourceTree = "<group>"; };
 		277C84802047971E00D7B2B1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		277C848F20479F3100D7B2B1 /* FileCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCoordinator.swift; sourceTree = "<group>"; };
-		27C9DBAB2040FAE400A87E9E /* WebRiffle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRiffle.swift; sourceTree = "<group>"; };
 		27C9DBAD204105B000A87E9E /* VerifyCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyCodeView.swift; sourceTree = "<group>"; };
 		27C9DBAF2041094500A87E9E /* VerifyCodeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyCodeViewController.swift; sourceTree = "<group>"; };
 		27C9DBB120410E9700A87E9E /* 0a1f-26-01-37.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "0a1f-26-01-37.png"; sourceTree = "<group>"; };
@@ -283,7 +278,6 @@
 		27448B1A20170ABA001FC925 = {
 			isa = PBXGroup;
 			children = (
-				2749698820886B8D009A1E1B /* PowerCore */,
 				27C9DBDA204146D300A87E9E /* Core */,
 				27448B2520170ABA001FC925 /* CCCHOOO */,
 				27448B3820170ABA001FC925 /* CCCHOOOTests */,
@@ -454,17 +448,13 @@
 		27C9DBDA204146D300A87E9E /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				2749698820886B8D009A1E1B /* PowerCore */,
 				277C84332046A00F00D7B2B1 /* Image */,
 				277C842E204652AA00D7B2B1 /* ML */,
-				2730DEB42043DB4F009B4B87 /* Pipeline.swift */,
 				277C848F20479F3100D7B2B1 /* FileCoordinator.swift */,
-				27448B522017112D001FC925 /* WebBullet.swift */,
-				27C9DBAB2040FAE400A87E9E /* WebRiffle.swift */,
 				27C9DBAD204105B000A87E9E /* VerifyCodeView.swift */,
 				27C9DBAF2041094500A87E9E /* VerifyCodeViewController.swift */,
 				27C9DBB320410F0900A87E9E /* VerifyCodeViewController.xib */,
-				27448B5420176CFE001FC925 /* DownloadManager.swift */,
-				27448B5620176E34001FC925 /* DownloadTask.swift */,
 				27C9DBDC2041472C00A87E9E /* Ccchooox */,
 				27448B58201837AD001FC925 /* Script */,
 				27E4C12D203701040003A38D /* Feemoo */,

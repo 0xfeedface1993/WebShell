@@ -88,10 +88,13 @@ class ViewController: NSViewController {
 //                     "http://www.88pan.cc/file-532359.html",
 //                     "http://www.ccchoo.com/file-40055.html",
 //                     "http://www.ccchoo.com/file-40053.html"]http://www.chooyun.com/file-51745.html
-        let items = ["http://www.666pan.cc/file-530009.html", "http://www.666pan.cc/file-532273.html"]
+        let items = ["http://www.666pan.cc/file-532641.html", "http://www.chooyun.com/file-51745.html", "http://www.feemoo.com/s/v2j0z15j", "http://www.ccchoo.com/file-40052.html", "http://www.666pan.cc/file-532273.html", "http://www.feemoo.com/file-1897522.html"]
         for item in items {
-            let riffle = Pan666(urlString: item)
-            pipline.add(riffle: riffle)
+//            let riffle = Pan666(urlString: item)
+//            pipline.add(riffle: riffle)
+            if let _ = pipline.add(url: item) {
+                
+            }
         }
         
 //        let f1 = pipline.add(url: "http://www.feemoo.com/s/v2j0z15j") as? Feemoo

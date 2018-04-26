@@ -129,7 +129,7 @@ public class PCPipeline {
     /// 添加WebRiffle，自动按序列顺序执行
     ///
     /// - Parameter riffle: WebRiffle
-    public func add(riffle: PCWebRiffle) {
+    func add(riffle: PCWebRiffle) {
         if let index = find(withRiffle: riffle) {
             workers[index].add(riffle: riffle)
             delegate?.pipline?(didAddRiffle: riffle)
@@ -138,6 +138,34 @@ public class PCPipeline {
             workers.append(seat)
             seat.add(riffle: riffle)
             delegate?.pipline?(didAddRiffle: riffle)
+        }
+    }
+    
+    public func add<T: PCWebRiffle>(url: String) -> T? {
+        guard let host = URL(string: url) else {
+            return nil
+        }
+        
+        let type = siteType(url: host)
+        switch type {
+        case .feemoo:
+            let riffle = Feemoo(urlString: url)
+            riffle.host = type
+            add(riffle: riffle)
+            return riffle as? T
+        case .pan666:
+            let riffle = Pan666(urlString: url)
+            riffle.host = type
+            add(riffle: riffle)
+            return riffle as? T
+        case .cchooo:
+            let riffle = Ccchooo(urlString: url)
+            riffle.host = type
+            add(riffle: riffle)
+            return riffle as? T
+        case .unknowsite:
+            print("unkown site!")
+            return nil
         }
     }
     
