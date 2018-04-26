@@ -13,7 +13,7 @@
 #endif
 
 /// 飞猫网盘，只需要传入首页链接和输入正确验证码即可下载
-public class Feemoo: WebRiffle {
+public class Feemoo: PCWebRiffle {
     /// 文件id，从页面获取，有的页面链接不包含文件id
     var fileid = ""
     /// 文件名，从页面获取
@@ -26,7 +26,10 @@ public class Feemoo: WebRiffle {
     
     public init(urlString: String) {
         super.init()
-        mainURL = URL(string: urlString)        
+        mainURL = URL(string: urlString)
+        if let url = mainURL {
+            host = siteType(url: url)
+        }
     }
     
     override public func begin() {
@@ -60,7 +63,7 @@ public class Feemoo: WebRiffle {
             
         }, failedAction: nil, isAutomaticallyPass: true)
         
-        let mainPage = WebBullet(method: .get, headFields: ["Connection": "keep-alive",
+        let mainPage = PCWebBullet(method: .get, headFields: ["Connection": "keep-alive",
                                                             "Accept-Language": "zh-cn",
                                                             "Upgrade-Insecure-Requests": "1",
                                                             "Accept-Encoding": "gzip, deflate",
@@ -69,10 +72,8 @@ public class Feemoo: WebRiffle {
                                                             "Host": "www.feemoo.com"], formData: [:], url: url, injectJavaScript: [mainJSUnit])
         let secondPage = reloadCodeImageMaker(url: url)
         
-        bullets = [mainPage, secondPage]
-        bulletsIterator = bullets.makeIterator()
-        currentResult = bulletsIterator?.next()
-        webView.load(currentResult!.request)
+        watting = [mainPage, secondPage]
+        webView.load(watting[0].request)
     }
     
     /// 只获取验证码页面
@@ -80,18 +81,15 @@ public class Feemoo: WebRiffle {
     /// - Parameter url: 验证码页面url
     func reloadCodeImage(url: URL) {
         let secondPage = reloadCodeImageMaker(url: url)
-        
-        bullets = [secondPage]
-        bulletsIterator = bullets.makeIterator()
-        currentResult = bulletsIterator?.next()
-        webView.load(currentResult!.request)
+        watting.append(secondPage)
+        webView.load(watting[0].request)
     }
     
     /// 验证码页面配置
     ///
     /// - Parameter url: 验证码页面url
     /// - Returns: WebBullet实例，主要用于从新获取验证码
-    func reloadCodeImageMaker(url: URL) -> WebBullet {
+    func reloadCodeImageMaker(url: URL) -> PCWebBullet {
         let secondJSUnit = InjectUnit(script: "\(functionScript) getCodeImageAndCodeEncry();", successAction: {
             dat in
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1, execute: {
@@ -101,6 +99,7 @@ public class Feemoo: WebRiffle {
                         let _ = dic["codeencry"],
                         let base64 = Data(base64Encoded: img) else {
                             print("wrong data!")
+                            self.downloadFinished()
                             return
                     }
                     let image = ImageMaker(data: base64)
@@ -112,7 +111,11 @@ public class Feemoo: WebRiffle {
                 })
             })
         }, failedAction: nil, isAutomaticallyPass: false)
-        let secondPage = WebBullet(method: .get, headFields: ["User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], formData: [:], url: url, injectJavaScript: [secondJSUnit])
+        let secondPage = PCWebBullet(method: .get,
+                                     headFields: ["User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"],
+                                     formData: [:],
+                                     url: url,
+                                     injectJavaScript: [secondJSUnit])
         return secondPage
     }
     
@@ -132,6 +135,7 @@ public class Feemoo: WebRiffle {
         let fetchLink = InjectUnit(script: "fetchDownloadLink();", successAction: { daty in
             guard let str = daty as? String else {
                 print("ooops! not string!")
+                self.downloadFinished()
                 return
             }
             print("+++++ Parser string success: \(str)")
@@ -150,47 +154,38 @@ public class Feemoo: WebRiffle {
             }
             
             let label = UUID().uuidString
-            self.fileDownloadRequest =  DownloadRequest(mainURL: self.mainURL, label: label, fileName: self.fileName, downloadStateUpdate: { pack in
-                #if os(macOS)
-                    guard let controller = self.downloadStateController else {   return  }
-                    var items = controller.content as! [DownloadInfo]
-                    if let index = items.index(where: { $0.uuid == label }) {
-                        items[index].progress = "\(pack.progress * 100)%"
-                        items[index].totalBytes = "\(Float(pack.totalBytes) / 1024.0 / 1024.0)M"
-                        items[index].site = pack.request.url.host!
-                        controller.content = items
-                        return
-                    }
-                    items.append(DownloadInfo(task: pack))
-                    controller.content = items
-                #elseif os(iOS)
-                    NotificationCenter.default.post(name: WebRiffle.UpdateRiffleDownloadNotification, object: Pipeline.share.downloadStateData)
-                #endif
-            }, downloadFinished: { pack in
-                print(pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
+            var fileDownloadRequest = PCDownloadRequest(headFields: ["Referer":self.feemooRefer,
+                                            "Accept-Language":"zh-cn",
+                                            "Upgrade-Insecure-Requests":"1",
+                                            "Accept-Encoding":"gzip, deflate",
+                                            "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                                            "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: url, method: .get, body: nil)
+            fileDownloadRequest.downloadStateUpdate = { pack in
+                
+            }
+            
+            fileDownloadRequest.downloadFinished = { pack in
+                print(pack.pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
                 
                 defer {
                     self.downloadFinished()
                 }
                 
-                if let data = pack.revData, let str = String(data: data, encoding: .utf8) {
+                if let data = pack.pack.revData, let str = String(data: data, encoding: .utf8) {
                     print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%\n")
                     print(str)
                     print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%")
                 }
                 
                 FileManager.default.save(pack: pack)
-            }, headFields: ["Referer":self.feemooRefer,
-                            "Accept-Language":"zh-cn",
-                            "Upgrade-Insecure-Requests":"1",
-                            "Accept-Encoding":"gzip, deflate",
-                            "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                            "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: url, method: .get, body: nil, riffle: self, isDelegateEnable: true)
-            DownloadManager.share.add(request: self.fileDownloadRequest!)
+            }
+            fileDownloadRequest.riffle = self
+            PCDownloadManager.share.add(request: fileDownloadRequest)
         }, failedAction: { (e) in
             print(e)
         }, isAutomaticallyPass: true)
-        self.currentResult?.injectJavaScript = [imageCodeUnit, fetchLink]
+        
+        watting[0].injectJavaScript = [imageCodeUnit, fetchLink]
         execNextCommand()
     }
 }

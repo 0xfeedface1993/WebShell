@@ -20,7 +20,7 @@ function selfCookie() {
 }
 
 function getSecondPageLinkAndFileName() {
-    var fileid = document.querySelector("div.col-md-8.col-sm-7.col-xs-12.down_one_lf.down_one_lf1>div>span").getAttribute("onclick").split("'")[1];
+    var fileid = document.querySelector("span.bc2").getAttribute('onclick').split('\'')[1];
     var href = document.querySelector("div.col-md-4.col-sm-4.col-xs-12.down_five_main.down_five_rt>div.down_five_b>a").href;
     return { "fileName": getFileName(), "href": href, "fileid": fileid, "cookie": selfCookie() }
 }
@@ -36,15 +36,15 @@ function getBase64Image(img) {
 }
 
 function getCodeImageAndCodeEncry() {
-    var fileid = document.querySelector("div.col-md-8.col-sm-7.col-xs-12.down_one_lf.down_one_lf1>div>span").getAttribute("onclick").split("'")[1];
+    var fileid = document.body.innerHTML.match(/svip_down\('[^']+/g)[0].split('\'')[1]
     vip_downvip_down('com', fileid);
     // getimgcoded();
     return { "img": getBase64Image(document.getElementById('verityImgtag')), "codeencry": codeencry, "fileid": fileid };
 }
 
 function getFileName() {
-    var name = document.querySelector('title').innerText.split(' ')[0];//document.querySelector('p.down_one_lf_tl>span').innerText;
-    return uuid(8, 10) + name + ".rar";
+    var name = document.querySelector('.down_one_lf_tl>span').innerText;//document.querySelector('p.down_one_lf_tl>span').innerText;
+    return uuid(8, 10) + name;
 }
 
 function uuid(len, radix) {

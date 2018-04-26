@@ -13,6 +13,8 @@
 		27448B2E20170ABA001FC925 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 27448B2C20170ABA001FC925 /* Main.storyboard */; };
 		27448B3A20170ABA001FC925 /* CCCHOOOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B3920170ABA001FC925 /* CCCHOOOTests.swift */; };
 		27448B4520170ABA001FC925 /* CCCHOOOUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B4420170ABA001FC925 /* CCCHOOOUITests.swift */; };
+		2745A3C2209175510060F237 /* Feemoo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27E4C12E2037011E0003A38D /* Feemoo.swift */; };
+		2745A3C3209175520060F237 /* Feemoo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27E4C12E2037011E0003A38D /* Feemoo.swift */; };
 		2749698D20887048009A1E1B /* PCDownloadTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749698920886BBE009A1E1B /* PCDownloadTask.swift */; };
 		2749698E20887048009A1E1B /* PCDownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749698B20886F9B009A1E1B /* PCDownloadManager.swift */; };
 		2749698F20887048009A1E1B /* PCDownloadTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749698920886BBE009A1E1B /* PCDownloadTask.swift */; };
@@ -58,6 +60,8 @@
 		27C9DBE52041475300A87E9E /* feemoo.js in Resources */ = {isa = PBXBuildFile; fileRef = 27E4C130203703610003A38D /* feemoo.js */; };
 		27C9DBE62041475300A87E9E /* ccchooo.js in Resources */ = {isa = PBXBuildFile; fileRef = 27448B592018387A001FC925 /* ccchooo.js */; };
 		27C9DBE92041495A00A87E9E /* Ccchooo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C9DBB520413F7300A87E9E /* Ccchooo.swift */; };
+		27FD7CE72091B5B00098F0EE /* Pan666.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277BFBD5203EA876009EE51B /* Pan666.swift */; };
+		27FD7CE82091B5B10098F0EE /* Pan666.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277BFBD5203EA876009EE51B /* Pan666.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -866,11 +870,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				2749699820897EC5009A1E1B /* PCWebRiffle.swift in Sources */,
+				27FD7CE82091B5B10098F0EE /* Pan666.swift in Sources */,
 				277C84912047A0BB00D7B2B1 /* FileCoordinator.swift in Sources */,
 				277C84522046A49500D7B2B1 /* Ccchooo.swift in Sources */,
 				274969A120899A65009A1E1B /* PCWebBullet.swift in Sources */,
 				277C84492046A49500D7B2B1 /* VCMLParser.swift in Sources */,
 				277C84482046A49500D7B2B1 /* Four.mlmodel in Sources */,
+				2745A3C3209175520060F237 /* Feemoo.swift in Sources */,
 				277C84472046A49500D7B2B1 /* ImageMaker.swift in Sources */,
 				2749699020887048009A1E1B /* PCDownloadManager.swift in Sources */,
 				2749698F20887048009A1E1B /* PCDownloadTask.swift in Sources */,
@@ -909,9 +915,11 @@
 			files = (
 				27C9DBE02041474900A87E9E /* VerifyCodeViewController.swift in Sources */,
 				27C9DBE92041495A00A87E9E /* Ccchooo.swift in Sources */,
+				2745A3C2209175510060F237 /* Feemoo.swift in Sources */,
 				2749699720897EC5009A1E1B /* PCWebRiffle.swift in Sources */,
 				27C9DBDF2041474900A87E9E /* VerifyCodeView.swift in Sources */,
 				274969A020899A64009A1E1B /* PCWebBullet.swift in Sources */,
+				27FD7CE72091B5B00098F0EE /* Pan666.swift in Sources */,
 				277C84352046A02200D7B2B1 /* ImageMaker.swift in Sources */,
 				277C8432204652F700D7B2B1 /* VCMLParser.swift in Sources */,
 				2749699320888222009A1E1B /* PCPipline.swift in Sources */,

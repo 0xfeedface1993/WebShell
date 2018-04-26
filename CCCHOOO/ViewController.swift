@@ -80,7 +80,7 @@ class ViewController: NSViewController {
 //                     "http://www.666pan.cc/file-532273.html",
 //                     "http://www.88pan.cc/file-532359.html",
 //                     "http://www.666pan.cc/file-532687.html"]
-//        let items = ["http://www.feemoo.com/file-1892482.html",
+//        let items = ["http://www.feemoo.com/file-1892482.html",http://www.feemoo.com/s/v2j0z15j
 //                     "http://www.feemoo.com/s/1htfnfyn",
 //                     "http://www.feemoo.com/file-1897522.html",
 //                     "http://www.666pan.cc/file-532687.html",
@@ -88,9 +88,9 @@ class ViewController: NSViewController {
 //                     "http://www.88pan.cc/file-532359.html",
 //                     "http://www.ccchoo.com/file-40055.html",
 //                     "http://www.ccchoo.com/file-40053.html"]http://www.chooyun.com/file-51745.html
-        let items = ["http://www.ccchoo.com/file-40052.html", "http://www.chooyun.com/file-51745.html"]
+        let items = ["http://www.666pan.cc/file-530009.html", "http://www.666pan.cc/file-532273.html"]
         for item in items {
-            let riffle = Ccchooo(urlString: item)
+            let riffle = Pan666(urlString: item)
             pipline.add(riffle: riffle)
         }
         

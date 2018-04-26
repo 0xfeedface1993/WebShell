@@ -13,7 +13,7 @@
 #endif
 
 /// 666盘，提供下载首页地址即可
-public class Pan666 : WebRiffle {
+public class Pan666 : PCWebRiffle {
     override public var scriptName: String {
         return "666pan"
     }
@@ -47,6 +47,7 @@ public class Pan666 : WebRiffle {
         if let result = regx?.firstMatch(in: urlString, options: NSRegularExpression.MatchingOptions.reportProgress, range: NSRange(location: 0, length: strNS.length)) {
             fileNumber = strNS.substring(with: result.range)
             print("fileNumber: \(fileNumber)")
+            self.host =  .pan666
         }
     }
     
@@ -80,27 +81,25 @@ public class Pan666 : WebRiffle {
             self.load666PanDownloadLink(code: "1234")
         }, failedAction: nil, isAutomaticallyPass: true)
         
-        let main1Page = WebBullet(method: .get, headFields: ["Accept-Language":"zh-cn",
+        let main1Page = PCWebBullet(method: .get, headFields: ["Accept-Language":"zh-cn",
                                                              "Upgrade-Insecure-Requests":"1",
                                                              "Accept-Encoding":"gzip, deflate",
                                                              "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                                                              "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6"], formData: [:], url: pan6661URL, injectJavaScript: [main1Unit])
-        let main2Page = WebBullet(method: .get, headFields: ["Accept-Language":"zh-cn",
+        let main2Page = PCWebBullet(method: .get, headFields: ["Accept-Language":"zh-cn",
                                                              "Upgrade-Insecure-Requests":"1",
                                                              "Accept-Encoding":"gzip, deflate",
                                                              "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                                                              "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6",
                                                              "Referer":pan6661URL.absoluteString], formData: [:], url: pan6662URL, injectJavaScript: [])
-        let main3Page = WebBullet(method: .get, headFields: ["Accept-Language":"zh-cn",
+        let main3Page = PCWebBullet(method: .get, headFields: ["Accept-Language":"zh-cn",
                                                              "Upgrade-Insecure-Requests":"1",
                                                              "Accept-Encoding":"gzip, deflate",
                                                              "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                                                              "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6",
                                                              "Referer":pan6662URL.absoluteString], formData: [:], url: pan6663URL, injectJavaScript: [main3Unit])
-        bullets = [main1Page, main2Page, main3Page]
-        bulletsIterator = bullets.makeIterator()
-        currentResult = bulletsIterator?.next()
-        webView.load(currentResult!.request)
+        watting += [main1Page, main2Page, main3Page]
+        webView.load(watting[0].request)
     }
     
     
@@ -125,16 +124,15 @@ public class Pan666 : WebRiffle {
 //            }
             self.load666PanDownloadLink(code: "1234")
         }, failedAction: nil, isAutomaticallyPass: true)
-        let main3Page = WebBullet(method: .get, headFields: ["Accept-Language":"zh-cn",
+        let main3Page = PCWebBullet(method: .get, headFields: ["Accept-Language":"zh-cn",
                                                              "Upgrade-Insecure-Requests":"1",
                                                              "Accept-Encoding":"gzip, deflate",
                                                              "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                                                              "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6",
                                                              "Referer":pan6662URL.absoluteString], formData: [:], url: pan6663URL, injectJavaScript: [main3Unit])
-        bullets = [main3Page]
-        bulletsIterator = bullets.makeIterator()
-        currentResult = bulletsIterator?.next()
-        webView.load(currentResult!.request)
+        watting += [main3Page]
+        
+        webView.load(watting[0].request)
     }
     
     
@@ -159,7 +157,7 @@ public class Pan666 : WebRiffle {
             print(str)
             self.readDownloadLink(url: URL(string: str)!)
         }, failedAction: nil, isAutomaticallyPass: true)
-        let codeVerifyPage = WebBullet(method: .post, headFields: ["Referer":pan6663URL.absoluteString,
+        let codeVerifyPage = PCWebBullet(method: .post, headFields: ["Referer":pan6663URL.absoluteString,
                                                                    "Accept-Language":"zh-cn",
                                                                    "Origin":"http://\(pan6663URL.host!)",
             "Accept":"*/*",
@@ -167,7 +165,7 @@ public class Pan666 : WebRiffle {
             "Content-Type":"application/x-www-form-urlencoded; charset=UTF-8",
             "Accept-Encoding":"gzip, deflate",
             "User-Agen":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6"], formData: ["action":"check_code", "code":code], url: URL(string: "http://\(pan6663URL.host!)/ajax.php")!, injectJavaScript: [codeVerifyUnit])
-        let downloadListPage = WebBullet(method: .post, headFields: ["Connection":"keep-alive",
+        let downloadListPage = PCWebBullet(method: .post, headFields: ["Connection":"keep-alive",
                                                                      "Referer":pan6663URL.absoluteString,
                                                                      "Accept-Language":"zh-cn",
                                                                      "Origin":"http://\(pan6663URL.host!)",
@@ -178,10 +176,8 @@ public class Pan666 : WebRiffle {
             "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6",
             "Host":pan6663URL.host!], formData: ["action":"load_down_addr2", "file_id":fileNumber], url: URL(string: "http://\(pan6663URL.host!)/ajax.php")!, injectJavaScript: [downloadListUnit])
         
-        bullets = [codeVerifyPage, downloadListPage]
-        bulletsIterator = bullets.makeIterator()
-        currentResult = bulletsIterator?.next()
-        webView.load(currentResult!.request)
+        watting += [codeVerifyPage, downloadListPage]
+        webView.load(watting[0].request)
     }
     
     
@@ -189,19 +185,15 @@ public class Pan666 : WebRiffle {
     ///
     /// - Parameter url: 下载地址中转页面
     func readDownloadLink(url: URL) {
-        let request = DownloadRequest(mainURL: mainURL, label: UUID().uuidString, fileName: self.fileName, downloadStateUpdate: nil, downloadFinished: { (tk) in
-            guard let dat = tk.revData, let str = String(data: dat, encoding: .utf8) else {
+        var request = PCDownloadRequest(headFields: [:], url: url, method: .get, body: nil)
+        request.isFileDownloadTask = false
+        request.downloadStateUpdate = nil
+        request.downloadFinished = { (tk) in
+            guard let dat = tk.pack.revData, let str = String(data: dat, encoding: .utf8) else {
                 print("worong data!")
                 return
             }
             print("+++++ Parser string success: \(str)")
-            
-            defer {
-                if let index = DownloadManager.share.tasks.index(where: { $0.request.url == tk.request.url }) {
-                    print("Remove Download task: \(tk.request)")
-                    DownloadManager.share.tasks.remove(at: index)
-                }
-            }
             
             do {
                 let regx = try NSRegularExpression(pattern: "http://\\w+\\.\\w+.\\w+[:\\w]+/\\w+\\.\\w+\\?[^\"]+", options: NSRegularExpression.Options.caseInsensitive)
@@ -215,27 +207,16 @@ public class Pan666 : WebRiffle {
                         return
                     }
                     
-                    let label = UUID().uuidString
-                    self.fileDownloadRequest = DownloadRequest(mainURL: self.mainURL, label: label, fileName: self.fileName, downloadStateUpdate: { pack in
-                        #if os(macOS)
-                            guard let controller = self.downloadStateController else {   return  }
-                            var items = controller.content as! [DownloadInfo]
-                            if let index = items.index(where: { $0.uuid == label }) {
-                                items[index].progress = "\(pack.progress * 100)%"
-                                items[index].totalBytes = "\(Float(pack.totalBytes) / 1024.0 / 1024.0)M"
-                                items[index].site = pack.request.url.host!
-                                controller.content = items
-                                return
-                            }
-                            items.append(DownloadInfo(task: pack))
-                            controller.content = items
-                        #elseif os(iOS)
-                            print("((((((((((((((((((((((((( Post UpdateRiffleDownloadNotification )))))))))))))))))))))))))))))")
-                            NotificationCenter.default.post(name: WebRiffle.UpdateRiffleDownloadNotification, object: Pipeline.share.downloadStateData)
-                        #endif
-                    }, downloadFinished: { pack in
-                        print(pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
-                        if let data = pack.revData, let str = String(data: data, encoding: .utf8) {
+                    var fileDownloadRequest = PCDownloadRequest(headFields: ["Referer":self.pan6663URL.absoluteString,
+                                                                             "Accept-Language":"zh-cn",
+                                                                             "Upgrade-Insecure-Requests":"1",
+                                                                             "Accept-Encoding":"gzip, deflate",
+                                                                             "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                                                                             "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: urlx, method: .get, body: nil)
+                    fileDownloadRequest.downloadStateUpdate = nil
+                    fileDownloadRequest.downloadFinished = { pack in
+                        print(pack.pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
+                        if let data = pack.pack.revData, let str = String(data: data, encoding: .utf8) {
                             print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%\n")
                             print(str)
                             print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%")
@@ -246,21 +227,17 @@ public class Pan666 : WebRiffle {
                         }
                         
                         FileManager.default.save(pack: pack)
-                    }, headFields: ["Referer":self.pan6663URL.absoluteString,
-                                    "Accept-Language":"zh-cn",
-                                    "Upgrade-Insecure-Requests":"1",
-                                    "Accept-Encoding":"gzip, deflate",
-                                    "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                                    "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: urlx, method: .get, body: nil, riffle: self, isDelegateEnable: true)
-                    DownloadManager.share.add(request: self.fileDownloadRequest!)
+                    }
+                    fileDownloadRequest.riffle = self
+                    PCDownloadManager.share.add(request: fileDownloadRequest)
                 }   else    {
                     self.downloadFinished()
                 }
             }   catch   {
-                print(error)
+                print("*********** \(error)")
+                self.downloadFinished()
             }
-            
-        }, headFields: [:], url: url, method: .get, body: nil, riffle: self, isDelegateEnable: false)
-        DownloadManager.share.add(request: request)
+        }
+        PCDownloadManager.share.add(request: request)
     }
 }

@@ -68,6 +68,8 @@ extension PCDownloadManager : URLSessionDownloadDelegate {
             tasks[index].request.downloadFinished?(tasks[index])
             guard tasks[index].request.isFileDownloadTask else {
                 print("*********** None File Download Task! No Delegate Excute")
+                print("*********** Remove Download task: \(tasks[index].request)")
+                PCDownloadManager.share.tasks.remove(at: index)
                 return
             }
             pipline.delegate?.pipline?(didFinishedTask: tasks[index])

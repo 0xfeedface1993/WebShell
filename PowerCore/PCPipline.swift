@@ -17,6 +17,8 @@ public class PCPiplineSeat {
     var finished = [PCWebRiffle]()
     var working = [PCWebRiffle]()
     private var pipline = PCPipeline.share
+    private var timer: Timer?
+    private var lastDownloadTime: Date?
     
     init(site: WebHostSite) {
         self.site = site
@@ -33,10 +35,26 @@ public class PCPiplineSeat {
         if working.count == 1 {
             run()
         }
+//        if timer == nil {
+//            timer = Timer(fire: Date(), interval: 10 * 60, repeats: true) { (t) in
+//                if self.isTimeWallPatch() {
+//                    self.run()
+//                }
+//            }
+//        }
     }
     
     /// 执行下一个下载任务
     func run() {
+//        let now = Date()
+//
+//        if !self.isTimeWallPatch() {
+//            print("^^^^^^^^^^^^^^^^ Please Wait \(10 * 60 - now.timeIntervalSince(self.lastDownloadTime!)) Second To Next \(site) ^^^^^^^^^^^^^^^^")
+//            return
+//        }
+//
+//        lastDownloadTime = now
+        
         if working.count >= 1    {
             if working[0].isFinished == false {
                 working[0].begin()
@@ -69,6 +87,20 @@ public class PCPiplineSeat {
         // 任务完成要确定为文件下载并且下载完成标签为真时才执行下一个任务
         if working.first?.isFinished == true {
             run()
+        }
+    }
+    
+    /// 检查间隔下载时间是否到10分钟了
+    ///
+    /// - Returns: 若间隔时间未到则返回false
+    func isTimeWallPatch() -> Bool {
+        let now = Date()
+        
+        if let last = lastDownloadTime {
+            return now.timeIntervalSince(last) > 10 * 60
+        }   else    {
+            lastDownloadTime = now
+            return true
         }
     }
 }
