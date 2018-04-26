@@ -77,7 +77,7 @@ public class WebRiffle : NSObject, WebRiffleProtocol {
     public var delegate : WebRiffleDelegate?
     
     /// 对应的下载任务，当获取下载地址成功后创建得到
-    public weak var downloadTask: DownloadTask?
+    public weak var downloadTask: PCDownloadTask?
     
 #if os(macOS)
 /// 下载列表绑定的数据，针对于使用视图绑定的情况，如果是其他情况请声明其他变量并进行控制

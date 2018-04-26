@@ -13,7 +13,7 @@
 #endif
 
 /// 彩虹盘
-public class Ccchooo: WebRiffle {
+public class Ccchooo: PCWebRiffle {
     /// 文件名，从页面获取
     var fileName = ""
     /// 文件ID
@@ -33,7 +33,8 @@ public class Ccchooo: WebRiffle {
         let strNS = urlString as NSString
         if let result = regx?.firstMatch(in: urlString, options: NSRegularExpression.MatchingOptions.reportProgress, range: NSRange(location: 0, length: strNS.length)) {
             fileNumber = strNS.substring(with: result.range)
-            print("fileNumber: \(fileNumber)")
+            print("-------- fileNumber: \(fileNumber)")
+            host = .cchooo
         }
     }
     
@@ -54,12 +55,12 @@ public class Ccchooo: WebRiffle {
             self.fileName = name
             print("file name: \(name)")
         }, failedAction: nil, isAutomaticallyPass: true)
-        let mainPage = WebBullet(method: .get,
+        let mainPage = PCWebBullet(method: .get,
                                  headFields: [:],
                                  formData: [:],
                                  url: URL(string: "http://www.ccchoo.com/down-\(fileNumber).html")!,
                                  injectJavaScript: [mainJSUnit])
-        let main2Page = WebBullet(method: .get, headFields: ["Referer":"http://www.ccchoo.com/file-\(fileNumber).html",
+        let main2Page = PCWebBullet(method: .get, headFields: ["Referer":"http://www.ccchoo.com/file-\(fileNumber).html",
             "Accept-Language":"zh-cn",
             "Upgrade-Insecure-Requests":"1",
             "Accept-Encoding":"gzip, deflate",
@@ -82,12 +83,8 @@ public class Ccchooo: WebRiffle {
                 
                 print("link: \(url.absoluteString)")
             }
-            
-//            if let base64 = dic["image"], let data = Data(base64Encoded: base64), let img = NSImage(data: data) {
-//                self.code.image = img
-//            }
         }, failedAction: nil, isAutomaticallyPass: true)
-        let main3Page = WebBullet(method: .get, headFields: ["Referer":"http://www.ccchoo.com/down2-\(fileNumber).html",
+        let main3Page = PCWebBullet(method: .get, headFields: ["Referer":"http://www.ccchoo.com/down2-\(fileNumber).html",
             "Accept-Language":"zh-cn",
             "Upgrade-Insecure-Requests":"1",
             "Accept-Encoding":"gzip, deflate",
@@ -96,10 +93,15 @@ public class Ccchooo: WebRiffle {
                                   formData: [:],
                                   url: URL(string: "http://www.ccchoo.com/down-\(fileNumber).html")!,
                                   injectJavaScript: [main3JSUnit])
-        bullets = [mainPage, main2Page, main3Page]
-        bulletsIterator = bullets.makeIterator()
-        currentResult = bulletsIterator?.next()
-        webView.load(currentResult!.request)
+        watting = [mainPage, main2Page, main3Page]
+        
+        if Thread.isMainThread {
+            webView.load(watting[0].request)
+        }   else    {
+            DispatchQueue.main.async {
+                self.webView.load(self.watting[0].request)
+            }
+        }
     }
     
     /// 下载文件
@@ -112,45 +114,37 @@ public class Ccchooo: WebRiffle {
             dat in
             let url = downloadLink
             let label = UUID().uuidString
-            self.fileDownloadRequest = DownloadRequest(mainURL: self.mainURL, label: label, fileName: self.fileName, downloadStateUpdate: { pack in
-                #if os(macOS)
-                    guard let controller = self.downloadStateController else {   return  }
-                    var items = controller.content as! [DownloadInfo]
-                    if let index = items.index(where: { $0.uuid == label }) {
-                        items[index].progress = "\(pack.progress * 100)%"
-                        items[index].totalBytes = "\(Float(pack.totalBytes) / 1024.0 / 1024.0)M"
-                        items[index].site = pack.request.url.host!
-                        controller.content = items
-                        return
-                    }
-                    items.append(DownloadInfo(task: pack))
-                    controller.content = items
-                #elseif os(iOS)
-                    NotificationCenter.default.post(name: WebRiffle.UpdateRiffleDownloadNotification, object: Pipeline.share.downloadStateData)
-                #endif
-            }, downloadFinished: { pack in
-                print(pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
-                if let data = pack.revData, let str = String(data: data, encoding: .utf8) {
+            var fileDownloadRequest = PCDownloadRequest(headFields: ["Referer":"http://www.ccchoo.com/down-\(self.fileNumber).html",
+                "Accept-Language":"zh-cn",
+                "Upgrade-Insecure-Requests":"1",
+                "Accept-Encoding":"gzip, deflate",
+                "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: url, method: .post, body: nil)
+            fileDownloadRequest.riffle = self
+            fileDownloadRequest.downloadStateUpdate = nil
+            fileDownloadRequest.downloadFinished = { pack in
+                defer {
+                    self.downloadFinished()
+                }
+                
+                if let e = pack.pack.error {
+                    print("************ \(e)")
+                    return
+                }
+                
+                print(pack.pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
+                if let data = pack.pack.revData, let str = String(data: data, encoding: .utf8) {
                     print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%\n")
                     print(str)
                     print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%")
                 }
                 
-                defer {
-                    self.downloadFinished()
-                }
-                
                 FileManager.default.save(pack: pack)
-            }, headFields: ["Referer":"http://www.ccchoo.com/down-\(self.fileNumber).html",
-                "Accept-Language":"zh-cn",
-                "Upgrade-Insecure-Requests":"1",
-                "Accept-Encoding":"gzip, deflate",
-                "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: url, method: .post, body: nil, riffle: self, isDelegateEnable: true)
-            DownloadManager.share.add(request: self.fileDownloadRequest!)
+            }
+            PCDownloadManager.share.add(request: fileDownloadRequest)
         }, failedAction: nil, isAutomaticallyPass: true)
         
-        let codeUpload = WebBullet(method: .post, headFields: ["Referer":"http://www.ccchoo.com/down-\(fileNumber).html",
+        let codeUpload = PCWebBullet(method: .post, headFields: ["Referer":"http://www.ccchoo.com/down-\(fileNumber).html",
             "Origin":"http://www.ccchoo.com",
             "Accept-Language":"zh-cn",
             "Upgrade-Insecure-Requests":"1",
@@ -164,9 +158,7 @@ public class Ccchooo: WebRiffle {
                                               "vipd":"0"],
                                    url: URL(string: "http://www.ccchoo.com/ajax.php")!,
                                    injectJavaScript: [codeUploadUnit])
-        bullets = [codeUpload]
-        bulletsIterator = bullets.makeIterator()
-        currentResult = bulletsIterator?.next()
-        webView.load(currentResult!.request)
+        watting.append(codeUpload)
+        webView.load(watting[0].request)
     }
 }

@@ -10,6 +10,37 @@ import Cocoa
 import WebKit
 import WebShell
 
+/// 下载状态数据模型，用于视图数据绑定
+public class DownloadInfo : NSObject {
+    weak var riffle : PCWebRiffle?
+    public var createTime = Date(timeIntervalSince1970: 0)
+    @objc public dynamic var name = ""
+    @objc public dynamic var progress = ""
+    @objc public dynamic var totalBytes = ""
+    @objc public dynamic var site = ""
+    @objc public dynamic var state = ""
+    override init() {
+        super.init()
+    }
+    
+    init(task: PCDownloadTask) {
+        super.init()
+        riffle = task.request.riffle
+        name = task.fileName
+        progress = "\(task.pack.progress * 100)%"
+        totalBytes = "\(Float(task.pack.totalBytes) / 1024.0 / 1024.0)M"
+        site = task.request.riffle!.mainURL!.host!
+        createTime = task.createTime
+    }
+    
+    init(riffle: PCWebRiffle) {
+        super.init()
+        self.riffle = riffle
+        name = riffle.mainURL!.absoluteString
+        site = riffle.mainURL!.host!
+    }
+}
+
 class ViewController: NSViewController {
     @IBOutlet var DownloadStateController: NSArrayController!
     
@@ -40,7 +71,7 @@ class ViewController: NSViewController {
 //        vc.codeView.imageView.image = NSImage(named: NSImage.Name.init("0a1f-26-01-37"))
 //        presentViewControllerAsModalWindow(vc)
         
-        let pipline = Pipeline.share
+        let pipline = PCPipeline.share
         pipline.delegate = self
 //        let items = ["http://www.ccchoo.com/file-40052.html",
 //                     "http://www.ccchoo.com/file-40053.html",
@@ -56,11 +87,11 @@ class ViewController: NSViewController {
 //                     "http://www.666pan.cc/file-532273.html",
 //                     "http://www.88pan.cc/file-532359.html",
 //                     "http://www.ccchoo.com/file-40055.html",
-//                     "http://www.ccchoo.com/file-40053.html"]
-        let items = ["http://www.ccchoo.com/file-40055.html"]
+//                     "http://www.ccchoo.com/file-40053.html"]http://www.chooyun.com/file-51745.html
+        let items = ["http://www.ccchoo.com/file-40052.html", "http://www.chooyun.com/file-51745.html"]
         for item in items {
-            guard let fx = pipline.add(url: item) else { return }
-            fx.downloadStateController = DownloadStateController
+            let riffle = Ccchooo(urlString: item)
+            pipline.add(riffle: riffle)
         }
         
 //        let f1 = pipline.add(url: "http://www.feemoo.com/s/v2j0z15j") as? Feemoo
@@ -105,24 +136,52 @@ class ViewController: NSViewController {
     }
 }
 
-extension ViewController : PiplineDelegate {
-    func pipline(didAddRiffle riffle: WebRiffle) {
+extension ViewController : PCPiplineDelegate {
+    func pipline(didAddRiffle riffle: PCWebRiffle) {
+        print("\n(((((((((((((((((((((( Pipline didAddRiffle Begin )))))))))))))))))))))))")
+        let info = DownloadInfo(riffle: riffle)
+        add(info: info)
+        print("(((((((((((((((((((((( Pipline didAddRiffle End )))))))))))))))))))))))\n")
+    }
+    
+    func pipline(didUpdateTask task: PCDownloadTask) {
+        print("(((((((((((((((((((((( Pipline didUpdateTask Begin )))))))))))))))))))))))")
+        let info = DownloadInfo(task: task)
+        add(info: info)
+        print("(((((((((((((((((((((( Pipline didUpdateTask End )))))))))))))))))))))))")
+    }
+    
+    func pipline(didFinishedTask task: PCDownloadTask, error: Error?) {
+        print("\n(((((((((((((((((((((( Pipline didFinishedTask Begin )))))))))))))))))))))))")
         
+        print("(((((((((((((((((((((( Pipline didFinishedTask End )))))))))))))))))))))))\n")
     }
     
-    func pipline(didBeginRiffle riffle: WebRiffle) {
-        
+    func pipline(didFinishedRiffle riffle: PCWebRiffle) {
+        print("\n(((((((((((((((((((((( Pipline didFinishedRiffle Begin )))))))))))))))))))))))")
+        print("************ Not Found File Link: \(riffle.mainURL?.absoluteString ?? "** no link **")")
+        print("(((((((((((((((((((((( Pipline didFinishedRiffle End )))))))))))))))))))))))\n")
     }
     
-    func pipline(didFinishedRiffle riffle: WebRiffle) {
-        
-    }
-    
-    func pipline(didUpdateTask task: DownloadTask) {
-        print("+++++||||||||||||||||+++++ \(task.request.fileName) +++++||||||||||||||||+++++")
-    }
-    
-    func pipline(didFinishedTask task: DownloadTask, withError error: Error?) {
-        print("\\\\\\\\\\\\\\\\\\ \(task.request.fileName) Fnished ////////////////")
+    func add(info: DownloadInfo) {
+        if let items = DownloadStateController.content as? [DownloadInfo] {
+            var newItems = items
+            if let index = newItems.index(where: {
+                if let rif = $0.riffle {
+                    return rif == info.riffle
+                }
+                return false
+            }) {
+                newItems[index] = info
+                DownloadStateController.content = newItems
+                print(">>>>>>>>>>>>>>>>> Update info \(info.name)")
+            }   else    {
+                DownloadStateController.content = newItems + [info]
+                print(">>>>>>>>>>>>>>>>> Add info \(info.name)")
+            }
+        }   else    {
+            DownloadStateController.content = [info]
+            print(">>>>>>>>>>>>>>>>> Add info \(info.name)")
+        }
     }
 }

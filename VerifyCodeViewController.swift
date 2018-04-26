@@ -30,9 +30,9 @@ class VerifyCodeViewController: NSViewController {
             return codeView.reloadImage
         }
     }
-    weak var presentingRiffle : WebRiffle?
+    weak var presentingRiffle : PCWebRiffle?
     
-    init(riffle: WebRiffle?) {
+    init(riffle: PCWebRiffle?) {
         super.init(nibName: NSNib.Name.init("VerifyCodeViewController"), bundle: Bundle(for: type(of: self)))
         self.presentingRiffle = riffle
     }

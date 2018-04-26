@@ -7,13 +7,22 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2730DEB52043DB4F009B4B87 /* Pipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2730DEB42043DB4F009B4B87 /* Pipeline.swift */; };
 		27448B2720170ABA001FC925 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B2620170ABA001FC925 /* AppDelegate.swift */; };
 		27448B2920170ABA001FC925 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B2820170ABA001FC925 /* ViewController.swift */; };
 		27448B2B20170ABA001FC925 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 27448B2A20170ABA001FC925 /* Assets.xcassets */; };
 		27448B2E20170ABA001FC925 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 27448B2C20170ABA001FC925 /* Main.storyboard */; };
 		27448B3A20170ABA001FC925 /* CCCHOOOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B3920170ABA001FC925 /* CCCHOOOTests.swift */; };
 		27448B4520170ABA001FC925 /* CCCHOOOUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B4420170ABA001FC925 /* CCCHOOOUITests.swift */; };
+		2749698D20887048009A1E1B /* PCDownloadTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749698920886BBE009A1E1B /* PCDownloadTask.swift */; };
+		2749698E20887048009A1E1B /* PCDownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749698B20886F9B009A1E1B /* PCDownloadManager.swift */; };
+		2749698F20887048009A1E1B /* PCDownloadTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749698920886BBE009A1E1B /* PCDownloadTask.swift */; };
+		2749699020887048009A1E1B /* PCDownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749698B20886F9B009A1E1B /* PCDownloadManager.swift */; };
+		2749699320888222009A1E1B /* PCPipline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749699120888113009A1E1B /* PCPipline.swift */; };
+		2749699420888223009A1E1B /* PCPipline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749699120888113009A1E1B /* PCPipline.swift */; };
+		2749699720897EC5009A1E1B /* PCWebRiffle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749699520897CAB009A1E1B /* PCWebRiffle.swift */; };
+		2749699820897EC5009A1E1B /* PCWebRiffle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749699520897CAB009A1E1B /* PCWebRiffle.swift */; };
+		274969A020899A64009A1E1B /* PCWebBullet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749699E20899A60009A1E1B /* PCWebBullet.swift */; };
+		274969A120899A65009A1E1B /* PCWebBullet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749699E20899A60009A1E1B /* PCWebBullet.swift */; };
 		277C8430204652C500D7B2B1 /* Four.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 277C842F204652C500D7B2B1 /* Four.mlmodel */; };
 		277C8432204652F700D7B2B1 /* VCMLParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277C8431204652F700D7B2B1 /* VCMLParser.swift */; };
 		277C84352046A02200D7B2B1 /* ImageMaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277C84342046A02200D7B2B1 /* ImageMaker.swift */; };
@@ -21,17 +30,10 @@
 		277C84472046A49500D7B2B1 /* ImageMaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277C84342046A02200D7B2B1 /* ImageMaker.swift */; };
 		277C84482046A49500D7B2B1 /* Four.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 277C842F204652C500D7B2B1 /* Four.mlmodel */; };
 		277C84492046A49500D7B2B1 /* VCMLParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277C8431204652F700D7B2B1 /* VCMLParser.swift */; };
-		277C844A2046A49500D7B2B1 /* Pipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2730DEB42043DB4F009B4B87 /* Pipeline.swift */; };
-		277C844B2046A49500D7B2B1 /* WebBullet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B522017112D001FC925 /* WebBullet.swift */; };
-		277C844C2046A49500D7B2B1 /* WebRiffle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C9DBAB2040FAE400A87E9E /* WebRiffle.swift */; };
-		277C84502046A49500D7B2B1 /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B5420176CFE001FC925 /* DownloadManager.swift */; };
-		277C84512046A49500D7B2B1 /* DownloadTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B5620176E34001FC925 /* DownloadTask.swift */; };
 		277C84522046A49500D7B2B1 /* Ccchooo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C9DBB520413F7300A87E9E /* Ccchooo.swift */; };
 		277C84532046A49500D7B2B1 /* 666pan.js in Resources */ = {isa = PBXBuildFile; fileRef = 277BFBD7203EA974009EE51B /* 666pan.js */; };
 		277C84542046A49500D7B2B1 /* feemoo.js in Resources */ = {isa = PBXBuildFile; fileRef = 27E4C130203703610003A38D /* feemoo.js */; };
 		277C84552046A49500D7B2B1 /* ccchooo.js in Resources */ = {isa = PBXBuildFile; fileRef = 27448B592018387A001FC925 /* ccchooo.js */; };
-		277C84562046A49500D7B2B1 /* Feemoo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27E4C12E2037011E0003A38D /* Feemoo.swift */; };
-		277C84572046A49500D7B2B1 /* Pan666.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277BFBD5203EA876009EE51B /* Pan666.swift */; };
 		277C845F2047971D00D7B2B1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277C845E2047971D00D7B2B1 /* AppDelegate.swift */; };
 		277C84612047971D00D7B2B1 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277C84602047971D00D7B2B1 /* ViewController.swift */; };
 		277C84642047971D00D7B2B1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 277C84622047971D00D7B2B1 /* Main.storyboard */; };
@@ -49,18 +51,12 @@
 		27C9DBCE204146A100A87E9E /* WebShell.h in Headers */ = {isa = PBXBuildFile; fileRef = 27C9DBBE204146A100A87E9E /* WebShell.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27C9DBD1204146A100A87E9E /* WebShell.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27C9DBBC204146A100A87E9E /* WebShell.framework */; };
 		27C9DBD2204146A100A87E9E /* WebShell.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 27C9DBBC204146A100A87E9E /* WebShell.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		27C9DBDD2041474900A87E9E /* WebBullet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B522017112D001FC925 /* WebBullet.swift */; };
-		27C9DBDE2041474900A87E9E /* WebRiffle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C9DBAB2040FAE400A87E9E /* WebRiffle.swift */; };
 		27C9DBDF2041474900A87E9E /* VerifyCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C9DBAD204105B000A87E9E /* VerifyCodeView.swift */; };
 		27C9DBE02041474900A87E9E /* VerifyCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C9DBAF2041094500A87E9E /* VerifyCodeViewController.swift */; };
 		27C9DBE12041474900A87E9E /* VerifyCodeViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 27C9DBB320410F0900A87E9E /* VerifyCodeViewController.xib */; };
-		27C9DBE22041474900A87E9E /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B5420176CFE001FC925 /* DownloadManager.swift */; };
-		27C9DBE32041474900A87E9E /* DownloadTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B5620176E34001FC925 /* DownloadTask.swift */; };
 		27C9DBE42041475300A87E9E /* 666pan.js in Resources */ = {isa = PBXBuildFile; fileRef = 277BFBD7203EA974009EE51B /* 666pan.js */; };
 		27C9DBE52041475300A87E9E /* feemoo.js in Resources */ = {isa = PBXBuildFile; fileRef = 27E4C130203703610003A38D /* feemoo.js */; };
 		27C9DBE62041475300A87E9E /* ccchooo.js in Resources */ = {isa = PBXBuildFile; fileRef = 27448B592018387A001FC925 /* ccchooo.js */; };
-		27C9DBE72041475300A87E9E /* Feemoo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27E4C12E2037011E0003A38D /* Feemoo.swift */; };
-		27C9DBE82041475300A87E9E /* Pan666.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277BFBD5203EA876009EE51B /* Pan666.swift */; };
 		27C9DBE92041495A00A87E9E /* Ccchooo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C9DBB520413F7300A87E9E /* Ccchooo.swift */; };
 /* End PBXBuildFile section */
 
@@ -167,6 +163,11 @@
 		27448B5420176CFE001FC925 /* DownloadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadManager.swift; sourceTree = "<group>"; };
 		27448B5620176E34001FC925 /* DownloadTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadTask.swift; sourceTree = "<group>"; };
 		27448B592018387A001FC925 /* ccchooo.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = ccchooo.js; sourceTree = "<group>"; };
+		2749698920886BBE009A1E1B /* PCDownloadTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCDownloadTask.swift; sourceTree = "<group>"; };
+		2749698B20886F9B009A1E1B /* PCDownloadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCDownloadManager.swift; sourceTree = "<group>"; };
+		2749699120888113009A1E1B /* PCPipline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCPipline.swift; sourceTree = "<group>"; };
+		2749699520897CAB009A1E1B /* PCWebRiffle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCWebRiffle.swift; sourceTree = "<group>"; };
+		2749699E20899A60009A1E1B /* PCWebBullet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCWebBullet.swift; sourceTree = "<group>"; };
 		277BFBD5203EA876009EE51B /* Pan666.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pan666.swift; sourceTree = "<group>"; };
 		277BFBD7203EA974009EE51B /* 666pan.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = 666pan.js; sourceTree = "<group>"; };
 		277C842F204652C500D7B2B1 /* Four.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = Four.mlmodel; sourceTree = "<group>"; };
@@ -278,6 +279,7 @@
 		27448B1A20170ABA001FC925 = {
 			isa = PBXGroup;
 			children = (
+				2749698820886B8D009A1E1B /* PowerCore */,
 				27C9DBDA204146D300A87E9E /* Core */,
 				27448B2520170ABA001FC925 /* CCCHOOO */,
 				27448B3820170ABA001FC925 /* CCCHOOOTests */,
@@ -348,6 +350,18 @@
 				27448B592018387A001FC925 /* ccchooo.js */,
 			);
 			path = Script;
+			sourceTree = "<group>";
+		};
+		2749698820886B8D009A1E1B /* PowerCore */ = {
+			isa = PBXGroup;
+			children = (
+				2749698920886BBE009A1E1B /* PCDownloadTask.swift */,
+				2749699120888113009A1E1B /* PCPipline.swift */,
+				2749698B20886F9B009A1E1B /* PCDownloadManager.swift */,
+				2749699520897CAB009A1E1B /* PCWebRiffle.swift */,
+				2749699E20899A60009A1E1B /* PCWebBullet.swift */,
+			);
+			path = PowerCore;
 			sourceTree = "<group>";
 		};
 		277BFBD4203EA85A009EE51B /* 666pan */ = {
@@ -851,18 +865,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2749699820897EC5009A1E1B /* PCWebRiffle.swift in Sources */,
 				277C84912047A0BB00D7B2B1 /* FileCoordinator.swift in Sources */,
-				277C84512046A49500D7B2B1 /* DownloadTask.swift in Sources */,
-				277C84572046A49500D7B2B1 /* Pan666.swift in Sources */,
 				277C84522046A49500D7B2B1 /* Ccchooo.swift in Sources */,
-				277C84562046A49500D7B2B1 /* Feemoo.swift in Sources */,
+				274969A120899A65009A1E1B /* PCWebBullet.swift in Sources */,
 				277C84492046A49500D7B2B1 /* VCMLParser.swift in Sources */,
-				277C844B2046A49500D7B2B1 /* WebBullet.swift in Sources */,
 				277C84482046A49500D7B2B1 /* Four.mlmodel in Sources */,
 				277C84472046A49500D7B2B1 /* ImageMaker.swift in Sources */,
-				277C844C2046A49500D7B2B1 /* WebRiffle.swift in Sources */,
-				277C844A2046A49500D7B2B1 /* Pipeline.swift in Sources */,
-				277C84502046A49500D7B2B1 /* DownloadManager.swift in Sources */,
+				2749699020887048009A1E1B /* PCDownloadManager.swift in Sources */,
+				2749698F20887048009A1E1B /* PCDownloadTask.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -872,6 +883,7 @@
 			files = (
 				277C84612047971D00D7B2B1 /* ViewController.swift in Sources */,
 				277C845F2047971D00D7B2B1 /* AppDelegate.swift in Sources */,
+				2749699420888223009A1E1B /* PCPipline.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -895,20 +907,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				27C9DBE82041475300A87E9E /* Pan666.swift in Sources */,
 				27C9DBE02041474900A87E9E /* VerifyCodeViewController.swift in Sources */,
 				27C9DBE92041495A00A87E9E /* Ccchooo.swift in Sources */,
-				27C9DBE22041474900A87E9E /* DownloadManager.swift in Sources */,
+				2749699720897EC5009A1E1B /* PCWebRiffle.swift in Sources */,
 				27C9DBDF2041474900A87E9E /* VerifyCodeView.swift in Sources */,
-				27C9DBDE2041474900A87E9E /* WebRiffle.swift in Sources */,
+				274969A020899A64009A1E1B /* PCWebBullet.swift in Sources */,
 				277C84352046A02200D7B2B1 /* ImageMaker.swift in Sources */,
 				277C8432204652F700D7B2B1 /* VCMLParser.swift in Sources */,
-				27C9DBE72041475300A87E9E /* Feemoo.swift in Sources */,
-				27C9DBE32041474900A87E9E /* DownloadTask.swift in Sources */,
+				2749699320888222009A1E1B /* PCPipline.swift in Sources */,
+				2749698E20887048009A1E1B /* PCDownloadManager.swift in Sources */,
 				277C849020479F3100D7B2B1 /* FileCoordinator.swift in Sources */,
-				27C9DBDD2041474900A87E9E /* WebBullet.swift in Sources */,
+				2749698D20887048009A1E1B /* PCDownloadTask.swift in Sources */,
 				277C8430204652C500D7B2B1 /* Four.mlmodel in Sources */,
-				2730DEB52043DB4F009B4B87 /* Pipeline.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
