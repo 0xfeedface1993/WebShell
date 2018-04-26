@@ -12,7 +12,7 @@ public class PCDownloadManager: NSObject {
     private static let _manager = PCDownloadManager()
     private let pipline = PCPipeline.share
     /// 外部访问的单例对象
-    static var share : PCDownloadManager {
+    public static var share : PCDownloadManager {
         get {
             return _manager
         }
@@ -21,6 +21,10 @@ public class PCDownloadManager: NSObject {
     private var session : URLSession!
     
     var tasks = [PCDownloadTask]()
+    
+    public var allTasks: [PCDownloadTask] {
+        return tasks
+    }
     
     override init() {
         super.init()

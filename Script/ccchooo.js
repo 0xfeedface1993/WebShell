@@ -1,5 +1,5 @@
 function getDowloadLink() {
-    var results = document.body.innerHTML.match(/http:\/\/down\w\.ccchoo\.com[^"]+/g);
+    var results = document.body.innerHTML.match(/http:\/\/down[\w\.]+[^"]+/g);
     if (results != null && results.length > 0) {
         return results[0];
     }

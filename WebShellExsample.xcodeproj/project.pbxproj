@@ -20,7 +20,6 @@
 		2749698F20887048009A1E1B /* PCDownloadTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749698920886BBE009A1E1B /* PCDownloadTask.swift */; };
 		2749699020887048009A1E1B /* PCDownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749698B20886F9B009A1E1B /* PCDownloadManager.swift */; };
 		2749699320888222009A1E1B /* PCPipline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749699120888113009A1E1B /* PCPipline.swift */; };
-		2749699420888223009A1E1B /* PCPipline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749699120888113009A1E1B /* PCPipline.swift */; };
 		2749699720897EC5009A1E1B /* PCWebRiffle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749699520897CAB009A1E1B /* PCWebRiffle.swift */; };
 		2749699820897EC5009A1E1B /* PCWebRiffle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749699520897CAB009A1E1B /* PCWebRiffle.swift */; };
 		274969A020899A64009A1E1B /* PCWebBullet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749699E20899A60009A1E1B /* PCWebBullet.swift */; };
@@ -62,6 +61,7 @@
 		27C9DBE92041495A00A87E9E /* Ccchooo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C9DBB520413F7300A87E9E /* Ccchooo.swift */; };
 		27FD7CE72091B5B00098F0EE /* Pan666.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277BFBD5203EA876009EE51B /* Pan666.swift */; };
 		27FD7CE82091B5B10098F0EE /* Pan666.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277BFBD5203EA876009EE51B /* Pan666.swift */; };
+		27FD7CEF2091CE9D0098F0EE /* PCPipline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749699120888113009A1E1B /* PCPipline.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -861,6 +861,7 @@
 			files = (
 				2749699820897EC5009A1E1B /* PCWebRiffle.swift in Sources */,
 				27FD7CE82091B5B10098F0EE /* Pan666.swift in Sources */,
+				27FD7CEF2091CE9D0098F0EE /* PCPipline.swift in Sources */,
 				277C84912047A0BB00D7B2B1 /* FileCoordinator.swift in Sources */,
 				277C84522046A49500D7B2B1 /* Ccchooo.swift in Sources */,
 				274969A120899A65009A1E1B /* PCWebBullet.swift in Sources */,
@@ -879,7 +880,6 @@
 			files = (
 				277C84612047971D00D7B2B1 /* ViewController.swift in Sources */,
 				277C845F2047971D00D7B2B1 /* AppDelegate.swift in Sources */,
-				2749699420888223009A1E1B /* PCPipline.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

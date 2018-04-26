@@ -47,7 +47,7 @@ public class Pan666 : PCWebRiffle {
         if let result = regx?.firstMatch(in: urlString, options: NSRegularExpression.MatchingOptions.reportProgress, range: NSRange(location: 0, length: strNS.length)) {
             fileNumber = strNS.substring(with: result.range)
             print("fileNumber: \(fileNumber)")
-            self.host =  .pan666
+            self.host = .pan666
         }
     }
     

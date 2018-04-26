@@ -103,6 +103,15 @@ public class PCPiplineSeat {
             return true
         }
     }
+    
+    func remove(riffle: PCWebRiffle) {
+        if let index = finished.index(where: { $0.host == riffle.host }) {
+            finished.remove(at: index)
+        }
+        if let index = working.index(where: { $0.host == riffle.host }) {
+            working.remove(at: index)
+        }
+    }
 }
 
 /// 流水线情况代理，状态更新调用
@@ -124,6 +133,10 @@ public class PCPipeline {
     
     /// 分类，每个woker管理一个站点下的所有WebRiffle
     var workers = [PCPiplineSeat]()
+    public var allWorkers: [PCPiplineSeat] {
+        return workers
+    }
+    
     public weak var delegate : PCPiplineDelegate?
     
     /// 添加WebRiffle，自动按序列顺序执行
@@ -187,6 +200,15 @@ public class PCPipeline {
         return workers.index(where: { (seat) -> Bool in
             return (seat.finished.first!.host == Hose) || (seat.working.first!.host == Hose)
         })
+    }
+    
+    /// 删除Riffle，完成队列和未完成队列里面的都删除
+    ///
+    /// - Parameter riffle: 需要删除的Riffle
+    public func remove(riffle: PCWebRiffle) {
+        if let index = find(withHost: riffle.host) {
+            workers[index].remove(riffle: riffle)
+        }
     }
 }
 

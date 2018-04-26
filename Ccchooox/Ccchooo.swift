@@ -82,6 +82,8 @@ public class Ccchooo: PCWebRiffle {
                 })
                 
                 print("link: \(url.absoluteString)")
+            }   else {
+                self.downloadFinished()
             }
         }, failedAction: nil, isAutomaticallyPass: true)
         let main3Page = PCWebBullet(method: .get, headFields: ["Referer":"http://www.ccchoo.com/down2-\(fileNumber).html",
@@ -93,7 +95,7 @@ public class Ccchooo: PCWebRiffle {
                                   formData: [:],
                                   url: URL(string: "http://www.ccchoo.com/down-\(fileNumber).html")!,
                                   injectJavaScript: [main3JSUnit])
-        watting = [mainPage, main2Page, main3Page]
+        watting = [mainPage, main3Page]
         
         if Thread.isMainThread {
             webView.load(watting[0].request)
