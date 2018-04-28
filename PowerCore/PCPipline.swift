@@ -265,7 +265,7 @@ public enum WebHostSite : Int {
 public struct SitePack {
     var regulerExpression : String
     var site : WebHostSite
-    public static let allSite = [SitePack(regulerExpression: "feemoo", site: .feemoo),
+    public static let allSite = [SitePack(regulerExpression: "(feemoo)|(fmpan)", site: .feemoo),
                                  SitePack(regulerExpression: "\\.\\d{2,}pan\\.", site: .pan666),
                                  SitePack(regulerExpression: "(ccchoo)|(chooyun)", site: .cchooo)]
 }
