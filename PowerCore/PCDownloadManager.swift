@@ -70,13 +70,14 @@ extension PCDownloadManager : URLSessionDownloadDelegate {
             print("download \(tasks[index].fileName) finish!")
             // 调用下载完成回调
             tasks[index].request.downloadFinished?(tasks[index])
+            pipline.delegate?.pipline?(didFinishedTask: tasks[index])
+            tasks[index].pack.revData = nil
             guard tasks[index].request.isFileDownloadTask else {
                 print("*********** None File Download Task! No Delegate Excute")
                 print("*********** Remove Download task: \(tasks[index].request)")
                 PCDownloadManager.share.tasks.remove(at: index)
                 return
             }
-            pipline.delegate?.pipline?(didFinishedTask: tasks[index])
         } catch {
             print("Download Save Error: \(error)")
             // 调用下载完成回调
@@ -84,9 +85,11 @@ extension PCDownloadManager : URLSessionDownloadDelegate {
             tasks[index].request.downloadFinished?(tasks[index])
             guard tasks[index].request.isFileDownloadTask else {
                 print("*********** None File Download Task! No Delegate Excute")
+                if let riffle = tasks[index].request.riffle {
+                    pipline.delegate?.pipline?(didFinishedRiffle: riffle)
+                }
                 return
             }
-            pipline.delegate?.pipline?(didFinishedTask: tasks[index])
         }
     }
     
@@ -102,22 +105,21 @@ extension PCDownloadManager : URLSessionDownloadDelegate {
             return
         }
         
-        defer {
-            tasks[index].pack.error = error
-            tasks[index].request.downloadFinished?(tasks[index])
-            // 当下载任务非文件下载任务时，不执行通知
-            if tasks[index].request.isFileDownloadTask {
-                tasks[index].request.riffle?.isFinished = true
-                tasks[index].request.riffle?.seat?.run()
-                pipline.delegate?.pipline?(didFinishedTask: tasks[index])
-            }   else    {
-                print("*********** None File Download Task! No Delegate Excute")
+        print("*********** download \(tasks[index].fileName) with error finished: \(e)")
+        
+        tasks[index].pack.error = error
+        tasks[index].request.downloadFinished?(tasks[index])
+        // 当下载任务非文件下载任务时，不执行通知
+        if tasks[index].request.isFileDownloadTask {
+            pipline.delegate?.pipline?(didFinishedTask: tasks[index])
+        }   else    {
+            print("*********** None File Download Task!")
+            if let riffle = tasks[index].request.riffle {
+                pipline.delegate?.pipline?(didFinishedRiffle: riffle)
             }
         }
         
-        if let e = error {
-            print("*********** download \(tasks[index].fileName) with error finished: \(e)")
-        }
+        tasks[index].pack.revData = nil
     }
     
     /// 下载进度更新代理方法

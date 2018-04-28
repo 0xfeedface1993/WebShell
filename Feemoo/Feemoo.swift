@@ -33,6 +33,7 @@ public class Feemoo: PCWebRiffle {
     }
     
     override public func begin() {
+        loadWebView()
         loadFeemooSequenceBullet()
     }
     
@@ -73,7 +74,7 @@ public class Feemoo: PCWebRiffle {
         let secondPage = reloadCodeImageMaker(url: url)
         
         watting = [mainPage, secondPage]
-        webView.load(watting[0].request)
+        seat?.webView.load(watting[0].request)
     }
     
     /// 只获取验证码页面
@@ -82,7 +83,7 @@ public class Feemoo: PCWebRiffle {
     func reloadCodeImage(url: URL) {
         let secondPage = reloadCodeImageMaker(url: url)
         watting.append(secondPage)
-        webView.load(watting[0].request)
+        seat?.webView.load(watting[0].request)
     }
     
     /// 验证码页面配置
@@ -93,7 +94,7 @@ public class Feemoo: PCWebRiffle {
         let secondJSUnit = InjectUnit(script: "\(functionScript) getCodeImageAndCodeEncry();", successAction: {
             dat in
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1, execute: {
-                self.webView.evaluateJavaScript("function callFetchImage() {return { \"img\": getBase64Image(document.getElementById('verityImgtag')), \"codeencry\": codeencry} } callFetchImage();", completionHandler: { (datx, err) in
+                self.seat?.webView.evaluateJavaScript("function callFetchImage() {return { \"img\": getBase64Image(document.getElementById('verityImgtag')), \"codeencry\": codeencry} } callFetchImage();", completionHandler: { (datx, err) in
                     guard let dic = datx as? [String:String],
                         let img = dic["img"],
                         let _ = dic["codeencry"],
@@ -160,10 +161,7 @@ public class Feemoo: PCWebRiffle {
                                             "Accept-Encoding":"gzip, deflate",
                                             "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                                             "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: url, method: .get, body: nil)
-            fileDownloadRequest.downloadStateUpdate = { pack in
-                
-            }
-            
+            fileDownloadRequest.downloadStateUpdate = nil
             fileDownloadRequest.downloadFinished = { pack in
                 print(pack.pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
                 

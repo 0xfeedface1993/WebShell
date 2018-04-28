@@ -32,6 +32,12 @@ public class PCDownloadTask: NSObject {
     public var request: PCDownloadRequest
     /// 文件名, 默认显示下载页面地址
     public var fileName: String
+    var saveFileName: String {
+        let parts = fileName.split(separator: ".")
+        let last = String(parts.last ?? "")
+        let prefix = String(parts.dropLast().joined())
+        return "\(prefix)(\(request.riffle?.password ?? "无密码")).\(last)"
+    }
     /// http任务
     public var task: URLSessionDownloadTask
     /// 下载数据信息, 进度信息，当下载完成后包含已下载的数据信息

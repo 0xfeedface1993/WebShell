@@ -39,6 +39,7 @@ public class Ccchooo: PCWebRiffle {
     }
     
     override public func begin() {
+        loadWebView()
         loadCCCHOOOSequenceBullet()
     }
     
@@ -60,15 +61,6 @@ public class Ccchooo: PCWebRiffle {
                                  formData: [:],
                                  url: URL(string: "http://www.ccchoo.com/down-\(fileNumber).html")!,
                                  injectJavaScript: [mainJSUnit])
-        let main2Page = PCWebBullet(method: .get, headFields: ["Referer":"http://www.ccchoo.com/file-\(fileNumber).html",
-            "Accept-Language":"zh-cn",
-            "Upgrade-Insecure-Requests":"1",
-            "Accept-Encoding":"gzip, deflate",
-            "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"],
-                                  formData: [:],
-                                  url: URL(string: "http://www.ccchoo.com/down2-\(fileNumber).html")!,
-                                  injectJavaScript: [])
         let main3JSUnit = InjectUnit(script: "\(functionScript) getImageAndLink();", successAction: {
             dat in
             guard let dic = dat as? [String:String] else {
@@ -98,10 +90,10 @@ public class Ccchooo: PCWebRiffle {
         watting = [mainPage, main3Page]
         
         if Thread.isMainThread {
-            webView.load(watting[0].request)
+            seat?.webView.load(watting[0].request)
         }   else    {
             DispatchQueue.main.async {
-                self.webView.load(self.watting[0].request)
+                self.seat?.webView.load(self.watting[0].request)
             }
         }
     }
@@ -161,6 +153,6 @@ public class Ccchooo: PCWebRiffle {
                                    url: URL(string: "http://www.ccchoo.com/ajax.php")!,
                                    injectJavaScript: [codeUploadUnit])
         watting.append(codeUpload)
-        webView.load(watting[0].request)
+        seat?.webView.load(watting[0].request)
     }
 }

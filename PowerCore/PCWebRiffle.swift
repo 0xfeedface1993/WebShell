@@ -9,10 +9,14 @@
 import WebKit
 
 public class PCWebRiffle: NSObject {
+    /// 解压密码
+    public var password = ""
     /// 下载首页url
     public var mainURL : URL?
     /// webview实例, 不需要展示给用户，每个站点都独自拥有一个实例，方便并行下载和管理
-    var webView : WKWebView!
+//    var webView : WKWebView? {
+//        return seat?.webView
+//    }
     /// 等待执行的WebBullet数组，按执行顺序排列
     var watting = [PCWebBullet]()
     /// 已执行的WebBullet数组，按执行顺序排列
@@ -53,14 +57,6 @@ public class PCWebRiffle: NSObject {
     override init() {
         verifyCodeParserErrorCount = 0
         super.init()
-        let userController = WKUserContentController()
-        let script = WKUserScript(source: functionScript, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
-        userController.addUserScript(script)
-        let config = WKWebViewConfiguration()
-        config.userContentController = userController
-        webView = WKWebView(frame: CGRect.zero, configuration: config)
-        webView.navigationDelegate = self
-        webView.customUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6"
     }
     
     public convenience init(mainURL: URL) {
@@ -69,18 +65,30 @@ public class PCWebRiffle: NSObject {
     }
     
     deinit {
-        webView.stopLoading()
-        webView.navigationDelegate = nil
+        seat?.webView.stopLoading()
+        seat?.webView.navigationDelegate = nil
     }
     
     //MARK: - 通知事件
     func downloadFinished() {
         isFinished = true
+        seat?.webView.navigationDelegate = nil
         seat?.taskFinished(finishedRiffle: self)
     }
     
     public func begin() {
         assertionFailure("Class WebRiffle is abstract class, you should use it's subclass, then confirm WebRiffleProtocol!")
+    }
+    
+    func loadWebView() {
+        let userController = WKUserContentController()
+        let script = WKUserScript(source: functionScript, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
+        userController.addUserScript(script)
+        let config = WKWebViewConfiguration()
+        config.userContentController = userController
+        seat?.webView = WKWebView(frame: CGRect.zero, configuration: config)
+        seat?.webView.navigationDelegate = self
+        seat?.webView.customUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6"
     }
 }
 
@@ -100,16 +108,16 @@ extension PCWebRiffle : WKNavigationDelegate {
     
     /// 跳转下一个页面并支持执行多个js指令序列
     func execNextCommand() {
+        guard self.watting.count > 0 else {
+            self.downloadFinished()
+            return
+        }
+        
         DispatchQueue.global().async {
-            guard self.watting.count > 0 else {
-                self.downloadFinished()
-                return
-            }
-            
             for js in self.watting[0].injectJavaScript {
                 let sem = DispatchSemaphore(value: 0)
                 DispatchQueue.main.async {
-                    self.webView.evaluateJavaScript(js.script, completionHandler: { (data, err) in
+                    self.seat?.webView.evaluateJavaScript(js.script, completionHandler: { (data, err) in
                         if let e = err {
                             js.failedAction?(e)
                             print("******** error : \(e)")
@@ -137,7 +145,7 @@ extension PCWebRiffle : WKNavigationDelegate {
             
             if let resultx = self.watting.first {
                 DispatchQueue.main.async {
-                    self.webView.load(resultx.request)
+                    self.seat?.webView.load(resultx.request)
                 }
             }
         }

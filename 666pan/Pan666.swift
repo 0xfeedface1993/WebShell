@@ -52,6 +52,7 @@ public class Pan666 : PCWebRiffle {
     }
     
     override public func begin() {
+        loadWebView()
         load666PanSequence()
     }
     
@@ -99,7 +100,7 @@ public class Pan666 : PCWebRiffle {
                                                              "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6",
                                                              "Referer":pan6662URL.absoluteString], formData: [:], url: pan6663URL, injectJavaScript: [main3Unit])
         watting += [main1Page, main2Page, main3Page]
-        webView.load(watting[0].request)
+        seat?.webView.load(watting[0].request)
     }
     
     
@@ -132,7 +133,7 @@ public class Pan666 : PCWebRiffle {
                                                              "Referer":pan6662URL.absoluteString], formData: [:], url: pan6663URL, injectJavaScript: [main3Unit])
         watting += [main3Page]
         
-        webView.load(watting[0].request)
+        seat?.webView.load(watting[0].request)
     }
     
     
@@ -177,7 +178,7 @@ public class Pan666 : PCWebRiffle {
             "Host":pan6663URL.host!], formData: ["action":"load_down_addr2", "file_id":fileNumber], url: URL(string: "http://\(pan6663URL.host!)/ajax.php")!, injectJavaScript: [downloadListUnit])
         
         watting += [codeVerifyPage, downloadListPage]
-        webView.load(watting[0].request)
+        seat?.webView.load(watting[0].request)
     }
     
     
@@ -215,7 +216,7 @@ public class Pan666 : PCWebRiffle {
                                                                              "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: urlx, method: .get, body: nil)
                     fileDownloadRequest.downloadStateUpdate = nil
                     fileDownloadRequest.downloadFinished = { pack in
-                        print(pack.pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
+                        print(pack.pack.revData?.debugDescription ?? "\n%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
                         if let data = pack.pack.revData, let str = String(data: data, encoding: .utf8) {
                             print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%\n")
                             print(str)

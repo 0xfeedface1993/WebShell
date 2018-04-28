@@ -7,12 +7,14 @@
 //
 
 import Foundation
+import WebKit
 
 let unkonwGroupName = "unkown-site-group"
 let GroupDefaultRule = "\\.[^\\.]+\\."
 
 /// 流水线上的一道产品线，管理一个站点下所有的任务
 public class PCPiplineSeat {
+    var webView : WKWebView!
     var site : WebHostSite = .unknowsite
     var finished = [PCWebRiffle]()
     var working = [PCWebRiffle]()
@@ -23,6 +25,9 @@ public class PCPiplineSeat {
     init(site: WebHostSite) {
         self.site = site
         print(">>>>>>>> Add group \(self.site) !")
+        let config = WKWebViewConfiguration()
+        webView = WKWebView(frame: CGRect.zero, configuration: config)
+        webView.customUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6"
     }
     
     /// 添加下载任务，若任务不属于该序列的站点则不添加
@@ -154,7 +159,7 @@ public class PCPipeline {
         }
     }
     
-    public func add<T: PCWebRiffle>(url: String) -> T? {
+    public func add<T: PCWebRiffle>(url: String, password: String) -> T? {
         guard let host = URL(string: url) else {
             return nil
         }
@@ -163,16 +168,19 @@ public class PCPipeline {
         switch type {
         case .feemoo:
             let riffle = Feemoo(urlString: url)
+            riffle.password = password
             riffle.host = type
             add(riffle: riffle)
             return riffle as? T
         case .pan666:
             let riffle = Pan666(urlString: url)
+            riffle.password = password
             riffle.host = type
             add(riffle: riffle)
             return riffle as? T
         case .cchooo:
             let riffle = Ccchooo(urlString: url)
+            riffle.password = password
             riffle.host = type
             add(riffle: riffle)
             return riffle as? T

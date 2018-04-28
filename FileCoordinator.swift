@@ -17,7 +17,7 @@ extension FileManager {
 #if os(macOS)
         // 保存到下载文件夹下
         if let urlString = NSSearchPathForDirectoriesInDomains(.downloadsDirectory, .userDomainMask, true).first {
-            let url = URL(fileURLWithPath: urlString).appendingPathComponent(pack.fileName)
+            let url = URL(fileURLWithPath: urlString).appendingPathComponent(pack.saveFileName)
             do {
                 try pack.pack.revData?.write(to: url)
                 print(">>>>>> file saved! <<<<<<")
@@ -26,7 +26,7 @@ extension FileManager {
             }
         }
 #elseif os(iOS)
-        guard let url = urls(for: .documentDirectory, in: .allDomainsMask).first?.appendingPathComponent(pack.fileName), createFile(atPath: url.path, contents: pack.pack.revData, attributes: nil) else {
+        guard let url = urls(for: .documentDirectory, in: .allDomainsMask).first?.appendingPathComponent(pack.saveFileName), createFile(atPath: url.path, contents: pack.pack.revData, attributes: nil) else {
             print("<<<<<<<<<<<<<<<<<<< File Not Save! >>>>>>>>>>>>>>>>>>>>")
             return
         }

@@ -88,15 +88,18 @@ class ViewController: NSViewController {
 //                     "http://www.88pan.cc/file-532359.html",
 //                     "http://www.ccchoo.com/file-40055.html",
 //                     "http://www.ccchoo.com/file-40053.html"]http://www.chooyun.com/file-51745.html
-//        let items = ["http://www.666pan.cc/file-532641.html", "http://www.chooyun.com/file-51745.html", "http://www.feemoo.com/s/v2j0z15j", "http://www.ccchoo.com/file-40052.html", "http://www.666pan.cc/file-532273.html", "http://www.feemoo.com/file-1897522.html"]
-        let items = ["http://www.chooyun.com/file-96683.html"]
+        let items = ["http://www.666pan.cc/file-532641.html", "http://www.666pan.cc/file-532273.html", "http://www.88pan.cc/file-532359.html"]//, "http://www.chooyun.com/file-51745.html", "http://www.feemoo.com/s/v2j0z15j", "http://www.ccchoo.com/file-40052.html", "http://www.feemoo.com/file-1897522.html"
+//        let items = ["http://www.chooyun.com/file-96683.html"]
         for item in items {
-//            let riffle = Pan666(urlString: item)
-//            pipline.add(riffle: riffle)
-            if let _ = pipline.add(url: item) {
-                
+            if let _ = pipline.add(url: item, password: "") {
+            
             }
         }
+        
+//        let parts = "fileName。daf.昆明理工.zip".split(separator: ".")
+//        let last = String(parts.last ?? "")
+//        let prefix = String(parts.dropLast().joined())
+//        print("\(prefix)(\("无密码")).\(last)")
         
 //        let f1 = pipline.add(url: "http://www.feemoo.com/s/v2j0z15j") as? Feemoo
 //        f1?.downloadStateController = DownloadStateController
