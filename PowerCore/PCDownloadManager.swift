@@ -50,6 +50,13 @@ public class PCDownloadManager: NSObject {
         tk.resume()
         print(">>>>>>>> start task \(task.fileName)")
     }
+    
+    func remove(fromRiffle riffle: PCWebRiffle) {
+        if let index = tasks.index(where: { $0.request.riffle == riffle }) {
+            tasks[index].task.cancel()
+            tasks.remove(at: index)
+        }
+    }
 }
 
 extension PCDownloadManager : URLSessionDownloadDelegate {
@@ -69,8 +76,9 @@ extension PCDownloadManager : URLSessionDownloadDelegate {
             tasks[index].pack.revData = try Data(contentsOf: location)
             print("download \(tasks[index].fileName) finish!")
             // 调用下载完成回调
+            let task = tasks[index]
             tasks[index].request.downloadFinished?(tasks[index])
-            pipline.delegate?.pipline?(didFinishedTask: tasks[index])
+            pipline.delegate?.pipline?(didFinishedTask: task)
             tasks[index].pack.revData = nil
             guard tasks[index].request.isFileDownloadTask else {
                 print("*********** None File Download Task! No Delegate Excute")
@@ -108,13 +116,14 @@ extension PCDownloadManager : URLSessionDownloadDelegate {
         print("*********** download \(tasks[index].fileName) with error finished: \(e)")
         
         tasks[index].pack.error = error
+        let task = tasks[index]
         tasks[index].request.downloadFinished?(tasks[index])
         // 当下载任务非文件下载任务时，不执行通知
-        if tasks[index].request.isFileDownloadTask {
-            pipline.delegate?.pipline?(didFinishedTask: tasks[index])
+        if task.request.isFileDownloadTask {
+            pipline.delegate?.pipline?(didFinishedTask: task)
         }   else    {
             print("*********** None File Download Task!")
-            if let riffle = tasks[index].request.riffle {
+            if let riffle = task.request.riffle {
                 pipline.delegate?.pipline?(didFinishedRiffle: riffle)
             }
         }

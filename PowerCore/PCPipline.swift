@@ -91,7 +91,10 @@ public class PCPiplineSeat {
         
         // 任务完成要确定为文件下载并且下载完成标签为真时才执行下一个任务
         if working.first?.isFinished == true {
+            print("----------------- Run Next Riffle, wokers: \(working.count) -----------------")
             run()
+        }   else {
+            print("----------------- Current Riffle Not Finish Or Nor wokers, wokers: \(working.count) -----------------")
         }
     }
     
@@ -110,11 +113,28 @@ public class PCPiplineSeat {
     }
     
     func remove(riffle: PCWebRiffle) {
-        if let index = finished.index(where: { $0.host == riffle.host }) {
-            finished.remove(at: index)
-        }
         if let index = working.index(where: { $0.host == riffle.host }) {
-            working.remove(at: index)
+            if index == working.startIndex {            
+                working[index].downloadFinished()
+            }   else    {
+                working.remove(at: index)
+            }
+        }
+    }
+    
+    public func restart(mainURL: URL) {
+        if let index = finished.index(where: { $0.mainURL == mainURL }) {
+            let item = finished[index]
+            item.isFinished = false
+            let downloadManager = PCDownloadManager.share
+            if let downloadIndex = downloadManager.tasks.index(where: { $0.request.riffle?.mainURL == mainURL }) {
+                print("########### Remove Download Task for \(mainURL.absoluteString) ###########")
+                downloadManager.tasks.remove(at: downloadIndex)
+            }
+            print("########### Remove Riffle from finished group ###########")
+            finished.remove(at: index)
+            print("########### Add Riffle to Pipiline ###########")
+            pipline.add(riffle: item)
         }
     }
 }
@@ -206,7 +226,15 @@ public class PCPipeline {
     /// - Returns: 位置
     func find(withHost Hose: WebHostSite) -> Int? {
         return workers.index(where: { (seat) -> Bool in
-            return (seat.finished.first!.host == Hose) || (seat.working.first!.host == Hose)
+            if let ff = seat.finished.first {
+                return ff.host == Hose
+            }
+            
+            if let wf = seat.working.first {
+                return wf.host == Hose
+            }
+            
+            return false
         })
     }
     
