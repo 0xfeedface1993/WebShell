@@ -145,6 +145,10 @@ public class Feemoo: PCWebRiffle {
                 print("+++++ Link not url string: \(str)")
                 if let url = self.mainURL, let _ = str.range(of: " failed") {
                     self.verifyCodeParserErrorCount += 1
+                    if self.verifyCodeParserErrorCount >= 50 {
+                        self.downloadFinished()
+                        return
+                    }
                     DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2, execute: {
                         self.reloadCodeImage(url: url)
                     })
