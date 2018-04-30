@@ -32,11 +32,19 @@ public class PCDownloadTask: NSObject {
     public var request: PCDownloadRequest
     /// 文件名, 默认显示下载页面地址
     public var fileName: String
+    /// 保存文件名，包含解压密码
     var saveFileName: String {
         let parts = fileName.split(separator: ".")
         let last = String(parts.last ?? "")
         let prefix = String(parts.dropLast().joined())
         return "\(prefix)(\(request.riffle?.password ?? "无密码")).\(last)"
+    }
+    /// 当下载目录存在相同的文件时使用时间前缀
+    var timeStampFileName: String {
+        let date = Date()
+        let dateFormater = DateFormatter()
+        dateFormater.dateFormat = "yyyy-MM-dd-HH:mm:SS-"
+        return dateFormater.string(from: date) + saveFileName
     }
     /// http任务
     public var task: URLSessionDownloadTask

@@ -92,9 +92,14 @@ class ViewController: NSViewController {
 //        let items = ["http://www.chooyun.com/file-96683.html"]
         for item in items {
             if let _ = pipline.add(url: item, password: "") {
-            
+
             }
         }
+        
+//        let date = Date()
+//        let dateFormater = DateFormatter()
+//        dateFormater.dateFormat = "yyyy-MM-dd-HH:mm:SS-"
+//        print(dateFormater.string(from: date) + "saveFileName.zip")
         
 //        let parts = "fileName。daf.昆明理工.zip".split(separator: ".")
 //        let last = String(parts.last ?? "")
