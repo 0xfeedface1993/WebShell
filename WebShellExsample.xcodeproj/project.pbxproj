@@ -556,9 +556,9 @@
 			productReference = 27448B4020170ABA001FC925 /* WebShellExsampleUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
-		277C843A2046A45A00D7B2B1 /* WebShell-iOS */ = {
+		277C843A2046A45A00D7B2B1 /* WebShell_iOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 277C84442046A45B00D7B2B1 /* Build configuration list for PBXNativeTarget "WebShell-iOS" */;
+			buildConfigurationList = 277C84442046A45B00D7B2B1 /* Build configuration list for PBXNativeTarget "WebShell_iOS" */;
 			buildPhases = (
 				277C84362046A45A00D7B2B1 /* Sources */,
 				277C84372046A45A00D7B2B1 /* Frameworks */,
@@ -569,7 +569,7 @@
 			);
 			dependencies = (
 			);
-			name = "WebShell-iOS";
+			name = WebShell_iOS;
 			productName = "WebShell-iOS";
 			productReference = 277C843B2046A45A00D7B2B1 /* WebShell_iOS.framework */;
 			productType = "com.apple.product-type.framework";
@@ -629,9 +629,9 @@
 			productReference = 277C847A2047971D00D7B2B1 /* WebShellExample-iOSUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
-		27C9DBBB204146A100A87E9E /* WebShell */ = {
+		27C9DBBB204146A100A87E9E /* WebShell_macOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 27C9DBD3204146A100A87E9E /* Build configuration list for PBXNativeTarget "WebShell" */;
+			buildConfigurationList = 27C9DBD3204146A100A87E9E /* Build configuration list for PBXNativeTarget "WebShell_macOS" */;
 			buildPhases = (
 				27C9DBB7204146A100A87E9E /* Sources */,
 				27C9DBB8204146A100A87E9E /* Frameworks */,
@@ -642,7 +642,7 @@
 			);
 			dependencies = (
 			);
-			name = WebShell;
+			name = WebShell_macOS;
 			productName = WebShell;
 			productReference = 27C9DBBC204146A100A87E9E /* WebShell.framework */;
 			productType = "com.apple.product-type.framework";
@@ -740,9 +740,9 @@
 				27448B2220170ABA001FC925 /* WebShellExsample */,
 				27448B3420170ABA001FC925 /* WebShellExsampleTests */,
 				27448B3F20170ABA001FC925 /* WebShellExsampleUITests */,
-				27C9DBBB204146A100A87E9E /* WebShell */,
+				27C9DBBB204146A100A87E9E /* WebShell_macOS */,
 				27C9DBC3204146A100A87E9E /* WebShellTests */,
-				277C843A2046A45A00D7B2B1 /* WebShell-iOS */,
+				277C843A2046A45A00D7B2B1 /* WebShell_iOS */,
 				277C845B2047971D00D7B2B1 /* WebShellExample-iOS */,
 				277C846E2047971D00D7B2B1 /* WebShellExample-iOSTests */,
 				277C84792047971D00D7B2B1 /* WebShellExample-iOSUITests */,
@@ -953,12 +953,12 @@
 		};
 		277C848B2047979B00D7B2B1 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 277C843A2046A45A00D7B2B1 /* WebShell-iOS */;
+			target = 277C843A2046A45A00D7B2B1 /* WebShell_iOS */;
 			targetProxy = 277C848A2047979B00D7B2B1 /* PBXContainerItemProxy */;
 		};
 		27C9DBC7204146A100A87E9E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 27C9DBBB204146A100A87E9E /* WebShell */;
+			target = 27C9DBBB204146A100A87E9E /* WebShell_macOS */;
 			targetProxy = 27C9DBC6204146A100A87E9E /* PBXContainerItemProxy */;
 		};
 		27C9DBC9204146A100A87E9E /* PBXTargetDependency */ = {
@@ -968,7 +968,7 @@
 		};
 		27C9DBD0204146A100A87E9E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 27C9DBBB204146A100A87E9E /* WebShell */;
+			target = 27C9DBBB204146A100A87E9E /* WebShell_macOS */;
 			targetProxy = 27C9DBCF204146A100A87E9E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -1405,7 +1405,7 @@
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = macosx;
 				SWIFT_VERSION = 4.0;
-				VALID_ARCHS = "i386 x86_64 arm64 armv7 armv7s";
+				VALID_ARCHS = "i386 x86_64";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -1432,7 +1432,7 @@
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = macosx;
 				SWIFT_VERSION = 4.0;
-				VALID_ARCHS = "i386 x86_64 arm64 armv7 armv7s";
+				VALID_ARCHS = "i386 x86_64";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -1509,7 +1509,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		277C84442046A45B00D7B2B1 /* Build configuration list for PBXNativeTarget "WebShell-iOS" */ = {
+		277C84442046A45B00D7B2B1 /* Build configuration list for PBXNativeTarget "WebShell_iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				277C84452046A45B00D7B2B1 /* Debug */,
@@ -1545,7 +1545,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		27C9DBD3204146A100A87E9E /* Build configuration list for PBXNativeTarget "WebShell" */ = {
+		27C9DBD3204146A100A87E9E /* Build configuration list for PBXNativeTarget "WebShell_macOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				27C9DBD4204146A100A87E9E /* Debug */,

@@ -6,9 +6,9 @@
 //  Copyright © 2018年 ascp. All rights reserved.
 //
 
-#if TARGET_OS_MAC
+#if os(macOS)
     import Cocoa
-#elseif TARGET_OS_IPHONE
+#elseif os(iOS)
     import UIKit
 #endif
 
