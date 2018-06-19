@@ -77,7 +77,9 @@ public class Ccchooo: PCWebRiffle {
             }   else {
                 self.downloadFinished()
             }
-        }, failedAction: nil, isAutomaticallyPass: true)
+        }, failedAction: { e in
+            self.downloadFinished()
+        }, isAutomaticallyPass: true)
         let main3Page = PCWebBullet(method: .get, headFields: ["Referer":"http://www.ccchoo.com/down2-\(fileNumber).html",
             "Accept-Language":"zh-cn",
             "Upgrade-Insecure-Requests":"1",

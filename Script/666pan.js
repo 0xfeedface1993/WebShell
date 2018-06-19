@@ -1,13 +1,11 @@
-function getDowloadLink() {
-    var results = document.body.innerHTML.match(/http:\/\/down\w\.ccchoo\.com[^"]+/g);
-    if (results != null && results.length > 0) {
-        return results[0];
-    }
-    return "";
+function loadImage() {
+	var image = document.getElementById("imgcode");
+	return getBase64Image(image);
 }
-                                                                              function selfHTML() {
-                                                                              return document.body.innerHTML;
-                                                                              }
+
+function selfHTML() {
+	return document.body.innerHTML;
+}
 
 function getBase64Image(img) {
     var canvas = document.createElement("canvas");
@@ -19,51 +17,38 @@ function getBase64Image(img) {
     return dataURL.replace("data:image/png;base64,", "");
 }
                                                                               
-                                                                              function getMiddleLink(){
-                                                                              return document.querySelector('div[class="d0"]>div>a[class="down_btn"]').href;
-                                                                              }
-
-                                                                              
-function getImage() {
-    var code = document.getElementById('imgcode');
-    var imgx = "";
-    if (code != null) {
-        imgx = getBase64Image(code);
-    }
-    return { "image": imgx};
+function getMiddleLink(){
+	var link = document.querySelector("#addr_list>a.down_btn:last-of-type").href;
+	return link;
 }
+
 
 function getFileName() {
-    var name = document.querySelector('div.fb_l.f14.txtgray>.file_item>li').innerText + '.rar';
-    return uuid(8, 10) + name;
+    var name = document.querySelector('div.fb_l.f14.txtgray>.file_item>li');
+  	name = name == null ? document.querySelector("div.row-fluid>div.span9>h1"):name;
+  	name = name.innerText;
+	return name;
 }
 
-function uuid(len, radix) {
-    var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
-    var uuid = [],
-        i;
-    radix = radix || chars.length;
+var codeFlag = "bad";
 
-    if (len) {
-        // Compact form
-        for (i = 0; i < len; i++) uuid[i] = chars[0 | Math.random() * radix];
-    } else {
-        // rfc4122, version 4 form
-        var r;
-
-        // rfc4122 requires these characters
-        uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
-        uuid[14] = '4';
-
-        // Fill in random data. At i==19 set the high bits of clock sequence as
-        // per rfc4122, sec. 4.1.5
-        for (i = 0; i < 36; i++) {
-            if (!uuid[i]) {
-                r = 0 | Math.random() * 16;
-                uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r];
-            }
-        }
-    }
-
-    return uuid.join('');
+function check_code(code){
+	document.getElementById('s1').disabled =true;  
+	$.post("ajax.php", "action=check_code&code=" + code,
+		function(msg){
+		 if(msg=='true'){
+			document.getElementById('down_box').style.display ='';
+			codeFlag = "good";
+		 }else{
+			document.getElementById('code_tips').innerHTML ='下载验证码不正确,请重新输入。';
+			document.getElementById('code').value='';
+			document.getElementById('s1').disabled =false;
+			chg_imgcode();
+			document.getElementById('code_tips').style.display='none';
+		 }
+	   });
 }
+
+
+
+

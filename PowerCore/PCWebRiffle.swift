@@ -71,8 +71,11 @@ public class PCWebRiffle: NSObject {
     
     //MARK: - 通知事件
     func downloadFinished() {
+        print("----------------- Download Finished Note -----------------")
         isFinished = true
-        seat?.webView.navigationDelegate = nil
+        DispatchQueue.main.async {
+            self.seat?.webView.navigationDelegate = nil
+        }
         seat?.taskFinished(finishedRiffle: self)
     }
     

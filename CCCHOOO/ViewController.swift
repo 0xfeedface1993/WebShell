@@ -8,7 +8,7 @@
 
 import Cocoa
 import WebKit
-import WebShell
+import WebShell_macOS
 
 /// 下载状态数据模型，用于视图数据绑定
 public class DownloadInfo : NSObject {
@@ -44,10 +44,17 @@ public class DownloadInfo : NSObject {
 class ViewController: NSViewController {
     @IBOutlet var DownloadStateController: NSArrayController!
     
+    @IBOutlet weak var codeView: NSImageView!
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
+        
+        NotificationCenter.default.addObserver(forName: ImageFetchNotification, object: nil, queue: OperationQueue.main) { (note) in
+            if let image = note.object as? ImageMaker {
+                self.codeView.image = image.shareImage
+            }
+        }
         
 //        webview.load(currentResult!.request)
 //        load666PanSequence(urlString: "")
@@ -88,7 +95,7 @@ class ViewController: NSViewController {
 //                     "http://www.88pan.cc/file-532359.html",
 //                     "http://www.ccchoo.com/file-40055.html",
 //                     "http://www.ccchoo.com/file-40053.html"]http://www.chooyun.com/file-51745.html
-        let items = ["http://www.666pan.cc/file-532641.html", "http://www.666pan.cc/file-532273.html", "http://www.88pan.cc/file-532359.html"]//, "http://www.chooyun.com/file-51745.html", "http://www.feemoo.com/s/v2j0z15j", "http://www.ccchoo.com/file-40052.html", "http://www.feemoo.com/file-1897522.html"
+        let items = ["http://www.678pan.org/file-339260.html"]//, "http://www.chooyun.com/file-51745.html", "http://www.feemoo.com/s/v2j0z15j", "http://www.ccchoo.com/file-40052.html", "http://www.feemoo.com/file-1897522.html"
 //        let items = ["http://www.chooyun.com/file-96683.html"]
         for item in items {
             if let _ = pipline.add(url: item, password: "") {

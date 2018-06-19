@@ -18,7 +18,7 @@
     
 #endif
 
-class ImageMaker {
+public class ImageMaker {
 #if os(macOS)
     public var shareImage : NSImage?
     static func read(imageName: String) -> NSImage? {
