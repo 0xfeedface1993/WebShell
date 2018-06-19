@@ -13,7 +13,7 @@ function getImage() {
 }
 
 function getFileDownloadLink() {
-    return document.body.innerHTML.match(/<a id="dnode[^>]+>/g)[0].match(/[^"]\w+:\/\/[^"]+/g)[0];
+    return document.querySelector("#addr_list>a[id^=\"dnode_\"]").getAttribute("data-url");  
 }
 
 function getDecode() {
@@ -23,3 +23,21 @@ function getDecode() {
 function getSubLinkAndDecode() {
     return {"decode": getDecode(), "link": getFileDownloadLink()};
 }
+
+
+function check_code(code){
+    document.getElementById('s1').disabled =true;  
+    $.post("ajax.php", "action=check_code&code=" + code,
+        function(msg){
+         if(msg=='true'){
+            document.getElementById('down_box').style.display ='';
+         }else{
+            document.getElementById('code_tips').innerHTML ='下载验证码不正确,请重新输入。';
+            document.getElementById('code').value='';
+            document.getElementById('s1').disabled =false;
+            chg_imgcode();
+            document.getElementById('code_tips').style.display='none';
+         }
+       });
+}
+

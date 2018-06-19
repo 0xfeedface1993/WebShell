@@ -28,9 +28,11 @@ class Yousuwp: PCWebRiffle {
             self.rule = rule
         }
         
-        static let file = PageURL(rule: { id in return URL(string: "http://www.yousuwp.com/file-\(id).html")! })
-        static let down2 = PageURL(rule: { id in return URL(string: "http://www.yousuwp.com/down2-\(id).html")! })
-        static let down = PageURL(rule: { id in return URL(string: "http://www.yousuwp.com/down-\(id).html")! })
+        private static let host = "www.yousuwp.com"
+        
+        static let file = PageURL(rule: { id in return URL(string: "http://\(host)/file-\(id).html")! })
+        static let down2 = PageURL(rule: { id in return URL(string: "http://\(host)/down2-\(id).html")! })
+        static let down = PageURL(rule: { id in return URL(string: "http://\(host)/down-\(id).html")! })
     }
     
     var fileID = ""
@@ -65,47 +67,46 @@ class Yousuwp: PCWebRiffle {
         var down = PageURL.down
         down.fileID = fileID
         
-        let main3Unit = InjectUnit(script: "\(functionScript)", successAction: { (data) in
-//            guard let image = data as? String, let base64Data = Data(base64Encoded: image), let img = NSImage(data: base64Data) else {
-//                print("worong data!")
-//                return
-//            }
+        func imagePaserUnitMaker() -> [InjectUnit] {
+            let delayTime = 0.5
             
-//            DispatchQueue.main.async {
-//                if let promot = self.promotViewController {
-//                    promot.codeView.imageView.image = image
-//                }   else    {
-//                    self.show(verifyCode: image, confirm: { (code) in
-//                        self.load666PanDownloadLink(code: code)
-//                    }, reloadWay: { (imageView) in
-//                        self.reload666PanImagePage()
-//                    }, withRiffle: self)
-//                }
-//            }
-            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1, execute: {
-                self.seat?.webView.evaluateJavaScript("getSubLinkAndDecode();", completionHandler: { (datx, err) in
-                    guard let items = datx as? [String : String] else {
-                        print("****** Data not dictionary!")
-                        return
-                    }
-                    
-                    guard let string = items["link"] else {
-                        print("****** Link not found!")
-                        return
-                    }
-                    
-                    guard let decode = items["decode"] else {
-                        print("****** Decode not found!")
-                        return
-                    }
-                    
-                    let url = URL(string: string)
-                    self.loadDownloadLink(url: url!, decode: decode)
+            let uploadCodeUnit = InjectUnit(script: "\(functionScript) check_code('abcd');", successAction: { (dat) in
+                DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + delayTime, execute: {
+                    self.execNextCommand()
                 })
-            })
-        }, failedAction: { (err) in
-            print(err)
-        }, isAutomaticallyPass: false);
+            }, failedAction: { _ in
+                self.downloadFinished()
+            }, isAutomaticallyPass: false)
+            
+            let loadDownloadAddressUnit = InjectUnit(script: "getSubLinkAndDecode();", successAction: { (dat) in
+                guard let items = dat as? [String : String] else {
+                    print("****** Data not dictionary!")
+                    self.downloadFinished()
+                    return
+                }
+                
+                guard let string = items["link"] else {
+                    print("****** Link not found!")
+                    self.downloadFinished()
+                    return
+                }
+                
+                guard let decode = items["decode"] else {
+                    print("****** Decode not found!")
+                    self.downloadFinished()
+                    return
+                }
+                
+                let url = URL(string: string)
+                self.loadDownloadLink(url: url!, decode: decode)
+            }, failedAction: { _ in
+                self.downloadFinished()
+            }, isAutomaticallyPass: true)
+            
+            return [uploadCodeUnit, loadDownloadAddressUnit]
+        }
+        
+        let units3 = imagePaserUnitMaker()
         
         let main1Page = PCWebBullet(method: .get, headFields: ["Accept-Language":"zh-cn",
                                                                "Upgrade-Insecure-Requests":"1",
@@ -123,7 +124,7 @@ class Yousuwp: PCWebRiffle {
                                                                "Accept-Encoding":"gzip, deflate",
                                                                "Accept":fullAccept,
                                                                "User-Agent":userAgent,
-                                                               "Referer":down2.url.absoluteString], formData: [:], url: down.url, injectJavaScript: [main3Unit])
+                                                               "Referer":down2.url.absoluteString], formData: [:], url: down.url, injectJavaScript: units3)
         watting += [main1Page, main2Page, main3Page]
         seat?.webView.load(watting[0].request)
     }
@@ -131,98 +132,35 @@ class Yousuwp: PCWebRiffle {
     func loadDownloadLink(url: URL, decode: String) {
         var down = PageURL.down
         down.fileID = fileID
-        
-        let unit = InjectUnit(script: "document.body.innerHTML;", successAction: { (data) in
-            guard let body = data as? String else {
-                print("***** Not string!")
-                return
+        let header = ["Host":url.portHost,
+                      "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                      "Accept-Encoding":"gzip, deflate",
+                      "Accept-Language":"zh-cn",
+                      "Content-Type":"application/x-www-form-urlencoded",
+                      "Origin":down.url.host!,
+                      "User-Agent":userAgent,
+                      "Connection":"keep-alive",
+                      "Upgrade-Insecure-Requests":"1",
+                      "Referer":down.url.absoluteString]
+        let post = "dcode=\(decode)"
+        var fileDownloadRequest = PCDownloadRequest(headFields: header, url: url, method: .post, body: post.data(using: .utf8)!)
+        fileDownloadRequest.downloadStateUpdate = nil
+        fileDownloadRequest.downloadFinished = { pack in
+            print(pack.pack.revData?.debugDescription ?? "\n%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
+            if let data = pack.pack.revData, let str = String(data: data, encoding: .utf8) {
+                print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%\n")
+                print(str)
+                print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%")
             }
-            print(body)
-        }, failedAction: { (err) in
-            print(err)
-        }, isAutomaticallyPass: false);
-        
-        let header = ["Connection": "keep-alive",
-                      "Referer": down.url.absoluteString,
-                      "Accept-Language": "zh-cn",
-                      "Origin": "http://www.yousuwp.com",
-                      "Upgrade-Insecure-Requests": "1",
-                      "Content-Type": "application/x-www-form-urlencoded",
-                      "Accept-Encoding": "gzip, deflate",
-                      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                      "User-Agent": userAgent,
-                      "Host": url.portHost]
-        
-        let download = PCWebBullet(method: .get, headFields: header, formData: [:], url: url, injectJavaScript: [unit])
-        watting.append(download)
-        seat?.webView.load(watting[0].request)
-        
-//        var down = PageURL.down
-//        down.fileID = fileID
-//        let header = ["Connection": "keep-alive",
-//                      "Referer": down.url.absoluteString,
-//                      "Accept-Language": "zh-cn",
-//                      "Origin": "http://www.yousuwp.com",
-//                      "Upgrade-Insecure-Requests": "1",
-//                      "Content-Type": "application/x-www-form-urlencoded",
-//                      "Accept-Encoding": "gzip, deflate",
-//                      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-//                      "User-Agent": userAgent]
-//        let post = "dcode=\(decode)"
-//        var request = PCDownloadRequest(headFields: header, url: url, method: .post, body: post.data(using: .utf8)!)
-//        request.isFileDownloadTask = false
-//        request.downloadStateUpdate = nil
-//        request.downloadFinished = { (tk) in
-//            guard let dat = tk.pack.revData, let str = String(data: dat, encoding: .utf8) else {
-//                print("worong data!")
-//                return
-//            }
-//            print("+++++ Parser string success: \(str)")
-//
-//            do {
-//                let regx = try NSRegularExpression(pattern: "http://\\w+\\.\\w+.\\w+[:\\w]+/\\w+\\.\\w+\\?[^\"]+", options: NSRegularExpression.Options.caseInsensitive)
-//                if let result = regx.firstMatch(in: str, options: .reportProgress, range: NSRange(location: 0, length: (str as NSString).length)) {
-//                    let link = (str as NSString).substring(with: result.range)
-//                    print("++++++ find download link: \(link)")
-//
-//                    guard let urlx = URL(string: link) else {
-//                        print("+++++ Link not url string: \(link)")
-//                        self.downloadFinished()
-//                        return
-//                    }
-//
-//                    var fileDownloadRequest = PCDownloadRequest(headFields: ["Referer":request.url.absoluteString,
-//                                                                             "Accept-Language":"zh-cn",
-//                                                                             "Upgrade-Insecure-Requests":"1",
-//                                                                             "Accept-Encoding":"gzip, deflate",
-//                                                                             "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-//                                                                             "User-Agent":userAgent], url: urlx, method: .get, body: nil)
-//                    fileDownloadRequest.downloadStateUpdate = nil
-//                    fileDownloadRequest.downloadFinished = { pack in
-//                        print(pack.pack.revData?.debugDescription ?? "\n%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
-//                        if let data = pack.pack.revData, let str = String(data: data, encoding: .utf8) {
-//                            print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%\n")
-//                            print(str)
-//                            print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%")
-//                        }
-//
-//                        defer {
-//                            self.downloadFinished()
-//                        }
-//
-//                        FileManager.default.save(pack: pack)
-//                    }
-//                    fileDownloadRequest.riffle = self
-//                    PCDownloadManager.share.add(request: fileDownloadRequest)
-//                }   else    {
-//                    self.downloadFinished()
-//                }
-//            }   catch   {
-//                print("*********** \(error)")
-//                self.downloadFinished()
-//            }
-//        }
-//        PCDownloadManager.share.add(request: request)
+            
+            defer {
+                self.downloadFinished()
+            }
+            
+            FileManager.default.save(pack: pack)
+        }
+        fileDownloadRequest.riffle = self
+        PCDownloadManager.share.add(request: fileDownloadRequest)
     }
 }
 
