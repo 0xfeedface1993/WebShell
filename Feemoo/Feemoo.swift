@@ -293,6 +293,7 @@ public class Feemoo: PCWebRiffle {
             }
         }
         fileDownloadRequest.riffle = self
+        fileDownloadRequest.isFileDownloadTask = false
         PCDownloadManager.share.add(request: fileDownloadRequest)
     }
     
