@@ -164,4 +164,9 @@ extension PCDownloadManager : URLSessionDownloadDelegate {
         // delegate
         pipline.delegate?.pipline?(didUpdateTask: tasks[index])
     }
+    
+    // 拦截自动重定向
+    public func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
+        completionHandler(nil)
+    }
 }

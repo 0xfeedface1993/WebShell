@@ -16,8 +16,8 @@ let GroupDefaultRule = "\\.[^\\.]+\\."
 public class PCPiplineSeat {
     var webView : WKWebView!
     var site : WebHostSite = .unknowsite
-    var finished = [PCWebRiffle]()
-    var working = [PCWebRiffle]()
+    public var finished = [PCWebRiffle]()
+    public var working = [PCWebRiffle]()
     private var pipline = PCPipeline.share
     private var timer: Timer?
     private var lastDownloadTime: Date?

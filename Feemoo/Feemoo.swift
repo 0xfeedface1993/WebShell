@@ -34,7 +34,8 @@ public class Feemoo: PCWebRiffle {
     
     override public func begin() {
         loadWebView()
-        loadFeemooSequenceBullet()
+//        loadFeemooSequenceBullet()
+        startSequence()
     }
     
     /// 启动序列
@@ -69,7 +70,7 @@ public class Feemoo: PCWebRiffle {
                                                             "Upgrade-Insecure-Requests": "1",
                                                             "Accept-Encoding": "gzip, deflate",
                                                             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                                                            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6",
+                                                            "User-Agent": userAgent,
                                                             "Host": "www.feemoo.com"], formData: [:], url: url, injectJavaScript: [mainJSUnit])
         let secondPage = reloadCodeImageMaker(url: url)
         
@@ -93,6 +94,7 @@ public class Feemoo: PCWebRiffle {
     func reloadCodeImageMaker(url: URL) -> PCWebBullet {
         let secondJSUnit = InjectUnit(script: "\(functionScript) getCodeImageAndCodeEncry();", successAction: {
             dat in
+            self.feemooRefer = url.absoluteString
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1, execute: {
                 self.seat?.webView.evaluateJavaScript("function callFetchImage() {return { \"img\": getBase64Image(document.getElementById('verityImgtag')), \"codeencry\": codeencry} } callFetchImage();", completionHandler: { (datx, err) in
                     guard let dic = datx as? [String:String],
@@ -113,7 +115,7 @@ public class Feemoo: PCWebRiffle {
             })
         }, failedAction: nil, isAutomaticallyPass: false)
         let secondPage = PCWebBullet(method: .get,
-                                     headFields: ["User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"],
+                                     headFields: ["User-Agent":userAgent],
                                      formData: [:],
                                      url: url,
                                      injectJavaScript: [secondJSUnit])
@@ -158,36 +160,170 @@ public class Feemoo: PCWebRiffle {
                 return
             }
             
-            let label = UUID().uuidString
-            var fileDownloadRequest = PCDownloadRequest(headFields: ["Referer":self.feemooRefer,
-                                            "Accept-Language":"zh-cn",
-                                            "Upgrade-Insecure-Requests":"1",
-                                            "Accept-Encoding":"gzip, deflate",
-                                            "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                                            "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: url, method: .get, body: nil)
-            fileDownloadRequest.downloadStateUpdate = nil
-            fileDownloadRequest.downloadFinished = { pack in
-                print(pack.pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
-                
-                defer {
-                    self.downloadFinished()
-                }
-                
-                if let data = pack.pack.revData, let str = String(data: data, encoding: .utf8) {
-                    print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%\n")
-                    print(str)
-                    print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%")
-                }
-                
-                FileManager.default.save(pack: pack)
-            }
-            fileDownloadRequest.riffle = self
-            PCDownloadManager.share.add(request: fileDownloadRequest)
+            self.redirectDownload(url: url)
         }, failedAction: { (e) in
             print(e)
         }, isAutomaticallyPass: true)
         
         watting[0].injectJavaScript = [imageCodeUnit, fetchLink]
         execNextCommand()
+    }
+    
+    
+    // 测试下载
+    func startSequence() {
+        guard let urlx = mainURL else {
+            return
+        }
+        
+        let url = URL(string: "http://www.feemoo.com" + urlx.path)!
+//        mainURL = url
+        
+        let mainJSUnit = InjectUnit(script: "\(functionScript) getSecondPageLinkAndFileName();", successAction: {
+            dat in
+            guard let dic = dat as? [String:String] else {
+                print("wrong data!")
+                return
+            }
+            
+            self.fileName = dic["fileName"] ?? (UUID().uuidString + ".feemoo")
+            print("file name: \(self.fileName)")
+            
+            
+            if let fileid = dic["fileid"], let href = dic["href"] {
+                print("fileid: \(fileid)")
+                print("href: \(href)")
+                self.fileid = fileid
+                self.feemooRefer = href
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1, execute: {
+                    secondPageLoad()
+                })
+            }   else    {
+                self.downloadFinished()
+            }
+        }, failedAction: { _ in self.downloadFinished() }, isAutomaticallyPass: false)
+        
+        let mainPage = PCWebBullet(method: .get, headFields: ["Connection": "keep-alive",
+                                                              "Accept-Language": "zh-cn",
+                                                              "Upgrade-Insecure-Requests": "1",
+                                                              "Accept-Encoding": "gzip, deflate",
+                                                              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                                                              "User-Agent": userAgent,
+                                                              "Host": url.host ?? ""], formData: [:], url: url, injectJavaScript: [mainJSUnit])
+       
+        
+        func secondPageLoad() {
+            let secondJSUnit = InjectUnit(script: "\(functionScript) getCodeImageAndCodeEncry();", successAction: { (dat) in
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1, execute: {
+                    self.watting[0].injectJavaScript = self.imageInjectUnitMaker()
+                    self.execNextCommand()
+                })
+            }, failedAction: { (err) in
+                self.downloadFinished()
+            }, isAutomaticallyPass: false)
+            
+            let secondPage = PCWebBullet(method: .get,
+                                         headFields: ["Host":url.host ?? "",
+                                                      "Upgrade-Insecure-Requests":"1",
+                                                      "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                                                      "User-Agent":userAgent,
+                                                      "Referer":url.absoluteString,
+                                                      "Accept-Language":"zh-cn",
+                                                      "Accept-Encoding":"gzip, deflate",
+                                                      "Connection":"keep-alive"],
+                                         formData: [:],
+                                         url: url,
+                                         injectJavaScript: [secondJSUnit])
+            watting = [secondPage]
+            seat?.webView.load(watting[0].request)
+        }
+        
+        watting = [mainPage]
+        seat?.webView.load(watting[0].request)
+    }
+    
+    func imageInjectUnitMaker() -> [InjectUnit] {
+        let reloadUnit = InjectUnit(script: "\(functionScript) getimgcoded();", successAction: { (dat) in
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1, execute: {
+                self.execNextCommand()
+            })
+        }, failedAction: { (err) in
+            self.downloadFinished()
+        }, isAutomaticallyPass: false)
+        
+        let fetchUnit = InjectUnit(script: "getImageString();", successAction: { (dat) in
+            guard let str = dat as? String, let base64 = Data(base64Encoded: str) else {
+                self.downloadFinished()
+                return
+            }
+            
+            let image = ImageMaker(data: base64)
+            AIBot.recognize(codeImage: image, completion: { (labels) in
+                let code = labels.first + labels.second + labels.third + labels.four
+                print("************ found code: \(code)")
+                self.loadFeemooDownloadLink(code: code)
+            })
+            
+        }, failedAction: { (err) in
+            self.downloadFinished()
+        }, isAutomaticallyPass: false)
+        
+        return [reloadUnit, fetchUnit]
+    }
+    
+    /// 通过中转文件地址获取重定向文件地址
+    ///
+    /// - Parameter url: 中转文件地址
+    func redirectDownload(url: URL) {
+        var fileDownloadRequest = PCDownloadRequest(headFields: ["Referer":self.feemooRefer,
+                                                                 "Accept-Language":"zh-cn",
+                                                                 "Upgrade-Insecure-Requests":"1",
+                                                                 "Accept-Encoding":"gzip, deflate",
+                                                                 "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                                                                 "User-Agent":userAgent], url: url, method: .get, body: nil)
+        self.feemooRefer = url.absoluteString
+        fileDownloadRequest.downloadStateUpdate = nil
+        fileDownloadRequest.downloadFinished = { pack in
+            print(pack.pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
+            
+            if let response = pack.task.response as? HTTPURLResponse, let location = response.allHeaderFields["Location"] as? String, let fileURL = URL(string: location) {
+                self.downloadFile(url: fileURL)
+            }   else    {
+                self.downloadFinished()
+            }
+        }
+        fileDownloadRequest.riffle = self
+        PCDownloadManager.share.add(request: fileDownloadRequest)
+    }
+    
+    
+    /// 下载文件
+    ///
+    /// - Parameter url: 文件实际下载路径
+    func downloadFile(url: URL) {
+        var fileDownloadRequest = PCDownloadRequest(headFields: ["Referer":self.feemooRefer,
+                                                                 "Accept-Language":"zh-cn",
+                                                                 "Upgrade-Insecure-Requests":"1",
+                                                                 "Accept-Encoding":"gzip, deflate",
+                                                                 "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                                                                 "User-Agent":userAgent], url: url, method: .get, body: nil)
+        fileDownloadRequest.downloadStateUpdate = nil
+        fileDownloadRequest.downloadFinished = { pack in
+            print(pack.pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
+            
+            defer {
+                self.downloadFinished()
+            }
+            
+            if let data = pack.pack.revData, let str = String(data: data, encoding: .utf8) {
+                print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%\n")
+                print(str)
+                print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%")
+            }
+            
+            FileManager.default.save(pack: pack)
+        }
+        fileDownloadRequest.riffle = self
+        PCDownloadManager.share.add(request: fileDownloadRequest)
     }
 }
