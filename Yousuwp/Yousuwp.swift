@@ -143,7 +143,7 @@ class Yousuwp: PCWebRiffle {
                       "Upgrade-Insecure-Requests":"1",
                       "Referer":down.url.absoluteString]
         let post = "dcode=\(decode)"
-        var fileDownloadRequest = PCDownloadRequest(headFields: header, url: url, method: .post, body: post.data(using: .utf8)!)
+        var fileDownloadRequest = PCDownloadRequest(headFields: header, url: url, method: .post, body: post.data(using: .utf8)!, uuid: uuid)
         fileDownloadRequest.downloadStateUpdate = nil
         fileDownloadRequest.downloadFinished = { pack in
             print(pack.pack.revData?.debugDescription ?? "\n%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")

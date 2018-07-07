@@ -9,6 +9,7 @@
 import WebKit
 
 public class PCWebRiffle: NSObject {
+    public var uuid = UUID()
     /// 解压密码
     public var password = ""
     /// 下载首页url
@@ -65,6 +66,7 @@ public class PCWebRiffle: NSObject {
     }
     
     deinit {
+        print("&&& Deinit Riffle &&&")
         seat?.webView.stopLoading()
         seat?.webView.navigationDelegate = nil
     }
@@ -74,9 +76,9 @@ public class PCWebRiffle: NSObject {
         print("----------------- Download Finished Note -----------------")
         isFinished = true
         DispatchQueue.main.async {
-            self.seat?.webView.navigationDelegate = nil
+//            self.seat?.webView.navigationDelegate = nil
+            self.seat?.taskFinished(finishedRiffle: self)
         }
-        seat?.taskFinished(finishedRiffle: self)
     }
     
     public func begin() {
@@ -91,7 +93,7 @@ public class PCWebRiffle: NSObject {
         config.userContentController = userController
         seat?.webView = WKWebView(frame: CGRect.zero, configuration: config)
         seat?.webView.navigationDelegate = self
-        seat?.webView.customUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6"
+        seat?.webView.customUserAgent = userAgent
     }
 }
 

@@ -136,7 +136,7 @@ public class Pan666 : PCWebRiffle {
                                                                  "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1.1 Safari/605.1.15",
                                                                  "Referer":pan6663URL.absoluteString,
                                                                  "Accept-Language":"zh-cn",
-                                                                 "Accept-Encoding":"gzip, deflate"], url: url, method: .get, body: nil)
+                                                                 "Accept-Encoding":"gzip, deflate"], url: url, method: .get, body: nil, uuid: uuid)
         fileDownloadRequest.downloadStateUpdate = nil
         fileDownloadRequest.downloadFinished = { pack in
             print(pack.pack.revData?.debugDescription ?? "\n%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")

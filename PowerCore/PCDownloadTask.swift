@@ -62,6 +62,8 @@ public class PCDownloadTask: NSObject {
 }
 
 public struct PCDownloadRequest {
+    /// uuid 用于标识任务
+    public var uuid: UUID
     /// http报文头部键值对
     public var headFields : [String:String]
     /// 文件下载地址
@@ -95,10 +97,11 @@ public struct PCDownloadRequest {
     /// 下载完成回调
     var downloadFinished : ((PCDownloadTask) -> ())?
     
-    init(headFields: [String:String], url : URL, method : HTTPMethod, body : Data?) {
+    init(headFields: [String:String], url : URL, method : HTTPMethod, body : Data?, uuid: UUID) {
         self.headFields = headFields
         self.url = url
         self.method = method
         self.body = body
+        self.uuid = uuid
     }
 }

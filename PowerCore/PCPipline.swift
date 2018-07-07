@@ -27,7 +27,7 @@ public class PCPiplineSeat {
         print(">>>>>>>> Add group \(self.site) !")
         let config = WKWebViewConfiguration()
         webView = WKWebView(frame: CGRect.zero, configuration: config)
-        webView.customUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6"
+        webView.customUserAgent = userAgent
     }
     
     /// 添加下载任务，若任务不属于该序列的站点则不添加
