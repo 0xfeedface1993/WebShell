@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		240D326520F5B49E00AED3C4 /* V2File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 240D326420F5B49E00AED3C4 /* V2File.swift */; };
+		240D326620F5B49E00AED3C4 /* V2File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 240D326420F5B49E00AED3C4 /* V2File.swift */; };
 		24F9C6CA20D8E05600E1F88D /* Yousuwp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F9C6C920D8E05600E1F88D /* Yousuwp.swift */; };
 		24F9C6CB20D8E05600E1F88D /* Yousuwp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F9C6C920D8E05600E1F88D /* Yousuwp.swift */; };
 		24F9C6CD20D8E06100E1F88D /* yousuwp.js in Resources */ = {isa = PBXBuildFile; fileRef = 24F9C6CC20D8E06100E1F88D /* yousuwp.js */; };
@@ -106,6 +108,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		240D326420F5B49E00AED3C4 /* V2File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = V2File.swift; sourceTree = "<group>"; };
 		24C94C2D20C6C06D00EFAC82 /* MLMaker.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MLMaker.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		24F9C6C920D8E05600E1F88D /* Yousuwp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Yousuwp.swift; sourceTree = "<group>"; };
 		24F9C6CC20D8E06100E1F88D /* yousuwp.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = yousuwp.js; sourceTree = "<group>"; };
@@ -184,6 +187,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		240D326320F5B48300AED3C4 /* V2 */ = {
+			isa = PBXGroup;
+			children = (
+				240D326420F5B49E00AED3C4 /* V2File.swift */,
+			);
+			path = V2;
+			sourceTree = "<group>";
+		};
 		24F9C6C820D8E05600E1F88D /* Yousuwp */ = {
 			isa = PBXGroup;
 			children = (
@@ -311,6 +322,7 @@
 		27C9DBDA204146D300A87E9E /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				240D326320F5B48300AED3C4 /* V2 */,
 				24F9C6CF20D8E17500E1F88D /* Const.swift */,
 				24F9C6C820D8E05600E1F88D /* Yousuwp */,
 				2749698820886B8D009A1E1B /* PowerCore */,
@@ -561,6 +573,7 @@
 				277C84912047A0BB00D7B2B1 /* FileCoordinator.swift in Sources */,
 				277C84522046A49500D7B2B1 /* Ccchooo.swift in Sources */,
 				274969A120899A65009A1E1B /* PCWebBullet.swift in Sources */,
+				240D326620F5B49E00AED3C4 /* V2File.swift in Sources */,
 				277C84492046A49500D7B2B1 /* VCMLParser.swift in Sources */,
 				277C84482046A49500D7B2B1 /* Four.mlmodel in Sources */,
 				2745A3C3209175520060F237 /* Feemoo.swift in Sources */,
@@ -595,6 +608,7 @@
 				277C8432204652F700D7B2B1 /* VCMLParser.swift in Sources */,
 				2749699320888222009A1E1B /* PCPipline.swift in Sources */,
 				2749698E20887048009A1E1B /* PCDownloadManager.swift in Sources */,
+				240D326520F5B49E00AED3C4 /* V2File.swift in Sources */,
 				24F9C6CA20D8E05600E1F88D /* Yousuwp.swift in Sources */,
 				277C849020479F3100D7B2B1 /* FileCoordinator.swift in Sources */,
 				24F9C6D020D8E17500E1F88D /* Const.swift in Sources */,

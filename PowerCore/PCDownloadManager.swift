@@ -9,6 +9,7 @@
 import Foundation
 
 public class PCDownloadManager: NSObject {
+    public typealias BackgroundTaskCaller = ([URLSessionDownloadTask]) -> [(task: URLSessionDownloadTask, url: URL, remoteURL: URL, uuid: UUID)]
     private static let _manager = PCDownloadManager()
     private let pipline = PCPipeline.share
     /// 外部访问的单例对象
@@ -19,6 +20,14 @@ public class PCDownloadManager: NSObject {
     }
     
     private var session : URLSession!
+    public lazy var backgroundSession : URLSession = {
+        let config = URLSessionConfiguration.background(withIdentifier: "com.ascp.background.downloader")
+        #if os(iOS)
+        config.sessionSendsLaunchEvents = true
+        #endif
+        return URLSession(configuration: config, delegate: self, delegateQueue: OperationQueue.main)
+    }()
+    public var completeHandle = [String: () -> Void]()
     
     var tasks = [PCDownloadTask]()
     
@@ -32,19 +41,44 @@ public class PCDownloadManager: NSObject {
         session = URLSession(configuration: config, delegate: self, delegateQueue: OperationQueue.main)
     }
     
+    
+    /// 读取后台下载任务，需要手动调用
+    ///
+    /// - Parameter caller: 调用回调，需要调用者返回PCDownloadTask数组对象
+    public func loadBackgroundTask(caller: BackgroundTaskCaller?) {
+        backgroundSession.getAllTasks(completionHandler: {
+            if let tks = $0 as? [URLSessionDownloadTask], let packs = caller?(tks.filter({ tk in !self.tasks.contains(where: { $0.request.request.url == tk.originalRequest!.url! }) })) {
+                packs.forEach({
+                    let request = PCDownloadRequest(headFields: [:], url: $0.url, method: HTTPMethod.get, body: nil, uuid: $0.uuid)
+                    let tk = PCDownloadTask(request: request, task: $0.task)
+                    self.tasks.append(tk)
+                })
+            }
+        })
+    }
+    
     /// 查找下载任务在序列中的位置
     ///
     /// - Parameter task: HTTP下载任务
     /// - Returns: 若找不到则返回nil
     func findTask(withDownloadTask task: URLSessionDownloadTask) -> Int? {
-        return tasks.index(where: { $0.task == task })
+        return tasks.index(where: {
+            if let url = $0.task.originalRequest?.url?.absoluteString {
+                return task.response!.url!.absoluteString == url
+            }
+            return false
+        })
     }
     
     /// 添加下载任务，并开始执行下载
     ///
     /// - Parameter request: 下载任务
     func add(request: PCDownloadRequest) {
+        #if os(iOS)
+        let tk = request.isFileDownloadTask ? backgroundSession.downloadTask(with: request.request):session.downloadTask(with: request.request)
+        #elseif os(macOS)
         let tk = session.downloadTask(with: request.request)
+        #endif
         let task = PCDownloadTask(request: request, task: tk)
         tasks.append(task)
         tk.resume()
@@ -169,4 +203,14 @@ extension PCDownloadManager : URLSessionDownloadDelegate {
     public func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
         completionHandler(nil)
     }
+    
+    #if os(iOS)
+    public func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
+        print("Background URL session \(session) finished events.")
+        if let identifier = session.configuration.identifier, let handle = completeHandle[identifier] {
+            handle()
+            completeHandle.removeValue(forKey: identifier)
+        }
+    }
+    #endif
 }
