@@ -64,7 +64,7 @@ class V2File: PCWebRiffle {
     }
     
     override public func begin() {
-        login(username: "318715498@qq.com", password: "xvtingsong")
+        login(username: "318715498@qq.com", password: "")
     }
     
     func login(username: String, password: String) {
@@ -80,7 +80,7 @@ class V2File: PCWebRiffle {
             "Origin":"http://www.v2file.com",
             "User-Agent":userAgent,
             "Connection":"keep-alive"
-            ], url: url, method: HTTPMethod.post, body: try! encoder.encode(upload), uuid: uuid)
+            ], url: url, method: HTTPMethod.post, body: try! encoder.encode(upload), uuid: UUID())
         loginRequest.downloadFinished = { task in
             guard let data = task.pack.revData else {
                 return
@@ -120,7 +120,7 @@ class V2File: PCWebRiffle {
             "Accept-Encoding":"gzip, deflate",
             "Connection":"keep-alive",
             "token-auth":token
-            ], url: requestFileLinkURL, method: HTTPMethod.get, body: nil, uuid: uuid)
+            ], url: requestFileLinkURL, method: HTTPMethod.get, body: nil, uuid: UUID())
         readlinkRequest.downloadFinished = { task in
             guard let data = task.pack.revData else {
                 return
