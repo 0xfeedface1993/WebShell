@@ -63,7 +63,7 @@ public class PCDownloadManager: NSObject {
     /// - Returns: 若找不到则返回nil
     func findTask(withDownloadTask task: URLSessionDownloadTask) -> Int? {
         return tasks.index(where: {
-            if let url = $0.task.originalRequest?.url?.absoluteString {
+            if let url = $0.task.currentRequest?.url?.absoluteString {
                 return task.response!.url!.absoluteString == url
             }
             return false
@@ -91,6 +91,16 @@ public class PCDownloadManager: NSObject {
             tasks.remove(at: index)
         }
     }
+    
+    #if os(iOS)
+    public func removeFromBackgroundSession(originURL: URL) {
+        backgroundSession.getAllTasks(completionHandler: { tasks in
+            if let task = tasks.first(where: { $0.originalRequest?.url == originURL }), task.state != .canceling {
+                task.cancel()
+            }
+        })
+    }
+    #endif
 }
 
 extension PCDownloadManager : URLSessionDownloadDelegate {

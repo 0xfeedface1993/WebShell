@@ -8,6 +8,10 @@
 
 import WebKit
 
+#if os(iOS)
+let webWindow = UIWindow(frame: UIScreen.main.bounds)
+#endif
+
 public class PCWebRiffle: NSObject {
     public var uuid = UUID()
     /// 解压密码
@@ -79,7 +83,7 @@ public class PCWebRiffle: NSObject {
 //            self.seat?.webView.navigationDelegate = nil
             self.seat?.taskFinished(finishedRiffle: self)
         }
-    }
+    }   
     
     public func begin() {
         assertionFailure("Class WebRiffle is abstract class, you should use it's subclass, then confirm WebRiffleProtocol!")
@@ -91,9 +95,15 @@ public class PCWebRiffle: NSObject {
         userController.addUserScript(script)
         let config = WKWebViewConfiguration()
         config.userContentController = userController
-        seat?.webView = WKWebView(frame: CGRect.zero, configuration: config)
+        #if os(iOS)
+        seat?.webView.removeFromSuperview()
+        #endif
+        seat?.webView = WKWebView(frame: webWindow.bounds, configuration: config)
         seat?.webView.navigationDelegate = self
         seat?.webView.customUserAgent = userAgent
+        #if os(iOS)
+        webWindow.addSubview(seat!.webView)
+        #endif
     }
 }
 

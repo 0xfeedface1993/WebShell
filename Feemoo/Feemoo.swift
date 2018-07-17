@@ -200,9 +200,10 @@ public class Feemoo: PCWebRiffle {
         fileDownloadRequest.downloadFinished = { pack in
             print(pack.pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
             
-            if let response = pack.task.response as? HTTPURLResponse, let location = response.allHeaderFields["Location"] as? String, let fileURL = URL(string: location) {
+            if let response = pack.task.response as? HTTPURLResponse, response.statusCode == 302, let location = response.allHeaderFields["Location"] as? String, let fileURL = URL(string: location) {
                 self.downloadFile(url: fileURL)
             }   else    {
+                FileManager.default.save(pack: pack)
                 self.downloadFinished()
             }
         }

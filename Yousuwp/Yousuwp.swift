@@ -153,8 +153,40 @@ class Yousuwp: PCWebRiffle {
                 print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%")
             }
             
+            if let response = pack.task.response as? HTTPURLResponse, response.statusCode == 302, let location = response.allHeaderFields["Location"] as? String, let fileURL = URL(string: location) {
+                PCDownloadManager.share.removeFromBackgroundSession(originURL: url)
+                self.downloadFile(url: fileURL, refer: url)
+            }   else    {
+                FileManager.default.save(pack: pack)
+                self.downloadFinished()
+            }
+        }
+        fileDownloadRequest.riffle = self
+        PCDownloadManager.share.add(request: fileDownloadRequest)
+    }
+    
+    /// 下载文件
+    ///
+    /// - Parameter url: 文件实际下载路径
+    func downloadFile(url: URL, refer: URL) {
+        var fileDownloadRequest = PCDownloadRequest(headFields: ["Referer":refer.absoluteString,
+                                                                 "Accept-Language":"zh-cn",
+                                                                 "Upgrade-Insecure-Requests":"1",
+                                                                 "Accept-Encoding":"gzip, deflate",
+                                                                 "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                                                                 "User-Agent":userAgent], url: url, method: .get, body: nil, uuid: uuid)
+        fileDownloadRequest.downloadStateUpdate = nil
+        fileDownloadRequest.downloadFinished = { pack in
+            print(pack.pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
+            
             defer {
                 self.downloadFinished()
+            }
+            
+            if let data = pack.pack.revData, let str = String(data: data, encoding: .utf8) {
+                print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%\n")
+                print(str)
+                print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%")
             }
             
             FileManager.default.save(pack: pack)

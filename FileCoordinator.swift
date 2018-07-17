@@ -36,10 +36,14 @@ extension FileManager {
             return
         }
         
-        var fileURL = url.appendingPathComponent(pack.saveFileName)
+        let fileURL = url.appendingPathComponent(pack.saveFileName)
         
         if fileExists(atPath: fileURL.path) {
-            fileURL = url.appendingPathComponent(pack.timeStampFileName)
+            do {
+                try removeItem(atPath: fileURL.path)
+            } catch {
+                print(error)
+            }
         }
         
         if createFile(atPath: fileURL.path, contents: pack.pack.revData, attributes: nil) {
