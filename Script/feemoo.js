@@ -9,7 +9,19 @@ function selfHTML() {
 }
 
 function getSecondPageLinkAndFileName() {
-    var fileid = document.scripts[1].innerHTML.match(/file_id=\d+/g)[0].split("=")[1];
+	var scs = document.scripts;
+	var fileid;
+	for (var i in scs) {
+		var sc = scs[i].innerHTML;
+		var results = sc.match(/file_id=\d+/g);
+		if (results && results.length > 0) {
+			var array = results[0].split("=");
+			if (array && array.length > 1) {
+				fileid = array[1];
+				break;
+			}
+		}
+	}
     var href = document.querySelector(".doudbtn2").href;
     return { "fileName": getFileName(), "href": href, "fileid": fileid }
 }
