@@ -154,7 +154,10 @@ class Yousuwp: PCWebRiffle {
             }
             
             if let response = pack.task.response as? HTTPURLResponse, response.statusCode == 302, let location = response.allHeaderFields["Location"] as? String, let fileURL = URL(string: location) {
+                #if os(iOS)
+                print("-------------- 302 Found, try remove task in background session --------------")
                 PCDownloadManager.share.removeFromBackgroundSession(originURL: url)
+                #endif
                 self.downloadFile(url: fileURL, refer: url)
             }   else    {
                 FileManager.default.save(pack: pack)

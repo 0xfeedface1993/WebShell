@@ -95,7 +95,8 @@ public class PCDownloadManager: NSObject {
     #if os(iOS)
     public func removeFromBackgroundSession(originURL: URL) {
         backgroundSession.getAllTasks(completionHandler: { tasks in
-            if let task = tasks.first(where: { $0.originalRequest?.url == originURL }), task.state != .canceling {
+            if let task = tasks.first(where: { $0.response?.url == originURL }) {
+                print("-------------- Canceling \(task) ---------------")
                 task.cancel()
             }
         })

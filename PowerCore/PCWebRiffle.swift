@@ -97,8 +97,10 @@ public class PCWebRiffle: NSObject {
         config.userContentController = userController
         #if os(iOS)
         seat?.webView.removeFromSuperview()
-        #endif
         seat?.webView = WKWebView(frame: webWindow.bounds, configuration: config)
+        #elseif os(macOS)
+        seat?.webView = WKWebView(frame: CGRect.zero, configuration: config)
+        #endif
         seat?.webView.navigationDelegate = self
         seat?.webView.customUserAgent = userAgent
         #if os(iOS)
