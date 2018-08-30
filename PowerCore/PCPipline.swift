@@ -309,7 +309,7 @@ public struct SitePack {
     var site : WebHostSite
     public static let allSite = [SitePack(regulerExpression: "(feemoo)|(fmpan)", site: .feemoo),
                                  SitePack(regulerExpression: "\\.\\d{2,}pan\\.", site: .pan666),
-                                 SitePack(regulerExpression: "(ccchoo)|(chooyun)|(caihoo)", site: .cchooo),
+                                 SitePack(regulerExpression: "(ccchoo)|(chooyun)|(caihoo)|(wodech)", site: .cchooo),
                                  SitePack(regulerExpression: "yousuwp", site: .yousuwp),
                                  SitePack(regulerExpression: "v2file", site: .v2file)]
 }
