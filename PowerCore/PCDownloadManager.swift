@@ -47,7 +47,19 @@ public class PCDownloadManager: NSObject {
     /// - Parameter caller: 调用回调，需要调用者返回PCDownloadTask数组对象
     public func loadBackgroundTask(caller: BackgroundTaskCaller?) {
         backgroundSession.getAllTasks(completionHandler: {
-            if let tks = $0 as? [URLSessionDownloadTask], let packs = caller?(tks.filter({ tk in !self.tasks.contains(where: { $0.request.request.url == tk.originalRequest!.url! }) })) {
+            guard let tks = $0 as? [URLSessionDownloadTask] else {
+                print("****** Not Download Task ******")
+                print($0)
+                return
+            }
+            
+            let validTask = tks.filter({ tk in
+                !self.tasks.contains(where: {
+                    $0.request.request.url == tk.currentRequest!.url!
+                })
+            })
+            
+            if let packs = caller?(validTask) {
                 packs.forEach({
                     let request = PCDownloadRequest(headFields: [:], url: $0.url, method: HTTPMethod.get, body: nil, uuid: $0.uuid)
                     let tk = PCDownloadTask(request: request, task: $0.task)
@@ -187,6 +199,9 @@ extension PCDownloadManager : URLSessionDownloadDelegate {
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
         guard let index = findTask(withDownloadTask: downloadTask) else {
             print("*********** task not in manager sequence: \(downloadTask.response?.url?.absoluteString ?? "no url")")
+            tasks.enumerated().forEach({
+                print("******* \($0.offset) current request: \($0.element.task.currentRequest)")
+            })
             return
         }
         
