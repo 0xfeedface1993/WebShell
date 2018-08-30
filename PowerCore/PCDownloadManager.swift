@@ -200,7 +200,7 @@ extension PCDownloadManager : URLSessionDownloadDelegate {
         guard let index = findTask(withDownloadTask: downloadTask) else {
             print("*********** task not in manager sequence: \(downloadTask.response?.url?.absoluteString ?? "no url")")
             tasks.enumerated().forEach({
-                print("******* \($0.offset) current request: \($0.element.task.currentRequest)")
+                print("******* \($0.offset) current request: \(String(describing: $0.element.task.currentRequest))")
             })
             return
         }
