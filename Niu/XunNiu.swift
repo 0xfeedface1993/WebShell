@@ -87,20 +87,49 @@ class XunNiu: PCWebRiffle {
         fileRequest.downloadFinished = { task in
             print(task.pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
             
+            if let response = task.task.response as? HTTPURLResponse, response.statusCode == 302, let location = response.allHeaderFields["Location"] as? String, let fileURL = URL(string: location) {
+                #if os(iOS)
+                print("-------------- 302 Found, try remove task in background session --------------")
+                PCDownloadManager.share.removeFromBackgroundSession(originURL: fileURL)
+                #endif
+                self.downloadFor302(url: fileURL, refer: fileURL)
+            }   else    {
+                FileManager.default.save(pack: task)
+                self.downloadFinished()
+            }
+        }
+        fileRequest.riffle = self
+        PCDownloadManager.share.add(request: fileRequest)
+    }
+    
+    /// 下载文件
+    ///
+    /// - Parameter url: 文件实际下载路径
+    func downloadFor302(url: URL, refer: URL) {
+        var fileDownloadRequest = PCDownloadRequest(headFields: ["Referer":refer.absoluteString,
+                                                                 "Accept-Language":"zh-cn",
+                                                                 "Upgrade-Insecure-Requests":"1",
+                                                                 "Accept-Encoding":"gzip, deflate",
+                                                                 "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                                                                 "User-Agent":userAgent], url: url, method: .get, body: nil, uuid: uuid)
+        fileDownloadRequest.downloadStateUpdate = nil
+        fileDownloadRequest.downloadFinished = { pack in
+            print(pack.pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
+            
             defer {
                 self.downloadFinished()
             }
             
-            if let data = task.pack.revData, let str = String(data: data, encoding: .utf8) {
+            if let data = pack.pack.revData, let str = String(data: data, encoding: .utf8) {
                 print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%\n")
                 print(str)
                 print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%")
             }
             
-            FileManager.default.save(pack: task)
+            FileManager.default.save(pack: pack)
         }
-        fileRequest.riffle = self
-        PCDownloadManager.share.add(request: fileRequest)
+        fileDownloadRequest.riffle = self
+        PCDownloadManager.share.add(request: fileDownloadRequest)
     }
     
     func parserFileLink(body: String) -> URL? {
