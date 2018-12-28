@@ -24,15 +24,15 @@ public class Pan666 : PCWebRiffle {
     var fileNumber = ""
     /// 首页，因为会出现重定向的问题，先写死，后期解决这个问题
     var pan6661URL : URL {
-        return URL(string: "http://www.678pan.vip/file-\(fileNumber).html")!
+        return URL(string: "http://www.567pan.com/file-\(fileNumber).html")!
     }
     /// 中转页面，重定向问题
     var pan6662URL : URL {
-        return URL(string: "http://www.678pan.vip/down2-\(fileNumber).html")!
+        return URL(string: "http://www.567pan.com/down2-\(fileNumber).html")!
     }
     /// 验证码输入页面，重定向问题
     var pan6663URL : URL {
-        return URL(string: "http://www.678pan.vip/down-\(fileNumber).html")!
+        return URL(string: "http://www.567pan.com/down-\(fileNumber).html")!
     }
     
     /// 初始化

@@ -33,7 +33,7 @@ function getFileName() {
 var codeFlag = "bad";
 
 function check_code(code){
-	document.getElementById('s1').disabled =true;  
+	document.getElementById('s1').disabled = true;  
 	$.post("ajax.php", "action=check_code&code=" + code,
 		function(msg){
 		 if(msg=='true'){

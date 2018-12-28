@@ -44,7 +44,7 @@ class V2File: PCWebRiffle {
     var loginResult : V2LoginResult?
     
     var requestFileLinkURL: URL {
-        return URL(string: "http://www.v2file.com/portal/file/download?id=" + fileNumber)!
+        return URL(string: "http://sportal.wa54.space/portal/file/download?id=" + fileNumber)!
     }
     
     /// 初始化
@@ -64,20 +64,20 @@ class V2File: PCWebRiffle {
     }
     
     override public func begin() {
-        login(username: "318715498@qq.com", password: "")
+        login(username: "318715498@qq.com", password: "xvtingsong")
     }
     
     func login(username: String, password: String) {
-        let url = URL(string: "http://sportal.v2file.com/portal/login")!
+        let url = URL(string: "http://sportal.wa54.space/users/login")!
         let upload = V2LoginUpload(email: username, password: password)
         let encoder = JSONEncoder()
         var loginRequest = PCDownloadRequest(headFields: [
-            "Host":"sportal.v2file.com",
+            "Host":"sportal.wa54.space",
             "Accept":"application/json, text/plain, */*",
             "Accept-Encoding":"gzip, deflate",
             "Accept-Language":"zh-cn",
             "Content-Type":"application/json",
-            "Origin":"http://www.v2file.com",
+            "Origin":"http://sportal.wa54.space",
             "User-Agent":userAgent,
             "Connection":"keep-alive"
             ], url: url, method: HTTPMethod.post, body: try! encoder.encode(upload), uuid: UUID())
@@ -97,6 +97,8 @@ class V2File: PCWebRiffle {
                 self.readFileLink()
             }   catch   {
                 print(error)
+                let str = String(data: data, encoding: .utf8)
+                print(str ?? "***** bad text *****")
                 self.downloadFinished()
             }
         }
@@ -111,12 +113,12 @@ class V2File: PCWebRiffle {
             return
         }
         var readlinkRequest = PCDownloadRequest(headFields: [
-            "Host":"sportal.v2file.com",
-            "Origin":"http://www.v2file.com",
+            "Host":"sportal.wa54.space",
+            "Origin":"http://sportal.wa54.space",
             "Accept":"application/json, text/plain, */*",
             "User-Agent":userAgent,
             "Accept-Language":"zh-cn",
-            "Referer":"http://www.v2file.com/",
+            "Referer":"http://sportal.wa54.space/",
             "Accept-Encoding":"gzip, deflate",
             "Connection":"keep-alive",
             "token-auth":token
@@ -156,7 +158,7 @@ class V2File: PCWebRiffle {
         var fileRequest = PCDownloadRequest(headFields: [
             "User-Agent": userAgent,
             "Accept": "*/*",
-            "Host": fileURL.host ?? "download.v2file.com",
+            "Host": fileURL.host ?? "download.wa54.space",
             "accept-encoding": "gzip, deflate",
             "Connection": "keep-alive"
             ], url: fileURL, method: HTTPMethod.get, body: nil, uuid: uuid)
