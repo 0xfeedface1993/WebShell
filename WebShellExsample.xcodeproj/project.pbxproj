@@ -9,6 +9,33 @@
 /* Begin PBXBuildFile section */
 		240D326520F5B49E00AED3C4 /* V2File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 240D326420F5B49E00AED3C4 /* V2File.swift */; };
 		240D326620F5B49E00AED3C4 /* V2File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 240D326420F5B49E00AED3C4 /* V2File.swift */; };
+		24E60F1021D65E4D007AB419 /* XunNiu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E60F0D21D65C50007AB419 /* XunNiu.swift */; };
+		24E60F1121D65E4E007AB419 /* XunNiu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E60F0D21D65C50007AB419 /* XunNiu.swift */; };
+		24E60F1921D66181007AB419 /* WebShellCoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E60F1821D66181007AB419 /* WebShellCoreTests.swift */; };
+		24E60F1B21D66181007AB419 /* WebShell_macOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27C9DBBC204146A100A87E9E /* WebShell_macOS.framework */; };
+		24E60F2121D66364007AB419 /* XunNiu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E60F0D21D65C50007AB419 /* XunNiu.swift */; };
+		24E60F2221D66364007AB419 /* V2File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 240D326420F5B49E00AED3C4 /* V2File.swift */; };
+		24E60F2321D66364007AB419 /* Yousuwp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F9C6C920D8E05600E1F88D /* Yousuwp.swift */; };
+		24E60F2421D66364007AB419 /* PCDownloadTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749698920886BBE009A1E1B /* PCDownloadTask.swift */; };
+		24E60F2521D66364007AB419 /* PCPipline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749699120888113009A1E1B /* PCPipline.swift */; };
+		24E60F2621D66364007AB419 /* PCDownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749698B20886F9B009A1E1B /* PCDownloadManager.swift */; };
+		24E60F2721D66364007AB419 /* PCWebRiffle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749699520897CAB009A1E1B /* PCWebRiffle.swift */; };
+		24E60F2821D66364007AB419 /* PCWebBullet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749699E20899A60009A1E1B /* PCWebBullet.swift */; };
+		24E60F2921D66364007AB419 /* ImageMaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277C84342046A02200D7B2B1 /* ImageMaker.swift */; };
+		24E60F2A21D66364007AB419 /* VCMLParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277C8431204652F700D7B2B1 /* VCMLParser.swift */; };
+		24E60F2B21D66364007AB419 /* FileCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277C848F20479F3100D7B2B1 /* FileCoordinator.swift */; };
+		24E60F2C21D66364007AB419 /* VerifyCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C9DBAD204105B000A87E9E /* VerifyCodeView.swift */; };
+		24E60F2D21D66364007AB419 /* VerifyCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C9DBAF2041094500A87E9E /* VerifyCodeViewController.swift */; };
+		24E60F2E21D66364007AB419 /* VerifyCodeViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 27C9DBB320410F0900A87E9E /* VerifyCodeViewController.xib */; };
+		24E60F2F21D66364007AB419 /* Ccchooo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C9DBB520413F7300A87E9E /* Ccchooo.swift */; };
+		24E60F3021D66364007AB419 /* yousuwp.js in Resources */ = {isa = PBXBuildFile; fileRef = 24F9C6CC20D8E06100E1F88D /* yousuwp.js */; };
+		24E60F3121D66364007AB419 /* 666pan.js in Resources */ = {isa = PBXBuildFile; fileRef = 277BFBD7203EA974009EE51B /* 666pan.js */; };
+		24E60F3221D66364007AB419 /* feemoo.js in Resources */ = {isa = PBXBuildFile; fileRef = 27E4C130203703610003A38D /* feemoo.js */; };
+		24E60F3321D66364007AB419 /* ccchooo.js in Resources */ = {isa = PBXBuildFile; fileRef = 27448B592018387A001FC925 /* ccchooo.js */; };
+		24E60F3421D66364007AB419 /* Feemoo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27E4C12E2037011E0003A38D /* Feemoo.swift */; };
+		24E60F3521D66364007AB419 /* Pan666.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277BFBD5203EA876009EE51B /* Pan666.swift */; };
+		24E60F3621D6636E007AB419 /* Four.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 277C842F204652C500D7B2B1 /* Four.mlmodel */; };
+		24E60F3921D66466007AB419 /* Const.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F9C6CF20D8E17500E1F88D /* Const.swift */; };
 		24F9C6CA20D8E05600E1F88D /* Yousuwp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F9C6C920D8E05600E1F88D /* Yousuwp.swift */; };
 		24F9C6CB20D8E05600E1F88D /* Yousuwp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F9C6C920D8E05600E1F88D /* Yousuwp.swift */; };
 		24F9C6CD20D8E06100E1F88D /* yousuwp.js in Resources */ = {isa = PBXBuildFile; fileRef = 24F9C6CC20D8E06100E1F88D /* yousuwp.js */; };
@@ -66,6 +93,20 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		24E60F1C21D66181007AB419 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27448B1B20170ABA001FC925 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 27C9DBBB204146A100A87E9E;
+			remoteInfo = WebShell_macOS;
+		};
+		24E60F3721D663F5007AB419 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27448B1B20170ABA001FC925 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 27448B2220170ABA001FC925;
+			remoteInfo = WebShellExsample;
+		};
 		277C848A2047979B00D7B2B1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 27448B1B20170ABA001FC925 /* Project object */;
@@ -110,6 +151,10 @@
 /* Begin PBXFileReference section */
 		240D326420F5B49E00AED3C4 /* V2File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = V2File.swift; sourceTree = "<group>"; };
 		24C94C2D20C6C06D00EFAC82 /* MLMaker.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MLMaker.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		24E60F0D21D65C50007AB419 /* XunNiu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XunNiu.swift; sourceTree = "<group>"; };
+		24E60F1621D66180007AB419 /* WebShellCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WebShellCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		24E60F1821D66181007AB419 /* WebShellCoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebShellCoreTests.swift; sourceTree = "<group>"; };
+		24E60F1A21D66181007AB419 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		24F9C6C920D8E05600E1F88D /* Yousuwp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Yousuwp.swift; sourceTree = "<group>"; };
 		24F9C6CC20D8E06100E1F88D /* yousuwp.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = yousuwp.js; sourceTree = "<group>"; };
 		24F9C6CF20D8E17500E1F88D /* Const.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Const.swift; sourceTree = "<group>"; };
@@ -154,6 +199,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		24E60F1321D66180007AB419 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				24E60F1B21D66181007AB419 /* WebShell_macOS.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		27448B2020170ABA001FC925 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -195,6 +248,23 @@
 			path = V2;
 			sourceTree = "<group>";
 		};
+		24E60F0C21D65C0C007AB419 /* Niu */ = {
+			isa = PBXGroup;
+			children = (
+				24E60F0D21D65C50007AB419 /* XunNiu.swift */,
+			);
+			path = Niu;
+			sourceTree = "<group>";
+		};
+		24E60F1721D66181007AB419 /* WebShellCoreTests */ = {
+			isa = PBXGroup;
+			children = (
+				24E60F1821D66181007AB419 /* WebShellCoreTests.swift */,
+				24E60F1A21D66181007AB419 /* Info.plist */,
+			);
+			path = WebShellCoreTests;
+			sourceTree = "<group>";
+		};
 		24F9C6C820D8E05600E1F88D /* Yousuwp */ = {
 			isa = PBXGroup;
 			children = (
@@ -211,6 +281,7 @@
 				27C9DBBD204146A100A87E9E /* WebShell */,
 				277C843C2046A45A00D7B2B1 /* WebShell-iOS */,
 				277C845D2047971D00D7B2B1 /* WebShellExample-iOS */,
+				24E60F1721D66181007AB419 /* WebShellCoreTests */,
 				27448B2420170ABA001FC925 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -222,6 +293,7 @@
 				27C9DBBC204146A100A87E9E /* WebShell_macOS.framework */,
 				277C843B2046A45A00D7B2B1 /* WebShell_iOS.framework */,
 				277C845C2047971D00D7B2B1 /* WebShellExample-iOS.app */,
+				24E60F1621D66180007AB419 /* WebShellCoreTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -322,6 +394,7 @@
 		27C9DBDA204146D300A87E9E /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				24E60F0C21D65C0C007AB419 /* Niu */,
 				240D326320F5B48300AED3C4 /* V2 */,
 				24F9C6CF20D8E17500E1F88D /* Const.swift */,
 				24F9C6C820D8E05600E1F88D /* Yousuwp */,
@@ -378,6 +451,25 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		24E60F1521D66180007AB419 /* WebShellCoreTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 24E60F1E21D66181007AB419 /* Build configuration list for PBXNativeTarget "WebShellCoreTests" */;
+			buildPhases = (
+				24E60F1221D66180007AB419 /* Sources */,
+				24E60F1321D66180007AB419 /* Frameworks */,
+				24E60F1421D66180007AB419 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				24E60F1D21D66181007AB419 /* PBXTargetDependency */,
+				24E60F3821D663F5007AB419 /* PBXTargetDependency */,
+			);
+			name = WebShellCoreTests;
+			productName = WebShellCoreTests;
+			productReference = 24E60F1621D66180007AB419 /* WebShellCoreTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		27448B2220170ABA001FC925 /* WebShellExsample */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 27448B4920170ABA001FC925 /* Build configuration list for PBXNativeTarget "WebShellExsample" */;
@@ -458,10 +550,14 @@
 		27448B1B20170ABA001FC925 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0920;
+				LastSwiftUpdateCheck = 1010;
 				LastUpgradeCheck = 0930;
 				ORGANIZATIONNAME = ascp;
 				TargetAttributes = {
+					24E60F1521D66180007AB419 = {
+						CreatedOnToolsVersion = 10.1;
+						ProvisioningStyle = Automatic;
+					};
 					27448B2220170ABA001FC925 = {
 						CreatedOnToolsVersion = 9.2;
 						ProvisioningStyle = Automatic;
@@ -503,11 +599,24 @@
 				27C9DBBB204146A100A87E9E /* WebShell_macOS */,
 				277C843A2046A45A00D7B2B1 /* WebShell_iOS */,
 				277C845B2047971D00D7B2B1 /* WebShellExample-iOS */,
+				24E60F1521D66180007AB419 /* WebShellCoreTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		24E60F1421D66180007AB419 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				24E60F2E21D66364007AB419 /* VerifyCodeViewController.xib in Resources */,
+				24E60F3321D66364007AB419 /* ccchooo.js in Resources */,
+				24E60F3121D66364007AB419 /* 666pan.js in Resources */,
+				24E60F3021D66364007AB419 /* yousuwp.js in Resources */,
+				24E60F3221D66364007AB419 /* feemoo.js in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		27448B2120170ABA001FC925 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -553,6 +662,32 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		24E60F1221D66180007AB419 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				24E60F2B21D66364007AB419 /* FileCoordinator.swift in Sources */,
+				24E60F3921D66466007AB419 /* Const.swift in Sources */,
+				24E60F2921D66364007AB419 /* ImageMaker.swift in Sources */,
+				24E60F3621D6636E007AB419 /* Four.mlmodel in Sources */,
+				24E60F3421D66364007AB419 /* Feemoo.swift in Sources */,
+				24E60F2A21D66364007AB419 /* VCMLParser.swift in Sources */,
+				24E60F2321D66364007AB419 /* Yousuwp.swift in Sources */,
+				24E60F2C21D66364007AB419 /* VerifyCodeView.swift in Sources */,
+				24E60F2121D66364007AB419 /* XunNiu.swift in Sources */,
+				24E60F3521D66364007AB419 /* Pan666.swift in Sources */,
+				24E60F2821D66364007AB419 /* PCWebBullet.swift in Sources */,
+				24E60F2521D66364007AB419 /* PCPipline.swift in Sources */,
+				24E60F2F21D66364007AB419 /* Ccchooo.swift in Sources */,
+				24E60F2421D66364007AB419 /* PCDownloadTask.swift in Sources */,
+				24E60F2221D66364007AB419 /* V2File.swift in Sources */,
+				24E60F2D21D66364007AB419 /* VerifyCodeViewController.swift in Sources */,
+				24E60F2721D66364007AB419 /* PCWebRiffle.swift in Sources */,
+				24E60F2621D66364007AB419 /* PCDownloadManager.swift in Sources */,
+				24E60F1921D66181007AB419 /* WebShellCoreTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		27448B1F20170ABA001FC925 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -580,6 +715,7 @@
 				277C84472046A49500D7B2B1 /* ImageMaker.swift in Sources */,
 				2749699020887048009A1E1B /* PCDownloadManager.swift in Sources */,
 				2749698F20887048009A1E1B /* PCDownloadTask.swift in Sources */,
+				24E60F1121D65E4E007AB419 /* XunNiu.swift in Sources */,
 				24F9C6D120D8E17500E1F88D /* Const.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -599,6 +735,7 @@
 			files = (
 				27C9DBE02041474900A87E9E /* VerifyCodeViewController.swift in Sources */,
 				27C9DBE92041495A00A87E9E /* Ccchooo.swift in Sources */,
+				24E60F1021D65E4D007AB419 /* XunNiu.swift in Sources */,
 				2745A3C2209175510060F237 /* Feemoo.swift in Sources */,
 				2749699720897EC5009A1E1B /* PCWebRiffle.swift in Sources */,
 				27C9DBDF2041474900A87E9E /* VerifyCodeView.swift in Sources */,
@@ -620,6 +757,16 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		24E60F1D21D66181007AB419 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 27C9DBBB204146A100A87E9E /* WebShell_macOS */;
+			targetProxy = 24E60F1C21D66181007AB419 /* PBXContainerItemProxy */;
+		};
+		24E60F3821D663F5007AB419 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 27448B2220170ABA001FC925 /* WebShellExsample */;
+			targetProxy = 24E60F3721D663F5007AB419 /* PBXContainerItemProxy */;
+		};
 		277C848B2047979B00D7B2B1 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 277C843A2046A45A00D7B2B1 /* WebShell_iOS */;
@@ -660,6 +807,41 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		24E60F1F21D66181007AB419 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = E6NP67H473;
+				INFOPLIST_FILE = WebShellCoreTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ascp.WebShellCoreTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.2;
+			};
+			name = Debug;
+		};
+		24E60F2021D66181007AB419 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = E6NP67H473;
+				INFOPLIST_FILE = WebShellCoreTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ascp.WebShellCoreTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.2;
+			};
+			name = Release;
+		};
 		27448B4720170ABA001FC925 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -956,6 +1138,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		24E60F1E21D66181007AB419 /* Build configuration list for PBXNativeTarget "WebShellCoreTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				24E60F1F21D66181007AB419 /* Debug */,
+				24E60F2021D66181007AB419 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		27448B1E20170ABA001FC925 /* Build configuration list for PBXProject "WebShellExsample" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
