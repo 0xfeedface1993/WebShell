@@ -42,9 +42,27 @@ class V2File: PCWebRiffle {
     
     var fileNumber = ""
     var loginResult : V2LoginResult?
+    struct V2Host {
+        var url : URL
+        static let sportal = V2Host(url: URL(string: "http://sportal.wa54.space")!)
+        static let drive = V2Host(url: URL(string: "http://drive.wa54.space")!)
+        static let download = V2Host(url: URL(string: "http://download.wa54.space")!)
+    }
     
+    // 第一页
     var requestFileLinkURL: URL {
-        return URL(string: "http://sportal.wa54.space/portal/file/download?id=" + fileNumber)!
+        return V2Host.drive.url.appendingPathComponent("file_download/\(fileNumber)")
+    }
+    
+    // 登录
+    var loginURL: URL {
+        return V2Host.sportal.url.appendingPathComponent("portal/login")
+    }
+    
+    // 获取下载地址
+    var downloadLinkRequestURL: URL {
+        let url = URL(string: V2Host.sportal.url.absoluteString + "/portal/file/download?id=\(fileNumber)")!
+        return url
     }
     
     /// 初始化
@@ -64,20 +82,18 @@ class V2File: PCWebRiffle {
     }
     
     override public func begin() {
-        login(username: "318715498@qq.com", password: "xvtingsong")
+        login(username: "318715498@qq.com", password: "")
     }
     
     func login(username: String, password: String) {
-        let url = URL(string: "http://sportal.wa54.space/users/login")!
+        let url = loginURL
         let upload = V2LoginUpload(email: username, password: password)
         let encoder = JSONEncoder()
         var loginRequest = PCDownloadRequest(headFields: [
-            "Host":"sportal.wa54.space",
             "Accept":"application/json, text/plain, */*",
             "Accept-Encoding":"gzip, deflate",
             "Accept-Language":"zh-cn",
-            "Content-Type":"application/json",
-            "Origin":"http://sportal.wa54.space",
+            "Content-Type":"application/json;charset=UTF-8",
             "User-Agent":userAgent,
             "Connection":"keep-alive"
             ], url: url, method: HTTPMethod.post, body: try! encoder.encode(upload), uuid: UUID())
@@ -94,7 +110,7 @@ class V2File: PCWebRiffle {
                     return
                 }
                 self.loginResult = json
-                self.readFileLink()
+                self.firstPage()
             }   catch   {
                 print(error)
                 let str = String(data: data, encoding: .utf8)
@@ -107,22 +123,39 @@ class V2File: PCWebRiffle {
         PCDownloadManager.share.add(request: loginRequest)
     }
     
+    func firstPage() {
+        guard let token = loginResult?.data?.token, !token.isEmpty else {
+            self.downloadFinished()
+            return
+        }
+        var pageRequest = PCDownloadRequest(headFields: [:], url: requestFileLinkURL, method: HTTPMethod.get, body: nil, uuid: UUID())
+        pageRequest.downloadFinished = { task in
+            guard let _ = task.pack.revData else {
+                return
+            }
+            self.readFileLink()
+        }
+        pageRequest.isFileDownloadTask = false
+        pageRequest.riffle = self
+        PCDownloadManager.share.add(request: pageRequest)
+    }
+    
     func readFileLink() {
         guard let token = loginResult?.data?.token, !token.isEmpty else {
             self.downloadFinished()
             return
         }
         var readlinkRequest = PCDownloadRequest(headFields: [
-            "Host":"sportal.wa54.space",
-            "Origin":"http://sportal.wa54.space",
+            "Host":V2Host.sportal.url.host ?? "",
+            "Origin":"http://\(V2Host.drive.url.host ?? "")",
             "Accept":"application/json, text/plain, */*",
             "User-Agent":userAgent,
             "Accept-Language":"zh-cn",
-            "Referer":"http://sportal.wa54.space/",
+            "Referer":requestFileLinkURL.absoluteString,
             "Accept-Encoding":"gzip, deflate",
             "Connection":"keep-alive",
             "token-auth":token
-            ], url: requestFileLinkURL, method: HTTPMethod.get, body: nil, uuid: UUID())
+            ], url: downloadLinkRequestURL, method: HTTPMethod.get, body: nil, uuid: UUID())
         readlinkRequest.downloadFinished = { task in
             guard let data = task.pack.revData else {
                 return
@@ -156,10 +189,13 @@ class V2File: PCWebRiffle {
             return
         }
         var fileRequest = PCDownloadRequest(headFields: [
+            "Upgrade-Insecure-Requests": "1",
+            "Referer": requestFileLinkURL.absoluteString,
             "User-Agent": userAgent,
             "Accept": "*/*",
             "Host": fileURL.host ?? "download.wa54.space",
             "accept-encoding": "gzip, deflate",
+            "Accept-Language": "zh-cn",
             "Connection": "keep-alive"
             ], url: fileURL, method: HTTPMethod.get, body: nil, uuid: uuid)
         fileRequest.downloadFinished = { task in

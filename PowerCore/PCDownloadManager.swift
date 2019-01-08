@@ -76,7 +76,7 @@ public class PCDownloadManager: NSObject {
     func findTask(withDownloadTask task: URLSessionDownloadTask) -> Int? {
         return tasks.index(where: {
             if let url = $0.task.currentRequest?.url?.absoluteString {
-                return task.response!.url!.absoluteString == url
+                return (task.response?.url?.absoluteString ?? "") == url
             }
             return false
         })

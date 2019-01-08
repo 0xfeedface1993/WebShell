@@ -21,6 +21,8 @@ class WebShellCoreTests: XCTestCase {
     func testExample() {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct results.
+        let url = URL(string: "http://sportal.wa54.space/portal/file/download?id=302826")!
+        XCTAssert(url.absoluteString == "http://sportal.wa54.space/portal/file/download?id=302826", "错误地址")
     }
 
     func testPerformanceExample() {
