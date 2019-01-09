@@ -24,16 +24,18 @@ public class Pan666 : PCWebRiffle {
     var fileNumber = ""
     /// 首页，因为会出现重定向的问题，先写死，后期解决这个问题
     var pan6661URL : URL {
-        return URL(string: "http://www.567pan.com/file-\(fileNumber).html")!
+        return URL(string: "http://\(mainHost)/file-\(fileNumber).html")!
     }
     /// 中转页面，重定向问题
     var pan6662URL : URL {
-        return URL(string: "http://www.567pan.com/down2-\(fileNumber).html")!
+        return URL(string: "http://\(mainHost)/down2-\(fileNumber).html")!
     }
     /// 验证码输入页面，重定向问题
     var pan6663URL : URL {
-        return URL(string: "http://www.567pan.com/down-\(fileNumber).html")!
+        return URL(string: "http://\(mainHost)/down-\(fileNumber).html")!
     }
+    
+    let mainHost = "www.567pan.com"
     
     /// 初始化
     ///
@@ -52,91 +54,91 @@ public class Pan666 : PCWebRiffle {
     }
     
     override public func begin() {
-        loadWebView()
         load666PanSequence()
     }
     
     /// 启动序列
     func load666PanSequence() {
-        let main1Unit = InjectUnit(script: "\(functionScript) getFileName();", successAction: { (dat) in
-            guard let name = dat as? String else {
-                print("worong data!")
-                return
+        func loadPage(url: URL, header:[String:String] = [:], callback: ((PCDownloadTask) -> ())?) {
+            var pageRequest = PCDownloadRequest(headFields: [:], url: url, method: HTTPMethod.get, body: nil, uuid: UUID())
+            pageRequest.downloadFinished = { task in
+               callback?(task)
             }
-            print("fetch file name: \(name)")
-            self.fileName = name
-        }, failedAction: nil, isAutomaticallyPass: true)
-        
-        let main1Page = PCWebBullet(method: .get, headFields: ["Accept-Language":"zh-cn",
-                                                             "Upgrade-Insecure-Requests":"1",
-                                                             "Accept-Encoding":"gzip, deflate",
-                                                             "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                                                             "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6"], formData: [:], url: pan6661URL, injectJavaScript: [main1Unit])
-        let main2Page = PCWebBullet(method: .get, headFields: ["Accept-Language":"zh-cn",
-                                                             "Upgrade-Insecure-Requests":"1",
-                                                             "Accept-Encoding":"gzip, deflate",
-                                                             "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                                                             "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6",
-                                                             "Referer":pan6661URL.absoluteString], formData: [:], url: pan6662URL, injectJavaScript: [])
-        watting += [main1Page, main2Page]
-        reload666PanImagePage()
-    }
-    
-    var verifyCode = "abcd"
-    
-    /// 获取验证码并验证
-    func reload666PanImagePage() {
-        func imagePaserUnitMaker() -> [InjectUnit] {
-            let delayTime = 0.5
-
-            let uploadCodeUnit = InjectUnit(script: "\(functionScript) check_code('\(verifyCode)');", successAction: { (dat) in
-                DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + delayTime, execute: {
-                    self.execNextCommand()
-                })
-            }, failedAction: { _ in
-                self.downloadFinished()
-            }, isAutomaticallyPass: false)
-            
-            let loadDownloadAddressUnit = InjectUnit(script: "getMiddleLink();", successAction: { (dat) in
-                guard let link = dat as? String, let url = URL(string: link) else {
-                    print("worong data!")
-                    self.downloadFinished()
-                    return
-                }
-                
-                self.readDownloadLink(url: url)
-            }, failedAction: { _ in
-                self.downloadFinished()
-            }, isAutomaticallyPass: true)
-            
-            return [uploadCodeUnit, loadDownloadAddressUnit]
+            pageRequest.isFileDownloadTask = false
+            pageRequest.riffle = self
+            PCDownloadManager.share.add(request: pageRequest)
         }
         
-        let units = imagePaserUnitMaker()
-        
-        let main3Page = PCWebBullet(method: .get, headFields: ["Accept-Language":"zh-cn",
-                                                             "Upgrade-Insecure-Requests":"1",
-                                                             "Accept-Encoding":"gzip, deflate",
-                                                             "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                                                             "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6",
-                                                             "Referer":pan6662URL.absoluteString], formData: [:], url: pan6663URL, injectJavaScript: units)
-        watting += [main3Page]
-        
-        seat?.webView.load(watting[0].request)
+        loadPage(url: pan6661URL) { [unowned self] (_) in
+            loadPage(url: self.pan6662URL, header: ["Accept-Language":"zh-cn",
+                                               "Upgrade-Insecure-Requests":"1",
+                                               "Accept-Encoding":"gzip, deflate",
+                                               "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                                               "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6",
+                                               "Referer":self.pan6661URL.absoluteString], callback: { [unowned self] (_) in
+                                                loadPage(url: self.pan6663URL, header: ["Accept-Language":"zh-cn",
+                                                                                        "Upgrade-Insecure-Requests":"1",
+                                                                                        "Accept-Encoding":"gzip, deflate",
+                                                                                        "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                                                                                        "User-Agent":userAgent,
+                                                                                        "Referer":self.pan6662URL.absoluteString], callback: { [unowned self] (_) in
+                                                                                       self.readDownloadLinkList()
+                                                })
+            })
+        }
     }
     
-    /// 读取下载地址并开始下载
-    ///
-    /// - Parameter url: 下载地址（含sign参数）
-    func readDownloadLink(url: URL) {
-        var fileDownloadRequest = PCDownloadRequest(headFields: ["Host":url.host!,
-                                                                 "Connection":"keep-alive",
+    func readDownloadLinkList() {
+        let url = URL(string: "http://\(mainHost)/ajax.php")!
+        var pageRequest = PCDownloadRequest(headFields: ["Connection":"keep-alive",
+                                                         "Referer":pan6663URL.absoluteString,
+                                                         "Accept-Language":"zh-cn",
+                                                         "Origin":"http://\(mainHost)",
+                                                         "Accept":"text/plain, */*; q=0.01",
+                                                         "X-Requested-With":"XMLHttpRequest",
+                                                         "Content-Type":"application/x-www-form-urlencoded; charset=UTF-8",
+                                                         "Accept-Encoding":"gzip, deflate",
+                                                         "User-Agent":userAgent], url: url, method: HTTPMethod.post, body: "action=load_down_addr1&file_id=\(fileNumber)".data(using: .utf8), uuid: UUID())
+        pageRequest.downloadFinished = { task in
+            guard let data = task.pack.revData else {
+                self.downloadFinished()
+                return
+            }
+            
+            guard let html = String(data: data, encoding: .utf8), let list = self.parserFileLinkList(body: html), list.count > 0 else {
+                self.downloadFinished()
+                print("**************** file download link list not found ****************")
+                return
+            }
+            
+            self.downloadFile(urls: list)
+        }
+        pageRequest.isFileDownloadTask = false
+        pageRequest.riffle = self
+        PCDownloadManager.share.add(request: pageRequest)
+    }
+    
+    func parserFileLinkList(body: String) -> [URL]? {
+        let regx = try? NSRegularExpression(pattern: "http:\\/\\/[^\"]+", options: NSRegularExpression.Options.caseInsensitive)
+        let strNS = body as NSString
+        if let results = regx?.matches(in: body, options: NSRegularExpression.MatchingOptions.reportProgress, range: NSRange(location: 0, length: strNS.length)) {
+            return results.map({
+                let url = URL(string: strNS.substring(with: $0.range))
+                print("-------- file link: \(url?.absoluteString ?? "nil")")
+                return url ?? nil
+            }).filter({ $0 != nil }).map({ $0! })
+        }
+        return nil
+    }
+    
+    func downloadFile(urls: [URL]) {
+        var fileDownloadRequest = PCDownloadRequest(headFields: ["Connection":"keep-alive",
                                                                  "Upgrade-Insecure-Requests":"1",
                                                                  "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                                                                 "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1.1 Safari/605.1.15",
-                                                                 "Referer":pan6663URL.absoluteString,
+                                                                 "User-Agent":userAgent,
+                                                                 "Referer":self.pan6663URL.absoluteString,
                                                                  "Accept-Language":"zh-cn",
-                                                                 "Accept-Encoding":"gzip, deflate"], url: url, method: .get, body: nil, uuid: uuid)
+                                                                 "Accept-Encoding":"gzip, deflate"], url: urls[0], method: .get, body: nil, uuid: uuid)
         fileDownloadRequest.downloadStateUpdate = nil
         fileDownloadRequest.downloadFinished = { pack in
             print(pack.pack.revData?.debugDescription ?? "\n%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
@@ -146,11 +148,14 @@ public class Pan666 : PCWebRiffle {
                 print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%")
             }
             
-            defer {
+            if let response = pack.task.response as? HTTPURLResponse, response.statusCode == 503, urls.count > 0 {
+                print("------------- 503x Found -------------")
+                print("------------- Go Next Link -------------")
+                self.downloadFile(urls: urls.dropFirst().map({ $0 }))
+            }   else    {
+                FileManager.default.save(pack: pack)
                 self.downloadFinished()
             }
-            
-            FileManager.default.save(pack: pack)
         }
         fileDownloadRequest.riffle = self
         PCDownloadManager.share.add(request: fileDownloadRequest)

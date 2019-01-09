@@ -131,6 +131,7 @@ class V2File: PCWebRiffle {
         var pageRequest = PCDownloadRequest(headFields: [:], url: requestFileLinkURL, method: HTTPMethod.get, body: nil, uuid: UUID())
         pageRequest.downloadFinished = { task in
             guard let _ = task.pack.revData else {
+                self.downloadFinished()
                 return
             }
             self.readFileLink()
@@ -158,6 +159,7 @@ class V2File: PCWebRiffle {
             ], url: downloadLinkRequestURL, method: HTTPMethod.get, body: nil, uuid: UUID())
         readlinkRequest.downloadFinished = { task in
             guard let data = task.pack.revData else {
+                self.downloadFinished()
                 return
             }
             do {
