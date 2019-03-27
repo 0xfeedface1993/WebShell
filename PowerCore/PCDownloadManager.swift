@@ -74,7 +74,7 @@ public class PCDownloadManager: NSObject {
     /// - Parameter task: HTTP下载任务
     /// - Returns: 若找不到则返回nil
     func findTask(withDownloadTask task: URLSessionDownloadTask) -> Int? {
-        return tasks.index(where: {
+        return tasks.firstIndex(where: {
             if let url = $0.task.currentRequest?.url?.absoluteString {
                 return (task.response?.url?.absoluteString ?? "") == url
             }
@@ -98,7 +98,7 @@ public class PCDownloadManager: NSObject {
     }
     
     func remove(fromRiffle riffle: PCWebRiffle) {
-        if let index = tasks.index(where: { $0.request.riffle == riffle }) {
+        if let index = tasks.firstIndex(where: { $0.request.riffle == riffle }) {
             tasks[index].task.cancel()
             tasks.remove(at: index)
         }

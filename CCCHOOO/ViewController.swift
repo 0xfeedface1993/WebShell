@@ -95,7 +95,7 @@ class ViewController: NSViewController {
 //                     "http://www.88pan.cc/file-532359.html",
 //                     "http://www.ccchoo.com/file-40055.html",
 //                     "http://www.ccchoo.com/file-40053.html"]http://www.chooyun.com/file-51745.html
-        let items = ["http://www.567pan.com/file-140318.html"]//, "http://www.chooyun.com/file-51745.html", "http://www.feemoo.com/s/v2j0z15j", "http://www.ccchoo.com/file-40052.html", "http://www.feemoo.com/file-1897522.html"
+        let items = ["http://www.567pan.com/file-156781.html"]//, "http://www.chooyun.com/file-51745.html", "http://www.feemoo.com/s/v2j0z15j", "http://www.ccchoo.com/file-40052.html", "http://www.feemoo.com/file-1897522.html"
 //        let items = ["http://www.chooyun.com/file-96683.html"]
         for item in items {
             if let _ = pipline.add(url: item, password: "") {
@@ -185,7 +185,7 @@ extension ViewController : PCPiplineDelegate {
     func add(info: DownloadInfo) {
         if let items = DownloadStateController.content as? [DownloadInfo] {
             var newItems = items
-            if let index = newItems.index(where: {
+            if let index = newItems.firstIndex(where: {
                 if let rif = $0.riffle {
                     return rif == info.riffle
                 }

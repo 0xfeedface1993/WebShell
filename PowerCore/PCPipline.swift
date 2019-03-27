@@ -71,7 +71,7 @@ public class PCPiplineSeat {
                     run()
                 }
                 
-                guard let _ = PCDownloadManager.share.tasks.index(where: { $0.request.riffle?.mainURL == finished.last!.mainURL && $0.request.isFileDownloadTask }) else {
+                guard let _ = PCDownloadManager.share.tasks.firstIndex(where: { $0.request.riffle?.mainURL == finished.last!.mainURL && $0.request.isFileDownloadTask }) else {
                     pipline.delegate?.pipline?(didFinishedRiffle: finished.last!)
                     return
                 }
@@ -113,7 +113,7 @@ public class PCPiplineSeat {
     }
     
     func remove(riffle: PCWebRiffle) {
-        if let index = working.index(where: { $0.host == riffle.host }) {
+        if let index = working.firstIndex(where: { $0.host == riffle.host }) {
             if index == working.startIndex {            
                 working[index].downloadFinished()
             }   else    {
@@ -123,11 +123,11 @@ public class PCPiplineSeat {
     }
     
     public func restart(mainURL: URL) {
-        if let index = finished.index(where: { $0.mainURL == mainURL }) {
+        if let index = finished.firstIndex(where: { $0.mainURL == mainURL }) {
             let item = finished[index]
             item.isFinished = false
             let downloadManager = PCDownloadManager.share
-            if let downloadIndex = downloadManager.tasks.index(where: { $0.request.riffle?.mainURL == mainURL }) {
+            if let downloadIndex = downloadManager.tasks.firstIndex(where: { $0.request.riffle?.mainURL == mainURL }) {
                 print("########### Remove Download Task for \(mainURL.absoluteString) ###########")
                 downloadManager.tasks.remove(at: downloadIndex)
             }
@@ -233,7 +233,7 @@ public class PCPipeline {
     /// - Parameter riffle: riffle对象
     /// - Returns: 若没有对应的位置，则返回nil
     func find(withRiffle riffle: PCWebRiffle) -> Int? {
-        return workers.index(where: { (seat) -> Bool in
+        return workers.firstIndex(where: { (seat) -> Bool in
             return (seat.finished.first(where: { $0.host == riffle.host }) != nil) || (seat.working.first(where: { $0.host == riffle.host }) != nil)
         })
     }
@@ -243,7 +243,7 @@ public class PCPipeline {
     /// - Parameter Hose: 站点类型
     /// - Returns: 位置
     func find(withHost Hose: WebHostSite) -> Int? {
-        return workers.index(where: { (seat) -> Bool in
+        return workers.firstIndex(where: { (seat) -> Bool in
             if let ff = seat.finished.first {
                 return ff.host == Hose
             }
