@@ -98,7 +98,7 @@ class ViewController: NSViewController {
         let items = ["http://www.567pan.com/file-156781.html"]//, "http://www.chooyun.com/file-51745.html", "http://www.feemoo.com/s/v2j0z15j", "http://www.ccchoo.com/file-40052.html", "http://www.feemoo.com/file-1897522.html"
 //        let items = ["http://www.chooyun.com/file-96683.html"]
         for item in items {
-            if let _ = pipline.add(url: item, password: "") {
+            if let _ = pipline.add(url: item, password: "", friendName: "ssss") {
 
             }
         }

@@ -37,7 +37,7 @@ public class PCDownloadTask: NSObject {
         let parts = fileName.split(separator: ".")
         let last = String(parts.last ?? "")
         let prefix = String(parts.dropLast().joined())
-        return "\(prefix)(\(request.riffle?.password ?? "无密码")).\(last)"
+        return "\(request.friendName.count > 0 ? request.friendName:prefix)(\(request.riffle?.password ?? "无密码")).\(last)"
     }
     /// 当下载目录存在相同的文件时使用时间前缀
     var timeStampFileName: String {
