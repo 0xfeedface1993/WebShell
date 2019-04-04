@@ -96,7 +96,7 @@ class V2File: PCWebRiffle {
             "Content-Type":"application/json;charset=UTF-8",
             "User-Agent":userAgent,
             "Connection":"keep-alive"
-            ], url: url, method: HTTPMethod.post, body: try! encoder.encode(upload), uuid: UUID())
+            ], url: url, method: HTTPMethod.post, body: try! encoder.encode(upload), uuid: UUID(), friendName: self.friendName)
         loginRequest.downloadFinished = { task in
             guard let data = task.pack.revData else {
                 return
@@ -128,7 +128,7 @@ class V2File: PCWebRiffle {
             self.downloadFinished()
             return
         }
-        var pageRequest = PCDownloadRequest(headFields: [:], url: requestFileLinkURL, method: HTTPMethod.get, body: nil, uuid: UUID())
+        var pageRequest = PCDownloadRequest(headFields: [:], url: requestFileLinkURL, method: HTTPMethod.get, body: nil, uuid: UUID(), friendName: self.friendName)
         pageRequest.downloadFinished = { task in
             guard let _ = task.pack.revData else {
                 self.downloadFinished()
@@ -156,7 +156,7 @@ class V2File: PCWebRiffle {
             "Accept-Encoding":"gzip, deflate",
             "Connection":"keep-alive",
             "token-auth":token
-            ], url: downloadLinkRequestURL, method: HTTPMethod.get, body: nil, uuid: UUID())
+            ], url: downloadLinkRequestURL, method: HTTPMethod.get, body: nil, uuid: UUID(), friendName: self.friendName)
         readlinkRequest.downloadFinished = { task in
             guard let data = task.pack.revData else {
                 self.downloadFinished()
@@ -199,7 +199,7 @@ class V2File: PCWebRiffle {
             "accept-encoding": "gzip, deflate",
             "Accept-Language": "zh-cn",
             "Connection": "keep-alive"
-            ], url: fileURL, method: HTTPMethod.get, body: nil, uuid: uuid)
+            ], url: fileURL, method: HTTPMethod.get, body: nil, uuid: uuid, friendName: self.friendName)
         fileRequest.downloadFinished = { task in
             print(task.pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
             

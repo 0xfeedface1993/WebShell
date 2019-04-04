@@ -194,7 +194,7 @@ public class Feemoo: PCWebRiffle {
                                                                  "Upgrade-Insecure-Requests":"1",
                                                                  "Accept-Encoding":"gzip, deflate",
                                                                  "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                                                                 "User-Agent":userAgent], url: url, method: .get, body: nil, uuid: UUID())
+                                                                 "User-Agent":userAgent], url: url, method: .get, body: nil, uuid: UUID(), friendName: self.friendName)
         self.feemooRefer = url.absoluteString
         fileDownloadRequest.downloadStateUpdate = nil
         fileDownloadRequest.downloadFinished = { pack in
@@ -222,7 +222,7 @@ public class Feemoo: PCWebRiffle {
                                                                  "Upgrade-Insecure-Requests":"1",
                                                                  "Accept-Encoding":"gzip, deflate",
                                                                  "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                                                                 "User-Agent":userAgent], url: url, method: .get, body: nil, uuid: uuid)
+                                                                 "User-Agent":userAgent], url: url, method: .get, body: nil, uuid: uuid, friendName: self.friendName)
         fileDownloadRequest.downloadStateUpdate = nil
         fileDownloadRequest.downloadFinished = { pack in
             print(pack.pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")

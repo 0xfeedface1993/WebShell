@@ -179,7 +179,8 @@ public class PCPipeline {
         }
     }
     
-    public func add<T: PCWebRiffle>(url: String, password: String) -> T? {
+    @discardableResult
+    public func add<T: PCWebRiffle>(url: String, password: String, friendName: String) -> T? {
         guard let host = URL(string: url) else {
             return nil
         }

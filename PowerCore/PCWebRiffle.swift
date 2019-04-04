@@ -14,6 +14,8 @@ let webWindow = UIWindow(frame: UIScreen.main.bounds)
 
 public class PCWebRiffle: NSObject {
     public var uuid = UUID()
+    /// 可视化文件名，可选
+    public var friendName = ""
     /// 解压密码
     public var password = ""
     /// 下载首页url

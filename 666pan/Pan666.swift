@@ -60,7 +60,7 @@ public class Pan666 : PCWebRiffle {
     /// 启动序列
     func load666PanSequence() {
         func loadPage(url: URL, header:[String:String] = [:], callback: ((PCDownloadTask) -> ())?) {
-            var pageRequest = PCDownloadRequest(headFields: [:], url: url, method: HTTPMethod.get, body: nil, uuid: UUID())
+            var pageRequest = PCDownloadRequest(headFields: [:], url: url, method: HTTPMethod.get, body: nil, uuid: UUID(), friendName: self.friendName)
             pageRequest.downloadFinished = { task in
                callback?(task)
             }
@@ -98,7 +98,7 @@ public class Pan666 : PCWebRiffle {
                                                          "X-Requested-With":"XMLHttpRequest",
                                                          "Content-Type":"application/x-www-form-urlencoded; charset=UTF-8",
                                                          "Accept-Encoding":"gzip, deflate",
-                                                         "User-Agent":userAgent], url: url, method: HTTPMethod.post, body: "action=load_down_addr1&file_id=\(fileNumber)".data(using: .utf8), uuid: UUID())
+                                                         "User-Agent":userAgent], url: url, method: HTTPMethod.post, body: "action=load_down_addr1&file_id=\(fileNumber)".data(using: .utf8), uuid: UUID(), friendName: self.friendName)
         pageRequest.downloadFinished = { task in
             guard let data = task.pack.revData else {
                 self.downloadFinished()
@@ -138,7 +138,7 @@ public class Pan666 : PCWebRiffle {
                                                                  "User-Agent":userAgent,
                                                                  "Referer":self.pan6663URL.absoluteString,
                                                                  "Accept-Language":"zh-cn",
-                                                                 "Accept-Encoding":"gzip, deflate"], url: urls[0], method: .get, body: nil, uuid: uuid)
+                                                                 "Accept-Encoding":"gzip, deflate"], url: urls[0], method: .get, body: nil, uuid: uuid, friendName: self.friendName)
         fileDownloadRequest.downloadStateUpdate = nil
         fileDownloadRequest.downloadFinished = { pack in
             print(pack.pack.revData?.debugDescription ?? "\n%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")

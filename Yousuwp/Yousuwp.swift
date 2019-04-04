@@ -143,7 +143,7 @@ class Yousuwp: PCWebRiffle {
                       "Upgrade-Insecure-Requests":"1",
                       "Referer":down.url.absoluteString]
         let post = "dcode=\(decode)"
-        var fileDownloadRequest = PCDownloadRequest(headFields: header, url: url, method: .post, body: post.data(using: .utf8)!, uuid: uuid)
+        var fileDownloadRequest = PCDownloadRequest(headFields: header, url: url, method: .post, body: post.data(using: .utf8)!, uuid: uuid, friendName: self.friendName)
         fileDownloadRequest.downloadStateUpdate = nil
         fileDownloadRequest.downloadFinished = { pack in
             print(pack.pack.revData?.debugDescription ?? "\n%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
@@ -177,7 +177,7 @@ class Yousuwp: PCWebRiffle {
                                                                  "Upgrade-Insecure-Requests":"1",
                                                                  "Accept-Encoding":"gzip, deflate",
                                                                  "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                                                                 "User-Agent":userAgent], url: url, method: .get, body: nil, uuid: uuid)
+                                                                 "User-Agent":userAgent], url: url, method: .get, body: nil, uuid: uuid, friendName: self.friendName)
         fileDownloadRequest.downloadStateUpdate = nil
         fileDownloadRequest.downloadFinished = { pack in
             print(pack.pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")

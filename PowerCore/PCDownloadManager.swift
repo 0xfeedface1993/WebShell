@@ -9,7 +9,7 @@
 import Foundation
 
 public class PCDownloadManager: NSObject {
-    public typealias BackgroundTaskCaller = ([URLSessionDownloadTask]) -> [(task: URLSessionDownloadTask, url: URL, remoteURL: URL, uuid: UUID)]
+    public typealias BackgroundTaskCaller = ([URLSessionDownloadTask]) -> [(task: URLSessionDownloadTask, url: URL, remoteURL: URL, uuid: UUID, friendName: String)]
     private static let _manager = PCDownloadManager()
     private let pipline = PCPipeline.share
     /// 外部访问的单例对象
@@ -61,7 +61,7 @@ public class PCDownloadManager: NSObject {
             
             if let packs = caller?(validTask) {
                 packs.forEach({
-                    let request = PCDownloadRequest(headFields: [:], url: $0.url, method: HTTPMethod.get, body: nil, uuid: $0.uuid)
+                    let request = PCDownloadRequest(headFields: [:], url: $0.url, method: HTTPMethod.get, body: nil, uuid: $0.uuid, friendName: $0.friendName)
                     let tk = PCDownloadTask(request: request, task: $0.task)
                     self.tasks.append(tk)
                 })

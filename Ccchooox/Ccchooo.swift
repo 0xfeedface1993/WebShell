@@ -115,7 +115,7 @@ public class Ccchooo: PCWebRiffle {
                 "Upgrade-Insecure-Requests":"1",
                 "Accept-Encoding":"gzip, deflate",
                 "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: url, method: .post, body: nil, uuid: self.uuid)
+                "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: url, method: .post, body: nil, uuid: self.uuid, friendName: self.friendName)
             fileDownloadRequest.riffle = self
             fileDownloadRequest.downloadStateUpdate = nil
             fileDownloadRequest.downloadFinished = { pack in

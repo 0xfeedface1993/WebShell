@@ -49,7 +49,7 @@ class XunNiu: PCWebRiffle {
              "User-Agent":userAgent,
              "Referer":"http://\(hostName)/down-\(fileNumber).html",
              "Connection":"keep-alive"
-            ], url: url, method: HTTPMethod.post, body: "action=load_down_addr1&file_id=\(fileNumber)".data(using: .utf8)!, uuid: UUID())
+            ], url: url, method: HTTPMethod.post, body: "action=load_down_addr1&file_id=\(fileNumber)".data(using: .utf8)!, uuid: UUID(), friendName: self.friendName)
         request.downloadFinished = { task in
             guard let data = task.pack.revData else {
                 self.downloadFinished()
@@ -83,7 +83,7 @@ class XunNiu: PCWebRiffle {
             "Accept-Language":"zh-cn",
             "Accept-Encoding":"gzip, deflate",
             "Connection": "keep-alive"
-            ], url: fileURL, method: HTTPMethod.get, body: nil, uuid: uuid)
+            ], url: fileURL, method: HTTPMethod.get, body: nil, uuid: uuid, friendName: self.friendName)
         fileRequest.downloadFinished = { task in
             print(task.pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
             
@@ -111,7 +111,7 @@ class XunNiu: PCWebRiffle {
                                                                  "Upgrade-Insecure-Requests":"1",
                                                                  "Accept-Encoding":"gzip, deflate",
                                                                  "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                                                                 "User-Agent":userAgent], url: url, method: .get, body: nil, uuid: uuid)
+                                                                 "User-Agent":userAgent], url: url, method: .get, body: nil, uuid: uuid, friendName: self.friendName)
         fileDownloadRequest.downloadStateUpdate = nil
         fileDownloadRequest.downloadFinished = { pack in
             print(pack.pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
