@@ -82,7 +82,7 @@ class V2File: PCWebRiffle {
     }
     
     override public func begin() {
-        login(username: "318715498@qq.com", password: "xvtingsong")
+        login(username: "318715498@qq.com", password: "")
     }
     
     func login(username: String, password: String) {
