@@ -191,36 +191,42 @@ public class PCPipeline {
             let riffle = Feemoo(urlString: url)
             riffle.password = password
             riffle.host = type
+            riffle.friendName = friendName
             add(riffle: riffle)
             return riffle as? T
         case .pan666:
             let riffle = Pan666(urlString: url)
             riffle.password = password
             riffle.host = type
+            riffle.friendName = friendName
             add(riffle: riffle)
             return riffle as? T
         case .cchooo:
             let riffle = Ccchooo(urlString: url)
             riffle.password = password
             riffle.host = type
+            riffle.friendName = friendName
             add(riffle: riffle)
             return riffle as? T
         case .yousuwp:
             let riffle = Yousuwp(urlString: url)
             riffle.password = password
             riffle.host = type
+            riffle.friendName = friendName
             add(riffle: riffle)
             return riffle as? T
         case .v2file:
             let riffle = V2File(urlString: url)
             riffle.password = password
             riffle.host = type
+            riffle.friendName = friendName
             add(riffle: riffle)
             return riffle as? T
         case .xunniu:
             let riffle = XunNiu(urlString: url)
             riffle.password = password
             riffle.host = type
+            riffle.friendName = friendName
             add(riffle: riffle)
             return riffle as? T
         case .unknowsite:
@@ -320,7 +326,7 @@ public struct SitePack {
                                  SitePack(regulerExpression: "(ccchoo)|(chooyun)|(caihoo)|(wodech)", site: .cchooo),
                                  SitePack(regulerExpression: "yousuwp", site: .yousuwp),
                                  SitePack(regulerExpression: "xun\\-niu", site: .xunniu),
-                                 SitePack(regulerExpression: "(v2file)|(wa54)", site: .v2file)]
+                                 SitePack(regulerExpression: "(v2file)|(wa54)|(wp2ef)", site: .v2file)]
 }
 
 public func siteType(url: URL) -> WebHostSite {
