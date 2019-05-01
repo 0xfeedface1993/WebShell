@@ -74,12 +74,27 @@ public class PCDownloadManager: NSObject {
     /// - Parameter task: HTTP下载任务
     /// - Returns: 若找不到则返回nil
     func findTask(withDownloadTask task: URLSessionDownloadTask) -> Int? {
-        return tasks.firstIndex(where: {
-            if let url = $0.task.currentRequest?.url?.absoluteString {
-                return (task.response?.url?.absoluteString ?? "") == url
+        let index = tasks.firstIndex(where: {
+            guard let fileURL = $0.task.currentRequest?.url?.absoluteString else {
+                print("********* No request url *********")
+                return false
             }
-            return false
+            
+            guard let responseURL = task.response?.url?.absoluteString else {
+                print("********* No responseURL *********")
+                
+                if let requestURL = task.currentRequest?.url?.absoluteString {
+                    let result = requestURL == fileURL
+                    print(">>>>>>>>> Found requestURL match: \(result) *********")
+                    return result
+                }
+                
+                return false
+            }
+            
+            return responseURL == fileURL
         })
+        return index
     }
     
     /// 添加下载任务，并开始执行下载
