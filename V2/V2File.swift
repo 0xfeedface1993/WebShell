@@ -45,7 +45,7 @@ class V2File: PCWebRiffle {
     struct V2Host {
         var url : URL
         static let sportal = V2Host(url: URL(string: "http://sportal.wa54.space")!)
-        static let drive = V2Host(url: URL(string: "http://net.drive.wp2ef.space")!)
+        static let drive = V2Host(url: URL(string: "http://download.wp344.space")!)
         static let download = V2Host(url: URL(string: "http://download.wa54.space")!)
     }
     
@@ -82,7 +82,7 @@ class V2File: PCWebRiffle {
     }
     
     override public func begin() {
-        login(username: "318715498@qq.com", password: "")
+        login(username: "", password: "")
     }
     
     func login(username: String, password: String) {

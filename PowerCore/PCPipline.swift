@@ -326,7 +326,7 @@ public struct SitePack {
                                  SitePack(regulerExpression: "(ccchoo)|(chooyun)|(caihoo)|(wodech)", site: .cchooo),
                                  SitePack(regulerExpression: "yousuwp", site: .yousuwp),
                                  SitePack(regulerExpression: "xun\\-niu", site: .xunniu),
-                                 SitePack(regulerExpression: "(v2file)|(wa54)|(wp2ef)", site: .v2file)]
+                                 SitePack(regulerExpression: "(v2file)|(wa54)|(wp2ef)|(wp344)", site: .v2file)]
 }
 
 public func siteType(url: URL) -> WebHostSite {
