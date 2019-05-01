@@ -24,15 +24,15 @@ public class Pan666 : PCWebRiffle {
     var fileNumber = ""
     /// 首页，因为会出现重定向的问题，先写死，后期解决这个问题
     var pan6661URL : URL {
-        return URL(string: "http://\(mainHost)/file-\(fileNumber).html")!
+        return URL(string: "https://\(mainHost)/file-\(fileNumber).html")!
     }
     /// 中转页面，重定向问题
     var pan6662URL : URL {
-        return URL(string: "http://\(mainHost)/down2-\(fileNumber).html")!
+        return URL(string: "https://\(mainHost)/down2-\(fileNumber).html")!
     }
     /// 验证码输入页面，重定向问题
     var pan6663URL : URL {
-        return URL(string: "http://\(mainHost)/down-\(fileNumber).html")!
+        return URL(string: "https://\(mainHost)/down-\(fileNumber).html")!
     }
     
     let mainHost = "www.567pan.com"
@@ -89,11 +89,11 @@ public class Pan666 : PCWebRiffle {
     }
     
     func readDownloadLinkList() {
-        let url = URL(string: "http://\(mainHost)/ajax.php")!
+        let url = URL(string: "https://\(mainHost)/ajax.php")!
         var pageRequest = PCDownloadRequest(headFields: ["Connection":"keep-alive",
                                                          "Referer":pan6663URL.absoluteString,
                                                          "Accept-Language":"zh-cn",
-                                                         "Origin":"http://\(mainHost)",
+                                                         "Origin":"https://\(mainHost)",
                                                          "Accept":"text/plain, */*; q=0.01",
                                                          "X-Requested-With":"XMLHttpRequest",
                                                          "Content-Type":"application/x-www-form-urlencoded; charset=UTF-8",
@@ -119,7 +119,7 @@ public class Pan666 : PCWebRiffle {
     }
     
     func parserFileLinkList(body: String) -> [URL]? {
-        let regx = try? NSRegularExpression(pattern: "http:\\/\\/[^\"]+", options: NSRegularExpression.Options.caseInsensitive)
+        let regx = try? NSRegularExpression(pattern: "https:\\/\\/[^\"]+", options: NSRegularExpression.Options.caseInsensitive)
         let strNS = body as NSString
         if let results = regx?.matches(in: body, options: NSRegularExpression.MatchingOptions.reportProgress, range: NSRange(location: 0, length: strNS.length)) {
             return results.map({

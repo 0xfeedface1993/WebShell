@@ -59,7 +59,7 @@ public class Ccchooo: PCWebRiffle {
         let mainPage = PCWebBullet(method: .get,
                                  headFields: [:],
                                  formData: [:],
-                                 url: URL(string: "http://www.ccchoo.com/down-\(fileNumber).html")!,
+                                 url: URL(string: "http://www.mm222.cn/down-\(fileNumber).html")!,
                                  injectJavaScript: [mainJSUnit])
         let main3JSUnit = InjectUnit(script: "\(functionScript) getImageAndLink();", successAction: {
             dat in
@@ -80,14 +80,14 @@ public class Ccchooo: PCWebRiffle {
         }, failedAction: { e in
             self.downloadFinished()
         }, isAutomaticallyPass: true)
-        let main3Page = PCWebBullet(method: .get, headFields: ["Referer":"http://www.ccchoo.com/down2-\(fileNumber).html",
+        let main3Page = PCWebBullet(method: .get, headFields: ["Referer":"http://www.mm222.cn/down2-\(fileNumber).html",
             "Accept-Language":"zh-cn",
             "Upgrade-Insecure-Requests":"1",
             "Accept-Encoding":"gzip, deflate",
             "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"],
                                   formData: [:],
-                                  url: URL(string: "http://www.ccchoo.com/down-\(fileNumber).html")!,
+                                  url: URL(string: "http://www.mm222.cn/down-\(fileNumber).html")!,
                                   injectJavaScript: [main3JSUnit])
         watting = [mainPage, main3Page]
         
@@ -110,7 +110,7 @@ public class Ccchooo: PCWebRiffle {
             dat in
             let url = downloadLink
             let label = UUID().uuidString
-            var fileDownloadRequest = PCDownloadRequest(headFields: ["Referer":"http://www.ccchoo.com/down-\(self.fileNumber).html",
+            var fileDownloadRequest = PCDownloadRequest(headFields: ["Referer":"http://www.mm222.cn/down-\(self.fileNumber).html",
                 "Accept-Language":"zh-cn",
                 "Upgrade-Insecure-Requests":"1",
                 "Accept-Encoding":"gzip, deflate",
@@ -140,8 +140,8 @@ public class Ccchooo: PCWebRiffle {
             PCDownloadManager.share.add(request: fileDownloadRequest)
         }, failedAction: nil, isAutomaticallyPass: true)
         
-        let codeUpload = PCWebBullet(method: .post, headFields: ["Referer":"http://www.ccchoo.com/down-\(fileNumber).html",
-            "Origin":"http://www.ccchoo.com",
+        let codeUpload = PCWebBullet(method: .post, headFields: ["Referer":"http://www.mm222.cn/down-\(fileNumber).html",
+            "Origin":"http://www.mm222.cn",
             "Accept-Language":"zh-cn",
             "Upgrade-Insecure-Requests":"1",
             "Accept-Encoding":"gzip, deflate",
@@ -152,7 +152,7 @@ public class Ccchooo: PCWebRiffle {
                                    formData: ["action":"check_code",
                                               "code":code,
                                               "vipd":"0"],
-                                   url: URL(string: "http://www.ccchoo.com/ajax.php")!,
+                                   url: URL(string: "http://www.mm222.cn/ajax.php")!,
                                    injectJavaScript: [codeUploadUnit])
         watting.append(codeUpload)
         seat?.webView.load(watting[0].request)
