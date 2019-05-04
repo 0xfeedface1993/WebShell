@@ -70,6 +70,8 @@ public struct PCDownloadRequest {
     public var headFields : [String:String]
     /// 文件下载地址
     public var url : URL
+    /// 网盘地址
+    public var mainURL : URL?
     /// http报文方法
     public var method : HTTPMethod
     /// httpBody，post的时候放参数
@@ -90,7 +92,13 @@ public struct PCDownloadRequest {
     }
     
     /// 该下载任务所属的网盘任务
-    public weak var riffle: PCWebRiffle?
+    public weak var riffle: PCWebRiffle? {
+        didSet {
+            if let r = riffle {
+                mainURL = r.mainURL
+            }
+        }
+    }
     /// 当任务非资源下载任务时，置为false
     public var isFileDownloadTask = true
     
