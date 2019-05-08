@@ -8,6 +8,6 @@
 
 import Foundation
 
-protocol TBQueueItem {
-    
+protocol TBQueueItem: class {
+    var tag : String { get set }
 }

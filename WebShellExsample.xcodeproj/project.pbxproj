@@ -15,6 +15,7 @@
 		241317A9224B19EB00EBE853 /* TBQueueItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 241317A8224B19EB00EBE853 /* TBQueueItem.swift */; };
 		241317AA224B19EB00EBE853 /* TBQueueItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 241317A8224B19EB00EBE853 /* TBQueueItem.swift */; };
 		241317AB224B19EB00EBE853 /* TBQueueItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 241317A8224B19EB00EBE853 /* TBQueueItem.swift */; };
+		24B3CA2F227FE87D0094B43E /* TBPiplineSeat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24B3CA2E227FE87D0094B43E /* TBPiplineSeat.swift */; };
 		24E60F1021D65E4D007AB419 /* XunNiu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E60F0D21D65C50007AB419 /* XunNiu.swift */; };
 		24E60F1121D65E4E007AB419 /* XunNiu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E60F0D21D65C50007AB419 /* XunNiu.swift */; };
 		24E60F1921D66181007AB419 /* WebShellCoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E60F1821D66181007AB419 /* WebShellCoreTests.swift */; };
@@ -158,6 +159,7 @@
 		240D326420F5B49E00AED3C4 /* V2File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = V2File.swift; sourceTree = "<group>"; };
 		241317A4224B194000EBE853 /* TBPipline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TBPipline.swift; sourceTree = "<group>"; };
 		241317A8224B19EB00EBE853 /* TBQueueItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TBQueueItem.swift; sourceTree = "<group>"; };
+		24B3CA2E227FE87D0094B43E /* TBPiplineSeat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TBPiplineSeat.swift; sourceTree = "<group>"; };
 		24C94C2D20C6C06D00EFAC82 /* MLMaker.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MLMaker.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		24E60F0D21D65C50007AB419 /* XunNiu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XunNiu.swift; sourceTree = "<group>"; };
 		24E60F1621D66180007AB419 /* WebShellCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WebShellCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -261,6 +263,7 @@
 			children = (
 				241317A4224B194000EBE853 /* TBPipline.swift */,
 				241317A8224B19EB00EBE853 /* TBQueueItem.swift */,
+				24B3CA2E227FE87D0094B43E /* TBPiplineSeat.swift */,
 			);
 			path = Tomb;
 			sourceTree = "<group>";
@@ -773,6 +776,7 @@
 				2749698E20887048009A1E1B /* PCDownloadManager.swift in Sources */,
 				240D326520F5B49E00AED3C4 /* V2File.swift in Sources */,
 				24F9C6CA20D8E05600E1F88D /* Yousuwp.swift in Sources */,
+				24B3CA2F227FE87D0094B43E /* TBPiplineSeat.swift in Sources */,
 				277C849020479F3100D7B2B1 /* FileCoordinator.swift in Sources */,
 				24F9C6D020D8E17500E1F88D /* Const.swift in Sources */,
 				2749698D20887048009A1E1B /* PCDownloadTask.swift in Sources */,

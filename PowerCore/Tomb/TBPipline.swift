@@ -10,8 +10,9 @@ import Foundation
 
 class TBPipline {
     static let share = TBPipline()
-    
-    let waitQueue = [TBQueueItem]()
+    var currentItem : TBQueueItem?
+    var waitQueue = [TBQueueItem]()
+    var seats = [TBQueueItem]()
     
     init() {
         
