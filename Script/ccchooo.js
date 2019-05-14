@@ -1,9 +1,6 @@
 function getDowloadLink() {
-    var results = document.body.innerHTML.match(/http:\/\/down[\w\.]+[^"]+/g);
-    if (results != null && results.length > 0) {
-        return results[0];
-    }
-    return "";
+    var results = document.querySelector('#addr_list0>.bc').href;
+    return results != null ? results:"";
 }
 
 function getBase64Image(img) {
@@ -27,8 +24,16 @@ function getImageAndLink() {
 }
 
 function getFileName() {
-    var name = document.getElementsByClassName('down_one_lf_tl')[0].children[0].innerText;
-    return uuid(8, 10) + name;
+                                                                      var x = document.getElementsByClassName('down_one_lf_tl');
+                                                                      if (x != null && x.length > 0) {
+                                                                      if (x[0].children.length > 0) {
+                                                                      var name = x[0].children[0].innerText;
+                                                                      return name;
+                                                                      }
+                                                                      return "";
+                                                                      }
+    
+    return "";
 }
 
 function uuid(len, radix) {

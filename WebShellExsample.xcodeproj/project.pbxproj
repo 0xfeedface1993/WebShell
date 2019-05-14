@@ -161,6 +161,7 @@
 		240D326420F5B49E00AED3C4 /* V2File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = V2File.swift; sourceTree = "<group>"; };
 		241317A4224B194000EBE853 /* TBPipline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TBPipline.swift; sourceTree = "<group>"; };
 		241317A8224B19EB00EBE853 /* TBQueueItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TBQueueItem.swift; sourceTree = "<group>"; };
+		246FF0F6228A6F2500B8BE0B /* WebShellExsample.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WebShellExsample.entitlements; sourceTree = "<group>"; };
 		24B3CA2E227FE87D0094B43E /* TBPiplineSeat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TBPiplineSeat.swift; sourceTree = "<group>"; };
 		24B3CC9F228405480094B43E /* TBParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TBParser.swift; sourceTree = "<group>"; };
 		24B3CD0A22856FF30094B43E /* TBDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TBDownloader.swift; sourceTree = "<group>"; };
@@ -302,6 +303,7 @@
 		27448B1A20170ABA001FC925 = {
 			isa = PBXGroup;
 			children = (
+				246FF0F6228A6F2500B8BE0B /* WebShellExsample.entitlements */,
 				27C9DBDA204146D300A87E9E /* Core */,
 				27448B2520170ABA001FC925 /* CCCHOOO */,
 				27C9DBBD204146A100A87E9E /* WebShell */,
@@ -590,6 +592,11 @@
 						CreatedOnToolsVersion = 9.2;
 						LastSwiftMigration = 1020;
 						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.Sandbox = {
+								enabled = 1;
+							};
+						};
 					};
 					277C843A2046A45A00D7B2B1 = {
 						CreatedOnToolsVersion = 9.2;
@@ -999,7 +1006,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = CCCHOOO/CCCHOOO.entitlements;
+				CODE_SIGN_ENTITLEMENTS = WebShellExsample.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = A272626J38;
@@ -1016,7 +1023,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = CCCHOOO/CCCHOOO.entitlements;
+				CODE_SIGN_ENTITLEMENTS = WebShellExsample.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = A272626J38;
