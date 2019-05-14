@@ -8,18 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		240D326520F5B49E00AED3C4 /* V2File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 240D326420F5B49E00AED3C4 /* V2File.swift */; };
-		240D326620F5B49E00AED3C4 /* V2File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 240D326420F5B49E00AED3C4 /* V2File.swift */; };
 		241317A5224B194000EBE853 /* TBPipline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 241317A4224B194000EBE853 /* TBPipline.swift */; };
-		241317A6224B194000EBE853 /* TBPipline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 241317A4224B194000EBE853 /* TBPipline.swift */; };
 		241317A7224B194000EBE853 /* TBPipline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 241317A4224B194000EBE853 /* TBPipline.swift */; };
 		241317A9224B19EB00EBE853 /* TBQueueItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 241317A8224B19EB00EBE853 /* TBQueueItem.swift */; };
-		241317AA224B19EB00EBE853 /* TBQueueItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 241317A8224B19EB00EBE853 /* TBQueueItem.swift */; };
 		241317AB224B19EB00EBE853 /* TBQueueItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 241317A8224B19EB00EBE853 /* TBQueueItem.swift */; };
 		24B3CA2F227FE87D0094B43E /* TBPiplineSeat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24B3CA2E227FE87D0094B43E /* TBPiplineSeat.swift */; };
 		24B3CCA0228405480094B43E /* TBParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24B3CC9F228405480094B43E /* TBParser.swift */; };
 		24B3CD0B22856FF30094B43E /* TBDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24B3CD0A22856FF30094B43E /* TBDownloader.swift */; };
 		24E60F1021D65E4D007AB419 /* XunNiu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E60F0D21D65C50007AB419 /* XunNiu.swift */; };
-		24E60F1121D65E4E007AB419 /* XunNiu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E60F0D21D65C50007AB419 /* XunNiu.swift */; };
 		24E60F1921D66181007AB419 /* WebShellCoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E60F1821D66181007AB419 /* WebShellCoreTests.swift */; };
 		24E60F1B21D66181007AB419 /* WebShell_macOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27C9DBBC204146A100A87E9E /* WebShell_macOS.framework */; };
 		24E60F2121D66364007AB419 /* XunNiu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E60F0D21D65C50007AB419 /* XunNiu.swift */; };
@@ -46,46 +42,22 @@
 		24E60F3621D6636E007AB419 /* Four.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 277C842F204652C500D7B2B1 /* Four.mlmodel */; };
 		24E60F3921D66466007AB419 /* Const.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F9C6CF20D8E17500E1F88D /* Const.swift */; };
 		24F9C6CA20D8E05600E1F88D /* Yousuwp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F9C6C920D8E05600E1F88D /* Yousuwp.swift */; };
-		24F9C6CB20D8E05600E1F88D /* Yousuwp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F9C6C920D8E05600E1F88D /* Yousuwp.swift */; };
 		24F9C6CD20D8E06100E1F88D /* yousuwp.js in Resources */ = {isa = PBXBuildFile; fileRef = 24F9C6CC20D8E06100E1F88D /* yousuwp.js */; };
-		24F9C6CE20D8E06100E1F88D /* yousuwp.js in Resources */ = {isa = PBXBuildFile; fileRef = 24F9C6CC20D8E06100E1F88D /* yousuwp.js */; };
 		24F9C6D020D8E17500E1F88D /* Const.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F9C6CF20D8E17500E1F88D /* Const.swift */; };
-		24F9C6D120D8E17500E1F88D /* Const.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F9C6CF20D8E17500E1F88D /* Const.swift */; };
 		27448B2720170ABA001FC925 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B2620170ABA001FC925 /* AppDelegate.swift */; };
 		27448B2920170ABA001FC925 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B2820170ABA001FC925 /* ViewController.swift */; };
 		27448B2B20170ABA001FC925 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 27448B2A20170ABA001FC925 /* Assets.xcassets */; };
 		27448B2E20170ABA001FC925 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 27448B2C20170ABA001FC925 /* Main.storyboard */; };
 		2745A3C2209175510060F237 /* Feemoo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27E4C12E2037011E0003A38D /* Feemoo.swift */; };
-		2745A3C3209175520060F237 /* Feemoo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27E4C12E2037011E0003A38D /* Feemoo.swift */; };
 		2749698D20887048009A1E1B /* PCDownloadTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749698920886BBE009A1E1B /* PCDownloadTask.swift */; };
 		2749698E20887048009A1E1B /* PCDownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749698B20886F9B009A1E1B /* PCDownloadManager.swift */; };
-		2749698F20887048009A1E1B /* PCDownloadTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749698920886BBE009A1E1B /* PCDownloadTask.swift */; };
-		2749699020887048009A1E1B /* PCDownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749698B20886F9B009A1E1B /* PCDownloadManager.swift */; };
 		2749699320888222009A1E1B /* PCPipline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749699120888113009A1E1B /* PCPipline.swift */; };
 		2749699720897EC5009A1E1B /* PCWebRiffle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749699520897CAB009A1E1B /* PCWebRiffle.swift */; };
-		2749699820897EC5009A1E1B /* PCWebRiffle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749699520897CAB009A1E1B /* PCWebRiffle.swift */; };
 		274969A020899A64009A1E1B /* PCWebBullet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749699E20899A60009A1E1B /* PCWebBullet.swift */; };
-		274969A120899A65009A1E1B /* PCWebBullet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749699E20899A60009A1E1B /* PCWebBullet.swift */; };
 		277C8430204652C500D7B2B1 /* Four.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 277C842F204652C500D7B2B1 /* Four.mlmodel */; };
 		277C8432204652F700D7B2B1 /* VCMLParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277C8431204652F700D7B2B1 /* VCMLParser.swift */; };
 		277C84352046A02200D7B2B1 /* ImageMaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277C84342046A02200D7B2B1 /* ImageMaker.swift */; };
-		277C843F2046A45B00D7B2B1 /* WebShell_iOS.h in Headers */ = {isa = PBXBuildFile; fileRef = 277C843D2046A45B00D7B2B1 /* WebShell_iOS.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		277C84472046A49500D7B2B1 /* ImageMaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277C84342046A02200D7B2B1 /* ImageMaker.swift */; };
-		277C84482046A49500D7B2B1 /* Four.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 277C842F204652C500D7B2B1 /* Four.mlmodel */; };
-		277C84492046A49500D7B2B1 /* VCMLParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277C8431204652F700D7B2B1 /* VCMLParser.swift */; };
-		277C84522046A49500D7B2B1 /* Ccchooo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C9DBB520413F7300A87E9E /* Ccchooo.swift */; };
-		277C84532046A49500D7B2B1 /* 666pan.js in Resources */ = {isa = PBXBuildFile; fileRef = 277BFBD7203EA974009EE51B /* 666pan.js */; };
-		277C84542046A49500D7B2B1 /* feemoo.js in Resources */ = {isa = PBXBuildFile; fileRef = 27E4C130203703610003A38D /* feemoo.js */; };
-		277C84552046A49500D7B2B1 /* ccchooo.js in Resources */ = {isa = PBXBuildFile; fileRef = 27448B592018387A001FC925 /* ccchooo.js */; };
-		277C845F2047971D00D7B2B1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277C845E2047971D00D7B2B1 /* AppDelegate.swift */; };
-		277C84612047971D00D7B2B1 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277C84602047971D00D7B2B1 /* ViewController.swift */; };
-		277C84642047971D00D7B2B1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 277C84622047971D00D7B2B1 /* Main.storyboard */; };
-		277C84662047971D00D7B2B1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 277C84652047971D00D7B2B1 /* Assets.xcassets */; };
-		277C84692047971D00D7B2B1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 277C84672047971D00D7B2B1 /* LaunchScreen.storyboard */; };
-		277C848C204797A400D7B2B1 /* WebShell_iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 277C843B2046A45A00D7B2B1 /* WebShell_iOS.framework */; };
-		277C848D204797A400D7B2B1 /* WebShell_iOS.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 277C843B2046A45A00D7B2B1 /* WebShell_iOS.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		277C849020479F3100D7B2B1 /* FileCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277C848F20479F3100D7B2B1 /* FileCoordinator.swift */; };
-		277C84912047A0BB00D7B2B1 /* FileCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277C848F20479F3100D7B2B1 /* FileCoordinator.swift */; };
 		27C9DBCE204146A100A87E9E /* WebShell.h in Headers */ = {isa = PBXBuildFile; fileRef = 27C9DBBE204146A100A87E9E /* WebShell.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27C9DBD1204146A100A87E9E /* WebShell_macOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27C9DBBC204146A100A87E9E /* WebShell_macOS.framework */; };
 		27C9DBD2204146A100A87E9E /* WebShell_macOS.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 27C9DBBC204146A100A87E9E /* WebShell_macOS.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -97,8 +69,6 @@
 		27C9DBE62041475300A87E9E /* ccchooo.js in Resources */ = {isa = PBXBuildFile; fileRef = 27448B592018387A001FC925 /* ccchooo.js */; };
 		27C9DBE92041495A00A87E9E /* Ccchooo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C9DBB520413F7300A87E9E /* Ccchooo.swift */; };
 		27FD7CE72091B5B00098F0EE /* Pan666.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277BFBD5203EA876009EE51B /* Pan666.swift */; };
-		27FD7CE82091B5B10098F0EE /* Pan666.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277BFBD5203EA876009EE51B /* Pan666.swift */; };
-		27FD7CEF2091CE9D0098F0EE /* PCPipline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749699120888113009A1E1B /* PCPipline.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -116,13 +86,6 @@
 			remoteGlobalIDString = 27448B2220170ABA001FC925;
 			remoteInfo = WebShellExsample;
 		};
-		277C848A2047979B00D7B2B1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 27448B1B20170ABA001FC925 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 277C843A2046A45A00D7B2B1;
-			remoteInfo = "WebShell-iOS";
-		};
 		27C9DBCF204146A100A87E9E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 27448B1B20170ABA001FC925 /* Project object */;
@@ -133,17 +96,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		277C848E204797A500D7B2B1 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				277C848D204797A400D7B2B1 /* WebShell_iOS.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		27C9DBD6204146A100A87E9E /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -191,10 +143,8 @@
 		277C842F204652C500D7B2B1 /* Four.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = Four.mlmodel; sourceTree = "<group>"; };
 		277C8431204652F700D7B2B1 /* VCMLParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VCMLParser.swift; sourceTree = "<group>"; };
 		277C84342046A02200D7B2B1 /* ImageMaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageMaker.swift; sourceTree = "<group>"; };
-		277C843B2046A45A00D7B2B1 /* WebShell_iOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = WebShell_iOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		277C843D2046A45B00D7B2B1 /* WebShell_iOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WebShell_iOS.h; sourceTree = "<group>"; };
 		277C843E2046A45B00D7B2B1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		277C845C2047971D00D7B2B1 /* WebShellExample-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "WebShellExample-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		277C845E2047971D00D7B2B1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		277C84602047971D00D7B2B1 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		277C84632047971D00D7B2B1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -227,21 +177,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				27C9DBD1204146A100A87E9E /* WebShell_macOS.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		277C84372046A45A00D7B2B1 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		277C84592047971D00D7B2B1 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				277C848C204797A400D7B2B1 /* WebShell_iOS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -319,8 +254,6 @@
 			children = (
 				27448B2320170ABA001FC925 /* WebShellExsample.app */,
 				27C9DBBC204146A100A87E9E /* WebShell_macOS.framework */,
-				277C843B2046A45A00D7B2B1 /* WebShell_iOS.framework */,
-				277C845C2047971D00D7B2B1 /* WebShellExample-iOS.app */,
 				24E60F1621D66180007AB419 /* WebShellCoreTests.xctest */,
 			);
 			name = Products;
@@ -461,14 +394,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
-		277C84382046A45A00D7B2B1 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				277C843F2046A45B00D7B2B1 /* WebShell_iOS.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		27C9DBB9204146A100A87E9E /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -518,43 +443,6 @@
 			productReference = 27448B2320170ABA001FC925 /* WebShellExsample.app */;
 			productType = "com.apple.product-type.application";
 		};
-		277C843A2046A45A00D7B2B1 /* WebShell_iOS */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 277C84442046A45B00D7B2B1 /* Build configuration list for PBXNativeTarget "WebShell_iOS" */;
-			buildPhases = (
-				277C84362046A45A00D7B2B1 /* Sources */,
-				277C84372046A45A00D7B2B1 /* Frameworks */,
-				277C84382046A45A00D7B2B1 /* Headers */,
-				277C84392046A45A00D7B2B1 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = WebShell_iOS;
-			productName = "WebShell-iOS";
-			productReference = 277C843B2046A45A00D7B2B1 /* WebShell_iOS.framework */;
-			productType = "com.apple.product-type.framework";
-		};
-		277C845B2047971D00D7B2B1 /* WebShellExample-iOS */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 277C84812047971E00D7B2B1 /* Build configuration list for PBXNativeTarget "WebShellExample-iOS" */;
-			buildPhases = (
-				277C84582047971D00D7B2B1 /* Sources */,
-				277C84592047971D00D7B2B1 /* Frameworks */,
-				277C845A2047971D00D7B2B1 /* Resources */,
-				277C848E204797A500D7B2B1 /* Embed Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				277C848B2047979B00D7B2B1 /* PBXTargetDependency */,
-			);
-			name = "WebShellExample-iOS";
-			productName = "WebShellExample-iOS";
-			productReference = 277C845C2047971D00D7B2B1 /* WebShellExample-iOS.app */;
-			productType = "com.apple.product-type.application";
-		};
 		27C9DBBB204146A100A87E9E /* WebShell_macOS */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 27C9DBD3204146A100A87E9E /* Build configuration list for PBXNativeTarget "WebShell_macOS" */;
@@ -598,19 +486,6 @@
 							};
 						};
 					};
-					277C843A2046A45A00D7B2B1 = {
-						CreatedOnToolsVersion = 9.2;
-						ProvisioningStyle = Automatic;
-					};
-					277C845B2047971D00D7B2B1 = {
-						CreatedOnToolsVersion = 9.2;
-						ProvisioningStyle = Automatic;
-						SystemCapabilities = {
-							com.apple.BackgroundModes = {
-								enabled = 1;
-							};
-						};
-					};
 					27C9DBBB204146A100A87E9E = {
 						CreatedOnToolsVersion = 9.2;
 						LastSwiftMigration = 1020;
@@ -633,8 +508,6 @@
 			targets = (
 				27448B2220170ABA001FC925 /* WebShellExsample */,
 				27C9DBBB204146A100A87E9E /* WebShell_macOS */,
-				277C843A2046A45A00D7B2B1 /* WebShell_iOS */,
-				277C845B2047971D00D7B2B1 /* WebShellExample-iOS */,
 				24E60F1521D66180007AB419 /* WebShellCoreTests */,
 			);
 		};
@@ -659,27 +532,6 @@
 			files = (
 				27448B2B20170ABA001FC925 /* Assets.xcassets in Resources */,
 				27448B2E20170ABA001FC925 /* Main.storyboard in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		277C84392046A45A00D7B2B1 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				277C84542046A49500D7B2B1 /* feemoo.js in Resources */,
-				24F9C6CE20D8E06100E1F88D /* yousuwp.js in Resources */,
-				277C84532046A49500D7B2B1 /* 666pan.js in Resources */,
-				277C84552046A49500D7B2B1 /* ccchooo.js in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		277C845A2047971D00D7B2B1 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				277C84692047971D00D7B2B1 /* LaunchScreen.storyboard in Resources */,
-				277C84662047971D00D7B2B1 /* Assets.xcassets in Resources */,
-				277C84642047971D00D7B2B1 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -735,40 +587,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		277C84362046A45A00D7B2B1 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				24F9C6CB20D8E05600E1F88D /* Yousuwp.swift in Sources */,
-				2749699820897EC5009A1E1B /* PCWebRiffle.swift in Sources */,
-				27FD7CE82091B5B10098F0EE /* Pan666.swift in Sources */,
-				27FD7CEF2091CE9D0098F0EE /* PCPipline.swift in Sources */,
-				277C84912047A0BB00D7B2B1 /* FileCoordinator.swift in Sources */,
-				277C84522046A49500D7B2B1 /* Ccchooo.swift in Sources */,
-				274969A120899A65009A1E1B /* PCWebBullet.swift in Sources */,
-				240D326620F5B49E00AED3C4 /* V2File.swift in Sources */,
-				277C84492046A49500D7B2B1 /* VCMLParser.swift in Sources */,
-				277C84482046A49500D7B2B1 /* Four.mlmodel in Sources */,
-				241317AA224B19EB00EBE853 /* TBQueueItem.swift in Sources */,
-				241317A6224B194000EBE853 /* TBPipline.swift in Sources */,
-				2745A3C3209175520060F237 /* Feemoo.swift in Sources */,
-				277C84472046A49500D7B2B1 /* ImageMaker.swift in Sources */,
-				2749699020887048009A1E1B /* PCDownloadManager.swift in Sources */,
-				2749698F20887048009A1E1B /* PCDownloadTask.swift in Sources */,
-				24E60F1121D65E4E007AB419 /* XunNiu.swift in Sources */,
-				24F9C6D120D8E17500E1F88D /* Const.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		277C84582047971D00D7B2B1 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				277C84612047971D00D7B2B1 /* ViewController.swift in Sources */,
-				277C845F2047971D00D7B2B1 /* AppDelegate.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		27C9DBB7204146A100A87E9E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -811,11 +629,6 @@
 			isa = PBXTargetDependency;
 			target = 27448B2220170ABA001FC925 /* WebShellExsample */;
 			targetProxy = 24E60F3721D663F5007AB419 /* PBXContainerItemProxy */;
-		};
-		277C848B2047979B00D7B2B1 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 277C843A2046A45A00D7B2B1 /* WebShell_iOS */;
-			targetProxy = 277C848A2047979B00D7B2B1 /* PBXContainerItemProxy */;
 		};
 		27C9DBD0204146A100A87E9E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1035,97 +848,6 @@
 			};
 			name = Release;
 		};
-		277C84452046A45B00D7B2B1 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = A272626J38;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = "WebShell-iOS/Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.ascp.WebShell-iOS";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.2;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
-		277C84462046A45B00D7B2B1 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = A272626J38;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = "WebShell-iOS/Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.ascp.WebShell-iOS";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.2;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Release;
-		};
-		277C84822047971E00D7B2B1 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = A272626J38;
-				INFOPLIST_FILE = "WebShellExample-iOS/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.ascp.WebShellExample-iOS";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 4.2;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		277C84832047971E00D7B2B1 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = A272626J38;
-				INFOPLIST_FILE = "WebShellExample-iOS/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.ascp.WebShellExample-iOS";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 4.2;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
 		27C9DBD4204146A100A87E9E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1206,24 +928,6 @@
 			buildConfigurations = (
 				27448B4A20170ABA001FC925 /* Debug */,
 				27448B4B20170ABA001FC925 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		277C84442046A45B00D7B2B1 /* Build configuration list for PBXNativeTarget "WebShell_iOS" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				277C84452046A45B00D7B2B1 /* Debug */,
-				277C84462046A45B00D7B2B1 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		277C84812047971E00D7B2B1 /* Build configuration list for PBXNativeTarget "WebShellExample-iOS" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				277C84822047971E00D7B2B1 /* Debug */,
-				277C84832047971E00D7B2B1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
