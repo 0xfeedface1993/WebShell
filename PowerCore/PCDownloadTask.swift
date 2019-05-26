@@ -51,7 +51,9 @@ public class PCDownloadTask: NSObject {
     /// 下载数据信息, 进度信息，当下载完成后包含已下载的数据信息
     public var pack = PCDownloadPack()
     /// 创建时间
-    public let createTime = Date()
+    public var createTime : Date {
+        return request.date
+    }
     
     init(request newRequest: PCDownloadRequest, task newTask: URLSessionDownloadTask) {
         self.request = newRequest
@@ -90,6 +92,7 @@ public struct PCDownloadRequest {
             return req
         }
     }
+    public let date = Date()
     
     /// 该下载任务所属的网盘任务
     public weak var riffle: PCWebRiffle? {
