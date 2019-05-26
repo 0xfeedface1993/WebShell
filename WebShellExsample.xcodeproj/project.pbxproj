@@ -15,6 +15,7 @@
 		24B3CA2F227FE87D0094B43E /* TBPiplineSeat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24B3CA2E227FE87D0094B43E /* TBPiplineSeat.swift */; };
 		24B3CCA0228405480094B43E /* TBParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24B3CC9F228405480094B43E /* TBParser.swift */; };
 		24B3CD0B22856FF30094B43E /* TBDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24B3CD0A22856FF30094B43E /* TBDownloader.swift */; };
+		24D707E6229AB8B000F9D557 /* Xipan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24D707E5229AB8B000F9D557 /* Xipan.swift */; };
 		24E60F1021D65E4D007AB419 /* XunNiu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E60F0D21D65C50007AB419 /* XunNiu.swift */; };
 		24E60F1921D66181007AB419 /* WebShellCoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E60F1821D66181007AB419 /* WebShellCoreTests.swift */; };
 		24E60F1B21D66181007AB419 /* WebShell_macOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27C9DBBC204146A100A87E9E /* WebShell_macOS.framework */; };
@@ -118,6 +119,7 @@
 		24B3CC9F228405480094B43E /* TBParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TBParser.swift; sourceTree = "<group>"; };
 		24B3CD0A22856FF30094B43E /* TBDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TBDownloader.swift; sourceTree = "<group>"; };
 		24C94C2D20C6C06D00EFAC82 /* MLMaker.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MLMaker.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		24D707E5229AB8B000F9D557 /* Xipan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Xipan.swift; sourceTree = "<group>"; };
 		24E60F0D21D65C50007AB419 /* XunNiu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XunNiu.swift; sourceTree = "<group>"; };
 		24E60F1621D66180007AB419 /* WebShellCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WebShellCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		24E60F1821D66181007AB419 /* WebShellCoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebShellCoreTests.swift; sourceTree = "<group>"; };
@@ -208,6 +210,14 @@
 				24B3CD0A22856FF30094B43E /* TBDownloader.swift */,
 			);
 			path = Tomb;
+			sourceTree = "<group>";
+		};
+		24D707E4229AB89D00F9D557 /* Xipan */ = {
+			isa = PBXGroup;
+			children = (
+				24D707E5229AB8B000F9D557 /* Xipan.swift */,
+			);
+			path = Xipan;
 			sourceTree = "<group>";
 		};
 		24E60F0C21D65C0C007AB419 /* Niu */ = {
@@ -356,6 +366,7 @@
 		27C9DBDA204146D300A87E9E /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				24D707E4229AB89D00F9D557 /* Xipan */,
 				24E60F0C21D65C0C007AB419 /* Niu */,
 				240D326320F5B48300AED3C4 /* V2 */,
 				24F9C6CF20D8E17500E1F88D /* Const.swift */,
@@ -597,6 +608,7 @@
 				24E60F1021D65E4D007AB419 /* XunNiu.swift in Sources */,
 				241317A5224B194000EBE853 /* TBPipline.swift in Sources */,
 				2745A3C2209175510060F237 /* Feemoo.swift in Sources */,
+				24D707E6229AB8B000F9D557 /* Xipan.swift in Sources */,
 				2749699720897EC5009A1E1B /* PCWebRiffle.swift in Sources */,
 				27C9DBDF2041474900A87E9E /* VerifyCodeView.swift in Sources */,
 				274969A020899A64009A1E1B /* PCWebBullet.swift in Sources */,
