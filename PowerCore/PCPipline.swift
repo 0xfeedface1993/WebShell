@@ -323,7 +323,7 @@ public struct SitePack {
     var site : WebHostSite
     public static let allSite = [SitePack(regulerExpression: "(feemoo)|(fmpan)", site: .feemoo),
                                  SitePack(regulerExpression: "\\.\\d{2,}pan\\.", site: .pan666),
-                                 SitePack(regulerExpression: "(ccchoo)|(chooyun)|(caihoo)|(wodech)|(mm222)", site: .cchooo),
+                                 SitePack(regulerExpression: "(ccchoo)|(chooyun)|(caihoo)|(wodech)|(mm222)|(getlle)", site: .cchooo),
                                  SitePack(regulerExpression: "yousuwp", site: .yousuwp),
                                  SitePack(regulerExpression: "xun\\-niu", site: .xunniu),
                                  SitePack(regulerExpression: "(v2file)|(wa54)|(wp2ef)|(wp344)", site: .v2file)]
