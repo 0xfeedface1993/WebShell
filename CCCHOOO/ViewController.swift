@@ -103,6 +103,9 @@ class ViewController: NSViewController {
             }
         }
         
+//        let request = TBRequest
+//        TBPipline.share.add(task: request)
+        
 //        let date = Date()
 //        let dateFormater = DateFormatter()
 //        dateFormater.dateFormat = "yyyy-MM-dd-HH:mm:SS-"

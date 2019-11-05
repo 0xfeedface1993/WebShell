@@ -42,6 +42,7 @@
 		24E60F3521D66364007AB419 /* Pan666.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277BFBD5203EA876009EE51B /* Pan666.swift */; };
 		24E60F3621D6636E007AB419 /* Four.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 277C842F204652C500D7B2B1 /* Four.mlmodel */; };
 		24E60F3921D66466007AB419 /* Const.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F9C6CF20D8E17500E1F88D /* Const.swift */; };
+		24E98026229B7F4F00EC6D96 /* TBWebview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E98025229B7F4F00EC6D96 /* TBWebview.swift */; };
 		24F9C6CA20D8E05600E1F88D /* Yousuwp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F9C6C920D8E05600E1F88D /* Yousuwp.swift */; };
 		24F9C6CD20D8E06100E1F88D /* yousuwp.js in Resources */ = {isa = PBXBuildFile; fileRef = 24F9C6CC20D8E06100E1F88D /* yousuwp.js */; };
 		24F9C6D020D8E17500E1F88D /* Const.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F9C6CF20D8E17500E1F88D /* Const.swift */; };
@@ -124,6 +125,7 @@
 		24E60F1621D66180007AB419 /* WebShellCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WebShellCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		24E60F1821D66181007AB419 /* WebShellCoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebShellCoreTests.swift; sourceTree = "<group>"; };
 		24E60F1A21D66181007AB419 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		24E98025229B7F4F00EC6D96 /* TBWebview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TBWebview.swift; sourceTree = "<group>"; };
 		24F9C6C920D8E05600E1F88D /* Yousuwp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Yousuwp.swift; sourceTree = "<group>"; };
 		24F9C6CC20D8E06100E1F88D /* yousuwp.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = yousuwp.js; sourceTree = "<group>"; };
 		24F9C6CF20D8E17500E1F88D /* Const.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Const.swift; sourceTree = "<group>"; };
@@ -208,6 +210,7 @@
 				24B3CA2E227FE87D0094B43E /* TBPiplineSeat.swift */,
 				24B3CC9F228405480094B43E /* TBParser.swift */,
 				24B3CD0A22856FF30094B43E /* TBDownloader.swift */,
+				24E98025229B7F4F00EC6D96 /* TBWebview.swift */,
 			);
 			path = Tomb;
 			sourceTree = "<group>";
@@ -607,6 +610,7 @@
 				27C9DBE92041495A00A87E9E /* Ccchooo.swift in Sources */,
 				24E60F1021D65E4D007AB419 /* XunNiu.swift in Sources */,
 				241317A5224B194000EBE853 /* TBPipline.swift in Sources */,
+				24E98026229B7F4F00EC6D96 /* TBWebview.swift in Sources */,
 				2745A3C2209175510060F237 /* Feemoo.swift in Sources */,
 				24D707E6229AB8B000F9D557 /* Xipan.swift in Sources */,
 				2749699720897EC5009A1E1B /* PCWebRiffle.swift in Sources */,

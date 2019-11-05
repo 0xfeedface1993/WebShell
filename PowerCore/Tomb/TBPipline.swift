@@ -8,8 +8,8 @@
 
 import Foundation
 
-public class TBPipline: Logger {
-    enum PiplineError: Error {
+public class TBPipline {
+    public enum PiplineError: Error {
         /// 等待队列和执行队列里面出现重复任务
         case reduplicateTask
         case unkownsite
@@ -28,7 +28,7 @@ public class TBPipline: Logger {
     ///
     /// - Parameter task: 解析任务参数结构体
     /// - Returns: 成功则返回 TBPiplineSeat 对象，否则返回 Error
-    func add(task: TBPiplineSeat.TBRequest) -> Result<TBPiplineSeat, PiplineError> {
+    public func add(task: TBPiplineSeat.TBRequest) -> Result<TBPiplineSeat, PiplineError> {
         let seat = TBPiplineSeat(request: task)
         
         guard seat.site != .unknowsite else {
@@ -50,7 +50,7 @@ public class TBPipline: Logger {
     /// 查找站点下一个任务并执行
     ///
     /// - Parameter site: 站点
-    func next(taskInSite site: WebHostSite) {
+    public func next(taskInSite site: WebHostSite) {
         if let _ = currentQueue.first(where: { $0.site == site }) {
             log(message: "Already have \(site) in progress, wait!")
             return
@@ -72,7 +72,7 @@ public class TBPipline: Logger {
     /// 完成当前站点下正在执行的任务，该任务下载完成、失败都会调用
     ///
     /// - Parameter site: 站点
-    func finish(taskInSite site: WebHostSite) {
+    public func finish(taskInSite site: WebHostSite) {
         defer {
             next(taskInSite: site)
         }
@@ -87,7 +87,7 @@ public class TBPipline: Logger {
     }
 }
 
-extension TBPipline : TBPiplineRoomDelegate {
+extension TBPipline : TBPiplineRoomDelegate, Logger {
     public func pipline(didFinishedSeat: TBQueueItem) {
         finish(taskInSite: didFinishedSeat.site)
     }

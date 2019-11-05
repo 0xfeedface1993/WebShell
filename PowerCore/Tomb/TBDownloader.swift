@@ -32,6 +32,12 @@ public class TBDownloader: NSObject {
         let config = URLSessionConfiguration.default
         session = URLSession(configuration: config, delegate: self, delegateQueue: OperationQueue.main)
     }
+    
+    func add(request: URLRequest) -> URLSessionDownloadTask {
+        let task = self.session.downloadTask(with: request)
+        task.resume()
+        return task
+    }
 }
 
 extension TBDownloader: URLSessionDownloadDelegate {

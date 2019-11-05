@@ -13,10 +13,26 @@ struct TBParser {
     static func parser(item: TBQueueItem) -> TBParser {
         switch item.site {
         case .xunniu:
+            let escape: ((TBParserUnit) -> Void) = { unit in
+                TBPipline.share.finish(taskInSite: item.site)
+            }
             let urlPaser = XNURLParser()
+            urlPaser.escape = escape
             urlPaser.value = item.url as AnyObject
             let finder = XNFinderParser()
-            return TBParser(parsers: [urlPaser, finder])
+            finder.escape = escape
+            let download = XNDowloadParser()
+            download.escape = escape
+            download.sucess = { unit in
+                guard let url = unit.passValue as? URLRequest else {
+                     TBPipline.share.finish(taskInSite: item.site)
+                    return
+                }
+                
+                let task = TBDownloader.share.add(request: url)
+                item.load(task: task)
+            }
+            return TBParser(parsers: [urlPaser, finder, download])
         default:
             return TBParser(parsers: [])
         }
@@ -27,6 +43,7 @@ protocol TBParserUnit: class {
     var value: AnyObject? { get set }
     var passValue: AnyObject? { get set }
     var escape: ((TBParserUnit) -> Void)? { get set }
+    var sucess: ((TBParserUnit) -> Void)? { get set }
 //    var dataTask: URLSessionTask? { get set }
     func execute(completion: @escaping (TBParserUnit) -> ())
 }
@@ -68,8 +85,7 @@ extension Array: Logger where Element == TBParserUnit {
 }
 
 class XNURLParser: TBParserUnit, Logger {
-//    var dataTask: URLSessionTask?
-    
+    var sucess: ((TBParserUnit) -> Void)?
     var value: AnyObject?
     var passValue: AnyObject?
     var escape: ((TBParserUnit) -> Void)?
@@ -103,7 +119,7 @@ class XNURLParser: TBParserUnit, Logger {
 }
 
 final class XNFinderParser: TBParserUnit, Logger {
-//    var dataTask: URLSessionTask?
+    var sucess: ((TBParserUnit) -> Void)?
     var value: AnyObject?
     var passValue: AnyObject?
     var escape: ((TBParserUnit) -> Void)?
@@ -165,3 +181,51 @@ final class XNFinderParser: TBParserUnit, Logger {
     }
 }
 
+
+final class XNDowloadParser: TBParserUnit, Logger {
+    var sucess: ((TBParserUnit) -> Void)?
+    var value: AnyObject?
+    var passValue: AnyObject?
+    var escape: ((TBParserUnit) -> Void)?
+    
+    func execute(completion: @escaping (TBParserUnit) -> ()) {
+        guard let html = value as? String else {
+            log(error: "Can't find download link")
+            return
+        }
+        
+        guard let url = html.convertURL() else {
+            log(error: "Invalid download link: \(html)")
+            return
+        }
+        
+        let header = ["Referer":url.absoluteString,
+                      "Accept-Language":"zh-cn",
+                      "Upgrade-Insecure-Requests":"1",
+                      "Accept-Encoding":"gzip, deflate",
+                      "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                      "User-Agent":userAgent]
+        
+        var request = URLRequest(url: url)
+        header.forEach({
+            request.addValue($0.value, forHTTPHeaderField: $0.key)
+        })
+        request.httpMethod = "GET"
+        
+        self.passValue = request as AnyObject
+        self.sucess?(self)
+    }
+}
+
+extension String: Logger {
+    func convertURL() -> URL? {
+        let regx = try? NSRegularExpression(pattern: #"https?:\/\/[^"]+"#, options: NSRegularExpression.Options.caseInsensitive)
+        let strNS = self as NSString
+        if let result = regx?.firstMatch(in: self, options: NSRegularExpression.MatchingOptions.reportProgress, range: NSRange(location: 0, length: strNS.length)) {
+            let url = URL(string: strNS.substring(with: result.range))
+            log(message: "file link: \(url?.absoluteString ?? "nil")")
+            return url
+        }
+        return nil
+    }
+}

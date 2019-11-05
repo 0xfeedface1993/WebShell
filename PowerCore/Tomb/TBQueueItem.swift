@@ -26,6 +26,9 @@ public protocol TBQueueItem {
     /// 接受到的数据
     var revData : Data? { get set }
     var suggesetFileName : String? { get set }
+    
+    func parserEnd()
+    func load(task: URLSessionDownloadTask)
 }
 
 public protocol TBPiplineRoomDelegate {

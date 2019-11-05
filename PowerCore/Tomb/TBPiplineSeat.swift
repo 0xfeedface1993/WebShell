@@ -9,24 +9,24 @@
 import Cocoa
 import WebKit
 
-class TBPiplineSeat: TBQueueItem, Hashable {
+public class TBPiplineSeat: TBQueueItem, Hashable {
     /// 任务创建请求
-    struct TBRequest {
+    public struct TBRequest {
         /// 网盘页面地址
-        var pageURL : URL
+        public var pageURL : URL
         /// 任务名称，用于文件保存和下载列表区分
-        var taskName : String
+        public var taskName : String
         /// 后缀名，只有文件下载开始才会存在
-        var extensionName : String?
+        public var extensionName : String?
         /// 解压密码，大部分压缩文件是有密码的
-        var password : String?
+        public var password : String?
         /// 站点类型
-        var site : WebHostSite {
+        public var site : WebHostSite {
             return siteType(url: pageURL)
         }
         
         /// 保存文件名，包含解压密码
-        var saveFileName: String {
+        public var saveFileName: String {
             if let e = extensionName {
                 return "\(taskName)(\(password ?? "")).\(e)"
             }
@@ -34,30 +34,29 @@ class TBPiplineSeat: TBQueueItem, Hashable {
         }
     }
     
-    static func == (lhs: TBPiplineSeat, rhs: TBPiplineSeat) -> Bool {
+    public static func == (lhs: TBPiplineSeat, rhs: TBPiplineSeat) -> Bool {
         return lhs.tag == rhs.tag
     }
     
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(tag)
         hasher.combine(originRequest.pageURL)
     }
     
-    var tag: String = UUID().uuidString
-    var site: WebHostSite {
+    public var tag: String = UUID().uuidString
+    public var site: WebHostSite {
         return originRequest.site
     }
-    var url: String {
+    public var url: String {
         return originRequest.pageURL.absoluteString
     }
     var originRequest: TBRequest
-    var webview: WKWebView?
     weak var pipline: TBPipline?
     
-    var downloadTask: URLSessionDownloadTask?
-    var parserCreatTime: Date = Date()
-    var startDownloadTime: Date?
-    var endDownloadTime: Date?
+    public var downloadTask: URLSessionDownloadTask?
+    public var parserCreatTime: Date = Date()
+    public var startDownloadTime: Date?
+    public var endDownloadTime: Date?
     
     /// 下载进度，1.0为100%
     public var progress : Float {
@@ -70,7 +69,7 @@ class TBPiplineSeat: TBQueueItem, Hashable {
     /// 接受到的数据
     public var revData : Data?
     
-    var suggesetFileName : String? {
+    public var suggesetFileName : String? {
         set {
             if originRequest.extensionName == nil,
                 let name = newValue?.components(separatedBy: ".").last {
@@ -85,13 +84,13 @@ class TBPiplineSeat: TBQueueItem, Hashable {
     
     init(request: TBRequest) {
         self.originRequest = request
-        let config = WKWebViewConfiguration()
-        webview = WKWebView(frame: CGRect.zero, configuration: config)
-        webview?.customUserAgent = userAgent
     }
     
-    deinit {
-        webview?.stopLoading()
-        webview = nil
+    public func parserEnd() {
+        
+    }
+    
+    public func load(task: URLSessionDownloadTask) {
+        self.downloadTask = task
     }
 }
