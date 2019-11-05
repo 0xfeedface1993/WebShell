@@ -132,6 +132,11 @@ public class Pan666 : PCWebRiffle {
     }
     
     func downloadFile(urls: [URL]) {
+        if urls.count <= 0 {
+            print("------------- URLs count is 0 -------------")
+            self.downloadFinished()
+            return
+        }
         var fileDownloadRequest = PCDownloadRequest(headFields: ["Connection":"keep-alive",
                                                                  "Upgrade-Insecure-Requests":"1",
                                                                  "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
