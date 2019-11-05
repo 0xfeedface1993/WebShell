@@ -2,19 +2,11 @@
 //  WebShell.h
 //  WebShell
 //
-//  Created by virus1993 on 2018/2/24.
-//  Copyright © 2018年 ascp. All rights reserved.
+//  Created by virus1994 on 2019/11/6.
+//  Copyright © 2019 ascp. All rights reserved.
 //
 
-//#if TARGET_OS_IPHONE
-//#import <UIkit/UIKit.h>
-//#elif TARGET_IPHONE_SIMULATOR
-//#import <UIkit/UIKit.h>
-//#elif TARGET_OS_MAC
-//#import <Cocoa/Cocoa.h>
-//#endif
-
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
 //! Project version number for WebShell.
 FOUNDATION_EXPORT double WebShellVersionNumber;
