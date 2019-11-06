@@ -75,10 +75,10 @@ class XunNiu: PCWebRiffle {
     
     func download(fileURL: URL) {
         var fileRequest = PCDownloadRequest(headFields: [
-            "Host":"\(fileURL.host ?? ""):\(fileURL.port ?? 80)",
+            "Host":"\(fileURL.host ?? "")\(fileURL.port != nil ? ":\(fileURL.port!)":"")",
             "Upgrade-Insecure-Requests":"1",
             "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0.2 Safari/605.1.15",
+            "User-Agent": userAgent,
             "Referer":"http://\(hostName)/down-\(fileNumber).html",
             "Accept-Language":"zh-cn",
             "Accept-Encoding":"gzip, deflate",

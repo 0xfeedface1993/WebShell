@@ -12,6 +12,6 @@
     import UIKit
 #endif
 
-let userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6"
+let userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Safari/605.1.15"
 let fullAccept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
 public let ImageFetchNotification = Notification.Name("com.ascp.image.code")
