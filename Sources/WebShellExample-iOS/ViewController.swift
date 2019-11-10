@@ -48,7 +48,7 @@ class ViewController: UITableViewController {
 //                     "http://www.88pan.cc/file-532359.html",
 //                     "http://www.ccchoo.com/file-40055.html",
 //                     "http://www.ccchoo.com/file-40053.html"]
-        let items = ["http://www.567pan.com/file-140318.html"]
+        let items = ["http://www.ibuspan.com/file/QUExMDczOA==.html"]
         PCPipeline.share.delegate = self
         for item in items {
             let _ = PCPipeline.share.add(url: item, password: "")
