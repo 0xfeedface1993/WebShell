@@ -179,7 +179,6 @@ public class PCPipeline {
         }
     }
     
-    @discardableResult
     public func add<T: PCWebRiffle>(url: String, password: String, friendName: String) -> T? {
         guard let host = URL(string: url) else {
             return nil
@@ -238,6 +237,13 @@ public class PCPipeline {
             return riffle as? T
         case .bus:
             let riffle = BusPan(urlString: url)
+            riffle.password = password
+            riffle.host = type
+            riffle.friendName = friendName
+            add(riffle: riffle)
+            return riffle as? T
+        case .color:
+            let riffle = ColorDx(urlString: url)
             riffle.password = password
             riffle.host = type
             riffle.friendName = friendName
@@ -331,6 +337,7 @@ public enum WebHostSite : Int {
     case xunniu
     case xi
     case bus
+    case color
     case unknowsite
 }
 
@@ -344,7 +351,8 @@ public struct SitePack {
                                  SitePack(regulerExpression: "xun\\-niu", site: .xunniu),
                                  SitePack(regulerExpression: "xibupan", site: .xi),
                                  SitePack(regulerExpression: "(v2file)|(wa54)|(wp2ef)|(wp344)|(wp8ky)", site: .v2file),
-                                 SitePack(regulerExpression: "ibuspan", site: .bus)]
+                                 SitePack(regulerExpression: "ibuspan", site: .bus),
+                                 SitePack(regulerExpression: "coofiles", site: .color)]
 }
 
 public func siteType(url: URL) -> WebHostSite {

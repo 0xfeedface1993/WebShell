@@ -76,6 +76,8 @@
 		27448B2920170ABA001FC925 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B2820170ABA001FC925 /* ViewController.swift */; };
 		27448B2B20170ABA001FC925 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 27448B2A20170ABA001FC925 /* Assets.xcassets */; };
 		27448B2E20170ABA001FC925 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 27448B2C20170ABA001FC925 /* Main.storyboard */; };
+		633B71F923CB10D700B70E1C /* ColorDx.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633B71F723CB107C00B70E1C /* ColorDx.swift */; };
+		633B71FA23CB1ADA00B70E1C /* ColorDx.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633B71F723CB107C00B70E1C /* ColorDx.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -168,6 +170,7 @@
 		27C9DBBF204146A100A87E9E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		27E4C12E2037011E0003A38D /* Feemoo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Feemoo.swift; sourceTree = "<group>"; };
 		27E4C130203703610003A38D /* feemoo.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = feemoo.js; sourceTree = "<group>"; };
+		633B71F723CB107C00B70E1C /* ColorDx.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorDx.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -224,6 +227,7 @@
 				240D326420F5B49E00AED3C4 /* V2File.swift */,
 				24F9C6CF20D8E17500E1F88D /* Const.swift */,
 				24F9C6C920D8E05600E1F88D /* Yousuwp.swift */,
+				633B71F723CB107C00B70E1C /* ColorDx.swift */,
 				2749698920886BBE009A1E1B /* PCDownloadTask.swift */,
 				2749698B20886F9B009A1E1B /* PCDownloadManager.swift */,
 				2749699520897CAB009A1E1B /* PCWebRiffle.swift */,
@@ -522,6 +526,7 @@
 				24B189E52378305500B31B36 /* BusPan.swift in Sources */,
 				242C07372371E9B10037D3C2 /* XunNiu.swift in Sources */,
 				242C073E2371E9B10037D3C2 /* PCWebBullet.swift in Sources */,
+				633B71F923CB10D700B70E1C /* ColorDx.swift in Sources */,
 				242C07422371E9B10037D3C2 /* VerifyCodeViewController.swift in Sources */,
 				242C073F2371E9B10037D3C2 /* ImageMaker.swift in Sources */,
 				242C074A2371E9B10037D3C2 /* TBParser.swift in Sources */,
@@ -555,6 +560,7 @@
 				24E60F2F21D66364007AB419 /* Ccchooo.swift in Sources */,
 				24E60F2421D66364007AB419 /* PCDownloadTask.swift in Sources */,
 				24113A412371E11800AEDEAA /* Xipan.swift in Sources */,
+				633B71FA23CB1ADA00B70E1C /* ColorDx.swift in Sources */,
 				24E60F2221D66364007AB419 /* V2File.swift in Sources */,
 				24E60F2D21D66364007AB419 /* VerifyCodeViewController.swift in Sources */,
 				24E60F2721D66364007AB419 /* PCWebRiffle.swift in Sources */,
@@ -754,7 +760,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
@@ -809,7 +815,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
