@@ -46,7 +46,7 @@ class V2File: PCWebRiffle {
         var url : URL
         static let sportal = V2Host(url: URL(string: "http://sportal.wa54.space")!)
         static let drive = V2Host(url: URL(string: "http://download.wp344.space")!)
-        static let download = V2Host(url: URL(string: "http://download.wa54.space")!)
+        static let download = V2Host(url: URL(string: "http://download.wa54.space")!)//http://download.wa54.space/2020-01-11/jYPR5bzyljII2ZmS449QrMKOTnSLf5cjhF9ub8Bv.zip?deadline=1578822741&rate=102400&filename=11343862.zip&sign=d57e946d29b94d5e9d50f00d9b52a7b2e3047517
     }
     
     // 第一页

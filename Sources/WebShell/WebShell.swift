@@ -343,7 +343,7 @@ public struct SitePack {
                                  SitePack(regulerExpression: "yousuwp", site: .yousuwp),
                                  SitePack(regulerExpression: "xun\\-niu", site: .xunniu),
                                  SitePack(regulerExpression: "xibupan", site: .xi),
-                                 SitePack(regulerExpression: "(v2file)|(wa54)|(wp2ef)|(wp344)", site: .v2file),
+                                 SitePack(regulerExpression: "(v2file)|(wa54)|(wp2ef)|(wp344)|(wp8ky)", site: .v2file),
                                  SitePack(regulerExpression: "ibuspan", site: .bus)]
 }
 
