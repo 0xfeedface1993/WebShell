@@ -352,7 +352,7 @@ public struct SitePack {
                                  SitePack(regulerExpression: "xibupan", site: .xi),
                                  SitePack(regulerExpression: "(v2file)|(wa54)|(wp2ef)|(wp344)|(wp8ky)", site: .v2file),
                                  SitePack(regulerExpression: "ibuspan", site: .bus),
-                                 SitePack(regulerExpression: "coofiles", site: .color)]
+                                 SitePack(regulerExpression: "(coofiles)|(kufiles)", site: .color)]
 }
 
 public func siteType(url: URL) -> WebHostSite {
