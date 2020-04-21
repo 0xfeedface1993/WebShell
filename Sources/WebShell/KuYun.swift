@@ -106,7 +106,7 @@ class KuYun: PCWebRiffle {
     }
     
     func parserFileLinkList(body: String) -> [URL]? {
-        let regx = try? NSRegularExpression(pattern: "cd[^\"]+", options: NSRegularExpression.Options.caseInsensitive)
+        let regx = try? NSRegularExpression(pattern: "cd\\.[^\"]+", options: NSRegularExpression.Options.caseInsensitive)
         let strNS = body as NSString
         if let results = regx?.matches(in: body, options: NSRegularExpression.MatchingOptions.reportProgress, range: NSRange(location: 0, length: strNS.length)) {
             return results.compactMap({
