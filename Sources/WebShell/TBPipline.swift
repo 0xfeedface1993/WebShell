@@ -17,20 +17,18 @@ public class TBPipline {
     }
     public static let share = TBPipline()
     /// 执行队列，当前正在执行的解析或下载任务
-    public var currentQueue = [TBQueueItem]()
+    public var currentQueue = [TBPiplineSeat]()
     /// 等待队列，等待执行的任务，FIFO队列
-    public var waitQueue = [TBQueueItem]()
+    public var waitQueue = [TBPiplineSeat]()
     
-    init() {
-        
-    }
+    init() { }
     
     /// 添加解析任务
     ///
     /// - Parameter task: 解析任务参数结构体
     /// - Returns: 成功则返回 TBPiplineSeat 对象，否则返回 Error
-    public func add(task: TBPiplineSeat.TBRequest) -> Result<TBPiplineSeat, PiplineError> {
-        let seat = TBPiplineSeat(request: task)
+    public func add(task: TBPiplineSeat) -> Result<TBPiplineSeat, PiplineError> {
+        let seat = task
         
         guard seat.site != .unknowsite else {
             return .failure(.unkownsite)
@@ -63,7 +61,7 @@ public class TBPipline {
             waitQueue.remove(at: wait)
             
             // 执行解析任务
-            
+            // 下一步解析工作
             return
         }
         
@@ -88,8 +86,8 @@ public class TBPipline {
     }
 }
 
-extension TBPipline : TBPiplineRoomDelegate, Logger {
-    public func pipline(didFinishedSeat: TBQueueItem) {
+extension TBPipline: Logger {
+    public func pipline(didFinishedSeat: TBPiplineSeat) {
         finish(taskInSite: didFinishedSeat.site)
     }
 }
@@ -101,21 +99,25 @@ extension TBPipline : TBDownloaderDelegate {
             return
         }
         
-        guard let index = self.currentQueue.firstIndex(where: { $0.downloadTask == downloadTask }) else {
+        guard let index = currentQueue.firstIndex(where: { $0.downloadTask == downloadTask }) else {
             log(error: "Downloader task not match any task in working queue. \(updateTask.task)")
             return
         }
         
         if let e = updateTask.error {
             log(error: "Download error: \(e.localizedDescription). \(updateTask.task)")
-            self.currentQueue[index].endDownloadTime = Date()
+            currentQueue[index].endDownloadTime = Date()
+            finish(taskInSite: currentQueue[index].site)
+            let seat = currentQueue[index]
+            seat.downloadCompletion(.failure(e))
             return
         }
         
-        self.currentQueue[index].revBytes = updateTask.reciveBytes ?? 0
-        self.currentQueue[index].totalBytes = updateTask.totalBytes ?? 0
-        self.currentQueue[index].suggesetFileName = downloadTask.response?.suggestedFilename
+        currentQueue[index].revBytes = updateTask.reciveBytes ?? 0
+        currentQueue[index].totalBytes = updateTask.totalBytes ?? 0
+        currentQueue[index].suggesetFileName = downloadTask.response?.suggestedFilename
         // 更新操作
+        // currentQueue[index].progressCompletion(currentQueue[index])
     }
     
     func downloader(_ downloader: TBDownloader, finishTask: TBDownloader.TBDownloadInfo) {
@@ -129,17 +131,37 @@ extension TBPipline : TBDownloaderDelegate {
             return
         }
         
+        self.currentQueue[index].endDownloadTime = Date()
+        
         if let e = finishTask.error {
             log(error: "Download finished error: \(e.localizedDescription). \(finishTask.task)")
-            self.currentQueue[index].endDownloadTime = Date()
             return
         }
         
         // 文件下载完成操作
+        // currentQueue[index].downloadCompletion(.success(currentQueue[index]))
     }
     
     func downloader(_ downloader: TBDownloader, interalError: Error?) {
-        
+        log(error: "Downloader failed due to interalError: \(interalError?.localizedDescription ?? "Unknown Error").")
+//        let date = Date()
+//
+//        for index in 0..<currentQueue.count {
+//            currentQueue[index].endDownloadTime = date
+//        }
+//
+//        for index in 0..<waitQueue.count {
+//            waitQueue[index].endDownloadTime = date
+//        }
+//
+//        let all = currentQueue + waitQueue
+//        all.forEach({
+//            if let e = interalError {
+//                $0.downloadCompletion(.failure(e))
+//            }
+//        })
+//        currentQueue.removeAll()
+//        waitQueue.removeAll()
     }
 }
 

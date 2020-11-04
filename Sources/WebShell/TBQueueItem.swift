@@ -27,11 +27,12 @@ public protocol TBQueueItem {
     var revData : Data? { get set }
     var suggesetFileName : String? { get set }
     
+    /// 下载完成/失败回调
+    var downloadCompletion: (Result<Self, Error>) -> Void { get set }
+    /// 下载进度变化回调
+    var progressCompletion: (Self) -> Void { get set }
+    
     func parserEnd()
     func load(task: URLSessionDownloadTask)
-}
-
-public protocol TBPiplineRoomDelegate {
-    func pipline(didFinishedSeat: TBQueueItem)
 }
 

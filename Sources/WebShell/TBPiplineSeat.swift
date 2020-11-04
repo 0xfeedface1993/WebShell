@@ -9,7 +9,7 @@
 import Cocoa
 import WebKit
 
-public class TBPiplineSeat: TBQueueItem, Hashable {
+final public class TBPiplineSeat: TBQueueItem, Hashable {
     /// 任务创建请求
     public struct TBRequest {
         /// 网盘页面地址
@@ -58,6 +58,11 @@ public class TBPiplineSeat: TBQueueItem, Hashable {
     public var startDownloadTime: Date?
     public var endDownloadTime: Date?
     
+    /// 下载完成/失败回调
+    public var downloadCompletion: (Result<TBPiplineSeat, Error>) -> Void
+    /// 下载进度变化回调
+    public var progressCompletion: (TBPiplineSeat) -> Void
+    
     /// 下载进度，1.0为100%
     public var progress : Float {
         return totalBytes > 0 ? Float(revBytes) / Float(totalBytes) : 0
@@ -82,8 +87,10 @@ public class TBPiplineSeat: TBQueueItem, Hashable {
         }
     }
     
-    init(request: TBRequest) {
+    init(request: TBRequest, downloadCompletion: @escaping (Result<TBPiplineSeat, Error>) -> Void, progressCompletion: @escaping (TBPiplineSeat) -> Void) {
         self.originRequest = request
+        self.downloadCompletion = downloadCompletion
+        self.progressCompletion = progressCompletion
     }
     
     public func parserEnd() {
