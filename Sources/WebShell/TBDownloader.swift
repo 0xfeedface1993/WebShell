@@ -7,6 +7,7 @@
 //
 
 import Cocoa
+import Combine
 
 protocol TBDownloaderDelegate: class {
     func downloader(_ downloader: TBDownloader, updateTask: TBDownloader.TBDownloadInfo)
@@ -14,7 +15,7 @@ protocol TBDownloaderDelegate: class {
     func downloader(_ downloader: TBDownloader, interalError: Error?)
 }
 
-public class TBDownloader: NSObject {
+public final class TBDownloader: NSObject, ObservableObject {
     struct TBDownloadInfo {
         var task: URLSessionTask
         var totalBytes: Int64?
@@ -37,6 +38,30 @@ public class TBDownloader: NSObject {
         let task = self.session.downloadTask(with: request)
         task.resume()
         return task
+    }
+    
+    typealias StatusUpdateOutput = (session: URLSession, downloadTask: URLSessionDownloadTask, bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64)
+    
+    struct DownloaderStatusTaskPublisher: Publisher {
+        func receive<S>(subscriber: S) where S : Subscriber, Self.Failure == S.Failure, Self.Output == S.Input {
+            
+        }
+        
+        typealias Output = StatusUpdateOutput
+        typealias Failure = Never
+        
+    }
+    
+    final class DownloadStatusSubscription<SubscriberType: Subscriber>: Subscription where SubscriberType.Input == StatusUpdateOutput, SubscriberType.Failure == Never {
+        func request(_ demand: Subscribers.Demand) {
+            
+        }
+        
+        func cancel() {
+            
+        }
+        
+        
     }
 }
 

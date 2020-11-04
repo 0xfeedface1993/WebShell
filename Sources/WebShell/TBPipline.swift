@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Combine
 
 public class TBPipline {
     public enum PiplineError: Error {

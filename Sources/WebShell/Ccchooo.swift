@@ -109,7 +109,7 @@ public class Ccchooo: PCWebRiffle {
         let codeUploadUnit = InjectUnit(script: "var code=0;", successAction: {
             dat in
             let url = downloadLink
-            let label = UUID().uuidString
+            // let label = UUID().uuidString
             var fileDownloadRequest = PCDownloadRequest(headFields: ["Referer":"http://www.mm222.cn/down-\(self.fileNumber).html",
                 "Accept-Language":"zh-cn",
                 "Upgrade-Insecure-Requests":"1",

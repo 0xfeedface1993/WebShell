@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 48;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -14,8 +14,6 @@
 		24113A452371E13E00AEDEAA /* TBWebview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E98025229B7F4F00EC6D96 /* TBWebview.swift */; };
 		241317A7224B194000EBE853 /* TBPipline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 241317A4224B194000EBE853 /* TBPipline.swift */; };
 		241317AB224B19EB00EBE853 /* TBQueueItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 241317A8224B19EB00EBE853 /* TBQueueItem.swift */; };
-		242C07302371E94D0037D3C2 /* WebShell.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 242C07292371E94D0037D3C2 /* WebShell.framework */; };
-		242C07312371E94D0037D3C2 /* WebShell.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 242C07292371E94D0037D3C2 /* WebShell.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		242C07352371E9B10037D3C2 /* WebShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2749699120888113009A1E1B /* WebShell.swift */; };
 		242C07362371E9B10037D3C2 /* Xipan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24D707E5229AB8B000F9D557 /* Xipan.swift */; };
 		242C07372371E9B10037D3C2 /* XunNiu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E60F0D21D65C50007AB419 /* XunNiu.swift */; };
@@ -40,7 +38,6 @@
 		242C074A2371E9B10037D3C2 /* TBParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24B3CC9F228405480094B43E /* TBParser.swift */; };
 		242C074B2371E9B10037D3C2 /* TBDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24B3CD0A22856FF30094B43E /* TBDownloader.swift */; };
 		242C074C2371E9B10037D3C2 /* TBWebview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E98025229B7F4F00EC6D96 /* TBWebview.swift */; };
-		242C074D2371E9B70037D3C2 /* Four.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 277C842F204652C500D7B2B1 /* Four.mlmodel */; };
 		242C074E2371E9C20037D3C2 /* VCMLParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277C8431204652F700D7B2B1 /* VCMLParser.swift */; };
 		242C074F2371E9C70037D3C2 /* yousuwp.js in Resources */ = {isa = PBXBuildFile; fileRef = 24F9C6CC20D8E06100E1F88D /* yousuwp.js */; };
 		242C07502371E9C70037D3C2 /* 666pan.js in Resources */ = {isa = PBXBuildFile; fileRef = 277BFBD7203EA974009EE51B /* 666pan.js */; };
@@ -70,7 +67,6 @@
 		24E60F3321D66364007AB419 /* ccchooo.js in Resources */ = {isa = PBXBuildFile; fileRef = 27448B592018387A001FC925 /* ccchooo.js */; };
 		24E60F3421D66364007AB419 /* Feemoo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27E4C12E2037011E0003A38D /* Feemoo.swift */; };
 		24E60F3521D66364007AB419 /* Pan666.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277BFBD5203EA876009EE51B /* Pan666.swift */; };
-		24E60F3621D6636E007AB419 /* Four.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 277C842F204652C500D7B2B1 /* Four.mlmodel */; };
 		24E60F3921D66466007AB419 /* Const.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F9C6CF20D8E17500E1F88D /* Const.swift */; };
 		27448B2720170ABA001FC925 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B2620170ABA001FC925 /* AppDelegate.swift */; };
 		27448B2920170ABA001FC925 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B2820170ABA001FC925 /* ViewController.swift */; };
@@ -79,16 +75,16 @@
 		631BEB4F244C52D4002243C4 /* KuYun.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631BEB4D244C52AF002243C4 /* KuYun.swift */; };
 		633B71F923CB10D700B70E1C /* ColorDx.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633B71F723CB107C00B70E1C /* ColorDx.swift */; };
 		633B71FA23CB1ADA00B70E1C /* ColorDx.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633B71F723CB107C00B70E1C /* ColorDx.swift */; };
+		635FEE0F25528D3500FEE0FD /* WebShell.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 242C07292371E94D0037D3C2 /* WebShell.framework */; };
+		635FEE1025528D3500FEE0FD /* WebShell.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 242C07292371E94D0037D3C2 /* WebShell.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		6365CE3824A1CD49004120EF /* DownStreamDataTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6365CE3624A1B02B004120EF /* DownStreamDataTask.swift */; };
+		6365CE3924A1CD4E004120EF /* WebShellError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6365CE3424A1AD95004120EF /* WebShellError.swift */; };
+		6365CE3A24A1CD56004120EF /* DownStreamDataTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6365CE3624A1B02B004120EF /* DownStreamDataTask.swift */; };
+		6365CE3B24A1CD59004120EF /* WebShellError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6365CE3424A1AD95004120EF /* WebShellError.swift */; };
+		63FE01EA249CB97200E32599 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 63FE01E9249CB97200E32599 /* SwiftSoup */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		242C072E2371E94D0037D3C2 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 27448B1B20170ABA001FC925 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 242C07282371E94D0037D3C2;
-			remoteInfo = WebShell;
-		};
 		24E60F3721D663F5007AB419 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 27448B1B20170ABA001FC925 /* Project object */;
@@ -96,16 +92,23 @@
 			remoteGlobalIDString = 27448B2220170ABA001FC925;
 			remoteInfo = WebShellExsample;
 		};
+		635FEE1125528D3500FEE0FD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27448B1B20170ABA001FC925 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 242C07282371E94D0037D3C2;
+			remoteInfo = WebShell;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		27C9DBD6204146A100A87E9E /* Embed Frameworks */ = {
+		635FEE1325528D3500FEE0FD /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				242C07312371E94D0037D3C2 /* WebShell.framework in Embed Frameworks */,
+				635FEE1025528D3500FEE0FD /* WebShell.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -126,7 +129,6 @@
 		24B3CA2E227FE87D0094B43E /* TBPiplineSeat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TBPiplineSeat.swift; sourceTree = "<group>"; };
 		24B3CC9F228405480094B43E /* TBParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TBParser.swift; sourceTree = "<group>"; };
 		24B3CD0A22856FF30094B43E /* TBDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TBDownloader.swift; sourceTree = "<group>"; };
-		24C94C2D20C6C06D00EFAC82 /* MLMaker.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MLMaker.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		24D707E5229AB8B000F9D557 /* Xipan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Xipan.swift; sourceTree = "<group>"; };
 		24E60F0D21D65C50007AB419 /* XunNiu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XunNiu.swift; sourceTree = "<group>"; };
 		24E60F1621D66180007AB419 /* WebShellCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WebShellCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -151,7 +153,6 @@
 		2749699E20899A60009A1E1B /* PCWebBullet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCWebBullet.swift; sourceTree = "<group>"; };
 		277BFBD5203EA876009EE51B /* Pan666.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pan666.swift; sourceTree = "<group>"; };
 		277BFBD7203EA974009EE51B /* 666pan.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = 666pan.js; sourceTree = "<group>"; };
-		277C842F204652C500D7B2B1 /* Four.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = Four.mlmodel; sourceTree = "<group>"; };
 		277C8431204652F700D7B2B1 /* VCMLParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VCMLParser.swift; sourceTree = "<group>"; };
 		277C84342046A02200D7B2B1 /* ImageMaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageMaker.swift; sourceTree = "<group>"; };
 		277C843D2046A45B00D7B2B1 /* WebShell_iOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WebShell_iOS.h; sourceTree = "<group>"; };
@@ -173,6 +174,8 @@
 		27E4C130203703610003A38D /* feemoo.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = feemoo.js; sourceTree = "<group>"; };
 		631BEB4D244C52AF002243C4 /* KuYun.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KuYun.swift; sourceTree = "<group>"; };
 		633B71F723CB107C00B70E1C /* ColorDx.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorDx.swift; sourceTree = "<group>"; };
+		6365CE3424A1AD95004120EF /* WebShellError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebShellError.swift; sourceTree = "<group>"; };
+		6365CE3624A1B02B004120EF /* DownStreamDataTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownStreamDataTask.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -180,6 +183,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				63FE01EA249CB97200E32599 /* SwiftSoup in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -194,7 +198,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				242C07302371E94D0037D3C2 /* WebShell.framework in Frameworks */,
+				635FEE0F25528D3500FEE0FD /* WebShell.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -249,9 +253,9 @@
 				24B3CA2E227FE87D0094B43E /* TBPiplineSeat.swift */,
 				24B3CC9F228405480094B43E /* TBParser.swift */,
 				24B3CD0A22856FF30094B43E /* TBDownloader.swift */,
+				6365CE3424A1AD95004120EF /* WebShellError.swift */,
+				6365CE3624A1B02B004120EF /* DownStreamDataTask.swift */,
 				24E98025229B7F4F00EC6D96 /* TBWebview.swift */,
-				277C842F204652C500D7B2B1 /* Four.mlmodel */,
-				24C94C2D20C6C06D00EFAC82 /* MLMaker.playground */,
 				277C8431204652F700D7B2B1 /* VCMLParser.swift */,
 				27448B58201837AD001FC925 /* Script */,
 			);
@@ -278,6 +282,7 @@
 				24113A3A2371D92D00AEDEAA /* Package.swift */,
 				246FF0F6228A6F2500B8BE0B /* WebShellExsample.entitlements */,
 				27448B2420170ABA001FC925 /* Products */,
+				635FEE0E25528D3500FEE0FD /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -347,6 +352,13 @@
 			path = WebShell;
 			sourceTree = "<group>";
 		};
+		635FEE0E25528D3500FEE0FD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -374,6 +386,9 @@
 			dependencies = (
 			);
 			name = WebShell;
+			packageProductDependencies = (
+				63FE01E9249CB97200E32599 /* SwiftSoup */,
+			);
 			productName = WebShell;
 			productReference = 242C07292371E94D0037D3C2 /* WebShell.framework */;
 			productType = "com.apple.product-type.framework";
@@ -403,12 +418,12 @@
 				27448B1F20170ABA001FC925 /* Sources */,
 				27448B2020170ABA001FC925 /* Frameworks */,
 				27448B2120170ABA001FC925 /* Resources */,
-				27C9DBD6204146A100A87E9E /* Embed Frameworks */,
+				635FEE1325528D3500FEE0FD /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				242C072F2371E94D0037D3C2 /* PBXTargetDependency */,
+				635FEE1225528D3500FEE0FD /* PBXTargetDependency */,
 			);
 			name = WebShellExsample;
 			productName = CCCHOOO;
@@ -422,7 +437,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1010;
-				LastUpgradeCheck = 1100;
+				LastUpgradeCheck = 1210;
 				ORGANIZATIONNAME = ascp;
 				TargetAttributes = {
 					242C07282371E94D0037D3C2 = {
@@ -455,6 +470,9 @@
 				Base,
 			);
 			mainGroup = 27448B1A20170ABA001FC925;
+			packageReferences = (
+				63FE01E8249CB97200E32599 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
+			);
 			productRefGroup = 27448B2420170ABA001FC925 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -511,18 +529,19 @@
 				242C07402371E9B10037D3C2 /* FileCoordinator.swift in Sources */,
 				242C073C2371E9B10037D3C2 /* PCDownloadManager.swift in Sources */,
 				242C07452371E9B10037D3C2 /* Feemoo.swift in Sources */,
+				6365CE3824A1CD49004120EF /* DownStreamDataTask.swift in Sources */,
 				242C07362371E9B10037D3C2 /* Xipan.swift in Sources */,
 				242C073B2371E9B10037D3C2 /* PCDownloadTask.swift in Sources */,
 				242C074E2371E9C20037D3C2 /* VCMLParser.swift in Sources */,
 				242C07412371E9B10037D3C2 /* VerifyCodeView.swift in Sources */,
 				242C07492371E9B10037D3C2 /* TBPiplineSeat.swift in Sources */,
 				242C073D2371E9B10037D3C2 /* PCWebRiffle.swift in Sources */,
-				242C074D2371E9B70037D3C2 /* Four.mlmodel in Sources */,
 				242C07482371E9B10037D3C2 /* TBQueueItem.swift in Sources */,
 				242C07462371E9B10037D3C2 /* Pan666.swift in Sources */,
 				242C07352371E9B10037D3C2 /* WebShell.swift in Sources */,
 				242C073A2371E9B10037D3C2 /* Yousuwp.swift in Sources */,
 				242C074B2371E9B10037D3C2 /* TBDownloader.swift in Sources */,
+				6365CE3924A1CD4E004120EF /* WebShellError.swift in Sources */,
 				242C07442371E9B10037D3C2 /* Ccchooo.swift in Sources */,
 				242C07472371E9B10037D3C2 /* TBPipline.swift in Sources */,
 				242C074C2371E9B10037D3C2 /* TBWebview.swift in Sources */,
@@ -548,13 +567,13 @@
 				24E60F3921D66466007AB419 /* Const.swift in Sources */,
 				24113A452371E13E00AEDEAA /* TBWebview.swift in Sources */,
 				24E60F2921D66364007AB419 /* ImageMaker.swift in Sources */,
-				24E60F3621D6636E007AB419 /* Four.mlmodel in Sources */,
 				24E60F3421D66364007AB419 /* Feemoo.swift in Sources */,
 				24113A442371E13E00AEDEAA /* TBPiplineSeat.swift in Sources */,
 				241317A7224B194000EBE853 /* TBPipline.swift in Sources */,
 				24E60F2A21D66364007AB419 /* VCMLParser.swift in Sources */,
 				24E60F2321D66364007AB419 /* Yousuwp.swift in Sources */,
 				24E60F2C21D66364007AB419 /* VerifyCodeView.swift in Sources */,
+				6365CE3A24A1CD56004120EF /* DownStreamDataTask.swift in Sources */,
 				24E60F2121D66364007AB419 /* XunNiu.swift in Sources */,
 				241317AB224B19EB00EBE853 /* TBQueueItem.swift in Sources */,
 				24113A432371E13E00AEDEAA /* TBParser.swift in Sources */,
@@ -562,6 +581,7 @@
 				24E60F2821D66364007AB419 /* PCWebBullet.swift in Sources */,
 				24E60F2521D66364007AB419 /* WebShell.swift in Sources */,
 				24E60F2F21D66364007AB419 /* Ccchooo.swift in Sources */,
+				6365CE3B24A1CD59004120EF /* WebShellError.swift in Sources */,
 				24E60F2421D66364007AB419 /* PCDownloadTask.swift in Sources */,
 				24113A412371E11800AEDEAA /* Xipan.swift in Sources */,
 				633B71FA23CB1ADA00B70E1C /* ColorDx.swift in Sources */,
@@ -585,15 +605,15 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		242C072F2371E94D0037D3C2 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 242C07282371E94D0037D3C2 /* WebShell */;
-			targetProxy = 242C072E2371E94D0037D3C2 /* PBXContainerItemProxy */;
-		};
 		24E60F3821D663F5007AB419 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 27448B2220170ABA001FC925 /* WebShellExsample */;
 			targetProxy = 24E60F3721D663F5007AB419 /* PBXContainerItemProxy */;
+		};
+		635FEE1225528D3500FEE0FD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 242C07282371E94D0037D3C2 /* WebShell */;
+			targetProxy = 635FEE1125528D3500FEE0FD /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -640,7 +660,11 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = WebShell/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ascp.WebShell;
@@ -667,7 +691,11 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = WebShell/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ascp.WebShell;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
@@ -686,7 +714,11 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = E6NP67H473;
 				INFOPLIST_FILE = WebShellCoreTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -704,7 +736,11 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = E6NP67H473;
 				INFOPLIST_FILE = WebShellCoreTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ascp.WebShellCoreTests;
@@ -738,6 +774,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -763,7 +800,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -799,6 +836,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -818,11 +856,12 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 4.2;
 			};
 			name = Release;
@@ -830,7 +869,6 @@
 		27448B4A20170ABA001FC925 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = WebShellExsample.entitlements;
 				CODE_SIGN_IDENTITY = "-";
@@ -838,7 +876,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = A272626J38;
 				INFOPLIST_FILE = CCCHOOO/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.ascp.CCCHOOO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -848,7 +889,6 @@
 		27448B4B20170ABA001FC925 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = WebShellExsample.entitlements;
 				CODE_SIGN_IDENTITY = "-";
@@ -856,7 +896,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = A272626J38;
 				INFOPLIST_FILE = CCCHOOO/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.ascp.CCCHOOO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -903,6 +946,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		63FE01E8249CB97200E32599 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/scinfu/SwiftSoup";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.3.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		63FE01E9249CB97200E32599 /* SwiftSoup */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 63FE01E8249CB97200E32599 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			productName = SwiftSoup;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 27448B1B20170ABA001FC925 /* Project object */;
 }
