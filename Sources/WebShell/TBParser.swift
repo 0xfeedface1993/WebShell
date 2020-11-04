@@ -229,3 +229,80 @@ extension String: Logger {
         return nil
     }
 }
+
+
+class DownloaderSetp {
+    enum Mode {
+        // get仅获取网页
+        case get
+        // 中间页面，需上一个页面获取参数
+        case middle
+        // 获取多个下载地址
+        case fileLinks
+        // 开始下载文件
+        case downloadOnly
+        
+        var httpMethod: String {
+            switch self {
+            case .get, .downloadOnly:
+                return "GET"
+            default:
+                return "POST"
+            }
+        }
+    }
+    
+    let mode: Mode
+    let url: URL
+    var headFields: [String:String]
+    var body: Data?
+    
+    var request: URLRequest {
+        var req = URLRequest(url: url)
+        req.httpShouldHandleCookies = true
+        req.httpMethod = mode.httpMethod
+        req.timeoutInterval = 5 * 60
+        for item in headFields {
+            req.addValue(item.value, forHTTPHeaderField: item.key)
+        }
+        req.httpBody = body
+        return req
+    }
+    
+    init(mode: Mode, url: URL, headFields: [String:String] = [:], data: Data? = nil) {
+        self.mode = mode
+        self.url = url
+        self.headFields = headFields
+        self.body = data
+    }
+
+//    var publisher: URLSession.DataTaskPublisher { URLSession.shared.dataTaskPublisher(for: request).eraseToAnyPublisher().catch(<#T##handler: (URLError) -> Publisher##(URLError) -> Publisher#>) }
+    
+    let onSuccessDelegate = ConfigDelegate<Data, Void>()
+    
+    func onSuccess(perform action: ((Data) -> Void)?) -> DownloaderSetp {
+        self.onSuccessDelegate.delegate(on: self) { _, data in
+            action?(data)
+        }
+        return self
+    }
+}
+
+public class ConfigDelegate<Input, Output> {
+    init() {
+        
+    }
+    
+    private var block: ((Input) -> Output?)?
+    
+    func delegate<T: AnyObject>(on target: T, block: ((T, Input) -> Output)?) {
+        self.block = { [weak target] input in
+            guard let target = target else { return nil }
+            return block?(target, input)
+        }
+    }
+    
+    func call(_ input: Input) -> Output? {
+        return block?(input)
+    }
+}

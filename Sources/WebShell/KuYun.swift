@@ -10,7 +10,7 @@ import Foundation
 
 class KuYun: PCWebRiffle {
     var fileNumber = ""
-    let hostName = "www.coolcloudx.com"
+    let hostName = "www.kufile.net"
     var fileMain = ""
     
     var onePage: URL {
