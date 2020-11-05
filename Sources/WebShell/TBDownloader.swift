@@ -42,6 +42,7 @@ public final class TBDownloader: NSObject, ObservableObject {
     
     typealias StatusUpdateOutput = (session: URLSession, downloadTask: URLSessionDownloadTask, bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64)
     
+    @available(OSX 10.15, *)
     struct DownloaderStatusTaskPublisher: Publisher {
         func receive<S>(subscriber: S) where S : Subscriber, Self.Failure == S.Failure, Self.Output == S.Input {
             
@@ -52,6 +53,7 @@ public final class TBDownloader: NSObject, ObservableObject {
         
     }
     
+    @available(OSX 10.15, *)
     final class DownloadStatusSubscription<SubscriberType: Subscriber>: Subscription where SubscriberType.Input == StatusUpdateOutput, SubscriberType.Failure == Never {
         func request(_ demand: Subscribers.Demand) {
             
@@ -60,8 +62,6 @@ public final class TBDownloader: NSObject, ObservableObject {
         func cancel() {
             
         }
-        
-        
     }
 }
 

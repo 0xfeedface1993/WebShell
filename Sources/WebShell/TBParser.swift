@@ -10,7 +10,7 @@ import Cocoa
 
 struct TBParser {
     var parsers = [TBParserUnit]()
-    static func parser(item: TBQueueItem) -> TBParser {
+    static func parser(item: TBPiplineSeat) -> TBParser {
         switch item.site {
         case .xunniu:
             let escape: ((TBParserUnit) -> Void) = { unit in
