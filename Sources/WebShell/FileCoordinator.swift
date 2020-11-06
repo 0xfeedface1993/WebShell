@@ -12,7 +12,7 @@
     import UIKit
 #endif
 
-extension FileManager {
+extension FileManager: Logger {
     func save(pack: PCDownloadTask) {
 #if os(macOS)
         // 保存到下载文件夹下
@@ -23,8 +23,13 @@ extension FileManager {
                 url = URL(fileURLWithPath: urlString).appendingPathComponent(pack.timeStampFileName)
             }
             
+            guard let revData = pack.pack.revData else {
+                log(message: "File data is empty! Not saved.")
+                return
+            }
+            
             do {
-                try pack.pack.revData?.write(to: url)
+                try revData.write(to: url)
                 print(">>>>>> file saved! <<<<<<")
             } catch {
                 print(error)

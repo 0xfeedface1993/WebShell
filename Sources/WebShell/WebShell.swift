@@ -13,13 +13,17 @@ let unkonwGroupName = "unkown-site-group"
 let GroupDefaultRule = "\\.[^\\.]+\\."
 
 /// 流水线上的一道产品线，管理一个站点下所有的任务
-public class PCPiplineSeat {
+public class PCPiplineSeat: Logger {
+    private var pipline = PCPipeline.share
     var webView : WKWebView!
     var site : WebHostSite = .unknowsite
+    /// 已完成下载+下载失败队列项
     public var finished = [PCWebRiffle]()
+    /// 正在下载+待下载队列
     public var working = [PCWebRiffle]()
-    private var pipline = PCPipeline.share
+    /// 用于处理下载间隔定时器
     private var timer: Timer?
+    /// 上次下载开始时间，一般的网盘两次下载都要10分钟的下载间隔
     private var lastDownloadTime: Date?
     
     init(site: WebHostSite) {
@@ -59,23 +63,37 @@ public class PCPiplineSeat {
 //        }
 //
 //        lastDownloadTime = now
+        guard working.count > 0 else {
+            log(message: "Current no worker in \(self.site).")
+            return
+        }
         
-        if working.count >= 1    {
-            if working[0].isFinished == false {
-                working[0].begin()
-            }   else    {
-                finished.append(working[0])
-                working.remove(at: 0)
-                
-                defer {
-                    run()
-                }
-                
-                guard let _ = PCDownloadManager.share.tasks.firstIndex(where: { $0.request.riffle?.mainURL == finished.last!.mainURL && $0.request.isFileDownloadTask }) else {
-                    pipline.delegate?.pipline?(didFinishedRiffle: finished.last!)
-                    return
-                }
-            }
+        guard working[0].isFinished else {
+            working[0].begin()
+            return
+        }
+        
+        // 将进行中的任务移到完成队列中，默认就是第一个
+        finished.append(working[0])
+        working.remove(at: 0)
+        log(message: "Swap queue, working: \(working.count) finished: \(finished.count)")
+        
+        defer {
+            // 处理完成后继续下一个任务
+            run()
+        }
+        
+        guard let last = finished.last else {
+            log(message: "No finished Task in \(self.site)")
+            return
+        }
+        
+        if PCDownloadManager
+            .share
+            .tasks
+            .firstIndex(where: { $0.request.riffle?.mainURL == last.mainURL && $0.request.isFileDownloadTask }) == nil {
+            log(message: "Can't find task for last finished task \(last.mainURL?.absoluteString ?? "Ooops!") in \(self.site), call didFinishedRiffle delegate, I forgot why.")
+            pipline.delegate?.pipline?(didFinishedRiffle: last)
         }
     }
     
@@ -89,11 +107,14 @@ public class PCPiplineSeat {
             return
         }
         
-        // 任务完成要确定为文件下载并且下载完成标签为真时才执行下一个任务
-        if working.first?.isFinished == true {
-            print("----------------- Run Next Riffle, wokers: \(working.count) -----------------")
+        defer {
             run()
-        }   else {
+        }
+        
+        // 任务完成要确定为文件下载并且下载完成标签为真时才执行下一个任务
+        if working.first?.isFinished ?? false {
+            print("----------------- Run Next Riffle, wokers: \(working.count) -----------------")
+        }   else    {
             print("----------------- Current Riffle Not Finish Or Nor wokers, wokers: \(working.count) -----------------")
         }
     }
