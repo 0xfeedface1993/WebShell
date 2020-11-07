@@ -81,8 +81,12 @@ public class PCWebRiffle: NSObject {
     func downloadFinished() {
         print("----------------- Download Finished Note -----------------")
         isFinished = true
-        DispatchQueue.main.async {
-            self.seat?.taskFinished(finishedRiffle: self)
+        print(">>> updat \(self).isFinished = \(isFinished)")
+        DispatchQueue.main.async { [weak self] in
+            guard let riffle = self else {
+                fatalError("Can't get riffle instance!")
+            }
+            riffle.seat?.taskFinished(finishedRiffle: riffle)
         }
     }   
     
