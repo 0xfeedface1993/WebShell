@@ -69,6 +69,7 @@ public class PCPiplineSeat: Logger {
         }
         
         guard working.first?.isFinished ?? false else {
+            log(message: "First task in working queue not finished: \(String(describing: working.first))")
             working.first?.begin()
             return
         }
