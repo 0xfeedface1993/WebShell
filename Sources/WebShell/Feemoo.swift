@@ -41,19 +41,19 @@ public class Feemoo: PCWebRiffle {
     ///
     /// - Parameter code: 验证码文本
     private func loadFeemooDownloadLink(code: String) {
-        let imageCodeUnit = InjectUnit(script: "com_down('\(fileid)', '\(code)', null);", successAction: { _ in
+        let imageCodeUnit = InjectUnit(script: "com_down('\(fileid)', '\(code)', null);", successAction: { [weak self] _ in
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2, execute: {
-                self.execNextCommand()
+                self?.execNextCommand()
             })
-        }, failedAction: { (err) in
+        }, failedAction: { [weak self] (err) in
             print("download link fetch js error: " + err.localizedDescription)
-            self.execNextCommand()
+            self?.execNextCommand()
         }, isAutomaticallyPass: false)
         
-        let fetchLink = InjectUnit(script: "fetchDownloadLink();", successAction: { daty in
+        let fetchLink = InjectUnit(script: "fetchDownloadLink();", successAction: { [weak self] daty in
             guard let str = daty as? String else {
                 print("ooops! not string!")
-                self.downloadFinished()
+                self?.downloadFinished()
                 return
             }
             print("+++++ Parser string success: \(str)")
@@ -61,22 +61,22 @@ public class Feemoo: PCWebRiffle {
             guard let url = URL(string: str) else {
                 print("+++++ Link not url string: \(str)")
                 if let _ = str.range(of: " failed") {
-                    self.verifyCodeParserErrorCount += 1
-                    if self.verifyCodeParserErrorCount >= 50 {
-                        self.downloadFinished()
+                    self?.verifyCodeParserErrorCount += 1
+                    if (self?.verifyCodeParserErrorCount ?? 0) >= 50 {
+                        self?.downloadFinished()
                         return
                     }
                     DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5, execute: {
-                        self.watting[0].injectJavaScript = self.imageInjectUnitMaker()
-                        self.execNextCommand()
+                        self?.watting[0].injectJavaScript = self?.imageInjectUnitMaker() ?? []
+                        self?.execNextCommand()
                     })
                 }   else    {
-                    self.downloadFinished()
+                    self?.downloadFinished()
                 }
                 return
             }
             
-            self.redirectDownload(url: url)
+            self?.redirectDownload(url: url)
         }, failedAction: { (e) in
             print(e)
         }, isAutomaticallyPass: false)
@@ -93,29 +93,29 @@ public class Feemoo: PCWebRiffle {
             return
         }
         
-        let mainJSUnit = InjectUnit(script: "\(functionScript) getSecondPageLinkAndFileName();", successAction: {
+        let mainJSUnit = InjectUnit(script: "\(functionScript) getSecondPageLinkAndFileName();", successAction: { [weak self]
             dat in
             guard let dic = dat as? [String:String] else {
                 print("wrong data!")
                 return
             }
             
-            self.fileName = dic["fileName"] ?? (UUID().uuidString + ".feemoo")
-            print("file name: \(self.fileName)")
+            self?.fileName = dic["fileName"] ?? (UUID().uuidString + ".feemoo")
+            print("file name: \(self?.fileName ?? "oops")")
             
             
             if let fileid = dic["fileid"], let href = dic["href"] {
                 print("fileid: \(fileid)")
                 print("href: \(href)")
-                self.fileid = fileid
-                self.feemooRefer = href
+                self?.fileid = fileid
+                self?.feemooRefer = href
                 DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1, execute: {
                     secondPageLoad()
                 })
             }   else    {
-                self.downloadFinished()
+                self?.downloadFinished()
             }
-        }, failedAction: { _ in self.downloadFinished() }, isAutomaticallyPass: false)
+        }, failedAction: { [weak self] _ in self?.downloadFinished() }, isAutomaticallyPass: false)
         
         let mainPage = PCWebBullet(method: .get, headFields: ["Connection": "keep-alive",
                                                               "Accept-Language": "zh-cn",
@@ -127,13 +127,13 @@ public class Feemoo: PCWebRiffle {
        
         
         func secondPageLoad() {
-            let secondJSUnit = InjectUnit(script: "\(functionScript) getCodeImageAndCodeEncry();", successAction: { (dat) in
+            let secondJSUnit = InjectUnit(script: "\(functionScript) getCodeImageAndCodeEncry();", successAction: { [weak self] (dat) in
                 DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1, execute: {
-                    self.watting[0].injectJavaScript = self.imageInjectUnitMaker()
-                    self.execNextCommand()
+                    self?.watting[0].injectJavaScript = self?.imageInjectUnitMaker() ?? []
+                    self?.execNextCommand()
                 })
-            }, failedAction: { (err) in
-                self.downloadFinished()
+            }, failedAction: { [weak self] (err) in
+                self?.downloadFinished()
             }, isAutomaticallyPass: false)
             
             let secondPage = PCWebBullet(method: .get,
@@ -157,17 +157,17 @@ public class Feemoo: PCWebRiffle {
     }
     
     func imageInjectUnitMaker() -> [InjectUnit] {
-        let reloadUnit = InjectUnit(script: "\(functionScript) getimgcoded();", successAction: { (dat) in
+        let reloadUnit = InjectUnit(script: "\(functionScript) getimgcoded();", successAction: { [weak self] (dat) in
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1, execute: {
-                self.execNextCommand()
+                self?.execNextCommand()
             })
-        }, failedAction: { (err) in
-            self.downloadFinished()
+        }, failedAction: { [weak self] (err) in
+            self?.downloadFinished()
         }, isAutomaticallyPass: false)
         
-        let fetchUnit = InjectUnit(script: "getImageString();", successAction: { (dat) in
+        let fetchUnit = InjectUnit(script: "getImageString();", successAction: { [weak self] (dat) in
             guard let str = dat as? String, let base64 = Data(base64Encoded: str) else {
-                self.downloadFinished()
+                self?.downloadFinished()
                 return
             }
             
@@ -175,11 +175,11 @@ public class Feemoo: PCWebRiffle {
             AIBot.recognize(codeImage: image, completion: { (labels) in
                 let code = labels.first + labels.second + labels.third + labels.four
                 print("************ found code: \(code)")
-                self.loadFeemooDownloadLink(code: code)
+                self?.loadFeemooDownloadLink(code: code)
             })
             
-        }, failedAction: { (err) in
-            self.downloadFinished()
+        }, failedAction: { [weak self] (err) in
+            self?.downloadFinished()
         }, isAutomaticallyPass: false)
         
         return [reloadUnit, fetchUnit]
@@ -197,14 +197,14 @@ public class Feemoo: PCWebRiffle {
                                                                  "User-Agent":userAgent], url: url, method: .get, body: nil, uuid: UUID(), friendName: self.friendName)
         self.feemooRefer = url.absoluteString
         fileDownloadRequest.downloadStateUpdate = nil
-        fileDownloadRequest.downloadFinished = { pack in
+        fileDownloadRequest.downloadFinished = { [weak self] pack in
             print(pack.pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
             
             if let response = pack.task.response as? HTTPURLResponse, response.statusCode == 302, let location = response.allHeaderFields["Location"] as? String, let fileURL = URL(string: location) {
-                self.downloadFile(url: fileURL)
+                self?.downloadFile(url: fileURL)
             }   else    {
                 FileManager.default.save(pack: pack)
-                self.downloadFinished()
+                self?.downloadFinished()
             }
         }
         fileDownloadRequest.riffle = self
@@ -224,12 +224,8 @@ public class Feemoo: PCWebRiffle {
                                                                  "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                                                                  "User-Agent":userAgent], url: url, method: .get, body: nil, uuid: uuid, friendName: self.friendName)
         fileDownloadRequest.downloadStateUpdate = nil
-        fileDownloadRequest.downloadFinished = { pack in
+        fileDownloadRequest.downloadFinished = { [weak self] pack in
             print(pack.pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
-            
-            defer {
-                self.downloadFinished()
-            }
             
             if let data = pack.pack.revData, let str = String(data: data, encoding: .utf8) {
                 print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%\n")
@@ -238,6 +234,7 @@ public class Feemoo: PCWebRiffle {
             }
             
             FileManager.default.save(pack: pack)
+            self?.downloadFinished()
         }
         fileDownloadRequest.riffle = self
         PCDownloadManager.share.add(request: fileDownloadRequest)

@@ -50,23 +50,23 @@ class XunNiu: PCWebRiffle {
              "Referer":"http://\(hostName)/down-\(fileNumber).html",
              "Connection":"keep-alive"
             ], url: url, method: HTTPMethod.post, body: "action=load_down_addr1&file_id=\(fileNumber)".data(using: .utf8)!, uuid: UUID(), friendName: self.friendName)
-        request.downloadFinished = { task in
+        request.downloadFinished = { [weak self] task in
             guard let data = task.pack.revData else {
-                self.downloadFinished()
+                self?.downloadFinished()
                 return
             }
             
             guard let str = String(data: data, encoding: .utf8) else {
-                self.downloadFinished()
+                self?.downloadFinished()
                 return
             }
             
-            guard let link = self.parserFileLink(body: str) else {
-                self.downloadFinished()
+            guard let link = self?.parserFileLink(body: str) else {
+                self?.downloadFinished()
                 return
             }
             
-            self.download(fileURL: link)
+            self?.download(fileURL: link)
         }
         request.isFileDownloadTask = false
         request.riffle = self
@@ -84,7 +84,7 @@ class XunNiu: PCWebRiffle {
             "Accept-Encoding":"gzip, deflate",
             "Connection": "keep-alive"
             ], url: fileURL, method: HTTPMethod.get, body: nil, uuid: uuid, friendName: self.friendName)
-        fileRequest.downloadFinished = { task in
+        fileRequest.downloadFinished = { [weak self] task in
             print(task.pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
             
             if let response = task.task.response as? HTTPURLResponse, response.statusCode == 302, let location = response.allHeaderFields["Location"] as? String, let fileURL = URL(string: location) {
@@ -92,10 +92,10 @@ class XunNiu: PCWebRiffle {
                 print("-------------- 302 Found, try remove task in background session --------------")
                 PCDownloadManager.share.removeFromBackgroundSession(originURL: fileURL)
                 #endif
-                self.downloadFor302(url: fileURL, refer: fileURL)
+                self?.downloadFor302(url: fileURL, refer: fileURL)
             }   else    {
                 FileManager.default.save(pack: task)
-                self.downloadFinished()
+                self?.downloadFinished()
             }
         }
         fileRequest.riffle = self
@@ -113,12 +113,8 @@ class XunNiu: PCWebRiffle {
                                                                  "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                                                                  "User-Agent":userAgent], url: url, method: .get, body: nil, uuid: uuid, friendName: self.friendName)
         fileDownloadRequest.downloadStateUpdate = nil
-        fileDownloadRequest.downloadFinished = { pack in
+        fileDownloadRequest.downloadFinished = { [weak self] pack in
             print(pack.pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
-            
-            defer {
-                self.downloadFinished()
-            }
             
             if let data = pack.pack.revData, let str = String(data: data, encoding: .utf8) {
                 print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%\n")
@@ -127,6 +123,7 @@ class XunNiu: PCWebRiffle {
             }
             
             FileManager.default.save(pack: pack)
+            self?.downloadFinished()
         }
         fileDownloadRequest.riffle = self
         PCDownloadManager.share.add(request: fileDownloadRequest)

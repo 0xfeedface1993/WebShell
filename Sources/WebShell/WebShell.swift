@@ -68,8 +68,8 @@ public class PCPiplineSeat: Logger {
             return
         }
         
-        guard working[0].isFinished else {
-            working[0].begin()
+        guard working.first?.isFinished ?? false else {
+            working.first?.begin()
             return
         }
         
@@ -107,16 +107,14 @@ public class PCPiplineSeat: Logger {
             return
         }
         
-        defer {
-            run()
-        }
-        
         // 任务完成要确定为文件下载并且下载完成标签为真时才执行下一个任务
         if working.first?.isFinished ?? false {
             print("----------------- Run Next Riffle, wokers: \(working.count) -----------------")
         }   else    {
             print("----------------- Current Riffle Not Finish Or Nor wokers, wokers: \(working.count) -----------------")
         }
+        
+        run()
     }
     
     /// 检查间隔下载时间是否到10分钟了
@@ -380,7 +378,7 @@ public struct SitePack {
                                  SitePack(regulerExpression: "xun\\-niu", site: .xunniu),
                                  SitePack(regulerExpression: "xibupan", site: .xi),
                                  SitePack(regulerExpression: "(v2file)|(wa54)|(wp2ef)|(wp344)|(wp8ky)", site: .v2file),
-                                 SitePack(regulerExpression: "ibuspan", site: .bus),
+                                 SitePack(regulerExpression: "(ibuspan)|(busdown)", site: .bus),
                                  SitePack(regulerExpression: "(coofiles)|(kufiles)", site: .color),
                                  SitePack(regulerExpression: "(coolcloudx)|(onstclouds)|(kufile)", site: .kuyun)]
 }

@@ -61,7 +61,7 @@ public class Ccchooo: PCWebRiffle {
                                  formData: [:],
                                  url: URL(string: "http://www.mm222.cn/down-\(fileNumber).html")!,
                                  injectJavaScript: [mainJSUnit])
-        let main3JSUnit = InjectUnit(script: "\(functionScript) getImageAndLink();", successAction: {
+        let main3JSUnit = InjectUnit(script: "\(functionScript) getImageAndLink();", successAction: { [weak self]
             dat in
             guard let dic = dat as? [String:String] else {
                 print("no data!")
@@ -70,15 +70,15 @@ public class Ccchooo: PCWebRiffle {
             
             if let url = URL(string: dic["link"] ?? "") {
                 DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1, execute: {
-                    self.loadCCCHOOODownloadLink(code: "1234", downloadLink: url)
+                    self?.loadCCCHOOODownloadLink(code: "1234", downloadLink: url)
                 })
                 
                 print("link: \(url.absoluteString)")
             }   else {
-                self.downloadFinished()
+                self?.downloadFinished()
             }
-        }, failedAction: { e in
-            self.downloadFinished()
+        }, failedAction: { [weak self] e in
+            self?.downloadFinished()
         }, isAutomaticallyPass: true)
         let main3Page = PCWebBullet(method: .get, headFields: ["Referer":"http://www.mm222.cn/down2-\(fileNumber).html",
             "Accept-Language":"zh-cn",
@@ -94,8 +94,9 @@ public class Ccchooo: PCWebRiffle {
         if Thread.isMainThread {
             seat?.webView.load(watting[0].request)
         }   else    {
-            DispatchQueue.main.async {
-                self.seat?.webView.load(self.watting[0].request)
+            DispatchQueue.main.async { [weak self] in
+                guard let req = self?.watting.first?.request else { return }
+                self?.seat?.webView.load(req)
             }
         }
     }
@@ -106,21 +107,20 @@ public class Ccchooo: PCWebRiffle {
     ///   - code: 验证码，目前可以是错误的
     ///   - downloadLink: 下载链接，调用验证码服务再下载
     func loadCCCHOOODownloadLink(code: String, downloadLink: URL) {
-        let codeUploadUnit = InjectUnit(script: "var code=0;", successAction: {
-            dat in
+        let codeUploadUnit = InjectUnit(script: "var code=0;", successAction: { [weak self] dat in
             let url = downloadLink
             // let label = UUID().uuidString
-            var fileDownloadRequest = PCDownloadRequest(headFields: ["Referer":"http://www.mm222.cn/down-\(self.fileNumber).html",
+            var fileDownloadRequest = PCDownloadRequest(headFields: ["Referer":"http://www.mm222.cn/down-\(self?.fileNumber ?? "").html",
                 "Accept-Language":"zh-cn",
                 "Upgrade-Insecure-Requests":"1",
                 "Accept-Encoding":"gzip, deflate",
                 "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7"], url: url, method: .post, body: nil, uuid: self.uuid, friendName: self.friendName)
+                "User-Agent":userAgent], url: url, method: .post, body: nil, uuid: self?.uuid ?? UUID(), friendName: self?.friendName ?? "badname")
             fileDownloadRequest.riffle = self
             fileDownloadRequest.downloadStateUpdate = nil
             fileDownloadRequest.downloadFinished = { pack in
                 defer {
-                    self.downloadFinished()
+                    self?.downloadFinished()
                 }
                 
                 if let e = pack.pack.error {

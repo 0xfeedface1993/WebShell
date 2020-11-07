@@ -70,37 +70,37 @@ class Yousuwp: PCWebRiffle {
         func imagePaserUnitMaker() -> [InjectUnit] {
             let delayTime = 0.5
             
-            let uploadCodeUnit = InjectUnit(script: "\(functionScript) check_code('abcd');", successAction: { (dat) in
+            let uploadCodeUnit = InjectUnit(script: "\(functionScript) check_code('abcd');", successAction: {  [weak self] (dat) in
                 DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + delayTime, execute: {
-                    self.execNextCommand()
+                    self?.execNextCommand()
                 })
             }, failedAction: { _ in
                 self.downloadFinished()
             }, isAutomaticallyPass: false)
             
-            let loadDownloadAddressUnit = InjectUnit(script: "getSubLinkAndDecode();", successAction: { (dat) in
+            let loadDownloadAddressUnit = InjectUnit(script: "getSubLinkAndDecode();", successAction: { [weak self] (dat) in
                 guard let items = dat as? [String : String] else {
                     print("****** Data not dictionary!")
-                    self.downloadFinished()
+                    self?.downloadFinished()
                     return
                 }
                 
                 guard let string = items["link"] else {
                     print("****** Link not found!")
-                    self.downloadFinished()
+                    self?.downloadFinished()
                     return
                 }
                 
                 guard let decode = items["decode"] else {
                     print("****** Decode not found!")
-                    self.downloadFinished()
+                    self?.downloadFinished()
                     return
                 }
                 
                 let url = URL(string: string)
-                self.loadDownloadLink(url: url!, decode: decode)
-            }, failedAction: { _ in
-                self.downloadFinished()
+                self?.loadDownloadLink(url: url!, decode: decode)
+            }, failedAction: { [weak self] _ in
+                self?.downloadFinished()
             }, isAutomaticallyPass: true)
             
             return [uploadCodeUnit, loadDownloadAddressUnit]
@@ -145,7 +145,7 @@ class Yousuwp: PCWebRiffle {
         let post = "dcode=\(decode)"
         var fileDownloadRequest = PCDownloadRequest(headFields: header, url: url, method: .post, body: post.data(using: .utf8)!, uuid: uuid, friendName: self.friendName)
         fileDownloadRequest.downloadStateUpdate = nil
-        fileDownloadRequest.downloadFinished = { pack in
+        fileDownloadRequest.downloadFinished = { [weak self] pack in
             print(pack.pack.revData?.debugDescription ?? "\n%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
             if let data = pack.pack.revData, let str = String(data: data, encoding: .utf8) {
                 print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%\n")
@@ -158,10 +158,10 @@ class Yousuwp: PCWebRiffle {
                 print("-------------- 302 Found, try remove task in background session --------------")
                 PCDownloadManager.share.removeFromBackgroundSession(originURL: url)
                 #endif
-                self.downloadFile(url: fileURL, refer: url)
+                self?.downloadFile(url: fileURL, refer: url)
             }   else    {
                 FileManager.default.save(pack: pack)
-                self.downloadFinished()
+                self?.downloadFinished()
             }
         }
         fileDownloadRequest.riffle = self
@@ -179,12 +179,8 @@ class Yousuwp: PCWebRiffle {
                                                                  "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                                                                  "User-Agent":userAgent], url: url, method: .get, body: nil, uuid: uuid, friendName: self.friendName)
         fileDownloadRequest.downloadStateUpdate = nil
-        fileDownloadRequest.downloadFinished = { pack in
+        fileDownloadRequest.downloadFinished = { [weak self] pack in
             print(pack.pack.revData?.debugDescription ?? "%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
-            
-            defer {
-                self.downloadFinished()
-            }
             
             if let data = pack.pack.revData, let str = String(data: data, encoding: .utf8) {
                 print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%\n")
@@ -193,6 +189,7 @@ class Yousuwp: PCWebRiffle {
             }
             
             FileManager.default.save(pack: pack)
+            self?.downloadFinished()
         }
         fileDownloadRequest.riffle = self
         PCDownloadManager.share.add(request: fileDownloadRequest)

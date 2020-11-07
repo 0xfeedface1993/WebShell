@@ -86,19 +86,19 @@ class KuYun: PCWebRiffle {
                                                          "Content-Type":"application/x-www-form-urlencoded; charset=UTF-8",
                                                          "Accept-Encoding":"gzip, deflate",
                                                          "User-Agent":userAgent], url: url, method: HTTPMethod.post, body: "action=load_down_addr1&file_id=\(fileNumber)".data(using: .utf8), uuid: UUID(), friendName: self.friendName)
-        pageRequest.downloadFinished = { task in
+        pageRequest.downloadFinished = { [weak self] task in
             guard let data = task.pack.revData else {
-                self.downloadFinished()
+                self?.downloadFinished()
                 return
             }
             
-            guard let html = String(data: data, encoding: .utf8), let list = self.parserFileLinkList(body: html)?.first else {
-                self.downloadFinished()
+            guard let html = String(data: data, encoding: .utf8), let list = self?.parserFileLinkList(body: html)?.first else {
+                self?.downloadFinished()
                 print("**************** file download link list not found ****************")
                 return
             }
             
-            self.downloadFile(url: list)
+            self?.downloadFile(url: list)
         }
         pageRequest.isFileDownloadTask = false
         pageRequest.riffle = self
@@ -146,7 +146,7 @@ class KuYun: PCWebRiffle {
                                                                  "Accept-Language":"zh-cn",
                                                                  "Accept-Encoding":"gzip, deflate"], url: url, method: .get, body: nil, uuid: uuid, friendName: self.friendName)
         fileDownloadRequest.downloadStateUpdate = nil
-        fileDownloadRequest.downloadFinished = { pack in
+        fileDownloadRequest.downloadFinished = { [weak self] pack in
             print(pack.pack.revData?.debugDescription ?? "\n%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
             if let data = pack.pack.revData, let str = String(data: data, encoding: .utf8) {
                 print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%\n")
@@ -156,9 +156,9 @@ class KuYun: PCWebRiffle {
             
             if let response = pack.task.response as? HTTPURLResponse, let next = response.allHeaderFields["Location"] as? String, let downloadFileURL = URL(string: next) {
                 print("------------- Go Next Link -------------")
-                self.go(url: downloadFileURL)
+                self?.go(url: downloadFileURL)
             }   else    {
-                self.downloadFinished()
+                self?.downloadFinished()
             }
         }
         fileDownloadRequest.riffle = self
@@ -174,13 +174,13 @@ class KuYun: PCWebRiffle {
                                                                  "Accept-Language":"zh-cn",
                                                                  "Accept-Encoding":"gzip, deflate"], url: url, method: .get, body: nil, uuid: uuid, friendName: self.friendName)
         fileDownloadRequest.downloadStateUpdate = nil
-        fileDownloadRequest.downloadFinished = { pack in
+        fileDownloadRequest.downloadFinished = { [weak self] pack in
             print(pack.pack.revData?.debugDescription ?? "\n%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
             
             if let response = pack.task.response as? HTTPURLResponse, response.statusCode == 302, let next = response.allHeaderFields["Location"] as? String, let downloadFileURL = URL(string: next) {
                 print("------------- 302 Found -------------")
                 print("------------- Go Next Link -------------")
-                self.go(url: downloadFileURL)
+                self?.go(url: downloadFileURL)
             }   else    {
                 if let data = pack.pack.revData, let str = String(data: data, encoding: .utf8) {
                     print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%\n")
@@ -188,7 +188,7 @@ class KuYun: PCWebRiffle {
                     print("%%%%%%%%%%%%%%%%%%%%%% data %%%%%%%%%%%%%%%%%%%%%%")
                 }
                 FileManager.default.save(pack: pack)
-                self.downloadFinished()
+                self?.downloadFinished()
             }
         }
         fileDownloadRequest.riffle = self

@@ -82,7 +82,6 @@ public class PCWebRiffle: NSObject {
         print("----------------- Download Finished Note -----------------")
         isFinished = true
         DispatchQueue.main.async {
-//            self.seat?.webView.navigationDelegate = nil
             self.seat?.taskFinished(finishedRiffle: self)
         }
     }   
@@ -132,11 +131,12 @@ extension PCWebRiffle : WKNavigationDelegate {
             return
         }
         
-        DispatchQueue.global().async {
-            for js in self.watting[0].injectJavaScript {
+        DispatchQueue.global().async { [weak self] in
+            guard let unit = self?.watting[0] else { return }
+            for js in unit.injectJavaScript {
                 let sem = DispatchSemaphore(value: 0)
                 DispatchQueue.main.async {
-                    self.seat?.webView.evaluateJavaScript(js.script, completionHandler: { (data, err) in
+                    self?.seat?.webView.evaluateJavaScript(js.script, completionHandler: { (data, err) in
                         if let e = err {
                             js.failedAction?(e)
                             print("******** error : \(e)")
@@ -144,14 +144,14 @@ extension PCWebRiffle : WKNavigationDelegate {
                             return
                         }
                         js.successAction?(data)
-                        print(">>>>>>>> sucess : \(self.watting[0].method)")
+                        print(">>>>>>>> sucess : \(unit.method )")
                         sem.signal()
                     })
                 }
                 sem.wait()
                 
-                self.watting[0].finishedJavaScript.append(self.watting[0].injectJavaScript[0])
-                self.watting[0].injectJavaScript.remove(at: 0)
+                self?.watting[0].finishedJavaScript.append(unit.injectJavaScript[0])
+                self?.watting[0].injectJavaScript.remove(at: 0)
                 
                 if !js.isAutomaticallyPass {
                     print("+++++++++ pause")
@@ -159,12 +159,12 @@ extension PCWebRiffle : WKNavigationDelegate {
                 }
             }
             
-            self.finished.append(self.watting[0])
-            self.watting.remove(at: 0)
+            self?.finished.append(unit)
+            self?.watting.remove(at: 0)
             
-            if let resultx = self.watting.first {
+            if let resultx = self?.watting.first {
                 DispatchQueue.main.async {
-                    self.seat?.webView.load(resultx.request)
+                    self?.seat?.webView.load(resultx.request)
                 }
             }
         }
