@@ -64,20 +64,24 @@ public class Xipan : PCWebRiffle {
             PCDownloadManager.share.add(request: pageRequest)
         }
         
-        loadPage(url: pan1URL) { [unowned self] (_) in
-            loadPage(url: self.pan2URL, header: ["Accept-Language":"zh-cn",
+        loadPage(url: pan1URL) { [weak self] _ in
+            guard let pan2URL = self?.pan2URL, let pan1 = self?.pan1URL, let pan3 = self?.pan3URL else {
+                self?.downloadFinished()
+                return
+            }
+            loadPage(url: pan2URL, header: ["Accept-Language":"zh-cn",
                                                     "Upgrade-Insecure-Requests":"1",
                                                     "Accept-Encoding":"gzip, deflate",
                                                     "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                                                     "User-Agent":userAgent,
-                                                    "Referer":self.pan1URL.absoluteString], callback: { [unowned self] (_) in
-                                                        loadPage(url: self.pan3URL, header: ["Accept-Language":"zh-cn",
+                                                    "Referer":pan1.absoluteString], callback: { _ in
+                                                        loadPage(url: pan3, header: ["Accept-Language":"zh-cn",
                                                                                                 "Upgrade-Insecure-Requests":"1",
                                                                                                 "Accept-Encoding":"gzip, deflate",
                                                                                                 "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                                                                                                 "User-Agent":userAgent,
-                                                                                                "Referer":self.pan2URL.absoluteString], callback: { [unowned self] (_) in
-                                                                                                    self.readDownloadLinkList()
+                                                                                                "Referer":pan2URL.absoluteString], callback: { _ in
+                                                                                                    self?.readDownloadLinkList()
                                                         })
             })
         }

@@ -69,20 +69,24 @@ public class Pan666 : PCWebRiffle {
             PCDownloadManager.share.add(request: pageRequest)
         }
         
-        loadPage(url: pan6661URL) { [unowned self] (_) in
-            loadPage(url: self.pan6662URL, header: ["Accept-Language":"zh-cn",
+        loadPage(url: pan6661URL) { [weak self] _ in
+            guard let pan6662URL = self?.pan6662URL, let pan6661URL = self?.pan6661URL, let pan6663URL = self?.pan6663URL else {
+                self?.downloadFinished()
+                return
+            }
+            loadPage(url: pan6662URL, header: ["Accept-Language":"zh-cn",
                                                "Upgrade-Insecure-Requests":"1",
                                                "Accept-Encoding":"gzip, deflate",
                                                "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                                                "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6",
-                                               "Referer":self.pan6661URL.absoluteString], callback: { [unowned self] (_) in
-                                                loadPage(url: self.pan6663URL, header: ["Accept-Language":"zh-cn",
+                                               "Referer":pan6661URL.absoluteString], callback: { _ in
+                                                loadPage(url: pan6663URL, header: ["Accept-Language":"zh-cn",
                                                                                         "Upgrade-Insecure-Requests":"1",
                                                                                         "Accept-Encoding":"gzip, deflate",
                                                                                         "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                                                                                         "User-Agent":userAgent,
-                                                                                        "Referer":self.pan6662URL.absoluteString], callback: { [unowned self] (_) in
-                                                                                       self.readDownloadLinkList()
+                                                                                        "Referer":pan6662URL.absoluteString], callback: { _ in
+                                                                                       self?.readDownloadLinkList()
                                                 })
             })
         }

@@ -57,20 +57,20 @@ class KuYun: PCWebRiffle {
                                                 "Accept-Encoding":"gzip, deflate",
                                                 "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                                                 "User-Agent":userAgent,
-                                                "Referer":self.onePage.absoluteString], callback: { [unowned self] task in
+                                                "Referer":self.onePage.absoluteString], callback: { [weak self] task in
                                                     guard let data = task.pack.revData else {
-                                                        self.downloadFinished()
+                                                        self?.downloadFinished()
                                                         return
                                                     }
                                                     
-                                                    guard let html = String(data: data, encoding: .utf8), let fileid = self.parserFileNumber(body: html)?.first else {
-                                                        self.downloadFinished()
+                                                    guard let html = String(data: data, encoding: .utf8), let fileid = self?.parserFileNumber(body: html)?.first else {
+                                                        self?.downloadFinished()
                                                         print("**************** file download link list not found ****************")
                                                         return
                                                     }
                                                     
-                                                    self.fileNumber = fileid
-                                                    self.readDownloadLinkList()
+                                                    self?.fileNumber = fileid
+                                                    self?.readDownloadLinkList()
                                                     
         })
     }

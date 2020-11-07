@@ -61,26 +61,30 @@ class ColorDx: PCWebRiffle {
             PCDownloadManager.share.add(request: pageRequest)
         }
         
-        loadPage(url: pageOne) { [unowned self] (_) in
-            loadPage(url: self.pageTwo, header: ["Accept-Language":"zh-cn",
+        loadPage(url: pageOne) { [weak self] _ in
+            guard let pageOne = self?.pageOne, let pageTwo = self?.pageTwo else {
+                self?.downloadFinished()
+                return
+            }
+            loadPage(url: pageTwo, header: ["Accept-Language":"zh-cn",
                                                "Upgrade-Insecure-Requests":"1",
                                                "Accept-Encoding":"gzip, deflate",
                                                "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                                                "User-Agent":userAgent,
-                                               "Referer":self.pageOne.absoluteString], callback: { [unowned self] task in
+                                               "Referer":pageOne.absoluteString], callback: { task in
                                                 guard let data = task.pack.revData else {
-                                                    self.downloadFinished()
+                                                    self?.downloadFinished()
                                                     return
                                                 }
                                                 
-                                                guard let html = String(data: data, encoding: .utf8), let fileid = self.parserFileNumber(body: html)?.first else {
-                                                    self.downloadFinished()
+                                                guard let html = String(data: data, encoding: .utf8), let fileid = self?.parserFileNumber(body: html)?.first else {
+                                                    self?.downloadFinished()
                                                     print("**************** file download link list not found ****************")
                                                     return
                                                 }
                                                 
-                                                self.fileNumber = fileid
-                                                self.readDownloadLinkList()
+                                                self?.fileNumber = fileid
+                                                self?.readDownloadLinkList()
                                                 
             })
         }
