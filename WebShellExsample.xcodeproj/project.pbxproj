@@ -81,6 +81,8 @@
 		6365CE3924A1CD4E004120EF /* WebShellError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6365CE3424A1AD95004120EF /* WebShellError.swift */; };
 		6365CE3A24A1CD56004120EF /* DownStreamDataTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6365CE3624A1B02B004120EF /* DownStreamDataTask.swift */; };
 		6365CE3B24A1CD59004120EF /* WebShellError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6365CE3424A1AD95004120EF /* WebShellError.swift */; };
+		63B7AC1A2559276F00943A7B /* XueQiu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B7AC192559276F00943A7B /* XueQiu.swift */; };
+		63B7AC1B2559276F00943A7B /* XueQiu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B7AC192559276F00943A7B /* XueQiu.swift */; };
 		63FE01EA249CB97200E32599 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 63FE01E9249CB97200E32599 /* SwiftSoup */; };
 /* End PBXBuildFile section */
 
@@ -176,6 +178,7 @@
 		633B71F723CB107C00B70E1C /* ColorDx.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorDx.swift; sourceTree = "<group>"; };
 		6365CE3424A1AD95004120EF /* WebShellError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebShellError.swift; sourceTree = "<group>"; };
 		6365CE3624A1B02B004120EF /* DownStreamDataTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownStreamDataTask.swift; sourceTree = "<group>"; };
+		63B7AC192559276F00943A7B /* XueQiu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XueQiu.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -235,6 +238,7 @@
 				24F9C6C920D8E05600E1F88D /* Yousuwp.swift */,
 				633B71F723CB107C00B70E1C /* ColorDx.swift */,
 				631BEB4D244C52AF002243C4 /* KuYun.swift */,
+				63B7AC192559276F00943A7B /* XueQiu.swift */,
 				2749698920886BBE009A1E1B /* PCDownloadTask.swift */,
 				2749698B20886F9B009A1E1B /* PCDownloadManager.swift */,
 				2749699520897CAB009A1E1B /* PCWebRiffle.swift */,
@@ -544,6 +548,7 @@
 				6365CE3924A1CD4E004120EF /* WebShellError.swift in Sources */,
 				242C07442371E9B10037D3C2 /* Ccchooo.swift in Sources */,
 				242C07472371E9B10037D3C2 /* TBPipline.swift in Sources */,
+				63B7AC1B2559276F00943A7B /* XueQiu.swift in Sources */,
 				242C074C2371E9B10037D3C2 /* TBWebview.swift in Sources */,
 				631BEB4F244C52D4002243C4 /* KuYun.swift in Sources */,
 				24B189E52378305500B31B36 /* BusPan.swift in Sources */,
@@ -571,6 +576,7 @@
 				24113A442371E13E00AEDEAA /* TBPiplineSeat.swift in Sources */,
 				241317A7224B194000EBE853 /* TBPipline.swift in Sources */,
 				24E60F2A21D66364007AB419 /* VCMLParser.swift in Sources */,
+				63B7AC1A2559276F00943A7B /* XueQiu.swift in Sources */,
 				24E60F2321D66364007AB419 /* Yousuwp.swift in Sources */,
 				24E60F2C21D66364007AB419 /* VerifyCodeView.swift in Sources */,
 				6365CE3A24A1CD56004120EF /* DownStreamDataTask.swift in Sources */,

@@ -269,6 +269,13 @@ public class PCPipeline {
             riffle.friendName = friendName
             add(riffle: riffle)
             return riffle as? T
+        case .xueQiu:
+            let riffle = XueQiu(urlString: url)
+            riffle.password = password
+            riffle.host = type
+            riffle.friendName = friendName
+            add(riffle: riffle)
+            return riffle as? T
         case .unknowsite:
             print("unkown site!")
             return nil
@@ -366,6 +373,7 @@ public enum WebHostSite : Int {
     case bus
     case color
     case kuyun
+    case xueQiu
     case unknowsite
 }
 
@@ -381,7 +389,8 @@ public struct SitePack {
                                  SitePack(regulerExpression: "(v2file)|(wa54)|(wp2ef)|(wp344)|(wp8ky)", site: .v2file),
                                  SitePack(regulerExpression: "(ibuspan)|(busdown)", site: .bus),
                                  SitePack(regulerExpression: "(coofiles)|(kufiles)", site: .color),
-                                 SitePack(regulerExpression: "(coolcloudx)|(onstclouds)|(kufile)", site: .kuyun)]
+                                 SitePack(regulerExpression: "(coolcloudx)|(onstclouds)|(kufile)", site: .kuyun),
+                                 SitePack(regulerExpression: "xueqiupan", site: .xueQiu)]
 }
 
 public func siteType(url: URL) -> WebHostSite {
