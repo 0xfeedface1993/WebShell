@@ -71,6 +71,11 @@ public class PCWebRiffle: NSObject {
         self.mainURL = mainURL
     }
     
+    public required init(urlString: String) {
+        verifyCodeParserErrorCount = 0
+        super.init()
+    }
+    
     deinit {
         print("&&& Deinit Riffle &&&")
         seat?.webView.stopLoading()

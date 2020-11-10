@@ -19,7 +19,7 @@ class XunNiu: PCWebRiffle {
     /// 初始化
     ///
     /// - Parameter urlString: 下载首页地址
-    public init(urlString: String) {
+    public required init(urlString: String) {
         super.init()
         mainURL = URL(string: urlString)
         /// 从地址中截取文件id

@@ -24,7 +24,7 @@ public class Feemoo: PCWebRiffle {
         return "feemoo"
     }
     
-    public init(urlString: String) {
+    public required init(urlString: String) {
         super.init()
         if let url = URL(string: urlString) {
             host = siteType(url: url)

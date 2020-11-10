@@ -38,9 +38,21 @@ public class PCPiplineSeat: Logger {
     ///
     /// - Parameter request: 下载任务请求
     func add(riffle: PCWebRiffle) {
+        if let remaindIndex = working.firstIndex(where: { $0 == riffle }) {
+            let item = working[remaindIndex]
+            if item.isFinished {
+                finished.append(item)
+                working.remove(at: remaindIndex)
+                log(message: "Current riffle \(riffle) existing in working queue \(remaindIndex)! But already finished, remove it!")
+            }   else    {
+                log(message: "Current riffle \(riffle) existing in working queue \(remaindIndex)! Pass this task.")
+                return
+            }
+        }
+        
         working.append(riffle)
         riffle.seat = self
-        print("Add request \(riffle.host) in group \(self.site) !")
+        print("+++++++++++ Add request \(riffle.host) in group \(self.site) !")
         if working.count == 1 {
             run()
         }
@@ -63,19 +75,19 @@ public class PCPiplineSeat: Logger {
 //        }
 //
 //        lastDownloadTime = now
-        guard working.count > 0 else {
+        guard let first = working.first else {
             log(message: "Current no worker in \(self.site).")
             return
         }
         
-        guard working.first?.isFinished ?? false else {
-            log(message: "First task in working queue not finished: \(String(describing: working.first))")
-            working.first?.begin()
+        guard first.isFinished else {
+            log(message: "First task in working queue not finished: \(first)")
+            first.begin()
             return
         }
         
         // 将进行中的任务移到完成队列中，默认就是第一个
-        finished.append(working[0])
+        finished.append(first)
         working.remove(at: 0)
         log(message: "Swap queue, working: \(working.count) finished: \(finished.count)")
         

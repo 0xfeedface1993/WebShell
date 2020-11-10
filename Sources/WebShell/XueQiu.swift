@@ -8,7 +8,7 @@
 
 import Foundation
 
-class XueQiu: PCWebRiffle {
+public class XueQiu: PCWebRiffle {
     var fileNumber = ""
     let hostName = "www.xueqiupan.com"
     
@@ -19,7 +19,7 @@ class XueQiu: PCWebRiffle {
     /// 初始化
     ///
     /// - Parameter urlString: 下载首页地址
-    public init(urlString: String) {
+    public required init(urlString: String) {
         super.init()
         mainURL = URL(string: urlString)
         /// 从地址中截取文件id
@@ -32,7 +32,7 @@ class XueQiu: PCWebRiffle {
         }
     }
     
-    override func begin() {
+    public override func begin() {
         loadFileLink()
     }
     
