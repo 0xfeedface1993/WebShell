@@ -9,7 +9,7 @@
 import Cocoa
 import WebKit
 
-class TBWebview: NSObject {
+class TBWebview: NSObject, Logger {
     static let share = TBWebview()
     struct WebPack {
         var site: SitePack
@@ -44,7 +44,8 @@ class TBWebview: NSObject {
     
     func caller(forWebview webview: WKWebView) -> TBWebViewDelegate? {
         guard let index = webviews.firstIndex(where: { $0.webview == webview }) else {
-            assert(false, "Webview not find for \(webview)")
+            log(error: "Webview not find for \(webview)")
+            return nil
         }
         
         return webviews[index].delegate
