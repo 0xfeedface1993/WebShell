@@ -399,7 +399,7 @@ public struct SitePack {
                                  SitePack(regulerExpression: "xun\\-niu", site: .xunniu),
                                  SitePack(regulerExpression: "xibupan", site: .xi),
                                  SitePack(regulerExpression: "(v2file)|(wa54)|(wp2ef)|(wp344)|(wp8ky)", site: .v2file),
-                                 SitePack(regulerExpression: "(ibuspan)|(busdown)", site: .bus),
+                                 SitePack(regulerExpression: "(ibuspan)|(busdown)|(buswok)", site: .bus),
                                  SitePack(regulerExpression: "(coofiles)|(kufiles)", site: .color),
                                  SitePack(regulerExpression: "(coolcloudx)|(onstclouds)|(kufile)", site: .kuyun),
                                  SitePack(regulerExpression: "xueqiupan", site: .xueQiu)]
