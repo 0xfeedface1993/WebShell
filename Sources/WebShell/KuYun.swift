@@ -14,12 +14,12 @@ class KuYun: PCWebRiffle {
     var fileMain = ""
     
     var onePage: URL {
-        return URL(string: "http://\(hostName)/down2/\(fileMain).html")!
+        return URL(string: "http://\(hostName)/file/\(fileMain).html")!
     }
     
     /// 中转页面
     var middlePage: URL {
-        return URL(string: "http://\(hostName)/down/\(fileMain).html")!
+        return URL(string: "http://\(hostName)/file/\(fileMain).html")!
     }
     
     /// 初始化
@@ -155,8 +155,20 @@ class KuYun: PCWebRiffle {
             }
             
             if let response = pack.task.response as? HTTPURLResponse, let next = response.allHeaderFields["Location"] as? String, let downloadFileURL = URL(string: next) {
+                print(">>> kuyun response http header: \(response.allHeaderFields)")
+                // 某些情况下，最后一个数据包会返回重定向信息，因此保存文件数据即可
+                if next.contains("promo.php") {
+                    FileManager.default.save(pack: pack)
+                    self?.downloadFinished()
+                    return
+                }
                 print("------------- Go Next Link -------------")
-                self?.go(url: downloadFileURL)
+                if next.hasPrefix("http") {
+                    self?.go(url: downloadFileURL)
+                }   else    {
+                    print(">>> invalid download URL: \(downloadFileURL)")
+                    self?.downloadFinished()
+                }
             }   else    {
                 self?.downloadFinished()
             }
@@ -166,6 +178,7 @@ class KuYun: PCWebRiffle {
     }
     
     func go(url: URL) {
+        print(">>> go url: \(url)")
         var fileDownloadRequest = PCDownloadRequest(headFields: ["Connection":"keep-alive",
                                                                  "Upgrade-Insecure-Requests":"1",
                                                                  "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -178,6 +191,12 @@ class KuYun: PCWebRiffle {
             print(pack.pack.revData?.debugDescription ?? "\n%%%%%%%%%%%%%%%%%%%%%% No data! %%%%%%%%%%%%%%%%%%%%%%")
             
             if let response = pack.task.response as? HTTPURLResponse, response.statusCode == 302, let next = response.allHeaderFields["Location"] as? String, let downloadFileURL = URL(string: next) {
+                // 某些情况下，最后一个数据包会返回重定向信息，因此保存文件数据即可
+                if next.contains("promo.php") {
+                    FileManager.default.save(pack: pack)
+                    self?.downloadFinished()
+                    return
+                }
                 print("------------- 302 Found -------------")
                 print("------------- Go Next Link -------------")
                 self?.go(url: downloadFileURL)

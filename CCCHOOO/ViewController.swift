@@ -95,7 +95,7 @@ class ViewController: NSViewController {
 //                     "http://www.88pan.cc/file-532359.html",
 //                     "http://www.ccchoo.com/file-40055.html",
 //                     "http://www.ccchoo.com/file-40053.html"]http://www.chooyun.com/file-51745.html
-        let items = ["http://www.xueqiupan.com/file-327962.html"]//, "http://www.chooyun.com/file-51745.html", "http://www.feemoo.com/s/v2j0z15j", "http://www.ccchoo.com/file-40052.html", "http://www.feemoo.com/file-1897522.html"
+        let items = ["http://www.onstclouds.com/file/QUExMzAzMDQw.html"]//, "http://www.chooyun.com/file-51745.html", "http://www.feemoo.com/s/v2j0z15j", "http://www.ccchoo.com/file-40052.html", "http://www.feemoo.com/file-1897522.html"
 //        let items = ["http://www.chooyun.com/file-96683.html"]
         for item in items {
             if let k: XueQiu = pipline.add(url: item, password: "", friendName: "ssss") {
