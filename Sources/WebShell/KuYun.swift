@@ -138,7 +138,8 @@ class KuYun: PCWebRiffle {
     }
     
     func downloadFile(url: URL) {
-        var fileDownloadRequest = PCDownloadRequest(headFields: ["Connection":"keep-alive",
+        var fileDownloadRequest = PCDownloadRequest(headFields: ["Host":hostName,
+                                                                 "Connection":"keep-alive",
                                                                  "Upgrade-Insecure-Requests":"1",
                                                                  "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                                                                  "User-Agent":userAgent,
@@ -167,7 +168,12 @@ class KuYun: PCWebRiffle {
                     self?.go(url: downloadFileURL)
                 }   else    {
                     print(">>> invalid download URL: \(downloadFileURL)")
-                    self?.downloadFinished()
+                    if let fixURL = URL(string: "http://clouddown1920.kufile.net/" + next) {
+                        self?.go(url: fixURL)
+                    }   else    {
+                        print(">>> try fix URL failed! <<<")
+                        self?.downloadFinished()
+                    }
                 }
             }   else    {
                 self?.downloadFinished()
