@@ -298,6 +298,13 @@ public class PCPipeline {
             riffle.friendName = friendName
             add(riffle: riffle)
             return riffle as? T
+        case .xfpan:
+            let riffle = XFPan(urlString: url)
+            riffle.password = password
+            riffle.host = type
+            riffle.friendName = friendName
+            add(riffle: riffle)
+            return riffle as? T
         }
     }
     
@@ -386,6 +393,7 @@ public enum WebHostSite : Int {
     case color
     case kuyun
     case xueQiu
+    case xfpan
     case unknowsite
 }
 
@@ -402,7 +410,8 @@ public struct SitePack {
                                  SitePack(regulerExpression: "(ibuspan)|(busdown)|(buswok)", site: .bus),
                                  SitePack(regulerExpression: "(coofiles)|(kufiles)", site: .color),
                                  SitePack(regulerExpression: "(coolcloudx)|(onstclouds)|(kufile)", site: .kuyun),
-                                 SitePack(regulerExpression: "xueqiupan", site: .xueQiu)]
+                                 SitePack(regulerExpression: "xueqiupan", site: .xueQiu),
+                                 SitePack(regulerExpression: "(xfpan)|(upfilex)", site: .xfpan)]
 }
 
 public func siteType(url: URL) -> WebHostSite {
