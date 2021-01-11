@@ -85,7 +85,7 @@ class KuYun: PCWebRiffle {
                                                          "X-Requested-With":"XMLHttpRequest",
                                                          "Content-Type":"application/x-www-form-urlencoded; charset=UTF-8",
                                                          "Accept-Encoding":"gzip, deflate",
-                                                         "User-Agent":userAgent], url: url, method: HTTPMethod.post, body: "action=load_down_addr1&file_id=\(fileNumber)".data(using: .utf8), uuid: UUID(), friendName: self.friendName)
+                                                         "User-Agent":userAgent], url: url, method: HTTPMethod.post, body: "action=load_down_file_user&file_id=\(fileNumber)&ms=undefined*undefined&sc=1680*1050".data(using: .utf8), uuid: UUID(), friendName: self.friendName)
         pageRequest.downloadFinished = { [weak self] task in
             guard let data = task.pack.revData else {
                 self?.downloadFinished()
@@ -168,12 +168,7 @@ class KuYun: PCWebRiffle {
                     self?.go(url: downloadFileURL)
                 }   else    {
                     print(">>> invalid download URL: \(downloadFileURL)")
-                    if let fixURL = URL(string: "http://clouddown1920.kufile.net/" + next) {
-                        self?.go(url: fixURL)
-                    }   else    {
-                        print(">>> try fix URL failed! <<<")
-                        self?.downloadFinished()
-                    }
+                    self?.downloadFinished()
                 }
             }   else    {
                 self?.downloadFinished()
