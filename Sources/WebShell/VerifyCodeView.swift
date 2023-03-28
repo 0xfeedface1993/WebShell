@@ -12,7 +12,7 @@ import Cocoa
 class VerifyCodeView: NSView {
     let imageView = NSImageView()
     let textField = NSTextField()
-    let button = NSButton(title: "确定", target: self, action: #selector(tap(sender:)))
+    let button = NSButton(title: "确定", target: VerifyCodeView.self, action: #selector(tap(sender:)))
     var tap : ((String)->())?
     var reloadImage : ((NSImageView)->())?
 

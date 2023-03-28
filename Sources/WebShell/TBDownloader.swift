@@ -9,7 +9,7 @@
 import Cocoa
 import Combine
 
-protocol TBDownloaderDelegate: class {
+protocol TBDownloaderDelegate: AnyObject {
     func downloader(_ downloader: TBDownloader, updateTask: TBDownloader.TBDownloadInfo)
     func downloader(_ downloader: TBDownloader, finishTask: TBDownloader.TBDownloadInfo)
     func downloader(_ downloader: TBDownloader, interalError: Error?)

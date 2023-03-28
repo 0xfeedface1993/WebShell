@@ -39,7 +39,7 @@ struct TBParser {
     }
 }
 
-protocol TBParserUnit: class {
+protocol TBParserUnit: AnyObject {
     var value: AnyObject? { get set }
     var passValue: AnyObject? { get set }
     var escape: ((TBParserUnit) -> Void)? { get set }

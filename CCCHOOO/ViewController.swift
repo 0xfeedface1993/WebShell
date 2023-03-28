@@ -9,6 +9,7 @@
 import Cocoa
 import WebKit
 import WebShell
+import Combine
 
 /// 下载状态数据模型，用于视图数据绑定
 public class DownloadInfo : NSObject {
@@ -45,6 +46,9 @@ class ViewController: NSViewController {
     @IBOutlet var DownloadStateController: NSArrayController!
     
     @IBOutlet weak var codeView: NSImageView!
+    
+    var cancellable: AnyCancellable?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -55,6 +59,41 @@ class ViewController: NSViewController {
                 self.codeView.image = image.shareImage
             }
         }
+        
+//        let link = "http://www.xueqiupan.com/file-672436.html"
+//
+//        cancellable = XueQiuDownPage()
+//            .join(XueQiuLinks())
+//            .join(XueQiuSaver())
+//            .publisher(for: link)
+//            .sink { complete in
+//                switch complete {
+//                case .finished:
+//                    break
+//                case .failure(let error):
+//                    print(">>> download error \(error)")
+//                }
+//            } receiveValue: { url in
+//                print(">>> download file at \(url)")
+//            }
+        
+        let link = "https://rosefile.net/6emc775g2p/s_MTGBHJKL.rar.html"
+        cancellable = AppendDownPath()
+            .join(FileIDStringInDomSearchGroup())
+            .join(FindGeneralFileLinks())
+            .join(XueQiuSaver())
+            .publisher(for: link)
+            .sink { complete in
+                switch complete {
+                case .finished:
+                    break
+                case .failure(let error):
+                    print(">>> download error \(error)")
+                }
+            } receiveValue: { url in
+                print(">>> download file at \(url)")
+            }
+
         
 //        webview.load(currentResult!.request)
 //        load666PanSequence(urlString: "")
@@ -77,31 +116,31 @@ class ViewController: NSViewController {
 //        }
 //        vc.codeView.imageView.image = NSImage(named: NSImage.Name.init("0a1f-26-01-37"))
 //        presentViewControllerAsModalWindow(vc)
-        
-        let pipline = PCPipeline.share
-        pipline.delegate = self
-//        let items = ["http://www.ccchoo.com/file-40052.html",
-//                     "http://www.ccchoo.com/file-40053.html",
-//                     "http://www.ccchoo.com/file-40055.html",
-//                     "http://www.666pan.cc/file-533064.html",
-//                     "http://www.666pan.cc/file-532273.html",
-//                     "http://www.88pan.cc/file-532359.html",
-//                     "http://www.666pan.cc/file-532687.html"]
-//        let items = ["http://www.feemoo.com/file-1892482.html",http://www.feemoo.com/s/v2j0z15j
-//                     "http://www.feemoo.com/s/1htfnfyn",
-//                     "http://www.feemoo.com/file-1897522.html",
-//                     "http://www.666pan.cc/file-532687.html",
-//                     "http://www.666pan.cc/file-532273.html",
-//                     "http://www.88pan.cc/file-532359.html",
-//                     "http://www.ccchoo.com/file-40055.html",
-//                     "http://www.ccchoo.com/file-40053.html"]http://www.chooyun.com/file-51745.html
-        let items = ["http://www.upfilex.com/file/QUE5MzkyMTM=.html"]//, "http://www.chooyun.com/file-51745.html", "http://www.feemoo.com/s/v2j0z15j", "http://www.ccchoo.com/file-40052.html", "http://www.feemoo.com/file-1897522.html"
-//        let items = ["http://www.chooyun.com/file-96683.html"]
-        for item in items {
-            if let k: XueQiu = pipline.add(url: item, password: "", friendName: "ssss") {
-                print(">>> K: \(k)")
-            }
-        }
+//        
+//        let pipline = PCPipeline.share
+//        pipline.delegate = self
+////        let items = ["http://www.ccchoo.com/file-40052.html",
+////                     "http://www.ccchoo.com/file-40053.html",
+////                     "http://www.ccchoo.com/file-40055.html",
+////                     "http://www.666pan.cc/file-533064.html",
+////                     "http://www.666pan.cc/file-532273.html",
+////                     "http://www.88pan.cc/file-532359.html",
+////                     "http://www.666pan.cc/file-532687.html"]
+////        let items = ["http://www.feemoo.com/file-1892482.html",http://www.feemoo.com/s/v2j0z15j
+////                     "http://www.feemoo.com/s/1htfnfyn",
+////                     "http://www.feemoo.com/file-1897522.html",
+////                     "http://www.666pan.cc/file-532687.html",
+////                     "http://www.666pan.cc/file-532273.html",
+////                     "http://www.88pan.cc/file-532359.html",
+////                     "http://www.ccchoo.com/file-40055.html",
+////                     "http://www.ccchoo.com/file-40053.html"]http://www.chooyun.com/file-51745.html
+//        let items = ["http://www.upfilex.com/file/QUE5MzkyMTM=.html"]//, "http://www.chooyun.com/file-51745.html", "http://www.feemoo.com/s/v2j0z15j", "http://www.ccchoo.com/file-40052.html", "http://www.feemoo.com/file-1897522.html"
+////        let items = ["http://www.chooyun.com/file-96683.html"]
+//        for item in items {
+//            if let k: XueQiu = pipline.add(url: item, password: "", friendName: "ssss") {
+//                print(">>> K: \(k)")
+//            }
+//        }
         
 //        let request = TBRequest
 //        TBPipline.share.add(task: request)
