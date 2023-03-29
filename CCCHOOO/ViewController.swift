@@ -60,28 +60,11 @@ class ViewController: NSViewController {
             }
         }
         
-//        let link = "http://www.xueqiupan.com/file-672436.html"
-//
-//        cancellable = XueQiuDownPage()
-//            .join(XueQiuLinks())
-//            .join(XueQiuSaver())
-//            .publisher(for: link)
-//            .sink { complete in
-//                switch complete {
-//                case .finished:
-//                    break
-//                case .failure(let error):
-//                    print(">>> download error \(error)")
-//                }
-//            } receiveValue: { url in
-//                print(">>> download file at \(url)")
-//            }
-        
-        let link = "https://rosefile.net/6emc775g2p/s_MTGBHJKL.rar.html"
-        cancellable = AppendDownPath()
-            .join(FileIDStringInDomSearchGroup())
-            .join(FindGeneralFileLinks())
-            .join(XueQiuSaver())
+        let link = "http://www.xueqiupan.com/file-672734.html"
+
+        cancellable = DownPage()
+            .join(PHPLinks())
+            .join(Saver(.override))
             .publisher(for: link)
             .sink { complete in
                 switch complete {
@@ -93,6 +76,23 @@ class ViewController: NSViewController {
             } receiveValue: { url in
                 print(">>> download file at \(url)")
             }
+        
+//        let link = "https://rosefile.net/6emc775g2p/s_MTGBHJKL.rar.html"
+//        cancellable = AppendDownPath()
+//            .join(FileIDStringInDomSearchGroup())
+//            .join(GeneralLinks())
+//            .join(Saver())
+//            .publisher(for: link)
+//            .sink { complete in
+//                switch complete {
+//                case .finished:
+//                    break
+//                case .failure(let error):
+//                    print(">>> download error \(error)")
+//                }
+//            } receiveValue: { url in
+//                print(">>> download file at \(url)")
+//            }
 
         
 //        webview.load(currentResult!.request)

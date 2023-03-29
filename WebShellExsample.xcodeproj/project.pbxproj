@@ -82,6 +82,16 @@
 		5227B1F829D2D32000C57D92 /* DurexError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5227B1ED29D2D32000C57D92 /* DurexError.swift */; };
 		5227B1F929D2D32000C57D92 /* AnyErase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5227B1EF29D2D32000C57D92 /* AnyErase.swift */; };
 		5227B1FA29D2D32000C57D92 /* PublisherShirk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5227B1F029D2D32000C57D92 /* PublisherShirk.swift */; };
+		52A6E44929D3E819007B0699 /* Combine+Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A6E44829D3E819007B0699 /* Combine+Task.swift */; };
+		52A6E44A29D3E819007B0699 /* Combine+Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A6E44829D3E819007B0699 /* Combine+Task.swift */; };
+		52A6E44C29D3EA06007B0699 /* Saver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A6E44B29D3EA06007B0699 /* Saver.swift */; };
+		52A6E44D29D3EA06007B0699 /* Saver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A6E44B29D3EA06007B0699 /* Saver.swift */; };
+		52A6E44F29D3EF30007B0699 /* Links.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A6E44E29D3EF30007B0699 /* Links.swift */; };
+		52A6E45029D3EF30007B0699 /* Links.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A6E44E29D3EF30007B0699 /* Links.swift */; };
+		52A6E45229D3F4FE007B0699 /* DownPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A6E45129D3F4FE007B0699 /* DownPage.swift */; };
+		52A6E45329D3F4FE007B0699 /* DownPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A6E45129D3F4FE007B0699 /* DownPage.swift */; };
+		52A6E45529D3FD8A007B0699 /* FileID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A6E45429D3FD8A007B0699 /* FileID.swift */; };
+		52A6E45629D3FD8A007B0699 /* FileID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A6E45429D3FD8A007B0699 /* FileID.swift */; };
 		6311FFC125AC50E100DC1566 /* String+URL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6311FFC025AC50E100DC1566 /* String+URL.swift */; };
 		6311FFC225AC50E100DC1566 /* String+URL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6311FFC025AC50E100DC1566 /* String+URL.swift */; };
 		6311FFCA25AC7BCB00DC1566 /* XFPan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6311FFC925AC7BCA00DC1566 /* XFPan.swift */; };
@@ -198,6 +208,11 @@
 		5227B1ED29D2D32000C57D92 /* DurexError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DurexError.swift; sourceTree = "<group>"; };
 		5227B1EF29D2D32000C57D92 /* AnyErase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyErase.swift; sourceTree = "<group>"; };
 		5227B1F029D2D32000C57D92 /* PublisherShirk.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PublisherShirk.swift; sourceTree = "<group>"; };
+		52A6E44829D3E819007B0699 /* Combine+Task.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Combine+Task.swift"; sourceTree = "<group>"; };
+		52A6E44B29D3EA06007B0699 /* Saver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Saver.swift; sourceTree = "<group>"; };
+		52A6E44E29D3EF30007B0699 /* Links.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Links.swift; sourceTree = "<group>"; };
+		52A6E45129D3F4FE007B0699 /* DownPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownPage.swift; sourceTree = "<group>"; };
+		52A6E45429D3FD8A007B0699 /* FileID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileID.swift; sourceTree = "<group>"; };
 		6311FFC025AC50E100DC1566 /* String+URL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+URL.swift"; sourceTree = "<group>"; };
 		6311FFC925AC7BCA00DC1566 /* XFPan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XFPan.swift; sourceTree = "<group>"; };
 		631BEB4D244C52AF002243C4 /* KuYun.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KuYun.swift; sourceTree = "<group>"; };
@@ -268,6 +283,11 @@
 				633B71F723CB107C00B70E1C /* ColorDx.swift */,
 				631BEB4D244C52AF002243C4 /* KuYun.swift */,
 				63B7AC192559276F00943A7B /* XueQiu.swift */,
+				52A6E44829D3E819007B0699 /* Combine+Task.swift */,
+				52A6E44B29D3EA06007B0699 /* Saver.swift */,
+				52A6E44E29D3EF30007B0699 /* Links.swift */,
+				52A6E45129D3F4FE007B0699 /* DownPage.swift */,
+				52A6E45429D3FD8A007B0699 /* FileID.swift */,
 				2749698920886BBE009A1E1B /* PCDownloadTask.swift */,
 				2749698B20886F9B009A1E1B /* PCDownloadManager.swift */,
 				2749699520897CAB009A1E1B /* PCWebRiffle.swift */,
@@ -586,6 +606,7 @@
 			files = (
 				5227B1F129D2D32000C57D92 /* Delay.swift in Sources */,
 				242C07402371E9B10037D3C2 /* FileCoordinator.swift in Sources */,
+				52A6E44A29D3E819007B0699 /* Combine+Task.swift in Sources */,
 				5227B1F529D2D32000C57D92 /* Durex.swift in Sources */,
 				242C073C2371E9B10037D3C2 /* PCDownloadManager.swift in Sources */,
 				242C07452371E9B10037D3C2 /* Feemoo.swift in Sources */,
@@ -595,9 +616,11 @@
 				242C07362371E9B10037D3C2 /* Xipan.swift in Sources */,
 				242C073B2371E9B10037D3C2 /* PCDownloadTask.swift in Sources */,
 				242C074E2371E9C20037D3C2 /* VCMLParser.swift in Sources */,
+				52A6E45329D3F4FE007B0699 /* DownPage.swift in Sources */,
 				242C07412371E9B10037D3C2 /* VerifyCodeView.swift in Sources */,
 				242C07492371E9B10037D3C2 /* TBPiplineSeat.swift in Sources */,
 				5227B1F429D2D32000C57D92 /* Condom.swift in Sources */,
+				52A6E44D29D3EA06007B0699 /* Saver.swift in Sources */,
 				5227B1F329D2D32000C57D92 /* SessionContext.swift in Sources */,
 				6311FFC225AC50E100DC1566 /* String+URL.swift in Sources */,
 				242C073D2371E9B10037D3C2 /* PCWebRiffle.swift in Sources */,
@@ -620,8 +643,10 @@
 				633B71F923CB10D700B70E1C /* ColorDx.swift in Sources */,
 				5227B1F629D2D32000C57D92 /* Request.swift in Sources */,
 				242C07422371E9B10037D3C2 /* VerifyCodeViewController.swift in Sources */,
+				52A6E45629D3FD8A007B0699 /* FileID.swift in Sources */,
 				5227B1FA29D2D32000C57D92 /* PublisherShirk.swift in Sources */,
 				242C073F2371E9B10037D3C2 /* ImageMaker.swift in Sources */,
+				52A6E45029D3EF30007B0699 /* Links.swift in Sources */,
 				5227B1F229D2D32000C57D92 /* AnyCondom.swift in Sources */,
 				242C074A2371E9B10037D3C2 /* TBParser.swift in Sources */,
 				242C07382371E9B10037D3C2 /* V2File.swift in Sources */,
@@ -641,6 +666,7 @@
 				24E60F3421D66364007AB419 /* Feemoo.swift in Sources */,
 				24113A442371E13E00AEDEAA /* TBPiplineSeat.swift in Sources */,
 				241317A7224B194000EBE853 /* TBPipline.swift in Sources */,
+				52A6E44929D3E819007B0699 /* Combine+Task.swift in Sources */,
 				24E60F2A21D66364007AB419 /* VCMLParser.swift in Sources */,
 				63B7AC1A2559276F00943A7B /* XueQiu.swift in Sources */,
 				24E60F2321D66364007AB419 /* Yousuwp.swift in Sources */,
@@ -654,12 +680,16 @@
 				24E60F2521D66364007AB419 /* WebShell.swift in Sources */,
 				24E60F2F21D66364007AB419 /* Ccchooo.swift in Sources */,
 				6311FFC125AC50E100DC1566 /* String+URL.swift in Sources */,
+				52A6E45229D3F4FE007B0699 /* DownPage.swift in Sources */,
 				6365CE3B24A1CD59004120EF /* WebShellError.swift in Sources */,
+				52A6E45529D3FD8A007B0699 /* FileID.swift in Sources */,
 				24E60F2421D66364007AB419 /* PCDownloadTask.swift in Sources */,
 				24113A412371E11800AEDEAA /* Xipan.swift in Sources */,
 				633B71FA23CB1ADA00B70E1C /* ColorDx.swift in Sources */,
+				52A6E44C29D3EA06007B0699 /* Saver.swift in Sources */,
 				24E60F2221D66364007AB419 /* V2File.swift in Sources */,
 				6311FFCA25AC7BCB00DC1566 /* XFPan.swift in Sources */,
+				52A6E44F29D3EF30007B0699 /* Links.swift in Sources */,
 				24E60F2D21D66364007AB419 /* VerifyCodeViewController.swift in Sources */,
 				24E60F2721D66364007AB419 /* PCWebRiffle.swift in Sources */,
 				24E60F2621D66364007AB419 /* PCDownloadManager.swift in Sources */,
