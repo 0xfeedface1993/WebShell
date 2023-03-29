@@ -1,4 +1,18 @@
-# WebShell [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
+
+# WebShell
+
+<!--<p align="center">-->
+<!--  <a href="https://github.com/0xfeedface1993/WebShell"><img src="docs_markdown/images/flexlayout-logo-text.png" alt="FlexLayout" width="210"/></a>-->
+<!--</p>-->
+
+<p align="center">
+  <a href="https://github.com/0xfeedface1993/WebShell"><img src="https://img.shields.io/badge/platforms-iOS%20%20%7C%20macOS-red.svg" /></a>
+  <a href="https://github.com/Carthage/Carthage"><img src="https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat" /></a>
+<a href="https://github.com/0xfeedface1993/WebShell/issues"><img src="https://img.shields.io/github/issues/0xfeedface1993/WebShell.svg?style=flat" /></a>
+</p></p>
+
+<br>
+
 A shell could opreate WKWebView in Swift &amp; JS, it run like internet worm, but not in harm way.
 
 ## Installation
