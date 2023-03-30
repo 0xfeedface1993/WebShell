@@ -13,11 +13,19 @@
 
 <br>
 
-Better way write worm code with Swift.
+Better way write worm code with Swift. 
+| Support Site | Module | Status |
+| --- | --- | --- |
+| www.xueqiupan.com | `DownPage`、`PHPLinks` | done |
+| rosefile.net | `AppendDownPath`、`FileIDStringInDomSearchGroup`、`GeneralLinks` | done |
+| www.567file.com | - | waitting |
+| www.xfpan.cc | - | waitting |
+| www.kufile.net | - | waitting |
 
 ### Ussage
 
 ```swift
+ let link = "http://www.xueqiupan.com/file-672734.html"
  cancellable = DownPage()
     .join(PHPLinks())
     .join(Saver(.override))
