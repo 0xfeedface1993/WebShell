@@ -14,6 +14,11 @@
 <br>
 
 Better way write worm code with Swift. 
+
+Downloading files from many cloud storage platforms can be cumbersome, requiring multiple page redirects. Through studying the download process, it was discovered that they are all patched together like monsters, and some of the download processes are the same. Theoretically, it is possible to solidify the necessary processes into different modules and link them together, which can be reused across different cloud storage platforms.
+
+This framework serves as the foundation for other apps, and one of the core abilities of the app I am developing is to automatically parse download links and enable one-click downloads using this framework. In the future, more straightforward APIs will be updated.
+
 | Support Site | Module | Status |
 | --- | --- | --- |
 | www.xueqiupan.com | `DownPage`、`PHPLinks` | done |
