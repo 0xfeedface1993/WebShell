@@ -62,7 +62,7 @@ class ViewController: NSViewController {
         
 //        let link = "http://www.xueqiupan.com/file-672734.html"
 //
-//        cancellable = DownPage()
+//        cancellable = DownPage(.default)
 //            .join(PHPLinks())
 //            .join(Saver(.override))
 //            .publisher(for: link)
@@ -79,7 +79,7 @@ class ViewController: NSViewController {
         
 //        let link = "https://rosefile.net/6emc775g2p/s_MTGBHJKL.rar.html"
 //        cancellable = AppendDownPath()
-//            .join(FileIDStringInDomSearchGroup())
+//            .join(FileIDStringInDomSearchGroup(.loadDownAddr1))
 //            .join(GeneralLinks())
 //            .join(Saver())
 //            .publisher(for: link)
@@ -94,9 +94,26 @@ class ViewController: NSViewController {
 //                print(">>> download file at \(url)")
 //            }
         
-        let link = "http://www.xunniufile.com/file-3549054.html"
-
-        cancellable = DownPage()
+//        let link = "http://www.xunniufile.com/file-3549054.html"
+//
+//        cancellable = DownPage(.default)
+//            .join(PHPLinks())
+//            .join(Saver(.override))
+//            .publisher(for: link)
+//            .sink { complete in
+//                switch complete {
+//                case .finished:
+//                    break
+//                case .failure(let error):
+//                    print(">>> download error \(error)")
+//                }
+//            } receiveValue: { url in
+//                print(">>> download file at \(url)")
+//            }
+            
+        let link = "http://www.xingyaoclouds.com/fs/2l66xn9ubrzzwba"
+        cancellable = RedirectEnablePage()
+            .join(ActionDownPage())
             .join(PHPLinks())
             .join(Saver(.override))
             .publisher(for: link)
@@ -110,7 +127,6 @@ class ViewController: NSViewController {
             } receiveValue: { url in
                 print(">>> download file at \(url)")
             }
-
         
 //        webview.load(currentResult!.request)
 //        load666PanSequence(urlString: "")

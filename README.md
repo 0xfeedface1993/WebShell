@@ -32,7 +32,7 @@ This framework serves as the foundation for other apps, and one of the core abil
 
 ```swift
  let link = "http://www.xueqiupan.com/file-672734.html"
- cancellable = DownPage()
+ cancellable = DownPage(.default)
     .join(PHPLinks())
     .join(Saver(.override))
     .publisher(for: link)

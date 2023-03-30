@@ -24,13 +24,13 @@ public struct AnyCondom<Input, Output>: Condom where Input: ContextValue, Output
     init<T, V>(_ first: T, last: V) where T: Condom, V: Condom, T.Input == Input, T.Output == V.Input, V.Output == Output {
         self.makePublisher = { value in
             first.publisher(for: value)
-                .flatMap(maxPublishers: .max(1), last.publisher(for:))
+                .flatMap(last.publisher(for:))
                 .eraseToAnyPublisher()
         }
         self.makeEmptyPublisher = {
             first.empty()
                 .map({ _ in () })
-                .flatMap(maxPublishers: .max(1), last.empty)
+                .flatMap(last.empty)
                 .eraseToAnyPublisher()
         }
     }

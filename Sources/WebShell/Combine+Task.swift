@@ -24,6 +24,8 @@ public enum ShellError: Error {
     case noFileID
     /// Data转文本失败
     case decodingFailed(String.Encoding)
+    /// 重定向
+    case redirect(URL)
 }
 
 extension URLSession {

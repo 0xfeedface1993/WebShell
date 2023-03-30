@@ -12,52 +12,50 @@ import Durex
 #endif
 import Combine
 
-/// 从链接中提取fileid，`http://xxxx/file-123456.html`提取fileid`123456`
-public struct FileIDMatch {
-    let url: String
-    let pattern = "\\-(\\w+)\\.\\w+"
+public protocol FileIDFinder {
+    init(_ pattern: String)
     
-    func extract() throws -> String {
-        if #available(iOS 16.0, macOS 13.0, *) {
-            let regx = try Regex(pattern)
-            guard let match = url.firstMatch(of: regx),
-                    let fileid = match.output[1].substring else {
-                throw ShellError.badURL(url)
-            }
-            return String(fileid)
-        } else {
-            // Fallback on earlier versions
-            let regx = try NSRegularExpression(pattern: pattern)
-            let nsString = url as NSString
-            guard let result = regx.firstMatch(in: url, range: .init(location: 0, length: nsString.length)) else {
-                throw ShellError.badURL(url)
-            }
-            return regx.replacementString(for: result, in: url, offset: 0, template: "$1")
-        }
+    func extract(_ text: String) throws -> String
+}
+
+extension FileIDFinder where Self == FileIDMatch {
+    public static var `default`: Self {
+        FileIDMatch("\\-(\\w+)\\.\\w+")
+    }
+    
+    public static var loadDownAddr1: Self {
+        FileIDMatch("load_down_addr1\\('([\\w\\d]+)'\\)")
+    }
+    
+    public static var downProcess4: Self {
+        FileIDMatch("down_process4\\(\"([\\w\\d]+)\"\\)")
     }
 }
 
-/// 从html代码中获取fileid，如：`load_down_addr1('123455')` -> 123455
-struct FileIDInFunctionParameter {
-    let html: String
-    let pattern = "load_down_addr1\\('([\\w\\d]+)'\\)"
+/// 从链接中提取fileid，`http://xxxx/file-123456.html`提取fileid`123456`
+public struct FileIDMatch: FileIDFinder {
+    var pattern = "\\-(\\w+)\\.\\w+"
     
-    func extract() throws -> String {
+    public init(_ pattern: String) {
+        self.pattern = pattern
+    }
+    
+    public func extract(_ text: String) throws -> String {
         if #available(iOS 16.0, macOS 13.0, *) {
             let regx = try Regex(pattern)
-            guard let fileid = html.firstMatch(of: regx)?.output[1].substring else {
-                throw ShellError.noFileID
+            guard let match = text.firstMatch(of: regx),
+                    let fileid = match.output[1].substring else {
+                throw ShellError.badURL(text)
             }
             return String(fileid)
         } else {
             // Fallback on earlier versions
             let regx = try NSRegularExpression(pattern: pattern)
-            let nsString = html as NSString
-            let range = NSRange(location: 0, length: nsString.length)
-            guard let fileid = regx.firstMatch(in: html, range: range) else {
-                throw ShellError.noFileID
+            let nsString = text as NSString
+            guard let result = regx.firstMatch(in: text, range: .init(location: 0, length: nsString.length)) else {
+                throw ShellError.badURL(text)
             }
-            return regx.replacementString(for: fileid, in: html, offset: 0, template: "$1")
+            return regx.replacementString(for: result, in: text, offset: 0, template: "$1")
         }
     }
 }
@@ -107,14 +105,16 @@ public struct FileIDStringInDomSearch: Condom {
     public typealias Input = URLRequest
     public typealias Output = String
     
-    public init() { }
+    let finder: FileIDFinder
+    
+    public init(_ finder: FileIDFinder) {
+        self.finder = finder
+    }
     
     public func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
         StringParserDataTask(request: inputValue, encoding: .utf8)
             .publisher()
-            .tryMap { html in
-                try FileIDInFunctionParameter(html: html).extract()
-            }
+            .tryMap(finder.extract(_:))
             .eraseToAnyPublisher()
     }
     
@@ -151,7 +151,11 @@ public struct FileIDStringInDomSearchGroup: Condom {
     public typealias Input = URLRequest
     public typealias Output = URLRequest
     
-    public init() { }
+    let finder: FileIDFinder
+    
+    public init(_ finder: FileIDFinder) {
+        self.finder = finder
+    }
     
     public func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
         do {
@@ -176,7 +180,7 @@ public struct FileIDStringInDomSearchGroup: Condom {
             throw ShellError.badURL(url.absoluteString)
         }
         
-        let searchid = FileIDStringInDomSearch()
+        let searchid = FileIDStringInDomSearch(finder)
         let page = GeneralDownPageByID(scheme: scheme, host: host, refer: url.absoluteString)
         
         return searchid.join(page)
