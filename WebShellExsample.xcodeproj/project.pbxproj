@@ -89,6 +89,16 @@
 		52DED82C29D54C96001DE51B /* VerifyCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C9DBAD204105B000A87E9E /* VerifyCodeView.swift */; };
 		52DED82D29D54C96001DE51B /* VerifyCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C9DBAF2041094500A87E9E /* VerifyCodeViewController.swift */; };
 		52DED82E29D54C96001DE51B /* VerifyCodeViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 27C9DBB320410F0900A87E9E /* VerifyCodeViewController.xib */; };
+		52DED86B29D56281001DE51B /* AnyErase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5227B1EF29D2D32000C57D92 /* AnyErase.swift */; };
+		52DED86C29D56281001DE51B /* PublisherShirk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5227B1F029D2D32000C57D92 /* PublisherShirk.swift */; };
+		52DED86D29D56291001DE51B /* Delay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5227B1E629D2D32000C57D92 /* Delay.swift */; };
+		52DED86E29D56291001DE51B /* AnyCondom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5227B1E729D2D32000C57D92 /* AnyCondom.swift */; };
+		52DED86F29D56291001DE51B /* SessionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5227B1E829D2D32000C57D92 /* SessionContext.swift */; };
+		52DED87029D56291001DE51B /* Condom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5227B1E929D2D32000C57D92 /* Condom.swift */; };
+		52DED87129D56291001DE51B /* Durex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5227B1EA29D2D32000C57D92 /* Durex.swift */; };
+		52DED87229D56291001DE51B /* Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5227B1EB29D2D32000C57D92 /* Request.swift */; };
+		52DED87329D56291001DE51B /* AnyValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5227B1EC29D2D32000C57D92 /* AnyValue.swift */; };
+		52DED87429D56291001DE51B /* DurexError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5227B1ED29D2D32000C57D92 /* DurexError.swift */; };
 		6311FFC125AC50E100DC1566 /* String+URL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6311FFC025AC50E100DC1566 /* String+URL.swift */; };
 		6311FFC225AC50E100DC1566 /* String+URL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6311FFC025AC50E100DC1566 /* String+URL.swift */; };
 		6311FFCA25AC7BCB00DC1566 /* XFPan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6311FFC925AC7BCA00DC1566 /* XFPan.swift */; };
@@ -522,7 +532,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1010;
-				LastUpgradeCheck = 1210;
+				LastUpgradeCheck = 1420;
 				ORGANIZATIONNAME = ascp;
 				TargetAttributes = {
 					242C07282371E94D0037D3C2 = {
@@ -662,6 +672,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				52DED86D29D56291001DE51B /* Delay.swift in Sources */,
+				52DED86E29D56291001DE51B /* AnyCondom.swift in Sources */,
+				52DED86F29D56291001DE51B /* SessionContext.swift in Sources */,
+				52DED87029D56291001DE51B /* Condom.swift in Sources */,
+				52DED87129D56291001DE51B /* Durex.swift in Sources */,
+				52DED87229D56291001DE51B /* Request.swift in Sources */,
+				52DED87329D56291001DE51B /* AnyValue.swift in Sources */,
+				52DED87429D56291001DE51B /* DurexError.swift in Sources */,
+				52DED86B29D56281001DE51B /* AnyErase.swift in Sources */,
+				52DED86C29D56281001DE51B /* PublisherShirk.swift in Sources */,
 				24E60F2B21D66364007AB419 /* FileCoordinator.swift in Sources */,
 				24113A422371E13E00AEDEAA /* TBDownloader.swift in Sources */,
 				24E60F3921D66466007AB419 /* Const.swift in Sources */,
@@ -761,6 +781,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = A272626J38;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -797,6 +818,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = A272626J38;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -830,6 +852,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = E6NP67H473;
 				INFOPLIST_FILE = WebShellCoreTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -851,6 +874,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = E6NP67H473;
 				INFOPLIST_FILE = WebShellCoreTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -899,6 +923,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -961,6 +986,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -990,6 +1016,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = A272626J38;
 				INFOPLIST_FILE = CCCHOOO/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1010,6 +1037,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = A272626J38;
 				INFOPLIST_FILE = CCCHOOO/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
