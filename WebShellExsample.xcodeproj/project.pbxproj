@@ -213,6 +213,7 @@
 		52A6E44E29D3EF30007B0699 /* Links.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Links.swift; sourceTree = "<group>"; };
 		52A6E45129D3F4FE007B0699 /* DownPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownPage.swift; sourceTree = "<group>"; };
 		52A6E45429D3FD8A007B0699 /* FileID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileID.swift; sourceTree = "<group>"; };
+		52DED82429D5420F001DE51B /* webshell.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = webshell.png; sourceTree = "<group>"; };
 		6311FFC025AC50E100DC1566 /* String+URL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+URL.swift"; sourceTree = "<group>"; };
 		6311FFC925AC7BCA00DC1566 /* XFPan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XFPan.swift; sourceTree = "<group>"; };
 		631BEB4D244C52AF002243C4 /* KuYun.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KuYun.swift; sourceTree = "<group>"; };
@@ -328,6 +329,7 @@
 		27448B1A20170ABA001FC925 = {
 			isa = PBXGroup;
 			children = (
+				52DED82329D53BFB001DE51B /* Doc */,
 				27448B2520170ABA001FC925 /* CCCHOOO */,
 				27C9DBBD204146A100A87E9E /* WebShell */,
 				24113A3F2371DB9F00AEDEAA /* Tests */,
@@ -428,6 +430,14 @@
 				5227B1F029D2D32000C57D92 /* PublisherShirk.swift */,
 			);
 			path = AnyErase;
+			sourceTree = "<group>";
+		};
+		52DED82329D53BFB001DE51B /* Doc */ = {
+			isa = PBXGroup;
+			children = (
+				52DED82429D5420F001DE51B /* webshell.png */,
+			);
+			path = Doc;
 			sourceTree = "<group>";
 		};
 		635FEE0E25528D3500FEE0FD /* Frameworks */ = {
