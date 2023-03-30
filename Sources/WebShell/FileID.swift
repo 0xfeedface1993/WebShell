@@ -18,7 +18,7 @@ public struct FileIDMatch {
     let pattern = "\\-(\\w+)\\.\\w+"
     
     func extract() throws -> String {
-        if #available(macOS 13.0, *) {
+        if #available(iOS 16.0, macOS 13.0, *) {
             let regx = try Regex(pattern)
             guard let match = url.firstMatch(of: regx),
                     let fileid = match.output[1].substring else {
@@ -43,7 +43,7 @@ struct FileIDInFunctionParameter {
     let pattern = "load_down_addr1\\('([\\w\\d]+)'\\)"
     
     func extract() throws -> String {
-        if #available(macOS 13.0, *) {
+        if #available(iOS 16.0, macOS 13.0, *) {
             let regx = try Regex(pattern)
             guard let fileid = html.firstMatch(of: regx)?.output[1].substring else {
                 throw ShellError.noFileID

@@ -12,6 +12,8 @@
     import UIKit
 #endif
 
+import WebShell
+
 class VerifyCodeViewController: NSViewController {
     let codeView = VerifyCodeView()
     var tap : ((String)->())? {

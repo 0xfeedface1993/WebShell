@@ -6,7 +6,11 @@
 //  Copyright © 2019 ascp. All rights reserved.
 //
 
+#if os(macOS)
 import Cocoa
+#elseif os(iOS)
+import UIKit
+#endif
 import WebKit
 
 final public class TBPiplineSeat: TBQueueItem, Hashable {

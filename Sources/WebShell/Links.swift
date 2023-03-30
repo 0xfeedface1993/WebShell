@@ -48,7 +48,7 @@ public struct DLPhpMatch {
     let pattern = "https?://[^\\s]+/dl\\.php\\?\\w+"
     
     func extract() throws -> [URL] {
-        if #available(macOS 13.0, *) {
+        if #available(iOS 16.0, macOS 13.0, *) {
             let regx = try Regex(pattern)
             let urls = url.matches(of: regx).compactMap({ $0.output[0].substring })
             return urls.compactMap { value in
@@ -73,7 +73,7 @@ public struct FileGeneralLinkMatch {
     let pattern = "\"(https?://[^\"]+)\""
     
     func extract() throws -> [URL] {
-        if #available(macOS 13.0, *) {
+        if #available(iOS 16.0, macOS 13.0, *) {
             let regx = try Regex(pattern)
             let urls = html.matches(of: regx).compactMap({ $0.output[1].substring })
             return urls.compactMap { value in
