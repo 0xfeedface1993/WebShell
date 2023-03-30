@@ -60,22 +60,22 @@ class ViewController: NSViewController {
             }
         }
         
-        let link = "http://www.xueqiupan.com/file-672734.html"
-
-        cancellable = DownPage()
-            .join(PHPLinks())
-            .join(Saver(.override))
-            .publisher(for: link)
-            .sink { complete in
-                switch complete {
-                case .finished:
-                    break
-                case .failure(let error):
-                    print(">>> download error \(error)")
-                }
-            } receiveValue: { url in
-                print(">>> download file at \(url)")
-            }
+//        let link = "http://www.xueqiupan.com/file-672734.html"
+//
+//        cancellable = DownPage()
+//            .join(PHPLinks())
+//            .join(Saver(.override))
+//            .publisher(for: link)
+//            .sink { complete in
+//                switch complete {
+//                case .finished:
+//                    break
+//                case .failure(let error):
+//                    print(">>> download error \(error)")
+//                }
+//            } receiveValue: { url in
+//                print(">>> download file at \(url)")
+//            }
         
 //        let link = "https://rosefile.net/6emc775g2p/s_MTGBHJKL.rar.html"
 //        cancellable = AppendDownPath()
@@ -93,6 +93,23 @@ class ViewController: NSViewController {
 //            } receiveValue: { url in
 //                print(">>> download file at \(url)")
 //            }
+        
+        let link = "http://www.xunniufile.com/file-3549054.html"
+
+        cancellable = DownPage()
+            .join(PHPLinks())
+            .join(Saver(.override))
+            .publisher(for: link)
+            .sink { complete in
+                switch complete {
+                case .finished:
+                    break
+                case .failure(let error):
+                    print(">>> download error \(error)")
+                }
+            } receiveValue: { url in
+                print(">>> download file at \(url)")
+            }
 
         
 //        webview.load(currentResult!.request)

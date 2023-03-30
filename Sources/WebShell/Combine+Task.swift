@@ -70,6 +70,18 @@ extension URLSession {
     }
 }
 
+#if DEBUG
+extension Publisher {
+    /// 只是为了打印错误信息
+    func logError() -> Publishers.MapError<Self, Failure> {
+        mapError { error in
+            _ = print(">>> [combine error stub] \(error)")
+            return error
+        }
+    }
+}
+#endif
+
 extension Array: ContextValue where Element == URLRequest {
     public var valueDescription: String {
         "\(self)"

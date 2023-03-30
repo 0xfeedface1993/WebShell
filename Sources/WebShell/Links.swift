@@ -45,7 +45,7 @@ public struct GeneralFileDownload {
 
 public struct DLPhpMatch {
     let url: String
-    let pattern = "https?://[^\\s]+/dl\\.php\\?\\w+"
+    let pattern = "https?://[^\\s]+/dl\\w+\\.php\\?[^\"]+"
     
     func extract() throws -> [URL] {
         if #available(iOS 16.0, macOS 13.0, *) {
@@ -106,6 +106,11 @@ public struct StringParserDataTask {
                 }
                 return text
             }
+        #if DEBUG
+            .follow {
+                print(">>> [\(type(of: self))] utf8 text: \($0)")
+            }
+        #endif
             .eraseToAnyPublisher()
     }
 }
