@@ -51,6 +51,43 @@ This framework serves as the foundation for other apps, and one of the core abil
 
 The file will download at your `Downloads` folder.
 
+### Introduction examples
+
+Just confirm `Condom` protocol make simple download HTML page operation become async module
+
+```
+struct DownloadWebPage: Condom {
+    typealias Input = URL
+    typealias Output = String
+    
+    public func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
+        // tool for data -> string 
+        StringParserDataTask(request: .init(url: inputValue), encoding: .utf8)
+            .publisher()
+    }
+    
+    public func empty() -> AnyPublisher<Output, Error> {
+        Fail(error: URLError(.badURL)).eraseToAnyPublisher()
+    }
+}
+``` 
+
+Then get publisher out of it，and sink to fire it up!
+```
+DownloadWebPage()
+    .publisher(for: link)
+    .sink { complete in
+        switch complete {
+           case .finished:
+               break
+           case .failure(let error):
+               print(">>> download error \(error)")
+        }
+    } receiveValue: { text in
+        print(">>> html: \(text)")
+    }
+```
+
 ## Installation
 
 #### carthage
@@ -61,6 +98,10 @@ Specify WebShell into your project's `Cartfile`:
 ```ogdl
 github "0xfeedface1993/WebShell" ~> 3.0
 ```
+#### Swift Package Manager (SPM)
+
+From Xcode, select from the menu File > Swift Packages > Add Package Dependency
+Specify the URL https://github.com/0xfeedface1993/WebShell
 
 ##
 As you can see, this project need more work, so if you want join me, any pull request will be helpful!
