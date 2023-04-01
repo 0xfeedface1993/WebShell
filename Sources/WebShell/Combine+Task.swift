@@ -8,6 +8,7 @@
 
 import Foundation
 import Combine
+import Durex
 
 public enum ShellError: Error {
     /// url为空或者不正确
