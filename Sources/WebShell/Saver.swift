@@ -102,5 +102,41 @@ public struct MoveToDownloads {
     }
 }
 
+/// 使用自定义URLSession下载模块
+public struct BridgeSaver: Condom {
+    public typealias Input = [URLRequest]
+    public typealias Output = URL
+    
+    let sessionBundle: SessionBundle
+    let policy: Saver.Policy
+    
+    public init(_ bundle: SessionBundle, policy: Saver.Policy = .normal) {
+        self.policy = policy
+        self.sessionBundle = bundle
+    }
+    
+    public func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
+        guard let request = inputValue.first else {
+            return Fail(error: ShellError.emptyRequest).eraseToAnyPublisher()
+        }
+        return sessionBundle
+            .session
+            .downloadTask(request)
+            .tryMap {
+                try MoveToDownloads(tempURL: $0.0, suggestedFilename: $0.1.suggestedFilename, policy: policy).move()
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    public func empty() -> AnyPublisher<Output, Error> {
+        Empty().eraseToAnyPublisher()
+    }
+}
 
-
+public struct SessionBundle {
+    public let session: URLSession
+    
+    public init(_ session: URLSession) {
+        self.session = session
+    }
+}

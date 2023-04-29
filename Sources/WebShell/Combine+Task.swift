@@ -8,7 +8,9 @@
 
 import Foundation
 import Combine
+#if canImport(Durex)
 import Durex
+#endif
 
 public enum ShellError: Error {
     /// url为空或者不正确
@@ -35,7 +37,7 @@ extension URLSession {
     /// - Returns: 异步结果，这里目前只取Data
     public func dataTask(_ request: URLRequest) -> Future<Data, Error> {
         Future { promise in
-            URLSession.shared.dataTask(with: request) { data, response, error in
+            self.dataTask(with: request) { data, response, error in
                 if let error = error {
                     promise(.failure(error))
                     return
@@ -56,7 +58,7 @@ extension URLSession {
     /// - Returns: 异步结果，这里目前取Data和URLResponse，response里面使用suggestedFilename读取文件名
     public func downloadTask(_ request: URLRequest) -> Future<(URL, URLResponse), Error> {
         Future { promise in
-            URLSession.shared.downloadTask(with: request, completionHandler: { url, response, error in
+            self.downloadTask(with: request, completionHandler: { url, response, error in
                 if let error = error {
                     promise(.failure(error))
                     return
