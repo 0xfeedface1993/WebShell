@@ -133,10 +133,20 @@ public struct BridgeSaver: Condom {
     }
 }
 
-public struct SessionBundle {
+public protocol URLUpdator {
+    func updateURLSubject() -> PassthroughSubject<URL, Never>
+}
+
+public struct SessionBundle: URLUpdator {
     public let session: URLSession
+    public let urlUpdateSubject: PassthroughSubject<URL, Never>
     
-    public init(_ session: URLSession) {
+    public init(_ session: URLSession, subject: PassthroughSubject<URL, Never>) {
         self.session = session
+        self.urlUpdateSubject = subject
+    }
+    
+    public func updateURLSubject() -> PassthroughSubject<URL, Never> {
+        urlUpdateSubject
     }
 }
