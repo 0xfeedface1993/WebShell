@@ -34,13 +34,17 @@ public struct Saver: Condom {
         guard let request = inputValue.first else {
             return Fail(error: ShellError.emptyRequest).eraseToAnyPublisher()
         }
-        return URLSession
-            .shared
-            .downloadTask(request)
+        
+        return SessionPool
+            .context(forKey: "")
+            .flatMap({ context in
+                context.download(with: request)
+            })
             .tryMap {
                 try MoveToDownloads(tempURL: $0.0, suggestedFilename: $0.1.suggestedFilename, policy: policy).move()
             }
             .eraseToAnyPublisher()
+            
     }
     
     public func empty() -> AnyPublisher<Output, Error> {
@@ -109,22 +113,28 @@ public struct BridgeSaver: Condom {
     
     let sessionBundle: SessionBundle
     let policy: Saver.Policy
+    let tag: Int?
     
-    public init(_ bundle: SessionBundle, policy: Saver.Policy = .normal) {
+    public init(_ bundle: SessionBundle, policy: Saver.Policy = .normal, tag: Int? = nil) {
         self.policy = policy
         self.sessionBundle = bundle
+        self.tag = tag
     }
     
     public func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
         guard let request = inputValue.first else {
             return Fail(error: ShellError.emptyRequest).eraseToAnyPublisher()
         }
-        return sessionBundle
-            .session
-            .downloadTask(request)
-            .tryMap {
-                try MoveToDownloads(tempURL: $0.0, suggestedFilename: $0.1.suggestedFilename, policy: policy).move()
-            }
+        
+        return SessionPool
+            .context(forKey: sessionBundle.sessionKey)
+            .flatMap { $0.downloadWithProgress(request, tag: tag) }
+            .compactMap({ update -> URL? in
+                guard case .file(let value, _) = update else {
+                    return nil
+                }
+                return value
+            })
             .eraseToAnyPublisher()
     }
     
@@ -133,20 +143,27 @@ public struct BridgeSaver: Condom {
     }
 }
 
-public protocol URLUpdator {
-    func updateURLSubject() -> PassthroughSubject<URL, Never>
-}
+//public protocol URLUpdator {
+//    typealias Output = DownloadURLProgressPublisher.News.State
+//    func updateURLSubject() -> PassthroughSubject<Output, Never>
+//}
 
-public struct SessionBundle: URLUpdator {
-    public let session: URLSession
-    public let urlUpdateSubject: PassthroughSubject<URL, Never>
+public struct SessionBundle {
+//    public let session: URLSession
+//    public let urlUpdateSubject: PassthroughSubject<URL, Never>
+//
+//    public init(_ session: URLSession, subject: PassthroughSubject<URL, Never>) {
+//        self.session = session
+//        self.urlUpdateSubject = subject
+//    }
+//
+//    public func updateURLSubject() -> PassthroughSubject<URL, Never> {
+//        urlUpdateSubject
+//    }
+    public let sessionKey: AnyHashable
+//    public let urlUpdateSubject: PassthroughSubject<Output, Never>
     
-    public init(_ session: URLSession, subject: PassthroughSubject<URL, Never>) {
-        self.session = session
-        self.urlUpdateSubject = subject
-    }
-    
-    public func updateURLSubject() -> PassthroughSubject<URL, Never> {
-        urlUpdateSubject
+    public init(_ sessionKey: AnyHashable) {
+        self.sessionKey = sessionKey
     }
 }

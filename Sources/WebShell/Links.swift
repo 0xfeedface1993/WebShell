@@ -45,7 +45,7 @@ public struct GeneralFileDownload {
 
 public struct DLPhpMatch {
     let url: String
-    let pattern = "https?://[^\\s]+/dl\\w+\\.php\\?[^\"]+"
+    let pattern = "https?://[^\\s]+/dl\\w*\\.php\\?[^\"]+"
     
     func extract() throws -> [URL] {
         if #available(iOS 16.0, macOS 13.0, *) {
@@ -98,19 +98,23 @@ public struct StringParserDataTask {
     let encoding: String.Encoding
     
     func publisher() -> AnyPublisher<String, Error> {
-        URLSession.shared
-            .dataTask(request)
-            .tryMap {
-                guard let text = String(data: $0, encoding: encoding) else {
-                    throw ShellError.decodingFailed(encoding)
-                }
-                return text
+        SessionPool
+            .context(forKey: request.hostKey())
+            .flatMap { context in
+                context
+                    .data(with: request)
+                    .tryMap {
+                        guard let text = String(data: $0, encoding: encoding) else {
+                            throw ShellError.decodingFailed(encoding)
+                        }
+                        return text
+                    }
             }
-        #if DEBUG
+#if DEBUG
             .follow {
                 print(">>> [\(type(of: self))] utf8 text: \($0)")
             }
-        #endif
+#endif
             .eraseToAnyPublisher()
     }
 }

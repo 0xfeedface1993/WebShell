@@ -1,0 +1,185 @@
+//
+//  File.swift
+//  
+//
+//  Created by john on 2023/5/1.
+//
+
+import Foundation
+import Combine
+import AnyErase
+import os.log
+
+public protocol CustomURLSession {
+    /// 下载数据，下载后的数据会转换成Data，大数据下载推荐使用``download(with:)``方法
+    /// - Parameter request: 网络请求
+    /// - Returns: 异步数据
+    func data(with request: URLRequest) -> AnyPublisher<Data, Error>
+    
+    /// 下载文件，文件存储在临时区域，拿到URL后进行复制或者移动
+    /// - Parameter request: 下载文件请求
+    /// - Returns: 异步文件URL
+    func download(with request: URLRequest) -> AnyPublisher<(URL, URLResponse), Error>
+    
+    /// 下载文件, 包含进度信息更新、下载完成、失败
+    /// - Parameter request: 下载文件请求
+    /// - Returns: 异步文件进度+文件URL
+    func downloadWithProgress(_ request: URLRequest, tag: AnyHashable?) -> DownloadURLProgressPublisher
+    
+    /// 其他模块想要获取当前下载任务的进度、完成通知则使用此方法获取Publisher,
+    /// 注意：此Publisher不会finished，终止的情况只会是error，所以只要监听receiveValue和error即可。
+    /// - Parameter identifier: 下载任务唯一key，使用它的hashValue
+    /// - Returns: 任务状态
+    func downloadNews(for identifier: AnyHashable) -> AnyPublisher<DownloadURLProgressPublisher.News, Error>
+}
+
+extension CustomURLSession {
+    /// 全局共享下载session
+    /// - Returns: 共享session
+    static func shared() -> CustomURLSession {
+        DownloadSession._shared
+    }
+}
+
+public protocol SessionProvider {
+    /// 绑定URLSession下载任务和任务tag，用于后续任务查询
+    /// - Parameters:
+    ///   - task: URLSession下载任务
+    ///   - tag: 任务tag
+    func bind(task: URLSessionDownloadTask, tagHashValue: Int)
+    
+    /// 解除URLSession下载任务和任务tag的绑定，下载任务结束后解除绑定
+    /// - Parameter task: URLSession下载任务
+    func unbind(task: URLSessionDownloadTask)
+    
+    /// 系统原始的URLSession
+    func systemSession() -> URLSession
+    
+    /// 匹配下载任务id
+    /// - Parameter task: URLSession下载任务
+    /// - Returns: 任务id
+    func tag(for task: URLSessionDownloadTask) -> Int
+    
+    /// 匹配下载任务id
+    /// - Parameter task: URLSession下载任务taskIdentifier
+    /// - Returns: 任务id
+    func tag(for taskIdentifier: Int) -> Int
+    
+    /// 根据任务id查下载任务taskIdentifier
+    /// - Parameter tag: 任务id
+    /// - Returns: taskIdentifier
+    func taskIdentifier(for tag: Int) -> Int?
+}
+
+fileprivate let logger = OSLog(subsystem: "com.ascp.session", category: "DownloadSession")
+
+public final class DownloadSession: CustomURLSession {
+    fileprivate static let _shared = DownloadSession()
+    private let delegator = URLSessionDelegator()
+    private lazy var _session = URLSession(configuration: .default, delegate: delegator, delegateQueue: nil)
+    private var tagsCached = [Int: Int]()
+    private let lock = Lock()
+    
+    public init() { }
+    
+    deinit {
+        lock.cleanupLock()
+    }
+    
+    public func downloadWithProgress(_ request: URLRequest, tag: AnyHashable? = nil) -> DownloadURLProgressPublisher {
+        DownloadURLProgressPublisher(request: request, session: self, tag: tag?.hashValue)
+    }
+    
+    public func download(with request: URLRequest) -> AnyPublisher<(URL, URLResponse), Error> {
+        DownloadURLPublisher(request: request, session: _session)
+            .eraseToAnyPublisher()
+//        return delegator
+//            .downloadTaskCompletion
+//            .tryMap {
+//                switch $0 {
+//                case .success(let data):
+//                    return data
+//                case .failure(let error):
+//                    throw error
+//                }
+//            }
+//            .filter { $0.task.taskIdentifier == task.taskIdentifier }
+//            .tryMap({ complete in
+//                switch complete.data {
+//                case .file(let url):
+//                    return url
+//                default:
+//                    throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: "\(complete)"])
+//                }
+//            })
+//            .eraseToAnyPublisher()
+    }
+    
+    public func data(with request: URLRequest) -> AnyPublisher<Data, Error> {
+        download(with: request)
+            .tryMap { url in
+                try Data(contentsOf: url.0)
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    public func downloadNews(for identifier: AnyHashable) -> AnyPublisher<DownloadURLProgressPublisher.News, Error> {
+        delegator.news(self, tag: identifier.hashValue)
+    }
+}
+
+extension DownloadSession: SessionProvider {
+    public func systemSession() -> URLSession {
+        _session
+    }
+    
+    public func bind(task: URLSessionDownloadTask, tagHashValue: Int) {
+        lock.lock()
+        let identifier = task.taskIdentifier
+        let value = tagsCached[identifier]
+        tagsCached[identifier] = tagHashValue
+        lock.unlock()
+        if let value = value {
+            os_log(.debug, log: logger, "download task %d already has tag %d", identifier, value)
+        }
+        os_log(.debug, log: logger, "download task %d add new tag %d", identifier, tagHashValue)
+    }
+    
+    public func unbind(task: URLSessionDownloadTask) {
+        lock.lock()
+        let identifier = task.taskIdentifier
+        tagsCached.removeValue(forKey: identifier)
+        lock.unlock()
+        os_log(.debug, log: logger, "download task %d remove tag", identifier)
+    }
+    
+    @inlinable
+    public func tag(for task: URLSessionDownloadTask) -> Int {
+        tag(for: task.taskIdentifier)
+    }
+    
+    public func tag(for taskIdentifier: Int) -> Int {
+        lock.lock()
+        let identifier = taskIdentifier
+        let value = tagsCached[identifier]
+        lock.unlock()
+        if let value = value {
+            os_log(.debug, log: logger, "download task %d retrive tag %d", identifier, value)
+        }   else    {
+            os_log(.debug, log: logger, "download task %d has no tag", identifier)
+        }
+        return value ?? identifier
+    }
+    
+    public func taskIdentifier(for tag: Int) -> Int? {
+        lock.lock()
+        let value = tagsCached.first(where: { $0.value == tag })?.key
+        lock.unlock()
+        if let value = value {
+            os_log(.debug, log: logger, "download tag %d retrive task %d", tag, value)
+        }   else    {
+            os_log(.debug, log: logger, "download tag %d has no task", tag)
+        }
+        return value
+    }
+}

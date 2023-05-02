@@ -32,16 +32,18 @@ public struct SessionError: Error, LocalizedError {
     }
 }
 
-public protocol SessionContext {
-    func session() -> URLSession
-}
+//public protocol SessionContext {
+//    func session() -> CustomURLSession
+//}
 
-extension URLSession: SessionContext {
-    @inlinable
-    public func session() -> URLSession {
-        self
-    }
-}
+public typealias SessionContext = CustomURLSession
+
+//extension URLSession: SessionContext {
+//    @inlinable
+//    public func session() -> CustomURLSession {
+//        self
+//    }
+//}
 
 @usableFromInline
 enum Sessions: Hashable {
@@ -139,7 +141,12 @@ extension SessionPool {
             .tryMap {
                 try $0.take().context
             }
-            .replaceNil(with: URLSession.shared)
+            .replaceNil(with: DownloadSession.shared())
+        #if DEBUG
+            .follow({
+                print(">>> context session \($0) for key \(key)")
+            })
+        #endif
             .eraseToAnyPublisher()
     }
 }
@@ -178,5 +185,24 @@ public struct PoolMaker {
             .follow(_store(_:forKey:))
             .map(\.0)
             .eraseToAnyPublisher()
+    }
+}
+
+public protocol SessionKeyProvider {
+    func hostKey() -> AnyHashable
+}
+
+extension URLRequest: SessionKeyProvider {
+    public func hostKey() -> AnyHashable {
+        url?.hostKey() ?? 0 as AnyHashable
+    }
+}
+
+extension URL: SessionKeyProvider {
+    public func hostKey() -> AnyHashable {
+        guard let host = host?.data(using: .utf8) else {
+            return 0
+        }
+        return host.hashValue
     }
 }

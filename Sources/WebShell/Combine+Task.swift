@@ -31,49 +31,49 @@ public enum ShellError: Error {
     case redirect(URL)
 }
 
-extension URLSession {
-    /// 封装URLSession.shared.dataTask(with:) 成publisher
-    /// - Parameter request: 网络请求
-    /// - Returns: 异步结果，这里目前只取Data
-    public func dataTask(_ request: URLRequest) -> Future<Data, Error> {
-        Future { promise in
-            self.dataTask(with: request) { data, response, error in
-                if let error = error {
-                    promise(.failure(error))
-                    return
-                }
-                
-                guard let data = data else {
-                    promise(.failure(ShellError.emptyData))
-                    return
-                }
-                
-                promise(.success(data))
-            }.resume()
-        }
-    }
-    
-    /// 封装URLSession.shared.downloadTask(with:) 成publisher
-    /// - Parameter request: 网络请求
-    /// - Returns: 异步结果，这里目前取Data和URLResponse，response里面使用suggestedFilename读取文件名
-    public func downloadTask(_ request: URLRequest) -> Future<(URL, URLResponse), Error> {
-        Future { promise in
-            self.downloadTask(with: request, completionHandler: { url, response, error in
-                if let error = error {
-                    promise(.failure(error))
-                    return
-                }
-                
-                guard let url = url, let response = response else {
-                    promise(.failure(ShellError.emptyData))
-                    return
-                }
-                
-                promise(.success((url, response)))
-            }).resume()
-        }
-    }
-}
+//extension URLSession {
+//    /// 封装URLSession.shared.dataTask(with:) 成publisher
+//    /// - Parameter request: 网络请求
+//    /// - Returns: 异步结果，这里目前只取Data
+//    public func dataTask(_ request: URLRequest) -> Future<Data, Error> {
+//        Future { promise in
+//            self.dataTask(with: request) { data, response, error in
+//                if let error = error {
+//                    promise(.failure(error))
+//                    return
+//                }
+//                
+//                guard let data = data else {
+//                    promise(.failure(ShellError.emptyData))
+//                    return
+//                }
+//                
+//                promise(.success(data))
+//            }.resume()
+//        }
+//    }
+//    
+//    /// 封装URLSession.shared.downloadTask(with:) 成publisher
+//    /// - Parameter request: 网络请求
+//    /// - Returns: 异步结果，这里目前取Data和URLResponse，response里面使用suggestedFilename读取文件名
+//    public func downloadTask(_ request: URLRequest) -> Future<(URL, URLResponse), Error> {
+//        Future { promise in
+//            self.downloadTask(with: request, completionHandler: { url, response, error in
+//                if let error = error {
+//                    promise(.failure(error))
+//                    return
+//                }
+//                
+//                guard let url = url, let response = response else {
+//                    promise(.failure(ShellError.emptyData))
+//                    return
+//                }
+//                
+//                promise(.success((url, response)))
+//            }).resume()
+//        }
+//    }
+//}
 
 #if DEBUG
 extension Publisher {

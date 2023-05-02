@@ -11,7 +11,7 @@ import Foundation
 import Combine
 #endif
 
-public protocol Condom<Output> {
+public protocol Condom<Output, Input> {
     associatedtype Input: ContextValue
     associatedtype Output: ContextValue
     

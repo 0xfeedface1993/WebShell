@@ -213,13 +213,14 @@ public struct RedirectEnablePage: Condom {
     public func publisher(for inputValue: String) -> AnyPublisher<Output, Error> {
         do {
             let request = try JustRequest(url: inputValue).make()
-            return URLSession
-                .shared
-                .downloadTask(request)
-                .map(\.1)
-                .tryMap { try validRedirectResponse($0, request: request) }
-                .map({ _ in inputValue })
-                .tryCatch(catchRedirectError(_:))
+            return SessionPool.context(forKey: "")
+                .flatMap({ context in
+                    context.download(with: request)
+                        .map(\.1)
+                        .tryMap { try validRedirectResponse($0, request: request) }
+                        .map({ _ in inputValue })
+                        .tryCatch(catchRedirectError(_:))
+                })
                 .eraseToAnyPublisher()
         } catch {
             return Fail(error: error).eraseToAnyPublisher()
