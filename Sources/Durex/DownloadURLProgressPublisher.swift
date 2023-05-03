@@ -164,70 +164,68 @@ public struct DownloadURLProgressPublisher: Publisher {
 
 
 extension URLSessionDelegator {
+    /// 将result转化成try-catch流
+    /// - Parameter result: result对象
+    /// - Returns: 存在的值
+    @inlinable
+    func tryMapResult<T, V>(_ result: Result<T, V>) throws -> T {
+        try result.get()
+    }
+    
+    /// 分解SessionComplete：，下载文件URL、请求响应、taskIdentifier三部分
+    /// - Parameter complete: 下载完成SessionComplete事件
+    /// - Returns: 下载文件URL、请求响应、taskIdentifier
+    func splitThree(_ complete: SessionComplete) -> (URL, URLResponse, Int)? {
+        if let response = complete.task.response {
+            return (complete.data, response, complete.task.taskIdentifier)
+        }
+#if DEBUG
+        print(">>> can't split complete \(complete), because response is nil")
+#endif
+        return nil
+    }
+    
+    /// 转换内部下载完成事件为外部RawNews，不匹配complete.task.taskIdentifier，没有response则返回nil
+    /// - Parameter complete: 内部下载完成事件
+    /// - Returns: 外部下载完成RawNews
+    func rawCompleteToRawNews(_ complete: SessionComplete) -> RawNews? {
+        if let response = complete.task.response {
+            return RawNews(.file(complete.data, response), taskIdentifier: complete.task.taskIdentifier)
+        }
+#if DEBUG
+        print(">>> can't convert rawCompleteToRawNews \(complete), because response is nil")
+#endif
+        return nil
+    }
+    
     fileprivate func newsCompletor(_ taskIdentifier: Int) -> AnyPublisher<DownloadURLProgressPublisher.News, Error> {
         downloadTaskCompletion
-            .tryMap({ result -> SessionComplete in
-                switch result {
-                case .success(let value):
-                    return value
-                case .failure(let error):
-                    throw error
-                }
-            })
-            .compactMap({
-                if let response = $0.task.response {
-                    return ($0.data, response, $0.task.taskIdentifier)
-                }
-                return nil
-            })
+            .tryMap(tryMapResult(_:))
+            .compactMap(splitThree(_:))
             .filter { $0.2 == taskIdentifier }
             .map { DownloadURLProgressPublisher.News.file($0.0, $0.1) }
+            .mapError({ $0 as Error })
             .eraseToAnyPublisher()
     }
     
     fileprivate func newsUpdator(_ taskIdentifier: Int, tag: Int) -> AnyPublisher<DownloadURLProgressPublisher.News, Error> {
         downloadTaskUpdate
             .filter({ $0.task.taskIdentifier == taskIdentifier })
-            .map({ taskState in
-                let progress = Progress(totalUnitCount: taskState.totalBytesExpectedToWrite)
-                progress.completedUnitCount = taskState.totalBytesWritten
-                return DownloadURLProgressPublisher.News
-                    .state(.init(progress: progress,
-                                 filename: taskState.task.response?.suggestedFilename,
-                                 identifier: tag))
-            })
+            .map { $0.newsValue(tag: tag) }
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
     
     fileprivate func rawNewsCompletor() -> AnyPublisher<RawNews, Error> {
         downloadTaskCompletion
-            .tryMap({ result -> SessionComplete in
-                switch result {
-                case .success(let value):
-                    return value
-                case .failure(let error):
-                    throw error
-                }
-            })
-            .compactMap({
-                if let response = $0.task.response {
-                    return RawNews(.file($0.data, response), taskIdentifier: $0.task.taskIdentifier)
-                }
-                return nil
-            })
+            .tryMap(tryMapResult(_:))
+            .compactMap(rawCompleteToRawNews(_:))
             .eraseToAnyPublisher()
     }
     
     fileprivate func rawNewsUpdator() -> AnyPublisher<RawNews, Error> {
         downloadTaskUpdate
-            .map({ taskState in
-                let progress = Progress(totalUnitCount: taskState.totalBytesExpectedToWrite)
-                progress.completedUnitCount = taskState.totalBytesWritten
-                return .init(.state(.init(progress: progress,
-                                          filename: taskState.task.response?.suggestedFilename,
-                                          identifier: 0)), taskIdentifier: taskState.task.taskIdentifier)
-            })
+            .map { RawNews($0.newsValue(tag: 0), taskIdentifier: $0.task.taskIdentifier) }
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
@@ -257,5 +255,23 @@ struct RawNews {
         case .file(_, _):
             return .init(data, taskIdentifier: taskIdentifier)
         }
+    }
+}
+
+extension SessionTaskState {
+    /// 内部下载状态转换为外部News状态
+    /// - Parameters:
+    ///   - taskState: 内部下载状态
+    ///   - tag: 任务id
+    /// - Returns: News下载状态
+    func newsValue(tag: Int) -> DownloadURLProgressPublisher.News {
+        let progress = Progress(totalUnitCount: totalBytesExpectedToWrite)
+        progress.completedUnitCount = totalBytesWritten
+        let state = DownloadURLProgressPublisher
+            .News
+            .State(progress: progress,
+                   filename: task.response?.suggestedFilename,
+                   identifier: tag)
+        return .state(state)
     }
 }
