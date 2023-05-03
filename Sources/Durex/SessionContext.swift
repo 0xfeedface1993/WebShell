@@ -32,6 +32,10 @@ public struct SessionError: Error, LocalizedError {
     }
 }
 
+public enum SessionKeyError: Error {
+    case noValidKey(AnyHashable)
+}
+
 //public protocol SessionContext {
 //    func session() -> CustomURLSession
 //}
@@ -135,7 +139,7 @@ extension SessionPool {
             .eraseToAnyPublisher()
     }
     
-    public static func context(forKey key: any Hashable) -> AnyPublisher<SessionContext, Error> {
+    public static func context(_ key: any Hashable) -> AnyPublisher<SessionContext, Error> {
         Just(Sessions(key))
             .receive(on: DispatchQueue.main)
             .tryMap {
@@ -149,6 +153,31 @@ extension SessionPool {
         #endif
             .eraseToAnyPublisher()
     }
+    
+//    public static func justContext<T>(_ anyItem: T) -> AnyPublisher<SessionContext, Error> {
+//        key(for: anyItem)
+//            .flatMap(context(forKey:))
+//            .catch({ error in
+//#if DEBUG
+//                print(">>> justContext session get failed. \(error)")
+//                print(">>> justContext session replace to \(DownloadSession.shared())")
+//#endif
+//                return Just(DownloadSession.shared())
+//                    .setFailureType(to: Error.self)
+//            })
+//            .eraseToAnyPublisher()
+//    }
+//    
+//    public static func context<T>(_ anyItem: T) -> AnyPublisher<SessionContext, Error> {
+//        context(forKey: anyItem as? Hashable)
+//    }
+//    
+//    public static func key<T>(for anyItem: T) -> AnyPublisher<AnyHashable, Error> {
+//        Just(SessionKeyFinder(anyItem))
+//            .receive(on: DispatchQueue.main)
+//            .tryMap { try $0.key() }
+//            .eraseToAnyPublisher()
+//    }
 }
 
 public struct PoolMaker {
@@ -185,24 +214,5 @@ public struct PoolMaker {
             .follow(_store(_:forKey:))
             .map(\.0)
             .eraseToAnyPublisher()
-    }
-}
-
-public protocol SessionKeyProvider {
-    func hostKey() -> AnyHashable
-}
-
-extension URLRequest: SessionKeyProvider {
-    public func hostKey() -> AnyHashable {
-        url?.hostKey() ?? 0 as AnyHashable
-    }
-}
-
-extension URL: SessionKeyProvider {
-    public func hostKey() -> AnyHashable {
-        guard let host = host?.data(using: .utf8) else {
-            return 0
-        }
-        return host.hashValue
     }
 }

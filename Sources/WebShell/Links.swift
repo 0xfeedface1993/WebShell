@@ -96,10 +96,11 @@ public struct FileGeneralLinkMatch {
 public struct StringParserDataTask {
     let request: URLRequest
     let encoding: String.Encoding
+    let sessionKey: AnyHashable
     
     func publisher() -> AnyPublisher<String, Error> {
         SessionPool
-            .context(forKey: request.hostKey())
+            .context(sessionKey)
             .flatMap { context in
                 context
                     .data(with: request)
@@ -120,14 +121,18 @@ public struct StringParserDataTask {
 }
 
 /// 查找`dl.php`的普通限速下载链接，生成下载请求，可能会有多个下载请求
-public struct PHPLinks: Condom {
+public struct PHPLinks: SessionableCondom {
     public typealias Input = URLRequest
     public typealias Output = [URLRequest]
     
-    public init() { }
+    public var key: AnyHashable
+    
+    public init(_ key: AnyHashable = "default") {
+        self.key = key
+    }
     
     public func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
-        StringParserDataTask(request: inputValue, encoding: .utf8)
+        StringParserDataTask(request: inputValue, encoding: .utf8, sessionKey: key)
             .publisher()
             .tryMap { try DLPhpMatch(url: $0).extract() }
             .map { urls in
@@ -154,17 +159,25 @@ public struct PHPLinks: Condom {
         
         return "\(scheme)://\(host)"
     }
+    
+    public func sessionKey(_ value: AnyHashable) -> PHPLinks {
+        PHPLinks(value)
+    }
 }
 
 /// 查找http下载链接，用双扩号引起来的链接"https://xxxxx"，生成下载请求，可能会有多个下载请求
-public struct GeneralLinks: Condom {
+public struct GeneralLinks: SessionableCondom {
     public typealias Input = URLRequest
     public typealias Output = [URLRequest]
     
-    public init() { }
+    public var key: AnyHashable
+    
+    public init(_ key: AnyHashable = "default") {
+        self.key = key
+    }
     
     public func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
-        StringParserDataTask(request: inputValue, encoding: .utf8)
+        StringParserDataTask(request: inputValue, encoding: .utf8, sessionKey: key)
             .publisher()
             .tryMap { html in
                 try FileGeneralLinkMatch(html: html).extract()
@@ -185,5 +198,9 @@ public struct GeneralLinks: Condom {
     
     public func empty() -> AnyPublisher<Output, Error> {
         Empty().eraseToAnyPublisher()
+    }
+    
+    public func sessionKey(_ value: AnyHashable) -> GeneralLinks {
+        GeneralLinks(value)
     }
 }

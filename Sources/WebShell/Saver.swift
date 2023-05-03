@@ -13,7 +13,7 @@ import Foundation
 import Combine
 
 /// 从多个下载下载链接中下载文件, 保存到`Downloads`目录，目前只使用第一个链接
-public struct Saver: Condom {
+public struct Saver: SessionableCondom {
     public typealias Input = [URLRequest]
     public typealias Output = URL
     
@@ -25,9 +25,11 @@ public struct Saver: Condom {
     }
     
     let policy: Policy
+    public var key: AnyHashable
     
-    public init(_ policy: Policy = .normal) {
+    public init(_ policy: Policy = .normal, key: AnyHashable = "default") {
         self.policy = policy
+        self.key = key
     }
     
     public func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
@@ -36,7 +38,7 @@ public struct Saver: Condom {
         }
         
         return SessionPool
-            .context(forKey: "")
+            .context(key)
             .flatMap({ context in
                 context.download(with: request)
             })
@@ -49,6 +51,10 @@ public struct Saver: Condom {
     
     public func empty() -> AnyPublisher<Output, Error> {
         Empty().eraseToAnyPublisher()
+    }
+    
+    public func sessionKey(_ value: AnyHashable) -> Saver {
+        Saver(policy, key: value)
     }
 }
 
@@ -107,10 +113,11 @@ public struct MoveToDownloads {
 }
 
 /// 使用自定义URLSession下载模块
-public struct BridgeSaver: Condom {
+public struct BridgeSaver: SessionableCondom {
     public typealias Input = [URLRequest]
     public typealias Output = URL
     
+    public var key: AnyHashable = "default"
     let sessionBundle: SessionBundle
     let policy: Saver.Policy
     let tag: Int?
@@ -119,6 +126,7 @@ public struct BridgeSaver: Condom {
         self.policy = policy
         self.sessionBundle = bundle
         self.tag = tag
+        self.key = sessionBundle.sessionKey
     }
     
     public func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
@@ -127,7 +135,7 @@ public struct BridgeSaver: Condom {
         }
         
         return SessionPool
-            .context(forKey: sessionBundle.sessionKey)
+            .context(key)
             .flatMap { $0.downloadWithProgress(request, tag: tag) }
             .tryMap(moveToDownloadsFolder(_:))
             .compactMap { $0 }
@@ -143,6 +151,10 @@ public struct BridgeSaver: Condom {
     
     public func empty() -> AnyPublisher<Output, Error> {
         Empty().eraseToAnyPublisher()
+    }
+    
+    public func sessionKey(_ value: AnyHashable) -> BridgeSaver {
+        BridgeSaver(.init(value), policy: policy, tag: tag)
     }
 }
 

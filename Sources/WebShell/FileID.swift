@@ -101,18 +101,20 @@ public struct AppendDownPath: Condom {
 }
 
 /// 从html代码中获取fileid模块，规则详见``FileIDInFunctionParameter``
-public struct FileIDStringInDomSearch: Condom {
+public struct FileIDStringInDomSearch: SessionableCondom {
     public typealias Input = URLRequest
     public typealias Output = String
     
     let finder: FileIDFinder
+    public var key: AnyHashable
     
-    public init(_ finder: FileIDFinder) {
+    public init(_ finder: FileIDFinder, key: AnyHashable = "default") {
         self.finder = finder
+        self.key = key
     }
     
     public func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
-        StringParserDataTask(request: inputValue, encoding: .utf8)
+        StringParserDataTask(request: inputValue, encoding: .utf8, sessionKey: key)
             .publisher()
             .tryMap(finder.extract(_:))
             .eraseToAnyPublisher()
@@ -120,6 +122,10 @@ public struct FileIDStringInDomSearch: Condom {
     
     public func empty() -> AnyPublisher<Output, Error> {
         Empty().eraseToAnyPublisher()
+    }
+    
+    public func sessionKey(_ value: AnyHashable) -> FileIDStringInDomSearch {
+        FileIDStringInDomSearch(finder, key: value)
     }
 }
 
@@ -147,14 +153,16 @@ public struct GeneralDownPageByID: Condom {
 
 /// 合并FileIDStringInDomSearch和GeneralDownPageBy两个模块，因后者需要前者的输入链接生成refer，
 /// 此模块减少复杂度，后续使用
-public struct FileIDStringInDomSearchGroup: Condom {
+public struct FileIDStringInDomSearchGroup: SessionableCondom {
     public typealias Input = URLRequest
     public typealias Output = URLRequest
     
     let finder: FileIDFinder
+    public var key: AnyHashable
     
-    public init(_ finder: FileIDFinder) {
+    public init(_ finder: FileIDFinder, key: AnyHashable = "default") {
         self.finder = finder
+        self.key = key
     }
     
     public func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
@@ -180,9 +188,13 @@ public struct FileIDStringInDomSearchGroup: Condom {
             throw ShellError.badURL(url.absoluteString)
         }
         
-        let searchid = FileIDStringInDomSearch(finder)
+        let searchid = FileIDStringInDomSearch(finder, key: key)
         let page = GeneralDownPageByID(scheme: scheme, host: host, refer: url.absoluteString)
         
         return searchid.join(page)
+    }
+    
+    public func sessionKey(_ value: AnyHashable) -> FileIDStringInDomSearchGroup {
+        FileIDStringInDomSearchGroup(finder, key: value)
     }
 }

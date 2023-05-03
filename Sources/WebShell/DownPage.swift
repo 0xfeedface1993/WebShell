@@ -52,16 +52,20 @@ public struct DownPage: Condom {
     }
 }
 
-public struct ActionDownPage: Condom {
+public struct ActionDownPage: SessionableCondom {
     public typealias Input = String
     public typealias Output = URLRequest
     
-    public init() { }
+    public var key: AnyHashable
+    
+    public init(_ key: AnyHashable = "default") {
+        self.key = key
+    }
     
     public func publisher(for inputValue: String) -> AnyPublisher<Output, Error> {
         do {
             let data = try request(inputValue)
-            return StringParserDataTask(request: data, encoding: .utf8)
+            return StringParserDataTask(request: data, encoding: .utf8, sessionKey: key)
                 .publisher()
                 .tryMap { try FileIDMatch.downProcess4.extract($0) }
                 .tryMap { try referRequest(inputValue, fileid: $0) }
@@ -99,6 +103,10 @@ public struct ActionDownPage: Condom {
         }
         
         return try ReferDownPageRequest(fileid: fileid, refer: string, scheme: scheme, host: host, action: "load_down_addr5").make()
+    }
+    
+    public func sessionKey(_ value: AnyHashable) -> ActionDownPage {
+        ActionDownPage(value)
     }
 }
 
@@ -204,16 +212,21 @@ public struct JustRequest {
     }
 }
 
-public struct RedirectEnablePage: Condom {
+public struct RedirectEnablePage: SessionableCondom {
     public typealias Input = String
     public typealias Output = String
     
-    public init() { }
+    public var key: AnyHashable
+    
+    public init(_ key: AnyHashable = "default") {
+        self.key = key
+    }
     
     public func publisher(for inputValue: String) -> AnyPublisher<Output, Error> {
         do {
             let request = try JustRequest(url: inputValue).make()
-            return SessionPool.context(forKey: "")
+            return SessionPool
+                .context(key)
                 .flatMap({ context in
                     context.download(with: request)
                         .map(\.1)
@@ -243,5 +256,9 @@ public struct RedirectEnablePage: Condom {
     
     public func empty() -> AnyPublisher<Output, Error> {
         Empty().eraseToAnyPublisher()
+    }
+    
+    public func sessionKey(_ value: AnyHashable) -> RedirectEnablePage {
+        RedirectEnablePage(value)
     }
 }

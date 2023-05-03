@@ -33,3 +33,9 @@ extension Condom {
         AnyCondom(self)
     }
 }
+
+public protocol SessionableCondom: Condom {
+    var key: AnyHashable { get }
+    
+    func sessionKey(_ value: AnyHashable) -> Self
+}
