@@ -129,13 +129,16 @@ public struct BridgeSaver: Condom {
         return SessionPool
             .context(forKey: sessionBundle.sessionKey)
             .flatMap { $0.downloadWithProgress(request, tag: tag) }
-            .compactMap({ update -> URL? in
-                guard case .file(let value, _) = update else {
-                    return nil
-                }
-                return value
-            })
+            .tryMap(moveToDownloadsFolder(_:))
+            .compactMap { $0 }
             .eraseToAnyPublisher()
+    }
+    
+    private func moveToDownloadsFolder(_ update: DownloadURLProgressPublisher.News) throws -> URL? {
+        guard case .file(let value, let response) = update else {
+            return nil
+        }
+        return try MoveToDownloads(tempURL: value, suggestedFilename: response.suggestedFilename, policy: policy).move()
     }
     
     public func empty() -> AnyPublisher<Output, Error> {

@@ -84,6 +84,7 @@ public struct DownloadURLProgressPublisher: Publisher {
         private var parent: Parent?
         private var downstream: Downstream?
         private var demand: Subscribers.Demand = .none
+        private var downloadTaskCancellable: AnyCancellable?
         
         init(parent: Parent, downstream: Downstream) {
             self.combineIdentifier = CombineIdentifier()
@@ -109,12 +110,12 @@ public struct DownloadURLProgressPublisher: Publisher {
                 let task = parent.session.systemSession().downloadTask(with: parent.request)
                 let tag = OptionalIntWrapper(parent.tag, task.taskIdentifier).value()
                 parent.session.bind(task: task, tagHashValue: tag)
-                if let downstream = downstream, let delegator = parent.delegtor {
+                if let delegator = parent.delegtor {
                     // 在任务第一个下载进度更新之前先发送一个开始状态，
                     // 用于传递taskIdentifier
-                    delegator.newsCompletor(task.taskIdentifier)
+                    downloadTaskCancellable = delegator.newsCompletor(task.taskIdentifier)
                         .prepend(.state(.init(progress: .init(totalUnitCount: 0), filename: nil, identifier: tag)))
-                        .subscribe(downstream)
+                        .sink(receiveCompletion: receiveCompletion(_:), receiveValue: receiveValue(_:))
                 }
                 
                 self.task = task
@@ -127,9 +128,9 @@ public struct DownloadURLProgressPublisher: Publisher {
             task?.resume()
         }
         
-        func cancel() {
+        private func receiveCompletion(_ completion: Subscribers.Completion<Error>) {
             lock.lock()
-            guard parent != nil else {
+            guard demand > 0, parent != nil, let downstream = downstream else {
                 lock.unlock()
                 return
             }
@@ -139,12 +140,49 @@ public struct DownloadURLProgressPublisher: Publisher {
                 session.unbind(task: task)
             }
             parent = nil
+            self.downstream = nil
+            demand = .none
+            self.task = nil
+            downloadTaskCancellable = nil
+            
+            lock.unlock()
+            switch completion {
+            case .finished:
+                downstream.receive(completion: .finished)
+            case .failure(let error):
+                downstream.receive(completion: .failure(error))
+            }
+        }
+        
+        private func receiveValue(_ news: Parent.News) {
+            guard demand > 0, parent != nil, let downstream = downstream else {
+                return
+            }
+            
+            _ = downstream.receive(news)
+        }
+        
+        func cancel() {
+            lock.lock()
+            guard parent != nil else {
+                lock.unlock()
+                return
+            }
+            
+            let task = self.task
+            let downloadTaskCancellable = self.downloadTaskCancellable
+            if let task = task, let session = parent?.session {
+                session.unbind(task: task)
+            }
+            parent = nil
             downstream = nil
             demand = .none
             self.task = nil
+            self.downloadTaskCancellable = nil
             lock.unlock()
             
             task?.cancel()
+            downloadTaskCancellable?.cancel()
         }
         
         var description: String { "DownloadURLProgressPublisher" }
