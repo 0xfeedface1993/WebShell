@@ -26,29 +26,12 @@ public struct DownPage: Condom {
     }
     
     public func publisher(for inputValue: String) -> AnyPublisher<Output, Error> {
-        do {
-            return AnyValue(try request(inputValue)).eraseToAnyPublisher()
-        } catch {
-            return Fail(error: error).eraseToAnyPublisher()
-        }
+        FileListURLRequestGenerator(finder, action: "load_down_addr1")
+            .publisher(for: inputValue)
     }
     
     public func empty() -> AnyPublisher<Output, Error> {
         Empty().eraseToAnyPublisher()
-    }
-    
-    func request(_ string: String) throws -> URLRequest {
-        guard let url = URL(string: string),
-                let component = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
-            throw ShellError.badURL(string)
-        }
-        
-        guard let host = component.host, let scheme = component.scheme else {
-            throw ShellError.badURL(string)
-        }
-        
-        let fileid = try finder.extract(string)
-        return try DownPageRequest(fileid: fileid, scheme: scheme, host: host).make()
     }
 }
 
@@ -148,29 +131,6 @@ public struct ReferDownPageRequest {
             .add(value: userAgent, forKey: "User-Agent")
             .add(value: refer, forKey: "Referer")
             .body("action=\(action)&file_id=\(fileid)".data(using: .utf8) ?? Data())
-            .build()
-    }
-}
-
-public struct DownPageRequest {
-    let fileid: String
-    let scheme: String
-    let host: String
-    
-    func make() throws -> URLRequest {
-        let http = "\(scheme)://\(host)"
-        let refer = "\(http)/down-\(fileid).html"
-        let url = "\(http)/ajax.php"
-        return try URLRequestBuilder(url)
-            .method(.post)
-            .add(value: "text/plain, */*; q=0.01", forKey: "Accept")
-            .add(value: "XMLHttpRequest", forKey: "X-Requested-With")
-            .add(value: "zh-CN,zh-Hans;q=0.9", forKey: "Accept-Language")
-            .add(value: "application/x-www-form-urlencoded; charset=UTF-8", forKey: "Content-Type")
-            .add(value: http, forKey: "Origin")
-            .add(value: userAgent, forKey: "User-Agent")
-            .add(value: refer, forKey: "Referer")
-            .body("action=load_down_addr1&file_id=\(fileid)".data(using: .utf8) ?? Data())
             .build()
     }
 }

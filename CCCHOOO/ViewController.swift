@@ -111,10 +111,27 @@ class ViewController: NSViewController {
 //                print(">>> download file at \(url)")
 //            }
             
-        let link = "http://www.xingyaoclouds.com/fs/2l66xn9ubrzzwba"
+//        let link = "http://www.xingyaoclouds.com/fs/2l66xn9ubrzzwba"
+//        cancellable = RedirectEnablePage()
+//            .join(ActionDownPage())
+//            .join(PHPLinks())
+//            .join(Saver(.override))
+//            .publisher(for: link)
+//            .sink { complete in
+//                switch complete {
+//                case .finished:
+//                    break
+//                case .failure(let error):
+//                    print(">>> download error \(error)")
+//                }
+//            } receiveValue: { url in
+//                print(">>> download file at \(url)")
+//            }
+        
+        let link = "http://www.expfile.com/file-1622046.html"
         cancellable = RedirectEnablePage()
-            .join(ActionDownPage())
-            .join(PHPLinks())
+            .join(FileListURLRequestGenerator(.default).action("load_down_addr1"))
+            .join(CDLinks())
             .join(Saver(.override))
             .publisher(for: link)
             .sink { complete in

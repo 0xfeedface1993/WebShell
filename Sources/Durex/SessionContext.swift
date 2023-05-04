@@ -145,12 +145,17 @@ extension SessionPool {
             .tryMap {
                 try $0.take().context
             }
+#if DEBUG
+            .logError()
+#endif
+            .replaceError(with: nil)
             .replaceNil(with: DownloadSession.shared())
-        #if DEBUG
+#if DEBUG
             .follow({
                 print(">>> context session \($0) for key \(key)")
             })
-        #endif
+            .setFailureType(to: Error.self)
+#endif
             .eraseToAnyPublisher()
     }
     

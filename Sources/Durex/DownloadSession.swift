@@ -7,7 +7,9 @@
 
 import Foundation
 import Combine
+#if canImport(AnyErase)
 import AnyErase
+#endif
 import os.log
 
 public protocol CustomURLSession {

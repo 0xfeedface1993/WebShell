@@ -8,7 +8,9 @@
 import Foundation
 import Combine
 import os.log
+#if canImport(AnyErase)
 import AnyErase
+#endif
 
 fileprivate let logger = OSLog(subsystem: "com.ascp.publisher", category: "DownloadURLProgressPublisher")
 

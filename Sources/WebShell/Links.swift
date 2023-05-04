@@ -12,11 +12,15 @@ import Durex
 #endif
 import Combine
 
-public struct PHPFileDownload {
+public struct PHPFileDownload: DownloadRequestBuilder {
     let url: String
     let refer: String
     
     func make() throws -> URLRequest {
+        try make(url, refer: refer)
+    }
+    
+    public func make(_ url: String, refer: String) throws -> URLRequest {
         try URLRequestBuilder(url)
             .method(.get)
             .add(value: "1", forKey: "Upgrade-Insecure-Requests")
@@ -43,27 +47,34 @@ public struct GeneralFileDownload {
     }
 }
 
-public struct DLPhpMatch {
+public struct DLPhpMatch: ContentMatch {
     let url: String
     let pattern = "https?://[^\\s]+/dl\\w*\\.php\\?[^\"]+"
     
     func extract() throws -> [URL] {
-        if #available(iOS 16.0, macOS 13.0, *) {
-            let regx = try Regex(pattern)
-            let urls = url.matches(of: regx).compactMap({ $0.output[0].substring })
-            return urls.compactMap { value in
-                URL(string: String(value))
-            }
-        } else {
-            // Fallback on earlier versions
-            let regx = try NSRegularExpression(pattern: pattern)
-            let nsString = url as NSString
-            let range = NSRange(location: 0, length: nsString.length)
-            return regx.matches(in: url, range: range)
-                .map { result in
-                    regx.replacementString(for: result, in: url, offset: 0, template: "$0")
-                }
-                .compactMap(URL.init(string:))
+        try extract(url)
+    }
+    
+    public func extract(_ text: String) throws -> [URL] {
+        try URLRegularExpressionMatch(url: text, pattern: pattern, template: Templates.dollar(0))
+            .extract()
+    }
+}
+
+public struct CDPhpMatch: ContentMatch {
+    let host: String
+    let pattern = "cd\\w*\\.php\\?[^\"]+"
+    
+    public func extract(_ url: String) throws -> [URL] {
+        let results = try URLRegularExpressionMatch(url: url, pattern: pattern, template: Templates.dollar(0))
+            .extract()
+        if let hostURL = URL(string: host) {
+            return results
+                .compactMap({ item in
+                    BaseURL(url: item).replaceHost(hostURL)
+                })
+        }   else    {
+            return results
         }
     }
 }
@@ -73,23 +84,8 @@ public struct FileGeneralLinkMatch {
     let pattern = "\"(https?://[^\"]+)\""
     
     func extract() throws -> [URL] {
-        if #available(iOS 16.0, macOS 13.0, *) {
-            let regx = try Regex(pattern)
-            let urls = html.matches(of: regx).compactMap({ $0.output[1].substring })
-            return urls.compactMap { value in
-                URL(string: String(value))
-            }
-        } else {
-            // Fallback on earlier versions
-            let regx = try NSRegularExpression(pattern: pattern)
-            let nsString = html as NSString
-            let range = NSRange(location: 0, length: nsString.length)
-            return regx.matches(in: html, range: range)
-                .map { result in
-                    regx.replacementString(for: result, in: html, offset: 0, template: "$1")
-                }
-                .compactMap(URL.init(string:))
-        }
+        try URLRegularExpressionMatch(url: html, pattern: pattern, template: Templates.dollar(1))
+            .extract()
     }
 }
 
@@ -132,32 +128,12 @@ public struct PHPLinks: SessionableCondom {
     }
     
     public func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
-        StringParserDataTask(request: inputValue, encoding: .utf8, sessionKey: key)
-            .publisher()
-            .tryMap { try DLPhpMatch(url: $0).extract() }
-            .map { urls in
-                urls.compactMap {
-                    do {
-                        return try PHPFileDownload(url: $0.absoluteString, refer: refer(inputValue)).make()
-                    }   catch   {
-                        print(">>> download url make failed \(error)")
-                        return nil
-                    }
-                }
-            }
-            .eraseToAnyPublisher()
+        DownloadLinks(key, matcher: DLPhpMatch(url: ""), requestBuilder: PHPFileDownload(url: "", refer: ""))
+            .publisher(for: inputValue)
     }
     
     public func empty() -> AnyPublisher<Output, Error> {
         Empty().eraseToAnyPublisher()
-    }
-    
-    private func refer(_ request: URLRequest) -> String {
-        guard let path = request.url, let scheme = path.scheme, let host = path.host else {
-            return ""
-        }
-        
-        return "\(scheme)://\(host)"
     }
     
     public func sessionKey(_ value: AnyHashable) -> PHPLinks {
@@ -202,5 +178,121 @@ public struct GeneralLinks: SessionableCondom {
     
     public func sessionKey(_ value: AnyHashable) -> GeneralLinks {
         GeneralLinks(value)
+    }
+}
+
+/// 查找`dl.php`的普通限速下载链接，生成下载请求，可能会有多个下载请求
+public struct DownloadLinks<Matcher: ContentMatch, RequestBuilder: DownloadRequestBuilder>: SessionableCondom {
+    public typealias Input = URLRequest
+    public typealias Output = [URLRequest]
+    
+    public var key: AnyHashable
+    public let matcher: Matcher
+    public let requestBuilder: RequestBuilder
+    
+    public init(_ key: AnyHashable = "default", matcher: Matcher, requestBuilder: RequestBuilder) {
+        self.key = key
+        self.matcher = matcher
+        self.requestBuilder = requestBuilder
+    }
+    
+    public func matcher<T: ContentMatch>(_ value: T) -> DownloadLinks<T, RequestBuilder> {
+        DownloadLinks<T, RequestBuilder>(key, matcher: value, requestBuilder: requestBuilder)
+    }
+    
+    public func builder<T: DownloadRequestBuilder>(_ value: T) -> DownloadLinks<Matcher, T> {
+        DownloadLinks<Matcher, T>(key, matcher: matcher, requestBuilder: value)
+    }
+    
+    public func key(_ value: AnyHashable) -> Self {
+        Self(key, matcher: matcher, requestBuilder: requestBuilder)
+    }
+    
+    public func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
+        StringParserDataTask(request: inputValue, encoding: .utf8, sessionKey: key)
+            .publisher()
+            .tryMap { try matcher.extract($0) }
+            .map { urls in
+                urls.compactMap {
+                    do {
+                        return try requestBuilder.make($0.absoluteString, refer: BaseURL(url: inputValue.url).domainURL())
+                    }   catch   {
+                        print(">>> download url make failed \(error)")
+                        return nil
+                    }
+                }
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    public func empty() -> AnyPublisher<Output, Error> {
+        Empty().eraseToAnyPublisher()
+    }
+    
+    @inlinable
+    public func sessionKey(_ value: AnyHashable) -> Self {
+       key(value)
+    }
+}
+
+public struct CDLinks: SessionableCondom {
+    public typealias Input = URLRequest
+    public typealias Output = [URLRequest]
+    
+    public var key: AnyHashable
+    
+    public init(_ key: AnyHashable = "default") {
+        self.key = key
+    }
+    
+    public func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
+        DownloadLinks(key, matcher: CDPhpMatch(host: BaseURL(url: inputValue.url).domainURL()),
+                      requestBuilder: PHPFileDownload(url: "", refer: ""))
+            .publisher(for: inputValue)
+    }
+    
+    public func empty() -> AnyPublisher<Output, Error> {
+        Empty().eraseToAnyPublisher()
+    }
+    
+    public func sessionKey(_ value: AnyHashable) -> Self {
+        CDLinks(value)
+    }
+}
+
+struct BaseURL {
+    let url: URL?
+    
+    func domainURL() -> String {
+        guard let path = url, let scheme = path.scheme, let host = path.host else {
+            return ""
+        }
+        
+        return "\(scheme)://\(host)"
+    }
+    
+    func replaceHost(_ otherURL: URL) -> URL? {
+        guard let url = url else {
+#if DEBUG
+            print(">>> replace url failed. nil url")
+#endif
+            return nil
+        }
+        
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+#if DEBUG
+            print(">>> replace url failed. use origin \(url)")
+#endif
+            return url
+        }
+        
+        guard let next = components.url(relativeTo: otherURL) else {
+#if DEBUG
+            print(">>> replace url failed. use origin \(url)")
+#endif
+            return url
+        }
+        
+        return next
     }
 }
