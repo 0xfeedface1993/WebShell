@@ -145,9 +145,9 @@ extension SessionPool {
             .tryMap {
                 try $0.take().context
             }
-#if DEBUG
-            .logError()
-#endif
+//#if DEBUG
+//            .logError()
+//#endif
             .replaceError(with: nil)
             .replaceNil(with: DownloadSession.shared())
 #if DEBUG

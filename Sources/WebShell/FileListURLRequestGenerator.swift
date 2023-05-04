@@ -8,6 +8,9 @@
 
 import Foundation
 import Combine
+#if canImport(Durex)
+import Durex
+#endif
 
 /// 从下载链接中抓取fileid，并生成下载link页面请求，
 /// 如：`/file-12345.html` -> 取出`12345`，
