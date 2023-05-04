@@ -10,6 +10,7 @@ import Foundation
 
 public protocol URLRegularExpressionMatchTemplate {
     func template() -> String
+    func rawTemplate() -> Int
 }
 
 public enum Templates: URLRegularExpressionMatchTemplate {
@@ -21,9 +22,20 @@ public enum Templates: URLRegularExpressionMatchTemplate {
             return "$\(value)"
         }
     }
+    
+    public func rawTemplate() -> Int {
+        switch self {
+        case .dollar(let value):
+            return Int(value)
+        }
+    }
 }
 
 extension String: URLRegularExpressionMatchTemplate {
+    public func rawTemplate() -> Int {
+        Int(self) ?? 0
+    }
+    
     @inlinable
     public func template() -> String {
         self
@@ -38,7 +50,7 @@ public struct URLRegularExpressionMatch {
     func extract() throws -> [URL] {
         if #available(iOS 16.0, macOS 13.0, *) {
             let regx = try Regex(pattern)
-            let urls = url.matches(of: regx).compactMap({ $0.output[0].substring })
+            let urls = url.matches(of: regx).compactMap({ $0.output[template.rawTemplate()].substring })
             return urls.compactMap { value in
                 URL(string: String(value))
             }

@@ -169,6 +169,11 @@ public struct GeneralLinks: SessionableCondom {
                     }
                 }
             }
+        #if DEBUG
+            .follow({
+                print(">>> [GeneralLinks] find download links \($0)")
+            })
+        #endif
             .eraseToAnyPublisher()
     }
     
