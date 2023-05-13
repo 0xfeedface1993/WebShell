@@ -99,9 +99,39 @@ class URLSessionDelegator: NSObject, URLSessionDownloadDelegate {
     let downloadTaskCompletion = PassthroughSubject<Result<SessionComplete, DownloadURLError>, Never>()
 //    let failedTaskCompletion = PassthroughSubject<SessionErrorNotification, Never>()
     
+    #if DEBUG
+    static var debugFlag = true
+    #endif
+    
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
-        SessionComplete(task: downloadTask, data: location)
-            .pass(to: downloadTaskCompletion)
+        let filename = UUID().uuidString
+        let cachedURL = FileManager.default.temporaryDirectory
+        let url = cachedURL.appendingPathComponent(filename)
+        
+        do {
+            try FileManager.default.moveItem(at: location, to: url)
+#if DEBUG
+            print(">>> move tmp file to \(url)")
+#endif
+            SessionComplete(task: downloadTask, data: url)
+                .pass(to: downloadTaskCompletion)
+        } catch {
+            downloadTaskCompletion.send(.failure(.init(task: downloadTask, error: error)))
+            return
+        }
+        
+//        #if DEBUG
+//        if URLSessionDelegator.debugFlag {
+//            URLSessionDelegator.debugFlag = false
+//            downloadTaskCompletion.send(.failure(.init(task: downloadTask, error: URLError(.unknown, userInfo: [NSLocalizedDescriptionKey: "hit debug flag"]))))
+//        }   else    {
+//            SessionComplete(task: downloadTask, data: url)
+//                .pass(to: downloadTaskCompletion)
+//        }
+//        #else
+//        SessionComplete(task: downloadTask, data: url)
+//            .pass(to: downloadTaskCompletion)
+//        #endif
     }
     
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {

@@ -75,9 +75,9 @@ public struct DownloadURLProgressPublisher: Publisher {
     
     typealias Parent = DownloadURLProgressPublisher
     private class Inner<Downstream: Subscriber>: Subscription, CustomStringConvertible, CustomReflectable, CustomPlaygroundDisplayConvertible
-        where
-            Downstream.Input == Parent.Output,
-            Downstream.Failure == Parent.Failure
+    where
+    Downstream.Input == Parent.Output,
+    Downstream.Failure == Parent.Failure
     {
         var combineIdentifier: CombineIdentifier
         
@@ -115,8 +115,18 @@ public struct DownloadURLProgressPublisher: Publisher {
                 if let delegator = parent.delegtor {
                     // 在任务第一个下载进度更新之前先发送一个开始状态，
                     // 用于传递taskIdentifier
-                    downloadTaskCancellable = delegator.newsCompletor(task.taskIdentifier)
+                    
+                    let taskResume = Future<URLSessionDownloadTask, Error> { promise in
+                        task.resume()
+                        promise(.success(task))
+                    }
+                    
+                    let completor = delegator.newsCompletor(task.taskIdentifier)
                         .prepend(.state(.init(progress: .init(totalUnitCount: 0), filename: nil, identifier: tag)))
+                    
+                    downloadTaskCancellable = completor
+                        .combineLatest(taskResume)
+                        .map(\.0)
                         .sink(receiveCompletion: receiveCompletion(_:), receiveValue: receiveValue(_:))
                 }
                 
@@ -124,15 +134,15 @@ public struct DownloadURLProgressPublisher: Publisher {
             }
             
             self.demand += demand
-            let task = self.task
             lock.unlock()
-            
-            task?.resume()
         }
         
         private func receiveCompletion(_ completion: Subscribers.Completion<Error>) {
             lock.lock()
             guard demand > 0, parent != nil, let downstream = downstream else {
+#if DEBUG
+                Swift.print(">>> [\(type(of: self))] \(#function) no downstream or parent or demand = 0.")
+#endif
                 lock.unlock()
                 return
             }
@@ -150,14 +160,23 @@ public struct DownloadURLProgressPublisher: Publisher {
             lock.unlock()
             switch completion {
             case .finished:
+#if DEBUG
+                Swift.print(">>> [\(type(of: self))] \(#function) .finished.")
+#endif
                 downstream.receive(completion: .finished)
             case .failure(let error):
+#if DEBUG
+                Swift.print(">>> [\(type(of: self))] \(#function) .error \(error).")
+#endif
                 downstream.receive(completion: .failure(error))
             }
         }
         
         private func receiveValue(_ news: Parent.News) {
             guard demand > 0, parent != nil, let downstream = downstream else {
+#if DEBUG
+                Swift.print(">>> [\(type(of: self))] \(#function) no downstream or parent or demand = 0.")
+#endif
                 return
             }
             
@@ -165,6 +184,9 @@ public struct DownloadURLProgressPublisher: Publisher {
         }
         
         func cancel() {
+#if DEBUG
+            Swift.print(">>> [\(type(of: self))] \(#function) cancel.")
+#endif
             lock.lock()
             guard parent != nil else {
                 lock.unlock()
@@ -241,6 +263,7 @@ extension URLSessionDelegator {
     fileprivate func newsCompletor(_ taskIdentifier: Int) -> AnyPublisher<DownloadURLProgressPublisher.News, Error> {
         downloadTaskCompletion
             .tryMap(tryMapResult(_:))
+            .tryCatch { try DownloadURLErrorFilter(error: $0, compare: { $0 == taskIdentifier }).on() }
             .compactMap(splitThree(_:))
             .filter { $0.2 == taskIdentifier }
             .map { DownloadURLProgressPublisher.News.file($0.0, $0.1) }
@@ -256,9 +279,16 @@ extension URLSessionDelegator {
             .eraseToAnyPublisher()
     }
     
-    fileprivate func rawNewsCompletor() -> AnyPublisher<RawNews, Error> {
+    /// 生成新的下载完成事件publisher，这里之所以要匹配taskIdentifier
+    /// 是因为如果上游的事件被`tryMapResult`转换成failure时不匹配当前任务
+    /// 则会导致本任务的异常失败，下游无法得到状态更新
+    /// - Parameter taskIdentifier: 匹配taskIdentifier方法
+    /// - Returns: 如果有完成/失败时间则会有事件发送
+    fileprivate func rawNewsCompletor(_ taskIdentifier: @escaping (Int) -> Bool) -> AnyPublisher<RawNews, Error> {
         downloadTaskCompletion
             .tryMap(tryMapResult(_:))
+            .tryCatch { try DownloadURLErrorFilter(error: $0, compare: taskIdentifier).on() }
+            .filter({ taskIdentifier($0.task.taskIdentifier) })
             .compactMap(rawCompleteToRawNews(_:))
             .eraseToAnyPublisher()
     }
@@ -271,11 +301,25 @@ extension URLSessionDelegator {
     }
     
     func news(_ session: SessionProvider, tag: Int) -> AnyPublisher<DownloadURLProgressPublisher.News, Error> {
-        rawNewsUpdator()
-            .merge(with: rawNewsCompletor())
-            .filter({ session.taskIdentifier(for: tag) == $0.taskIdentifier })
+        let compare: (Int) -> Bool = { session.taskIdentifier(for: tag) == $0 }
+        let completion = rawNewsCompletor(compare)
+        let normalUpdate = rawNewsUpdator().filter({ compare($0.taskIdentifier) })
+        return normalUpdate
+            .merge(with: completion)
             .map(\.data)
             .eraseToAnyPublisher()
+    }
+}
+
+struct DownloadURLErrorFilter {
+    let error: Error
+    let compare: (Int) -> Bool
+    
+    func on() throws -> Empty<SessionComplete, Error> {
+        if let taskError = error as? DownloadURLError, compare(taskError.task.taskIdentifier) {
+            throw error
+        }
+        return Empty<SessionComplete, Error>()
     }
 }
 

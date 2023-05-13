@@ -165,11 +165,11 @@ extension DownloadSession: SessionProvider {
         let identifier = taskIdentifier
         let value = tagsCached[identifier]
         lock.unlock()
-        if let value = value {
-            os_log(.debug, log: logger, "download task %d retrive tag %d", identifier, value)
-        }   else    {
-            os_log(.debug, log: logger, "download task %d has no tag", identifier)
-        }
+//        if let value = value {
+//            os_log(.debug, log: logger, "download task %d retrive tag %d", identifier, value)
+//        }   else    {
+//            os_log(.debug, log: logger, "download task %d has no tag", identifier)
+//        }
         return value ?? identifier
     }
     
@@ -177,11 +177,11 @@ extension DownloadSession: SessionProvider {
         lock.lock()
         let value = tagsCached.first(where: { $0.value == tag })?.key
         lock.unlock()
-        if let value = value {
-            os_log(.debug, log: logger, "download tag %d retrive task %d", tag, value)
-        }   else    {
-            os_log(.debug, log: logger, "download tag %d has no task", tag)
-        }
+//        if let value = value {
+//            os_log(.debug, log: logger, "download tag %d retrive task %d", tag, value)
+//        }   else    {
+//            os_log(.debug, log: logger, "download tag %d has no task", tag)
+//        }
         return value
     }
 }
