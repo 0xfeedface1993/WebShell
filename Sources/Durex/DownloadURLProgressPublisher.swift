@@ -226,14 +226,6 @@ public struct DownloadURLProgressPublisher: Publisher {
 
 
 extension URLSessionDelegator {
-    /// 将result转化成try-catch流
-    /// - Parameter result: result对象
-    /// - Returns: 存在的值
-    @inlinable
-    func tryMapResult<T, V>(_ result: Result<T, V>) throws -> T {
-        try result.get()
-    }
-    
     /// 分解SessionComplete：，下载文件URL、请求响应、taskIdentifier三部分
     /// - Parameter complete: 下载完成SessionComplete事件
     /// - Returns: 下载文件URL、请求响应、taskIdentifier
@@ -262,8 +254,12 @@ extension URLSessionDelegator {
     
     fileprivate func newsCompletor(_ taskIdentifier: Int) -> AnyPublisher<DownloadURLProgressPublisher.News, Error> {
         downloadTaskCompletion
-            .tryMap(tryMapResult(_:))
-            .tryCatch { try DownloadURLErrorFilter(error: $0, compare: { $0 == taskIdentifier }).on() }
+            .tryMap({ job in
+                try DownloadURLErrorFilter(result: job, compare: { $0 == taskIdentifier })
+                    .optional()
+            })
+            .compactMap({ $0 })
+            .eraseToAnyPublisher()
             .compactMap(splitThree(_:))
             .filter { $0.2 == taskIdentifier }
             .map { DownloadURLProgressPublisher.News.file($0.0, $0.1) }
@@ -286,8 +282,11 @@ extension URLSessionDelegator {
     /// - Returns: 如果有完成/失败时间则会有事件发送
     fileprivate func rawNewsCompletor(_ taskIdentifier: @escaping (Int) -> Bool) -> AnyPublisher<RawNews, Error> {
         downloadTaskCompletion
-            .tryMap(tryMapResult(_:))
-            .tryCatch { try DownloadURLErrorFilter(error: $0, compare: taskIdentifier).on() }
+            .tryMap({ job in
+                try DownloadURLErrorFilter(result: job, compare: taskIdentifier)
+                    .optional()
+            })
+            .compactMap({ $0 })
             .filter({ taskIdentifier($0.task.taskIdentifier) })
             .compactMap(rawCompleteToRawNews(_:))
             .eraseToAnyPublisher()
@@ -312,14 +311,39 @@ extension URLSessionDelegator {
 }
 
 struct DownloadURLErrorFilter {
-    let error: Error
+    let result: Result<SessionComplete, DownloadURLError>
     let compare: (Int) -> Bool
     
-    func on() throws -> Empty<SessionComplete, Error> {
+    private func on(_ error: Error) -> AnyPublisher<SessionComplete, DownloadURLError> {
         if let taskError = error as? DownloadURLError, compare(taskError.task.taskIdentifier) {
-            throw error
+            return Fail(error: taskError).eraseToAnyPublisher()
         }
-        return Empty<SessionComplete, Error>()
+        return Empty().eraseToAnyPublisher()
+    }
+    
+    private func _on(_ error: Error) throws {
+        if let taskError = error as? DownloadURLError, compare(taskError.task.taskIdentifier) {
+            throw taskError
+        }
+    }
+    
+    func optional() throws -> SessionComplete? {
+        switch result {
+        case .success(let value):
+            return value
+        case .failure(let error):
+            try _on(error)
+            return nil
+        }
+    }
+    
+    func `catch`() -> AnyPublisher<SessionComplete, DownloadURLError> {
+        switch result {
+        case .success(let value):
+            return Just(value).setFailureType(to: DownloadURLError.self).eraseToAnyPublisher()
+        case .failure(let error):
+            return on(error)
+        }
     }
 }
 
