@@ -82,7 +82,10 @@ public final class DownloadSession: CustomURLSession {
     private var tagsCached = [Int: Int]()
     private let lock = Lock()
     
-    public init() { }
+    public init() {
+        _session.configuration.timeoutIntervalForRequest = 5 * 60
+        _session.configuration.timeoutIntervalForResource = 15 * 24 * 3600
+    }
     
     deinit {
         lock.cleanupLock()
