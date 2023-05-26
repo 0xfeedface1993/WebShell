@@ -154,8 +154,8 @@ extension SessionPool {
             .follow({
                 print(">>> context session \($0) for key \(key)")
             })
-            .setFailureType(to: Error.self)
 #endif
+            .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
     
