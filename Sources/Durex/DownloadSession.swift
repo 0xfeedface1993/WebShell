@@ -83,7 +83,7 @@ public final class DownloadSession: CustomURLSession {
     private let lock = Lock()
     
     public init() {
-        _session.configuration.timeoutIntervalForRequest = 5 * 60
+        _session.configuration.timeoutIntervalForRequest = 20 * 60
         _session.configuration.timeoutIntervalForResource = 15 * 24 * 3600
     }
     
