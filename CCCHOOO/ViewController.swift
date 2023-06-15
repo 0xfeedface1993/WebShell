@@ -128,10 +128,28 @@ class ViewController: NSViewController {
 //                print(">>> download file at \(url)")
 //            }
         
-        let link = "http://www.expfile.com/file-1622046.html"
-        cancellable = RedirectEnablePage()
-            .join(FileListURLRequestGenerator(.default).action("load_down_addr1"))
-            .join(CDLinks())
+//        let link = "http://www.expfile.com/file-1622046.html"
+//        cancellable = RedirectEnablePage()
+//            .join(FileListURLRequestGenerator(.default).action("load_down_addr1"))
+//            .join(CDLinks())
+//            .join(Saver(.override))
+//            .publisher(for: link)
+//            .sink { complete in
+//                switch complete {
+//                case .finished:
+//                    break
+//                case .failure(let error):
+//                    print(">>> download error \(error)")
+//                }
+//            } receiveValue: { url in
+//                print(">>> download file at \(url)")
+//            }
+        
+        let link = "www.rarp.cc/fs/2xx9qxy9bgbbrwb"
+        cancellable = HTTPString()
+            .join(RedirectEnablePage())
+            .join(FileListURLRequestInPageGenerator(.downProcess4, action: "load_down_addr5"))
+            .join(PHPLinks())
             .join(Saver(.override))
             .publisher(for: link)
             .sink { complete in

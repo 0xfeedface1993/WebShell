@@ -25,8 +25,9 @@ This framework serves as the foundation for other apps, and one of the core abil
 | rosefile.net | `AppendDownPath`、`FileIDStringInDomSearchGroup`、`GeneralLinks` | done |
 | www.xunniufile.com | `DownPage`、`PHPLinks` | done |
 | www.xingyaoclouds.com | `RedirectEnablePage`、`ActionDownPage`、`PHPLinks` | done |
+| www.rarp.cc | `HTTPString`、`RedirectEnablePage`、`FileListURLRequestInPageGenerator`、`PHPLinks` | done |
 | www.567file.com | - | server 500 error |
-| www.xfpan.cc | - | working on |
+| www.xfpan.cc | - | waitting |
 | www.kufile.net | - | waitting |
 
 ### Ussage

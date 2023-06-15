@@ -30,6 +30,10 @@ extension FileIDFinder where Self == FileIDMatch {
     public static var downProcess4: Self {
         FileIDMatch("down_process4\\(\"([\\w\\d]+)\"\\)")
     }
+    
+    public static var lastPath: Self {
+        FileIDMatch("/([\\w\\d]+)$")
+    }
 }
 
 /// 从链接中提取fileid，`http://xxxx/file-123456.html`提取fileid`123456`
