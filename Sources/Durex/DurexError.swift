@@ -11,4 +11,5 @@ enum DurexError: Error {
     case emptyValues
     case invalueTransformType
     case nilSession
+    case missingHost
 }

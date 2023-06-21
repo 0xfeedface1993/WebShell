@@ -279,7 +279,7 @@ extension URLSessionDelegator {
     /// 是因为如果上游的事件被`tryMapResult`转换成failure时不匹配当前任务
     /// 则会导致本任务的异常失败，下游无法得到状态更新
     /// - Parameter taskIdentifier: 匹配taskIdentifier方法
-    /// - Returns: 如果有完成/失败时间则会有事件发送
+    /// - Returns: 只有有成功完成事件发送
     fileprivate func rawNewsCompletor(_ taskIdentifier: @escaping (Int) -> Bool) -> AnyPublisher<RawNews, Error> {
         downloadTaskCompletion
             .tryMap({ job in
@@ -299,9 +299,26 @@ extension URLSessionDelegator {
             .eraseToAnyPublisher()
     }
     
+    /// 只提取Error事件, 普通的value丢弃，为了处理news里面错误事件无法传递的问题
+    /// - Parameter taskIdentifier: 匹配taskIdentifier方法
+    /// - Returns: 只有失败事件发送
+    private func completeError(_ taskIdentifier: @escaping (Int) -> Bool) -> AnyPublisher<RawNews, Error> {
+        downloadTaskCompletion
+            .tryMap({ job in
+                // 将value转为nil，错误则抛出Error
+                try DownloadURLErrorFilter(result: job, compare: taskIdentifier)
+                    .dropValue()
+            })
+            // 丢弃nil值
+            .compactMap({ $0 })
+            .filter({ taskIdentifier($0.task.taskIdentifier) })
+            .compactMap(rawCompleteToRawNews(_:))
+            .eraseToAnyPublisher()
+    }
+    
     func news(_ session: SessionProvider, tag: Int) -> AnyPublisher<DownloadURLProgressPublisher.News, Error> {
         let compare: (Int) -> Bool = { session.taskIdentifier(for: tag) == $0 }
-        let completion = rawNewsCompletor(compare)
+        let completion = rawNewsCompletor(compare).merge(with: completeError(compare))
         let normalUpdate = rawNewsUpdator().filter({ compare($0.taskIdentifier) })
         return normalUpdate
             .merge(with: completion)
@@ -331,6 +348,16 @@ struct DownloadURLErrorFilter {
         switch result {
         case .success(let value):
             return value
+        case .failure(let error):
+            try _on(error)
+            return nil
+        }
+    }
+    
+    func dropValue() throws -> SessionComplete? {
+        switch result {
+        case .success(_):
+            return nil
         case .failure(let error):
             try _on(error)
             return nil
