@@ -46,7 +46,7 @@ public struct ActionDownPage: SessionableCondom {
     }
     
     public func publisher(for inputValue: String) -> AnyPublisher<Output, Error> {
-        FileListURLRequestInPageGenerator(.default, action: "load_down_addr5", key: key)
+        FileListURLRequestInPageGenerator(.downProcess4, action: "load_down_addr5", key: key)
             .publisher(for: inputValue)
     }
     
