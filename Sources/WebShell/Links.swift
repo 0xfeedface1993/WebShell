@@ -12,6 +12,30 @@ import Durex
 #endif
 import Combine
 
+//public struct SignPHPFileDownload: DownloadRequestBuilder {
+//    let url: String
+//    let refer: String
+//
+//    func make() throws -> URLRequest {
+//        try make(url, refer: refer)
+//    }
+//
+//    public func make(_ url: String, refer: String) throws -> URLRequest {
+//        try URLRequestBuilder(url)
+//            .method(.get)
+//            .add(value: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", forKey: "accept")
+//            .add(value: "cross-site", forKey: "sec-fetch-site")
+//            .add(value: "document", forKey: "sec-fetch-dest")
+//            .add(value: "en-US,en;q=0.9", forKey: "accept-language")
+//            .add(value: "navigate", forKey: "sec-fetch-mode")
+//            .add(value: userAgent, forKey: "user-agent")
+//            .add(value: refer, forKey: "referer")
+//            .add(value: "down_file_log=1", forKey: "Cookie")
+//            .build()
+//    }
+//}
+
+
 public struct PHPFileDownload: DownloadRequestBuilder {
     let url: String
     let refer: String
@@ -185,6 +209,62 @@ public struct GeneralLinks: SessionableCondom {
         GeneralLinks(value)
     }
 }
+
+//public struct SignLinks: SessionableCondom {
+//    public typealias Input = URLRequest
+//    public typealias Output = [URLRequest]
+//    
+//    public var key: AnyHashable
+//    
+//    public init(_ key: AnyHashable = "default") {
+//        self.key = key
+//    }
+//    
+//    public func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
+//        StringParserDataTask(request: inputValue, encoding: .utf8, sessionKey: key)
+//            .publisher()
+//            .tryMap { html in
+//                try FileGeneralLinkMatch(html: html).extract()
+//            }
+//            .map { urls in
+//                guard let inputURL = inputValue.url else {
+//#if DEBUG
+//                    print(">>> [\(type(of: self))] inputValue url is nil. \(inputValue)")
+//#endif
+//                    return []
+//                }
+//                let refer = hostOnly(inputURL).absoluteString
+//                return urls.compactMap {
+//                    do {
+//                        return try SignPHPFileDownload(url: $0.absoluteString, refer: refer).make()
+//                    }   catch   {
+//                        print(">>> download url make failed \(error)")
+//                        return nil
+//                    }
+//                }
+//            }
+//        #if DEBUG
+//            .follow({
+//                print(">>> [\(type(of: self))] find download links \($0)")
+//            })
+//        #endif
+//            .eraseToAnyPublisher()
+//    }
+//    
+//    private func hostOnly(_ url: URL) -> URL {
+//        var next = url
+//        next.deletePathExtension()
+//        return next
+//    }
+//    
+//    public func empty() -> AnyPublisher<Output, Error> {
+//        Empty().eraseToAnyPublisher()
+//    }
+//    
+//    public func sessionKey(_ value: AnyHashable) -> SignLinks {
+//        SignLinks(value)
+//    }
+//}
 
 /// 查找`dl.php`的普通限速下载链接，生成下载请求，可能会有多个下载请求
 public struct DownloadLinks<Matcher: ContentMatch, RequestBuilder: DownloadRequestBuilder>: SessionableCondom {

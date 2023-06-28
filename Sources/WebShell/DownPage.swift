@@ -46,46 +46,12 @@ public struct ActionDownPage: SessionableCondom {
     }
     
     public func publisher(for inputValue: String) -> AnyPublisher<Output, Error> {
-        do {
-            let data = try request(inputValue)
-            return StringParserDataTask(request: data, encoding: .utf8, sessionKey: key)
-                .publisher()
-                .tryMap { try FileIDMatch.downProcess4.extract($0) }
-                .tryMap { try referRequest(inputValue, fileid: $0) }
-                .eraseToAnyPublisher()
-        } catch {
-            return Fail(error: error).eraseToAnyPublisher()
-        }
+        FileListURLRequestInPageGenerator(.default, action: "load_down_addr5", key: key)
+            .publisher(for: inputValue)
     }
     
     public func empty() -> AnyPublisher<Output, Error> {
         Empty().eraseToAnyPublisher()
-    }
-    
-    func request(_ string: String) throws -> URLRequest {
-        guard let url = URL(string: string),
-                let component = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
-            throw ShellError.badURL(string)
-        }
-        
-        guard let host = component.host, let scheme = component.scheme else {
-            throw ShellError.badURL(string)
-        }
-        
-        return try DashDownPageRequest(refer: string, scheme: scheme, host: host).make()
-    }
-    
-    func referRequest(_ string: String, fileid: String) throws -> URLRequest {
-        guard let url = URL(string: string),
-                let component = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
-            throw ShellError.badURL(string)
-        }
-        
-        guard let host = component.host, let scheme = component.scheme else {
-            throw ShellError.badURL(string)
-        }
-        
-        return try ReferDownPageRequest(fileid: fileid, refer: string, scheme: scheme, host: host, action: "load_down_addr5").make()
     }
     
     public func sessionKey(_ value: AnyHashable) -> ActionDownPage {
@@ -155,6 +121,94 @@ public struct GeneralDownPage {
             .add(value: refer, forKey: "referer")
             .body("action=load_down_addr1&file_id=\(fileid)".data(using: .utf8) ?? Data())
             .build()
+    }
+}
+
+public struct ReferSignDownPageRequest {
+    let fileid: String
+    let refer: String
+    let scheme: String
+    let host: String
+    let action: String
+    let sign: String
+    
+    func make() throws -> URLRequest {
+        let http = "\(scheme)://\(host)"
+        let url = "\(http)/ajax.php"
+        return try URLRequestBuilder(url)
+            .method(.post)
+            .add(value: "text/plain, */*; q=0.01", forKey: "Accept")
+            .add(value: "XMLHttpRequest", forKey: "X-Requested-With")
+            .add(value: "zh-CN,zh-Hans;q=0.9", forKey: "Accept-Language")
+            .add(value: "application/x-www-form-urlencoded; charset=UTF-8", forKey: "Content-Type")
+            .add(value: http, forKey: "Origin")
+            .add(value: userAgent, forKey: "User-Agent")
+            .add(value: refer, forKey: "Referer")
+            .body("action=\(action)&sign=\(sign)&file_id=\(fileid)".data(using: .utf8) ?? Data())
+            .build()
+    }
+}
+
+public struct DownPageRequest {
+    let refer: String
+    let scheme: String
+    let host: String
+    let fileid: String
+    
+    func make() throws -> URLRequest {
+        let http = "\(scheme)://\(host)"
+        let url = "\(http)/down-\(fileid).html"
+        return try URLRequestBuilder(url)
+            .add(value: "1", forKey: "Upgrade-Insecure-Requests")
+            .add(value: fullAccept, forKey: "Accept")
+            .add(value: "zh-CN,zh-Hans;q=0.9", forKey: "Accept-Language")
+            .add(value: userAgent, forKey: "User-Agent")
+            .add(value: refer, forKey: "Referer")
+            .build()
+    }
+}
+
+
+public struct RawDownPage: Condom {
+    public typealias Input = String
+    public typealias Output = URLRequest
+    
+    public let fileid: String
+    
+    public init(fileid: String) {
+        self.fileid = fileid
+    }
+    
+    public func publisher(for inputValue: String) -> AnyPublisher<Output, Error> {
+        do {
+            let request = try request(inputValue)
+#if DEBUG
+            print(">>> [\(type(of: self))] make raw down page URLRequest \(request).")
+#endif
+            return AnyValue(request).eraseToAnyPublisher()
+        } catch {
+#if DEBUG
+            print(">>> [\(type(of: self))] make raw down page URLRequest failed.")
+#endif
+            return Fail(error: error).eraseToAnyPublisher()
+        }
+    }
+    
+    private func request(_ string: String) throws -> URLRequest {
+        guard let url = URL(string: string),
+                let component = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            throw ShellError.badURL(string)
+        }
+        
+        guard let host = component.host, let scheme = component.scheme else {
+            throw ShellError.badURL(string)
+        }
+        
+        return try DownPageRequest(refer: string, scheme: scheme, host: host, fileid: fileid).make()
+    }
+    
+    public func empty() -> AnyPublisher<Output, Error> {
+        Empty().eraseToAnyPublisher()
     }
 }
 

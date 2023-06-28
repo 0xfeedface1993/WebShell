@@ -26,9 +26,9 @@ This framework serves as the foundation for other apps, and one of the core abil
 | www.xunniufile.com | `DownPage`、`PHPLinks` | done |
 | www.xingyaoclouds.com | `RedirectEnablePage`、`ActionDownPage`、`PHPLinks` | done |
 | www.rarp.cc | `HTTPString`、`RedirectEnablePage`、`FileListURLRequestInPageGenerator`、`PHPLinks` | done |
-| www.567file.com | - | server 500 error |
-| www.xfpan.cc | - | waitting |
-| www.kufile.net | - | waitting |
+| www.567file.com | 'RedirectEnablePage'、'SignFileListURLRequestGenerator'、'PHPLinks' | done |
+| www.xfpan.cc | - | host down |
+| www.kufile.net | - | host down |
 
 ### Ussage
 

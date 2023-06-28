@@ -11,37 +11,6 @@ import WebKit
 import WebShell
 import Combine
 
-/// 下载状态数据模型，用于视图数据绑定
-public class DownloadInfo : NSObject {
-    weak var riffle : PCWebRiffle?
-    public var createTime = Date(timeIntervalSince1970: 0)
-    @objc public dynamic var name = ""
-    @objc public dynamic var progress = ""
-    @objc public dynamic var totalBytes = ""
-    @objc public dynamic var site = ""
-    @objc public dynamic var state = ""
-    override init() {
-        super.init()
-    }
-    
-    init(task: PCDownloadTask) {
-        super.init()
-        riffle = task.request.riffle
-        name = task.fileName
-        progress = "\(task.pack.progress * 100)%"
-        totalBytes = "\(Float(task.pack.totalBytes) / 1024.0 / 1024.0)M"
-        site = task.request.riffle!.mainURL!.host!
-        createTime = task.createTime
-    }
-    
-    init(riffle: PCWebRiffle) {
-        super.init()
-        self.riffle = riffle
-        name = riffle.mainURL!.absoluteString
-        site = riffle.mainURL!.host!
-    }
-}
-
 class ViewController: NSViewController {
     @IBOutlet var DownloadStateController: NSArrayController!
     
@@ -53,12 +22,6 @@ class ViewController: NSViewController {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
-        
-        NotificationCenter.default.addObserver(forName: ImageFetchNotification, object: nil, queue: OperationQueue.main) { (note) in
-            if let image = note.object as? ImageMaker {
-                self.codeView.image = image.shareImage
-            }
-        }
         
 //        let link = "http://www.xueqiupan.com/file-672734.html"
 //
@@ -145,10 +108,28 @@ class ViewController: NSViewController {
 //                print(">>> download file at \(url)")
 //            }
         
-        let link = "www.rarp.cc/fs/2xx9qxy9bgbbrwb"
-        cancellable = HTTPString()
-            .join(RedirectEnablePage())
-            .join(FileListURLRequestInPageGenerator(.downProcess4, action: "load_down_addr5"))
+//        let link = "www.rarp.cc/fs/2xx9qxy9bgbbrwb"
+//        cancellable = HTTPString()
+//            .join(RedirectEnablePage())
+//            .join(FileListURLRequestInPageGenerator(.downProcess4, action: "load_down_addr5"))
+//            .join(PHPLinks())
+//            .join(Saver(.override))
+//            .publisher(for: link)
+//            .sink { complete in
+//                switch complete {
+//                case .finished:
+//                    break
+//                case .failure(let error):
+//                    print(">>> download error \(error)")
+//                }
+//            } receiveValue: { url in
+//                print(">>> download file at \(url)")
+//            }
+    //https://www.567yun.cn/file-2228687.html
+//        2228695
+        let link = "https://www.567yun.cn/file-2228695.html"
+        cancellable = RedirectEnablePage()
+            .join(SignFileListURLRequestGenerator(.default, action: "load_down_addr10"))
             .join(PHPLinks())
             .join(Saver(.override))
             .publisher(for: link)
@@ -261,56 +242,6 @@ class ViewController: NSViewController {
     override var representedObject: Any? {
         didSet {
         // Update the view, if already loaded.
-        }
-    }
-}
-
-extension ViewController : PCPiplineDelegate {
-    func pipline(didAddRiffle riffle: PCWebRiffle) {
-        print("\n(((((((((((((((((((((( Pipline didAddRiffle Begin )))))))))))))))))))))))")
-        let info = DownloadInfo(riffle: riffle)
-        add(info: info)
-        print("(((((((((((((((((((((( Pipline didAddRiffle End )))))))))))))))))))))))\n")
-    }
-    
-    func pipline(didUpdateTask task: PCDownloadTask) {
-        print("(((((((((((((((((((((( Pipline didUpdateTask Begin )))))))))))))))))))))))")
-        let info = DownloadInfo(task: task)
-        add(info: info)
-        print("(((((((((((((((((((((( Pipline didUpdateTask End )))))))))))))))))))))))")
-    }
-    
-    func pipline(didFinishedTask task: PCDownloadTask, error: Error?) {
-        print("\n(((((((((((((((((((((( Pipline didFinishedTask Begin )))))))))))))))))))))))")
-        
-        print("(((((((((((((((((((((( Pipline didFinishedTask End )))))))))))))))))))))))\n")
-    }
-    
-    func pipline(didFinishedRiffle riffle: PCWebRiffle) {
-        print("\n(((((((((((((((((((((( Pipline didFinishedRiffle Begin )))))))))))))))))))))))")
-        print("************ Not Found File Link: \(riffle.mainURL?.absoluteString ?? "** no link **")")
-        print("(((((((((((((((((((((( Pipline didFinishedRiffle End )))))))))))))))))))))))\n")
-    }
-    
-    func add(info: DownloadInfo) {
-        if let items = DownloadStateController.content as? [DownloadInfo] {
-            var newItems = items
-            if let index = newItems.firstIndex(where: {
-                if let rif = $0.riffle {
-                    return rif == info.riffle
-                }
-                return false
-            }) {
-                newItems[index] = info
-                DownloadStateController.content = newItems
-                print(">>>>>>>>>>>>>>>>> Update info \(info.name)")
-            }   else    {
-                DownloadStateController.content = newItems + [info]
-                print(">>>>>>>>>>>>>>>>> Add info \(info.name)")
-            }
-        }   else    {
-            DownloadStateController.content = [info]
-            print(">>>>>>>>>>>>>>>>> Add info \(info.name)")
         }
     }
 }
