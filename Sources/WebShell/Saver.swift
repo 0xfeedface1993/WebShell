@@ -80,14 +80,14 @@ public struct MoveToDownloads {
         if policy == .override, FileManager.default.fileExists(atPath: defaultURL.path) {
             try FileManager.default.removeItem(at: defaultURL)
 #if DEBUG
-            print(">>> [override] delete file at \(defaultURL)")
+            logger.info("[override] delete file at \(defaultURL)")
 #endif
         }
         
         let destination = destinationURL(defaultURL)
         try FileManager.default.moveItem(at: tempURL, to: destination)
 #if DEBUG
-        print(">>> move file to \(destination)")
+        logger.info("move file to \(destination)")
 #endif
         return destination
     }

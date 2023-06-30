@@ -7,6 +7,9 @@
 
 import Foundation
 import Combine
+import Logging
+
+internal let logger = Logger(label: "com.ascp.download")
 
 struct DownloadSessionError: Error {
     let originError: Error
@@ -111,7 +114,7 @@ class URLSessionDelegator: NSObject, URLSessionDownloadDelegate {
         do {
             try FileManager.default.moveItem(at: location, to: url)
 #if DEBUG
-            print(">>> move tmp file to \(url)")
+            logger.info("move tmp file to \(url)")
 #endif
             SessionComplete(task: downloadTask, data: url)
                 .pass(to: downloadTaskCompletion)

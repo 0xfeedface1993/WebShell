@@ -12,8 +12,6 @@ import os.log
 import AnyErase
 #endif
 
-fileprivate let logger = OSLog(subsystem: "com.ascp.publisher", category: "DownloadURLPublisher")
-
 public struct DownloadURLPublisher: Publisher {
     public typealias Output = (URL, URLResponse)
     public typealias Failure = Error
@@ -57,7 +55,7 @@ public struct DownloadURLPublisher: Publisher {
         func request(_ demand: Subscribers.Demand) {
             lock.lock()
             guard let parent = parent else {
-                os_log("no DownloadURLPublisher in upstream.", log: logger, type: .debug)
+                logger.info("no DownloadURLPublisher in upstream of \(self)")
                 lock.unlock()
                 return
             }

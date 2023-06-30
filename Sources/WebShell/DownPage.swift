@@ -183,12 +183,12 @@ public struct RawDownPage: Condom {
         do {
             let request = try request(inputValue)
 #if DEBUG
-            print(">>> [\(type(of: self))] make raw down page URLRequest \(request).")
+            logger.info("[\(type(of: self))] make raw down page URLRequest \(request).")
 #endif
             return AnyValue(request).eraseToAnyPublisher()
         } catch {
 #if DEBUG
-            print(">>> [\(type(of: self))] make raw down page URLRequest failed.")
+            logger.error("[\(type(of: self))] make raw down page URLRequest failed.")
 #endif
             return Fail(error: error).eraseToAnyPublisher()
         }

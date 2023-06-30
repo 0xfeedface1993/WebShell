@@ -8,9 +8,12 @@
 
 import Foundation
 import Combine
+import Logging
 #if canImport(Durex)
 import Durex
 #endif
+
+internal let logger = Logger(label: "com.ascp.webshell")
 
 public enum ShellError: Error {
     /// url为空或者不正确
@@ -79,8 +82,9 @@ public enum ShellError: Error {
 extension Publisher {
     /// 只是为了打印错误信息
     func logError() -> Publishers.MapError<Self, Failure> {
-        mapError { error in
-            _ = print(">>> [combine error stub] \(error)")
+        let debug = "\(self)"
+        return mapError { error in
+            logger.error("[combine error stub] \(error), in \(debug)")
             return error
         }
     }

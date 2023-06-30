@@ -16,7 +16,7 @@ public enum URLRequestBuilderError: Error, LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .badURL(let string):
-            return ">>> bad url string for \(string ?? "nil")"
+            return "bad url string for \(string ?? "nil")"
         }
     }
 }

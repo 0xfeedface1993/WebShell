@@ -17,18 +17,18 @@ public struct SessionError: Error, LocalizedError {
     
     public var errorDescription: String? {
         if let _ = pool, let _ = context {
-            return ">>> No Session Error."
+            return "No Session Error."
         }
         
         if let context = context {
-            return ">>> Make session failed only context \(context) exist."
+            return "Make session failed only context \(context) exist."
         }
         
         if let pool = pool {
-            return ">>> Make session failed only pool \(pool) exist."
+            return "Make session failed only pool \(pool) exist."
         }
         
-        return ">>> No Session Error."
+        return "No Session Error."
     }
 }
 

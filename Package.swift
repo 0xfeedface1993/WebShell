@@ -12,13 +12,15 @@ let package = Package(
     products: [
         .library(name: "WebShell", targets: ["WebShell"]),
     ],
-    dependencies: [],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.5.2"),
+    ],
     targets: [
         .target(name: "WebShell", dependencies: ["Durex"]),
         .testTarget(name: "WebShellCoreTests", dependencies: ["WebShell"]),
         .target(
             name: "AnyErase",
-            dependencies: []),
+            dependencies: ["Logging"]),
         .target(
             name: "Durex",
             dependencies: ["AnyErase"]),

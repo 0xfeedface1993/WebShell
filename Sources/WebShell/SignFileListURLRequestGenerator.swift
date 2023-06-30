@@ -47,7 +47,7 @@ public struct SignFileListURLRequestGenerator: SessionableCondom {
                     // 解析sign参数
                     let sign = try SingValueMatch().extract($0)
 #if DEBUG
-                    print(">>> [\(type(of: self))] match sign \(sign) for origin link \(inputValue).")
+                    logger.info("[\(type(of: self))] match sign \(sign) for origin link \(inputValue).")
 #endif
                     // 构建下载列表ajax请求
                     return try request(inputValue, fileid: fileid, sign: sign)

@@ -41,13 +41,13 @@ public struct URLOffset {
             let regx = try Regex("(\\w+\\.)+\\w+")
             guard let match = string.firstMatch(of: regx)?.0 else {
 #if DEBUG
-            print(">>> [\(type(of: self))] no host in \(string)")
+            logger.error("[\(type(of: self))] no host in \(string)")
 #endif
                 throw DurexError.missingHost
             }
             
 #if DEBUG
-            print(">>> [\(type(of: self))] extract host \(match) from \(string)")
+            logger.info("[\(type(of: self))] extract host \(match) from \(string)")
 #endif
             
             return String(match)
@@ -56,12 +56,12 @@ public struct URLOffset {
             let regx = try NSRegularExpression(pattern: "(\\w+\\.)+\\w+")
             guard let range = regx.firstMatch(in: string, range: NSRange(location: 0, length: string.count))?.range else {
 #if DEBUG
-            print(">>> [\(type(of: self))] no host in \(string)")
+            logger.error("[\(type(of: self))] no host in \(string)")
 #endif
                 throw DurexError.missingHost
             }
 #if DEBUG
-            print(">>> [\(type(of: self))] extract host \((string as NSString).substring(with: range)) from \(string)")
+            logger.info("[\(type(of: self))] extract host \((string as NSString).substring(with: range)) from \(string)")
 #endif
             return (string as NSString).substring(with: range)
         }

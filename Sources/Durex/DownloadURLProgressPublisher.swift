@@ -12,8 +12,6 @@ import os.log
 import AnyErase
 #endif
 
-fileprivate let logger = OSLog(subsystem: "com.ascp.publisher", category: "DownloadURLProgressPublisher")
-
 struct OptionalIntWrapper<Item: Equatable> {
     let lhs: Item?
     let rhs: Item
@@ -102,7 +100,7 @@ public struct DownloadURLProgressPublisher: Publisher {
         func request(_ demand: Subscribers.Demand) {
             lock.lock()
             guard let parent = parent else {
-                os_log("no DownloadURLPublisher in upstream.", log: logger, type: .debug)
+                logger.info("no DownloadURLPublisher in upstream of \(self)")
                 lock.unlock()
                 return
             }
@@ -141,7 +139,7 @@ public struct DownloadURLProgressPublisher: Publisher {
             lock.lock()
             guard demand > 0, parent != nil, let downstream = downstream else {
 #if DEBUG
-                Swift.print(">>> [\(type(of: self))] \(#function) no downstream or parent or demand = 0.")
+                logger.info("[\(type(of: self))] \(#function) no downstream or parent or demand = 0.")
 #endif
                 lock.unlock()
                 return
@@ -161,12 +159,12 @@ public struct DownloadURLProgressPublisher: Publisher {
             switch completion {
             case .finished:
 #if DEBUG
-                Swift.print(">>> [\(type(of: self))] \(#function) .finished.")
+                logger.info("[\(type(of: self))] \(#function) .finished.")
 #endif
                 downstream.receive(completion: .finished)
             case .failure(let error):
 #if DEBUG
-                Swift.print(">>> [\(type(of: self))] \(#function) .error \(error).")
+                logger.error("[\(type(of: self))] \(#function) .error \(error).")
 #endif
                 downstream.receive(completion: .failure(error))
             }
@@ -175,7 +173,7 @@ public struct DownloadURLProgressPublisher: Publisher {
         private func receiveValue(_ news: Parent.News) {
             guard demand > 0, parent != nil, let downstream = downstream else {
 #if DEBUG
-                Swift.print(">>> [\(type(of: self))] \(#function) no downstream or parent or demand = 0.")
+                logger.info("[\(type(of: self))] \(#function) no downstream or parent or demand = 0.")
 #endif
                 return
             }
@@ -185,7 +183,7 @@ public struct DownloadURLProgressPublisher: Publisher {
         
         func cancel() {
 #if DEBUG
-            Swift.print(">>> [\(type(of: self))] \(#function) cancel.")
+            logger.info("[\(type(of: self))] \(#function) cancel.")
 #endif
             lock.lock()
             guard parent != nil else {
@@ -234,7 +232,7 @@ extension URLSessionDelegator {
             return (complete.data, response, complete.task.taskIdentifier)
         }
 #if DEBUG
-        print(">>> can't split complete \(complete), because response is nil")
+        logger.info("can't split complete \(complete), because response is nil")
 #endif
         return nil
     }
@@ -247,7 +245,7 @@ extension URLSessionDelegator {
             return RawNews(.file(complete.data, response), taskIdentifier: complete.task.taskIdentifier)
         }
 #if DEBUG
-        print(">>> can't convert rawCompleteToRawNews \(complete), because response is nil")
+        logger.info("can't convert rawCompleteToRawNews \(complete), because response is nil")
 #endif
         return nil
     }

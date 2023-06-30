@@ -73,8 +73,6 @@ public protocol SessionProvider {
     func taskIdentifier(for tag: Int) -> Int?
 }
 
-fileprivate let logger = OSLog(subsystem: "com.ascp.session", category: "DownloadSession")
-
 public final class DownloadSession: CustomURLSession {
     fileprivate static let _shared = DownloadSession()
     private let delegator = URLSessionDelegator()
@@ -145,9 +143,9 @@ extension DownloadSession: SessionProvider {
         tagsCached[identifier] = tagHashValue
         lock.unlock()
         if let value = value {
-            os_log(.debug, log: logger, "download task %d already has tag %d", identifier, value)
+            logger.info("download task \(identifier) already has tag \(value)")
         }
-        os_log(.debug, log: logger, "download task %d add new tag %d", identifier, tagHashValue)
+        logger.info("download task \(identifier) add new tag \(tagHashValue)")
     }
     
     public func unbind(task: URLSessionDownloadTask) {
@@ -155,7 +153,7 @@ extension DownloadSession: SessionProvider {
         let identifier = task.taskIdentifier
         tagsCached.removeValue(forKey: identifier)
         lock.unlock()
-        os_log(.debug, log: logger, "download task %d remove tag", identifier)
+        logger.info("download task \(identifier) remove tag")
     }
     
     @inlinable
