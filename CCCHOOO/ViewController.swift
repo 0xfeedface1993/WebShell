@@ -127,7 +127,7 @@ class ViewController: NSViewController {
 //            }
     //https://www.567yun.cn/file-2228687.html
 //        2228695
-        let link = "https://www.567yun.cn/file-2228695.html"
+        let link = "https://www.567yun.cn/file-2228692.html"
         cancellable = RedirectEnablePage()
             .join(SignFileListURLRequestGenerator(.default, action: "load_down_addr10"))
             .join(PHPLinks())
