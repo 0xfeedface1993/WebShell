@@ -152,7 +152,7 @@ extension SessionPool {
             .replaceNil(with: DownloadSession.shared())
 #if DEBUG
             .follow({
-                print(">>> context session \($0) for key \(key)")
+                logger.info("context session \($0) for key \(key)")
             })
 #endif
             .setFailureType(to: Error.self)

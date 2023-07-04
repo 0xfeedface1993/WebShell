@@ -115,6 +115,7 @@ public struct DownloadURLProgressPublisher: Publisher {
                     // 用于传递taskIdentifier
                     
                     let taskResume = Future<URLSessionDownloadTask, Error> { promise in
+                        logger.info("url task \(task.taskIdentifier) resume, cURL:\n\(parent.request.cURL(pretty: true))")
                         task.resume()
                         promise(.success(task))
                     }

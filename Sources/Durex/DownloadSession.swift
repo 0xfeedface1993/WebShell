@@ -76,13 +76,12 @@ public protocol SessionProvider {
 public final class DownloadSession: CustomURLSession {
     fileprivate static let _shared = DownloadSession()
     private let delegator = URLSessionDelegator()
-    private lazy var _session = URLSession(configuration: .default, delegate: delegator, delegateQueue: nil)
+    private lazy var _session = CookieMaster(delegator)
     private var tagsCached = [Int: Int]()
     private let lock = Lock()
     
     public init() {
-        _session.configuration.timeoutIntervalForRequest = 20 * 60
-        _session.configuration.timeoutIntervalForResource = 15 * 24 * 3600
+        
     }
     
     deinit {
@@ -94,28 +93,8 @@ public final class DownloadSession: CustomURLSession {
     }
     
     public func download(with request: URLRequest) -> AnyPublisher<(URL, URLResponse), Error> {
-        DownloadURLPublisher(request: request, session: _session)
+        DownloadURLPublisher(request: request, session: _session.session)
             .eraseToAnyPublisher()
-//        return delegator
-//            .downloadTaskCompletion
-//            .tryMap {
-//                switch $0 {
-//                case .success(let data):
-//                    return data
-//                case .failure(let error):
-//                    throw error
-//                }
-//            }
-//            .filter { $0.task.taskIdentifier == task.taskIdentifier }
-//            .tryMap({ complete in
-//                switch complete.data {
-//                case .file(let url):
-//                    return url
-//                default:
-//                    throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: "\(complete)"])
-//                }
-//            })
-//            .eraseToAnyPublisher()
     }
     
     public func data(with request: URLRequest) -> AnyPublisher<Data, Error> {
@@ -133,7 +112,7 @@ public final class DownloadSession: CustomURLSession {
 
 extension DownloadSession: SessionProvider {
     public func systemSession() -> URLSession {
-        _session
+        _session.session
     }
     
     public func bind(task: URLSessionDownloadTask, tagHashValue: Int) {

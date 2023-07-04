@@ -70,6 +70,7 @@ public struct DownloadURLPublisher: Publisher {
             let task = self.task
             lock.unlock()
             
+            logger.info("url task \(task?.taskIdentifier ?? 0), cURL:\n\(parent.request.cURL(pretty: true))")
             task?.resume()
         }
         
