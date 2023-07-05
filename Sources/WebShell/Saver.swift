@@ -142,11 +142,11 @@ public struct BridgeSaver: SessionableCondom {
             .eraseToAnyPublisher()
     }
     
-    private func moveToDownloadsFolder(_ update: DownloadURLProgressPublisher.News) throws -> URL? {
-        guard case .file(let value, let response) = update else {
+    private func moveToDownloadsFolder(_ update: TaskNews) throws -> URL? {
+        guard case .file(let value) = update else {
             return nil
         }
-        return try MoveToDownloads(tempURL: value, suggestedFilename: response.suggestedFilename, policy: policy).move()
+        return try MoveToDownloads(tempURL: value.url, suggestedFilename: value.response.suggestedFilename, policy: policy).move()
     }
     
     public func empty() -> AnyPublisher<Output, Error> {

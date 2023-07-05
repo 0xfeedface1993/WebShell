@@ -32,7 +32,17 @@ public protocol CustomURLSession {
     /// 注意：此Publisher不会finished，终止的情况只会是error，所以只要监听receiveValue和error即可。
     /// - Parameter identifier: 下载任务唯一key，使用它的hashValue
     /// - Returns: 任务状态
-    func downloadNews(for identifier: AnyHashable) -> AnyPublisher<DownloadURLProgressPublisher.News, Error>
+    func downloadNews(for identifier: AnyHashable) -> AnyPublisher<UpdateNews, Error>
+    
+    /// 其他模块想要获取当前下载任务的进度、完成通知则使用此方法获取Publisher,
+    /// 注意：此Publisher不会finished，也不会出现error，所以只要监听receiveValue，抛出的错误就是`.error()`枚举。
+    /// - Parameter identifier: 下载任务唯一key，使用它的hashValue
+    /// - Returns: 任务状态
+    func downloadWrapNews(for identifier: AnyHashable) -> AnyPublisher<UpdateNews, Never>
+    
+    /// 其他模块想要获取所有下载任务的进度、完成通知则使用此方法获取Publisher,
+    /// - Returns: 任务状态
+    func downloadNews() -> AnyPublisher<UpdateNews, Never>
 }
 
 extension CustomURLSession {
@@ -105,8 +115,28 @@ public final class DownloadSession: CustomURLSession {
             .eraseToAnyPublisher()
     }
     
-    public func downloadNews(for identifier: AnyHashable) -> AnyPublisher<DownloadURLProgressPublisher.News, Error> {
+    public func downloadNews(for identifier: AnyHashable) -> AnyPublisher<UpdateNews, Error> {
         delegator.news(self, tag: identifier.hashValue)
+            .map {
+                UpdateNews(value: $0, tagHashValue: identifier.hashValue)
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    public func downloadWrapNews(for identifier: AnyHashable) -> AnyPublisher<UpdateNews, Never> {
+        delegator.news(self, tag: identifier.hashValue)
+            .map {
+                UpdateNews(value: $0, tagHashValue: identifier.hashValue)
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    public func downloadNews() -> AnyPublisher<UpdateNews, Never> {
+        delegator.news()
+            .map {
+                UpdateNews(value: $0, tagHashValue: self.tag(for: $0.identifier))
+            }
+            .eraseToAnyPublisher()
     }
 }
 

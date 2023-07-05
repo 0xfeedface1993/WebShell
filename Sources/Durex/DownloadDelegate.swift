@@ -17,6 +17,10 @@ struct DownloadSessionError: Error {
     let date = Date()
 }
 
+public enum DownloadSessionRawError: Error {
+    case invalidResponse
+}
+
 struct SessionTaskState {
     let task: URLSessionDownloadTask
     let reciveBytes: Int64
@@ -65,6 +69,12 @@ struct SessionTaskState {
     func totalBytesExpectedToWrite(_ value: Int64) -> Self {
         SessionTaskState(task: task, reciveBytes: reciveBytes, totalBytesWritten: totalBytesWritten, totalBytesExpectedToWrite: value)
     }
+    
+    func newsState() -> TaskNews.State {
+        let progress = Progress(totalUnitCount: totalBytesExpectedToWrite)
+        progress.completedUnitCount = totalBytesWritten
+        return .init(progress: progress, filename: task.response?.suggestedFilename, identifier: task.taskIdentifier)
+    }
 }
 
 public struct DownloadURLError: Error {
@@ -85,6 +95,13 @@ public struct SessionComplete {
     func pass(to subject: PassthroughSubject<Result<SessionComplete, DownloadURLError>, Never>) {
         subject.send(.success(self))
     }
+    
+    func fileStone() -> TaskNews {
+        guard let response = task.response else {
+            return .error(.init(error: DownloadSessionError(originError: DownloadSessionRawError.invalidResponse, task: task), identifier: task.taskIdentifier))
+        }
+        return TaskNews.file(.init(url: data, response: response, identifier: task.taskIdentifier))
+    }
 }
 //
 //public struct SessionErrorNotification {
@@ -97,14 +114,109 @@ public struct SessionComplete {
 //    }
 //}
 
+public struct UpdateFailure {
+    public enum NoneError: Error {
+        case none
+    }
+    public let error: Error
+    public let identifier: Int
+    
+    public static let none = UpdateFailure(error: NoneError.none, identifier: 0)
+    
+    public func tag(_ value: Int) -> Self {
+        .init(error: error, identifier: value)
+    }
+}
+
+public struct UpdateNews {
+    public let value: TaskNews
+    public let tagHashValue: Int
+    
+    public init(value: TaskNews, tagHashValue: Int) {
+        self.value = value
+        self.tagHashValue = tagHashValue
+    }
+}
+
+public enum TaskNews {
+    case state(State)
+    case file(FileStone)
+    case error(UpdateFailure)
+    
+    public struct State: Equatable {
+        public let progress: Progress
+        public let filename: String?
+        public let identifier: Int
+        
+        public static let none = State(progress: .init(), filename: nil, identifier: 0)
+        
+        init(progress: Progress, filename: String?, identifier: Int) {
+            self.progress = progress
+            self.filename = filename
+            self.identifier = identifier
+        }
+        
+        public func tag(_ value: Int) -> State {
+            State(progress: progress, filename: filename, identifier: value)
+        }
+    }
+    
+    public struct FileStone: Equatable {
+        public let url: URL
+        public let response: URLResponse
+        public let identifier: Int
+        
+        public func tag(_ value: Int) -> Self {
+            .init(url: url, response: response, identifier: value)
+        }
+    }
+    
+    public var identifier: Int {
+        switch self {
+        case .file(let value):
+            return value.identifier
+        case .state(let value):
+            return value.identifier
+        case .error(let error):
+            return error.identifier
+        }
+    }
+}
+
 class URLSessionDelegator: NSObject, URLSessionDownloadDelegate {
-    let downloadTaskUpdate = PassthroughSubject<SessionTaskState, Never>()
-    let downloadTaskCompletion = PassthroughSubject<Result<SessionComplete, DownloadURLError>, Never>()
-//    let failedTaskCompletion = PassthroughSubject<SessionErrorNotification, Never>()
+    private let downloadTaskUpdate = PassthroughSubject<SessionTaskState, Never>()
+    private let downloadTaskCompletion = PassthroughSubject<Result<SessionComplete, DownloadURLError>, Never>()
+    /// 状态更新，可监听此Subject进行下载进度、下载完成、下载失败三种类型类型事件更新
+    let statePassthroughSubject = PassthroughSubject<TaskNews, Never>()
+    private let stateCancellable: AnyCancellable
     
     #if DEBUG
     static var debugFlag = true
     #endif
+    
+    override init() {
+        let updator = downloadTaskUpdate.map { state in
+            TaskNews.state(state.newsState())
+        }
+        
+        let completor = downloadTaskCompletion.map { result in
+            switch result {
+            case .success(let value):
+                return value.fileStone()
+            case .failure(let error):
+                return TaskNews.error(.init(error: error.error, identifier: error.task.taskIdentifier))
+            }
+        }
+        
+        stateCancellable = updator.merge(with: completor)
+            .subscribe(statePassthroughSubject)
+        
+        super.init()
+    }
+    
+    deinit {
+        stateCancellable.cancel()
+    }
     
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         let filename = UUID().uuidString
