@@ -97,9 +97,9 @@ public struct DownloadURLProgressPublisher: Publisher {
                         promise(.success(task))
                     }
                     
-                    let completor = delegator.news(for: tag)
-                        .setFailureType(to: Error.self)
+                    let completor: AnyPublisher<TaskNews, Error> = delegator.news(parent.session, tag: tag)
                         .prepend(.state(.init(progress: .init(totalUnitCount: 0), filename: nil, identifier: tag)))
+                        .eraseToAnyPublisher()
                     
                     downloadTaskCancellable = completor
                         .combineLatest(taskResume)
