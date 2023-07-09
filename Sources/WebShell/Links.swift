@@ -24,13 +24,10 @@ public struct SignPHPFileDownload: DownloadRequestBuilder {
         try URLRequestBuilder(url)
             .method(.get)
             .add(value: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", forKey: "accept")
-//            .add(value: "cross-site", forKey: "sec-fetch-site")
-//            .add(value: "document", forKey: "sec-fetch-dest")
             .add(value: "en-US,en;q=0.9", forKey: "accept-language")
-//            .add(value: "navigate", forKey: "sec-fetch-mode")
             .add(value: userAgent, forKey: "user-agent")
             .add(value: refer, forKey: "referer")
-//            .add(value: "down_file_log=1", forKey: "Cookie")
+            .add(value: "keep-alive", forKey: "Connection")
             .build()
     }
 }
@@ -52,6 +49,7 @@ public struct PHPFileDownload: DownloadRequestBuilder {
             .add(value: userAgent, forKey: "User-Agent")
             .add(value: refer, forKey: "Referer")
             .add(value: "zh-CN,zh-Hans;q=0.9", forKey: "Accept-Language")
+            .add(value: "keep-alive", forKey: "Connection")
             .build()
     }
 }
@@ -67,6 +65,7 @@ public struct GeneralFileDownload {
             .add(value: userAgent, forKey: "user-agent")
             .add(value: refer, forKey: "referer")
             .add(value: "zh-CN,zh-Hans;q=0.9", forKey: "accept-language")
+            .add(value: "keep-alive", forKey: "Connection")
             .build()
     }
 }

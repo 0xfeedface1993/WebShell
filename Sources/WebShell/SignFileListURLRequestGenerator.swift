@@ -36,7 +36,7 @@ public struct SignFileListURLRequestGenerator: SessionableCondom {
             // 读取fileid
             let fileid = try finder.extract(inputValue)
             // 转换成down-fileid.html页面
-            return RawDownPage(fileid: fileid)
+            return SignFileDownPage(fileid: fileid)
                 .publisher(for: inputValue)
                 .flatMap {
                     // 下载down-fileid.html页面

@@ -168,6 +168,68 @@ public struct DownPageRequest {
     }
 }
 
+public struct DownPageCustomHeaderRequest {
+    let scheme: String
+    let host: String
+    let fileid: String
+    
+    func make(_ builder: (URLRequestBuilder) -> URLRequestBuilder) throws -> URLRequest {
+        let http = "\(scheme)://\(host)"
+        let url = "\(http)/down-\(fileid).html"
+        return try builder(URLRequestBuilder(url)).build()
+    }
+}
+
+public struct SignFileDownPage: Condom {
+    public typealias Input = String
+    public typealias Output = URLRequest
+    
+    public let fileid: String
+    
+    public init(fileid: String) {
+        self.fileid = fileid
+    }
+    
+    public func publisher(for inputValue: String) -> AnyPublisher<Output, Error> {
+        do {
+            let request = try request(inputValue)
+#if DEBUG
+            logger.info("[\(type(of: self))] make raw down page URLRequest \(request).")
+#endif
+            return AnyValue(request).eraseToAnyPublisher()
+        } catch {
+#if DEBUG
+            logger.error("[\(type(of: self))] make raw down page URLRequest failed.")
+#endif
+            return Fail(error: error).eraseToAnyPublisher()
+        }
+    }
+    
+    private func request(_ string: String) throws -> URLRequest {
+        guard let url = URL(string: string),
+                let component = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            throw ShellError.badURL(string)
+        }
+        
+        guard let host = component.host, let scheme = component.scheme else {
+            throw ShellError.badURL(string)
+        }
+        
+        return try DownPageCustomHeaderRequest(scheme: scheme, host: host, fileid: fileid).make({
+            $0.add(value: "application/x-www-form-urlencoded", forKey: "content-type")
+                .add(value: "text/plain, */*", forKey: "accept")
+                .add(value: "XMLHttpRequest", forKey: "x-requested-with")
+                .add(value: "en-US,en;q=0.9", forKey: "accept-language")
+                .add(value: "\(scheme)://\(host)", forKey: "origin")
+                .add(value: userAgent, forKey: "user-agent")
+                .add(value: string, forKey: "referer")
+        })
+    }
+    
+    public func empty() -> AnyPublisher<Output, Error> {
+        Empty().eraseToAnyPublisher()
+    }
+}
 
 public struct RawDownPage: Condom {
     public typealias Input = String

@@ -121,6 +121,11 @@ public struct UpdateFailure {
     public let error: Error
     public let identifier: Int
     
+    public init(error: Error, identifier: Int) {
+        self.error = error
+        self.identifier = identifier
+    }
+    
     public static let none = UpdateFailure(error: NoneError.none, identifier: 0)
     
     public func tag(_ value: Int) -> Self {
