@@ -57,7 +57,7 @@ class ViewController: NSViewController {
 //                print(">>> download file at \(url)")
 //            }
         
-//        let link = "http://www.xunniufile.com/file-3549054.html"
+//        let link = "http://www.xunniu-pan.com/down-4067902.html"
 //
 //        cancellable = DownPage(.default)
 //            .join(PHPLinks())
@@ -127,22 +127,22 @@ class ViewController: NSViewController {
 //            }
     //https://www.567yun.cn/file-2228687.html
 //        2228695
-        let link = "https://www.567yun.cn/file-2228692.html"
-        cancellable = RedirectEnablePage()
-            .join(SignFileListURLRequestGenerator(.default, action: "load_down_addr10"))
-            .join(PHPLinks())
-            .join(Saver(.override))
-            .publisher(for: link)
-            .sink { complete in
-                switch complete {
-                case .finished:
-                    break
-                case .failure(let error):
-                    print(">>> download error \(error)")
-                }
-            } receiveValue: { url in
-                print(">>> download file at \(url)")
-            }
+//        let link = "https://www.567yun.cn/file-2228692.html"
+//        cancellable = RedirectEnablePage()
+//            .join(SignFileListURLRequestGenerator(.default, action: "load_down_addr10"))
+//            .join(PHPLinks())
+//            .join(Saver(.override))
+//            .publisher(for: link)
+//            .sink { complete in
+//                switch complete {
+//                case .finished:
+//                    break
+//                case .failure(let error):
+//                    print(">>> download error \(error)")
+//                }
+//            } receiveValue: { url in
+//                print(">>> download file at \(url)")
+//            }
         
 //        webview.load(currentResult!.request)
 //        load666PanSequence(urlString: "")

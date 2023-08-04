@@ -13,7 +13,7 @@ import Logging
 import Durex
 #endif
 
-internal let logger = Logger(label: "com.ascp.webshell")
+internal let shellLogger = Logger(label: "com.ascp.webshell")
 
 public enum ShellError: Error {
     /// url为空或者不正确
@@ -84,7 +84,7 @@ extension Publisher {
     func logError() -> Publishers.MapError<Self, Failure> {
         let debug = "\(self)"
         return mapError { error in
-            logger.error("[combine error stub] \(error), in \(debug)")
+            shellLogger.error("[combine error stub] \(error), in \(debug)")
             return error
         }
     }

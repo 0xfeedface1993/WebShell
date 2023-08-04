@@ -7,49 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		242C07392371E9B10037D3C2 /* Const.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F9C6CF20D8E17500E1F88D /* Const.swift */; };
 		24E60F1921D66181007AB419 /* WebShellCoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E60F1821D66181007AB419 /* WebShellCoreTests.swift */; };
-		24E60F3921D66466007AB419 /* Const.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24F9C6CF20D8E17500E1F88D /* Const.swift */; };
 		27448B2720170ABA001FC925 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B2620170ABA001FC925 /* AppDelegate.swift */; };
 		27448B2920170ABA001FC925 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B2820170ABA001FC925 /* ViewController.swift */; };
 		27448B2B20170ABA001FC925 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 27448B2A20170ABA001FC925 /* Assets.xcassets */; };
 		27448B2E20170ABA001FC925 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 27448B2C20170ABA001FC925 /* Main.storyboard */; };
-		52214A672A4C6F3B001EC633 /* SignFileListURLRequestGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52214A662A4C6F3B001EC633 /* SignFileListURLRequestGenerator.swift */; };
-		52214A682A4C6F3B001EC633 /* SignFileListURLRequestGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52214A662A4C6F3B001EC633 /* SignFileListURLRequestGenerator.swift */; };
-		52A6E44929D3E819007B0699 /* Combine+Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A6E44829D3E819007B0699 /* Combine+Task.swift */; };
-		52A6E44A29D3E819007B0699 /* Combine+Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A6E44829D3E819007B0699 /* Combine+Task.swift */; };
-		52A6E44C29D3EA06007B0699 /* Saver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A6E44B29D3EA06007B0699 /* Saver.swift */; };
-		52A6E44D29D3EA06007B0699 /* Saver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A6E44B29D3EA06007B0699 /* Saver.swift */; };
-		52A6E44F29D3EF30007B0699 /* Links.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A6E44E29D3EF30007B0699 /* Links.swift */; };
-		52A6E45029D3EF30007B0699 /* Links.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A6E44E29D3EF30007B0699 /* Links.swift */; };
-		52A6E45229D3F4FE007B0699 /* DownPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A6E45129D3F4FE007B0699 /* DownPage.swift */; };
-		52A6E45329D3F4FE007B0699 /* DownPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A6E45129D3F4FE007B0699 /* DownPage.swift */; };
-		52A6E45529D3FD8A007B0699 /* FileID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A6E45429D3FD8A007B0699 /* FileID.swift */; };
-		52A6E45629D3FD8A007B0699 /* FileID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A6E45429D3FD8A007B0699 /* FileID.swift */; };
-		52CB992E2A036506004E9A4A /* Delay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CB99222A036506004E9A4A /* Delay.swift */; };
-		52CB992F2A036506004E9A4A /* AnyCondom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CB99232A036506004E9A4A /* AnyCondom.swift */; };
-		52CB99302A036506004E9A4A /* SessionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CB99242A036506004E9A4A /* SessionContext.swift */; };
-		52CB99312A036506004E9A4A /* DownloadURLProgressPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CB99252A036506004E9A4A /* DownloadURLProgressPublisher.swift */; };
-		52CB99322A036506004E9A4A /* DownloadURLPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CB99262A036506004E9A4A /* DownloadURLPublisher.swift */; };
-		52CB99332A036506004E9A4A /* Condom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CB99272A036506004E9A4A /* Condom.swift */; };
-		52CB99342A036506004E9A4A /* DownloadDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CB99282A036506004E9A4A /* DownloadDelegate.swift */; };
-		52CB99352A036506004E9A4A /* Durex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CB99292A036506004E9A4A /* Durex.swift */; };
-		52CB99362A036506004E9A4A /* Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CB992A2A036506004E9A4A /* Request.swift */; };
-		52CB99372A036506004E9A4A /* AnyValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CB992B2A036506004E9A4A /* AnyValue.swift */; };
-		52CB99382A036506004E9A4A /* DurexError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CB992C2A036506004E9A4A /* DurexError.swift */; };
-		52CB99392A036506004E9A4A /* DownloadSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CB992D2A036506004E9A4A /* DownloadSession.swift */; };
-		52CB993E2A036552004E9A4A /* AnyErase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CB993B2A036552004E9A4A /* AnyErase.swift */; };
-		52CB993F2A036552004E9A4A /* PublisherShirk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CB993C2A036552004E9A4A /* PublisherShirk.swift */; };
-		52CB99402A036552004E9A4A /* Locker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CB993D2A036552004E9A4A /* Locker.swift */; };
-		52CB99422A0365D7004E9A4A /* FileListURLRequestGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CB99412A0365D7004E9A4A /* FileListURLRequestGenerator.swift */; };
-		52CB99442A036A61004E9A4A /* URLRegularExpressionMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52CB99432A036A61004E9A4A /* URLRegularExpressionMatch.swift */; };
-		6311FFC125AC50E100DC1566 /* String+URL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6311FFC025AC50E100DC1566 /* String+URL.swift */; };
-		6311FFC225AC50E100DC1566 /* String+URL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6311FFC025AC50E100DC1566 /* String+URL.swift */; };
-		635FEE0F25528D3500FEE0FD /* WebShell.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 242C07292371E94D0037D3C2 /* WebShell.framework */; };
-		635FEE1025528D3500FEE0FD /* WebShell.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 242C07292371E94D0037D3C2 /* WebShell.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		6365CE3924A1CD4E004120EF /* WebShellError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6365CE3424A1AD95004120EF /* WebShellError.swift */; };
-		6365CE3B24A1CD59004120EF /* WebShellError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6365CE3424A1AD95004120EF /* WebShellError.swift */; };
-		63FE01EA249CB97200E32599 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 63FE01E9249CB97200E32599 /* SwiftSoup */; };
+		524FEB9D2A7D570C00632315 /* WebShell in Frameworks */ = {isa = PBXBuildFile; productRef = 524FEB9C2A7D570C00632315 /* WebShell */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,13 +23,6 @@
 			remoteGlobalIDString = 27448B2220170ABA001FC925;
 			remoteInfo = WebShellExsample;
 		};
-		635FEE1125528D3500FEE0FD /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 27448B1B20170ABA001FC925 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 242C07282371E94D0037D3C2;
-			remoteInfo = WebShell;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -76,7 +32,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				635FEE1025528D3500FEE0FD /* WebShell.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -84,15 +39,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		24113A3A2371D92D00AEDEAA /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		24113A3C2371D95C00AEDEAA /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		242C07222371E8480037D3C2 /* LinuxMain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LinuxMain.swift; sourceTree = "<group>"; };
-		242C07292371E94D0037D3C2 /* WebShell.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = WebShell.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		246FF0F6228A6F2500B8BE0B /* WebShellExsample.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WebShellExsample.entitlements; sourceTree = "<group>"; };
 		24E60F1621D66180007AB419 /* WebShellCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WebShellCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		24E60F1821D66181007AB419 /* WebShellCoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebShellCoreTests.swift; sourceTree = "<group>"; };
 		24E60F1A21D66181007AB419 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		24F9C6CF20D8E17500E1F88D /* Const.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Const.swift; sourceTree = "<group>"; };
 		27448B2320170ABA001FC925 /* WebShellExsample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WebShellExsample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		27448B2620170ABA001FC925 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		27448B2820170ABA001FC925 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -100,53 +52,13 @@
 		27448B2D20170ABA001FC925 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		27448B2F20170ABA001FC925 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		27448B3020170ABA001FC925 /* CCCHOOO.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CCCHOOO.entitlements; sourceTree = "<group>"; };
-		277C843D2046A45B00D7B2B1 /* WebShell_iOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WebShell_iOS.h; sourceTree = "<group>"; };
-		277C843E2046A45B00D7B2B1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		277C845E2047971D00D7B2B1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		277C84602047971D00D7B2B1 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		277C84632047971D00D7B2B1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		277C84652047971D00D7B2B1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		277C84682047971D00D7B2B1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		277C846A2047971D00D7B2B1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		27C9DBBE204146A100A87E9E /* WebShell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WebShell.h; sourceTree = "<group>"; };
 		27C9DBBF204146A100A87E9E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		52214A662A4C6F3B001EC633 /* SignFileListURLRequestGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignFileListURLRequestGenerator.swift; sourceTree = "<group>"; };
-		52A6E44829D3E819007B0699 /* Combine+Task.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Combine+Task.swift"; sourceTree = "<group>"; };
-		52A6E44B29D3EA06007B0699 /* Saver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Saver.swift; sourceTree = "<group>"; };
-		52A6E44E29D3EF30007B0699 /* Links.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Links.swift; sourceTree = "<group>"; };
-		52A6E45129D3F4FE007B0699 /* DownPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownPage.swift; sourceTree = "<group>"; };
-		52A6E45429D3FD8A007B0699 /* FileID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileID.swift; sourceTree = "<group>"; };
-		52CB99222A036506004E9A4A /* Delay.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Delay.swift; sourceTree = "<group>"; };
-		52CB99232A036506004E9A4A /* AnyCondom.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyCondom.swift; sourceTree = "<group>"; };
-		52CB99242A036506004E9A4A /* SessionContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionContext.swift; sourceTree = "<group>"; };
-		52CB99252A036506004E9A4A /* DownloadURLProgressPublisher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadURLProgressPublisher.swift; sourceTree = "<group>"; };
-		52CB99262A036506004E9A4A /* DownloadURLPublisher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadURLPublisher.swift; sourceTree = "<group>"; };
-		52CB99272A036506004E9A4A /* Condom.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Condom.swift; sourceTree = "<group>"; };
-		52CB99282A036506004E9A4A /* DownloadDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadDelegate.swift; sourceTree = "<group>"; };
-		52CB99292A036506004E9A4A /* Durex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Durex.swift; sourceTree = "<group>"; };
-		52CB992A2A036506004E9A4A /* Request.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Request.swift; sourceTree = "<group>"; };
-		52CB992B2A036506004E9A4A /* AnyValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyValue.swift; sourceTree = "<group>"; };
-		52CB992C2A036506004E9A4A /* DurexError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DurexError.swift; sourceTree = "<group>"; };
-		52CB992D2A036506004E9A4A /* DownloadSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadSession.swift; sourceTree = "<group>"; };
-		52CB993B2A036552004E9A4A /* AnyErase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyErase.swift; sourceTree = "<group>"; };
-		52CB993C2A036552004E9A4A /* PublisherShirk.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PublisherShirk.swift; sourceTree = "<group>"; };
-		52CB993D2A036552004E9A4A /* Locker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Locker.swift; sourceTree = "<group>"; };
-		52CB99412A0365D7004E9A4A /* FileListURLRequestGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileListURLRequestGenerator.swift; sourceTree = "<group>"; };
-		52CB99432A036A61004E9A4A /* URLRegularExpressionMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLRegularExpressionMatch.swift; sourceTree = "<group>"; };
+		524FEB9B2A7D56CB00632315 /* WebShell */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = WebShell; sourceTree = "<group>"; };
 		52DED82429D5420F001DE51B /* webshell.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = webshell.png; sourceTree = "<group>"; };
-		6311FFC025AC50E100DC1566 /* String+URL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+URL.swift"; sourceTree = "<group>"; };
-		6365CE3424A1AD95004120EF /* WebShellError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebShellError.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		242C07262371E94D0037D3C2 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				63FE01EA249CB97200E32599 /* SwiftSoup in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		24E60F1321D66180007AB419 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -158,25 +70,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				635FEE0F25528D3500FEE0FD /* WebShell.framework in Frameworks */,
+				524FEB9D2A7D570C00632315 /* WebShell in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		24113A3E2371DB8800AEDEAA /* Sources */ = {
-			isa = PBXGroup;
-			children = (
-				52CB993A2A036552004E9A4A /* AnyErase */,
-				52CB99212A036506004E9A4A /* Durex */,
-				277C843C2046A45A00D7B2B1 /* WebShell-iOS */,
-				277C845D2047971D00D7B2B1 /* WebShellExample-iOS */,
-				24113A402371DDC700AEDEAA /* WebShell */,
-			);
-			path = Sources;
-			sourceTree = "<group>";
-		};
 		24113A3F2371DB9F00AEDEAA /* Tests */ = {
 			isa = PBXGroup;
 			children = (
@@ -184,24 +84,6 @@
 				24E60F1721D66181007AB419 /* WebShellCoreTests */,
 			);
 			path = Tests;
-			sourceTree = "<group>";
-		};
-		24113A402371DDC700AEDEAA /* WebShell */ = {
-			isa = PBXGroup;
-			children = (
-				24F9C6CF20D8E17500E1F88D /* Const.swift */,
-				52A6E44829D3E819007B0699 /* Combine+Task.swift */,
-				52A6E44B29D3EA06007B0699 /* Saver.swift */,
-				52A6E44E29D3EF30007B0699 /* Links.swift */,
-				52CB99412A0365D7004E9A4A /* FileListURLRequestGenerator.swift */,
-				52214A662A4C6F3B001EC633 /* SignFileListURLRequestGenerator.swift */,
-				52CB99432A036A61004E9A4A /* URLRegularExpressionMatch.swift */,
-				52A6E45129D3F4FE007B0699 /* DownPage.swift */,
-				52A6E45429D3FD8A007B0699 /* FileID.swift */,
-				6365CE3424A1AD95004120EF /* WebShellError.swift */,
-				6311FFC025AC50E100DC1566 /* String+URL.swift */,
-			);
-			path = WebShell;
 			sourceTree = "<group>";
 		};
 		24E60F1721D66181007AB419 /* WebShellCoreTests */ = {
@@ -216,13 +98,12 @@
 		27448B1A20170ABA001FC925 = {
 			isa = PBXGroup;
 			children = (
+				524FEB9A2A7D56CB00632315 /* Packages */,
 				52DED82329D53BFB001DE51B /* Doc */,
 				27448B2520170ABA001FC925 /* CCCHOOO */,
 				27C9DBBD204146A100A87E9E /* WebShell */,
 				24113A3F2371DB9F00AEDEAA /* Tests */,
-				24113A3E2371DB8800AEDEAA /* Sources */,
 				24113A3C2371D95C00AEDEAA /* README.md */,
-				24113A3A2371D92D00AEDEAA /* Package.swift */,
 				246FF0F6228A6F2500B8BE0B /* WebShellExsample.entitlements */,
 				27448B2420170ABA001FC925 /* Products */,
 				635FEE0E25528D3500FEE0FD /* Frameworks */,
@@ -234,7 +115,6 @@
 			children = (
 				27448B2320170ABA001FC925 /* WebShellExsample.app */,
 				24E60F1621D66180007AB419 /* WebShellCoreTests.xctest */,
-				242C07292371E94D0037D3C2 /* WebShell.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -252,28 +132,6 @@
 			path = CCCHOOO;
 			sourceTree = "<group>";
 		};
-		277C843C2046A45A00D7B2B1 /* WebShell-iOS */ = {
-			isa = PBXGroup;
-			children = (
-				277C843D2046A45B00D7B2B1 /* WebShell_iOS.h */,
-				277C843E2046A45B00D7B2B1 /* Info.plist */,
-			);
-			path = "WebShell-iOS";
-			sourceTree = "<group>";
-		};
-		277C845D2047971D00D7B2B1 /* WebShellExample-iOS */ = {
-			isa = PBXGroup;
-			children = (
-				277C845E2047971D00D7B2B1 /* AppDelegate.swift */,
-				277C84602047971D00D7B2B1 /* ViewController.swift */,
-				277C84622047971D00D7B2B1 /* Main.storyboard */,
-				277C84652047971D00D7B2B1 /* Assets.xcassets */,
-				277C84672047971D00D7B2B1 /* LaunchScreen.storyboard */,
-				277C846A2047971D00D7B2B1 /* Info.plist */,
-			);
-			path = "WebShellExample-iOS";
-			sourceTree = "<group>";
-		};
 		27C9DBBD204146A100A87E9E /* WebShell */ = {
 			isa = PBXGroup;
 			children = (
@@ -283,33 +141,12 @@
 			path = WebShell;
 			sourceTree = "<group>";
 		};
-		52CB99212A036506004E9A4A /* Durex */ = {
+		524FEB9A2A7D56CB00632315 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				52CB99222A036506004E9A4A /* Delay.swift */,
-				52CB99232A036506004E9A4A /* AnyCondom.swift */,
-				52CB99242A036506004E9A4A /* SessionContext.swift */,
-				52CB99252A036506004E9A4A /* DownloadURLProgressPublisher.swift */,
-				52CB99262A036506004E9A4A /* DownloadURLPublisher.swift */,
-				52CB99272A036506004E9A4A /* Condom.swift */,
-				52CB99282A036506004E9A4A /* DownloadDelegate.swift */,
-				52CB99292A036506004E9A4A /* Durex.swift */,
-				52CB992A2A036506004E9A4A /* Request.swift */,
-				52CB992B2A036506004E9A4A /* AnyValue.swift */,
-				52CB992C2A036506004E9A4A /* DurexError.swift */,
-				52CB992D2A036506004E9A4A /* DownloadSession.swift */,
+				524FEB9B2A7D56CB00632315 /* WebShell */,
 			);
-			path = Durex;
-			sourceTree = "<group>";
-		};
-		52CB993A2A036552004E9A4A /* AnyErase */ = {
-			isa = PBXGroup;
-			children = (
-				52CB993B2A036552004E9A4A /* AnyErase.swift */,
-				52CB993C2A036552004E9A4A /* PublisherShirk.swift */,
-				52CB993D2A036552004E9A4A /* Locker.swift */,
-			);
-			path = AnyErase;
+			name = Packages;
 			sourceTree = "<group>";
 		};
 		52DED82329D53BFB001DE51B /* Doc */ = {
@@ -329,38 +166,7 @@
 		};
 /* End PBXGroup section */
 
-/* Begin PBXHeadersBuildPhase section */
-		242C07242371E94D0037D3C2 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXHeadersBuildPhase section */
-
 /* Begin PBXNativeTarget section */
-		242C07282371E94D0037D3C2 /* WebShell */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 242C07322371E94D0037D3C2 /* Build configuration list for PBXNativeTarget "WebShell" */;
-			buildPhases = (
-				242C07242371E94D0037D3C2 /* Headers */,
-				242C07252371E94D0037D3C2 /* Sources */,
-				242C07262371E94D0037D3C2 /* Frameworks */,
-				242C07272371E94D0037D3C2 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = WebShell;
-			packageProductDependencies = (
-				63FE01E9249CB97200E32599 /* SwiftSoup */,
-			);
-			productName = WebShell;
-			productReference = 242C07292371E94D0037D3C2 /* WebShell.framework */;
-			productType = "com.apple.product-type.framework";
-		};
 		24E60F1521D66180007AB419 /* WebShellCoreTests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 24E60F1E21D66181007AB419 /* Build configuration list for PBXNativeTarget "WebShellCoreTests" */;
@@ -391,9 +197,11 @@
 			buildRules = (
 			);
 			dependencies = (
-				635FEE1225528D3500FEE0FD /* PBXTargetDependency */,
 			);
 			name = WebShellExsample;
+			packageProductDependencies = (
+				524FEB9C2A7D570C00632315 /* WebShell */,
+			);
 			productName = CCCHOOO;
 			productReference = 27448B2320170ABA001FC925 /* WebShellExsample.app */;
 			productType = "com.apple.product-type.application";
@@ -408,10 +216,6 @@
 				LastUpgradeCheck = 1420;
 				ORGANIZATIONNAME = ascp;
 				TargetAttributes = {
-					242C07282371E94D0037D3C2 = {
-						CreatedOnToolsVersion = 11.2;
-						ProvisioningStyle = Automatic;
-					};
 					24E60F1521D66180007AB419 = {
 						CreatedOnToolsVersion = 10.1;
 						LastSwiftMigration = 1020;
@@ -439,7 +243,6 @@
 			);
 			mainGroup = 27448B1A20170ABA001FC925;
 			packageReferences = (
-				63FE01E8249CB97200E32599 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 			);
 			productRefGroup = 27448B2420170ABA001FC925 /* Products */;
 			projectDirPath = "";
@@ -447,19 +250,11 @@
 			targets = (
 				27448B2220170ABA001FC925 /* WebShellExsample */,
 				24E60F1521D66180007AB419 /* WebShellCoreTests */,
-				242C07282371E94D0037D3C2 /* WebShell */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		242C07272371E94D0037D3C2 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		24E60F1421D66180007AB419 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -479,52 +274,10 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		242C07252371E94D0037D3C2 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				52CB993F2A036552004E9A4A /* PublisherShirk.swift in Sources */,
-				52A6E44A29D3E819007B0699 /* Combine+Task.swift in Sources */,
-				52CB99352A036506004E9A4A /* Durex.swift in Sources */,
-				52CB99312A036506004E9A4A /* DownloadURLProgressPublisher.swift in Sources */,
-				52CB992E2A036506004E9A4A /* Delay.swift in Sources */,
-				52CB99422A0365D7004E9A4A /* FileListURLRequestGenerator.swift in Sources */,
-				52214A682A4C6F3B001EC633 /* SignFileListURLRequestGenerator.swift in Sources */,
-				52CB99322A036506004E9A4A /* DownloadURLPublisher.swift in Sources */,
-				52A6E45329D3F4FE007B0699 /* DownPage.swift in Sources */,
-				52A6E44D29D3EA06007B0699 /* Saver.swift in Sources */,
-				6311FFC225AC50E100DC1566 /* String+URL.swift in Sources */,
-				52CB99302A036506004E9A4A /* SessionContext.swift in Sources */,
-				52CB99402A036552004E9A4A /* Locker.swift in Sources */,
-				6365CE3924A1CD4E004120EF /* WebShellError.swift in Sources */,
-				52CB99442A036A61004E9A4A /* URLRegularExpressionMatch.swift in Sources */,
-				52CB99372A036506004E9A4A /* AnyValue.swift in Sources */,
-				52CB99342A036506004E9A4A /* DownloadDelegate.swift in Sources */,
-				52CB99362A036506004E9A4A /* Request.swift in Sources */,
-				52CB99332A036506004E9A4A /* Condom.swift in Sources */,
-				52CB993E2A036552004E9A4A /* AnyErase.swift in Sources */,
-				52A6E45629D3FD8A007B0699 /* FileID.swift in Sources */,
-				52CB992F2A036506004E9A4A /* AnyCondom.swift in Sources */,
-				52CB99392A036506004E9A4A /* DownloadSession.swift in Sources */,
-				52A6E45029D3EF30007B0699 /* Links.swift in Sources */,
-				52CB99382A036506004E9A4A /* DurexError.swift in Sources */,
-				242C07392371E9B10037D3C2 /* Const.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		24E60F1221D66180007AB419 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				24E60F3921D66466007AB419 /* Const.swift in Sources */,
-				52A6E44929D3E819007B0699 /* Combine+Task.swift in Sources */,
-				6311FFC125AC50E100DC1566 /* String+URL.swift in Sources */,
-				52A6E45229D3F4FE007B0699 /* DownPage.swift in Sources */,
-				52214A672A4C6F3B001EC633 /* SignFileListURLRequestGenerator.swift in Sources */,
-				6365CE3B24A1CD59004120EF /* WebShellError.swift in Sources */,
-				52A6E45529D3FD8A007B0699 /* FileID.swift in Sources */,
-				52A6E44C29D3EA06007B0699 /* Saver.swift in Sources */,
-				52A6E44F29D3EF30007B0699 /* Links.swift in Sources */,
 				24E60F1921D66181007AB419 /* WebShellCoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -546,11 +299,6 @@
 			target = 27448B2220170ABA001FC925 /* WebShellExsample */;
 			targetProxy = 24E60F3721D663F5007AB419 /* PBXContainerItemProxy */;
 		};
-		635FEE1225528D3500FEE0FD /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 242C07282371E94D0037D3C2 /* WebShell */;
-			targetProxy = 635FEE1125528D3500FEE0FD /* PBXContainerItemProxy */;
-		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
@@ -562,98 +310,9 @@
 			name = Main.storyboard;
 			sourceTree = "<group>";
 		};
-		277C84622047971D00D7B2B1 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				277C84632047971D00D7B2B1 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-		277C84672047971D00D7B2B1 /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				277C84682047971D00D7B2B1 /* Base */,
-			);
-			name = LaunchScreen.storyboard;
-			sourceTree = "<group>";
-		};
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		242C07332371E94D0037D3C2 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CODE_SIGN_IDENTITY = "-";
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
-				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = A272626J38;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = WebShell/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.ascp.WebShell;
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SKIP_INSTALL = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
-		242C07342371E94D0037D3C2 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CODE_SIGN_IDENTITY = "-";
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
-				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = A272626J38;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = WebShell/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.ascp.WebShell;
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SKIP_INSTALL = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Release;
-		};
 		24E60F1F21D66181007AB419 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -861,15 +520,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		242C07322371E94D0037D3C2 /* Build configuration list for PBXNativeTarget "WebShell" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				242C07332371E94D0037D3C2 /* Debug */,
-				242C07342371E94D0037D3C2 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		24E60F1E21D66181007AB419 /* Build configuration list for PBXNativeTarget "WebShellCoreTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -899,22 +549,10 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		63FE01E8249CB97200E32599 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/scinfu/SwiftSoup";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.3.2;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
 /* Begin XCSwiftPackageProductDependency section */
-		63FE01E9249CB97200E32599 /* SwiftSoup */ = {
+		524FEB9C2A7D570C00632315 /* WebShell */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 63FE01E8249CB97200E32599 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
-			productName = SwiftSoup;
+			productName = WebShell;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -132,7 +132,7 @@ public struct StringParserDataTask {
             }
 #if DEBUG
             .follow {
-                logger.info("[\(type(of: self))] utf8 text: \($0)")
+                shellLogger.info("[\(type(of: self))] utf8 text: \($0)")
             }
 #endif
             .eraseToAnyPublisher()
@@ -187,14 +187,14 @@ public struct GeneralLinks: SessionableCondom {
                     do {
                         return try GeneralFileDownload(url: $0.absoluteString, refer: refer).make()
                     }   catch   {
-                        logger.error("download url make failed \(error)")
+                        shellLogger.error("download url make failed \(error)")
                         return nil
                     }
                 }
             }
         #if DEBUG
             .follow({
-                logger.info("[GeneralLinks] find download links \($0)")
+                shellLogger.info("[GeneralLinks] find download links \($0)")
             })
         #endif
             .eraseToAnyPublisher()
@@ -228,7 +228,7 @@ public struct SignLinks: SessionableCondom {
             .map { urls in
                 guard let inputURL = inputValue.url else {
 #if DEBUG
-                    logger.error("[\(type(of: self))] inputValue url is nil. \(inputValue)")
+                    shellLogger.error("[\(type(of: self))] inputValue url is nil. \(inputValue)")
 #endif
                     return []
                 }
@@ -237,14 +237,14 @@ public struct SignLinks: SessionableCondom {
                     do {
                         return try SignPHPFileDownload(url: $0.absoluteString, refer: refer).make()
                     }   catch   {
-                        logger.error("download url make failed \(error)")
+                        shellLogger.error("download url make failed \(error)")
                         return nil
                     }
                 }
             }
         #if DEBUG
             .follow({
-                logger.error("[\(type(of: self))] find download links \($0)")
+                shellLogger.error("[\(type(of: self))] find download links \($0)")
             })
         #endif
             .eraseToAnyPublisher()
@@ -301,7 +301,7 @@ public struct DownloadLinks<Matcher: ContentMatch, RequestBuilder: DownloadReque
                     do {
                         return try requestBuilder.make($0.absoluteString, refer: BaseURL(url: inputValue.url).domainURL())
                     }   catch   {
-                        logger.error("download url make failed \(error)")
+                        shellLogger.error("download url make failed \(error)")
                         return nil
                     }
                 }
@@ -358,21 +358,21 @@ struct BaseURL {
     func replaceHost(_ otherURL: URL) -> URL? {
         guard let url = url else {
 #if DEBUG
-            logger.error("replace url failed. nil url")
+            shellLogger.error("replace url failed. nil url")
 #endif
             return nil
         }
         
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
 #if DEBUG
-            logger.error("replace url failed. use origin \(url)")
+            shellLogger.error("replace url failed. use origin \(url)")
 #endif
             return url
         }
         
         guard let next = components.url(relativeTo: otherURL) else {
 #if DEBUG
-            logger.error("replace url failed. use origin \(url)")
+            shellLogger.error("replace url failed. use origin \(url)")
 #endif
             return url
         }

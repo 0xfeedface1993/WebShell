@@ -20,7 +20,7 @@ public protocol FileIDFinder {
 
 extension FileIDFinder where Self == FileIDMatch {
     public static var `default`: Self {
-        FileIDMatch("\\-(\\w+)\\.\\w+")
+        FileIDMatch("\\-(\\w+)\\.\\w+$")
     }
     
     public static var loadDownAddr1: Self {

@@ -194,12 +194,12 @@ public struct SignFileDownPage: Condom {
         do {
             let request = try request(inputValue)
 #if DEBUG
-            logger.info("[\(type(of: self))] make raw down page URLRequest \(request).")
+            shellLogger.info("[\(type(of: self))] make raw down page URLRequest \(request).")
 #endif
             return AnyValue(request).eraseToAnyPublisher()
         } catch {
 #if DEBUG
-            logger.error("[\(type(of: self))] make raw down page URLRequest failed.")
+            shellLogger.error("[\(type(of: self))] make raw down page URLRequest failed.")
 #endif
             return Fail(error: error).eraseToAnyPublisher()
         }
@@ -245,12 +245,12 @@ public struct RawDownPage: Condom {
         do {
             let request = try request(inputValue)
 #if DEBUG
-            logger.info("[\(type(of: self))] make raw down page URLRequest \(request).")
+            shellLogger.info("[\(type(of: self))] make raw down page URLRequest \(request).")
 #endif
             return AnyValue(request).eraseToAnyPublisher()
         } catch {
 #if DEBUG
-            logger.error("[\(type(of: self))] make raw down page URLRequest failed.")
+            shellLogger.error("[\(type(of: self))] make raw down page URLRequest failed.")
 #endif
             return Fail(error: error).eraseToAnyPublisher()
         }
