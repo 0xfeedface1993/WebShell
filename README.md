@@ -27,6 +27,7 @@ This framework serves as the foundation for other apps, and one of the core abil
 | www.xingyaoclouds.com | `RedirectEnablePage`、`ActionDownPage`、`PHPLinks` | done |
 | www.rarp.cc | `HTTPString`、`RedirectEnablePage`、`FileListURLRequestInPageGenerator`、`PHPLinks` | done |
 | www.567file.com | 'RedirectEnablePage'、'SignFileListURLRequestGenerator'、'PHPLinks' | done |
+| www.iycdn.com | `TowerGroup`、'PHPLinks' | done |
 | www.xfpan.cc | - | host down |
 | www.kufile.net | - | host down |
 

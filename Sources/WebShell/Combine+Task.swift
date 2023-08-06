@@ -32,6 +32,8 @@ public enum ShellError: Error {
     case decodingFailed(String.Encoding)
     /// 重定向
     case redirect(URL)
+    /// 没有正则匹配
+    case regulaNotMatch(String)
 }
 
 //extension URLSession {

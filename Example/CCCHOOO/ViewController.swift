@@ -23,6 +23,23 @@ class ViewController: NSViewController {
 
         // Do any additional setup after loading the view.
         
+        let link = "https://www.iycdn.com/file-213019.html"
+        
+        cancellable = TowerGroup("load_down_addr2")
+            .join(PHPLinks())
+            .join(Saver(.override))
+            .publisher(for: link)
+            .sink { complete in
+                switch complete {
+                case .finished:
+                    break
+                case .failure(let error):
+                    print(">>> download error \(error)")
+                }
+            } receiveValue: { url in
+                print(">>> download file at \(url)")
+            }
+        
 //        let link = "http://www.xueqiupan.com/file-672734.html"
 //
 //        cancellable = DownPage(.default)
@@ -236,7 +253,6 @@ class ViewController: NSViewController {
 //        let feemoo3 = Ccchooo(urlString: "http://www.ccchoo.com/down-51745.html")
 //        feemoo3.downloadStateController = DownloadStateController
 //        feemoo3.begin()
-        
     }
 
     override var representedObject: Any? {

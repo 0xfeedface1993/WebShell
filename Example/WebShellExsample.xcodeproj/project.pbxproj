@@ -7,12 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		24E60F1921D66181007AB419 /* WebShellCoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E60F1821D66181007AB419 /* WebShellCoreTests.swift */; };
 		27448B2720170ABA001FC925 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B2620170ABA001FC925 /* AppDelegate.swift */; };
 		27448B2920170ABA001FC925 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B2820170ABA001FC925 /* ViewController.swift */; };
 		27448B2B20170ABA001FC925 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 27448B2A20170ABA001FC925 /* Assets.xcassets */; };
 		27448B2E20170ABA001FC925 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 27448B2C20170ABA001FC925 /* Main.storyboard */; };
-		524FEB9D2A7D570C00632315 /* WebShell in Frameworks */ = {isa = PBXBuildFile; productRef = 524FEB9C2A7D570C00632315 /* WebShell */; };
+		5294AA492A7E9CC700FE549E /* LinuxMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5294AA452A7E9CC700FE549E /* LinuxMain.swift */; };
+		5294AA4A2A7E9CC700FE549E /* WebShellCoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5294AA472A7E9CC700FE549E /* WebShellCoreTests.swift */; };
+		5294AA4B2A7E9CC700FE549E /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5294AA482A7E9CC700FE549E /* Info.plist */; };
+		5294AA502A7E9D5100FE549E /* WebShell in Frameworks */ = {isa = PBXBuildFile; productRef = 5294AA4F2A7E9D5100FE549E /* WebShell */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,12 +41,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		24113A3C2371D95C00AEDEAA /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		242C07222371E8480037D3C2 /* LinuxMain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LinuxMain.swift; sourceTree = "<group>"; };
 		246FF0F6228A6F2500B8BE0B /* WebShellExsample.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WebShellExsample.entitlements; sourceTree = "<group>"; };
 		24E60F1621D66180007AB419 /* WebShellCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WebShellCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		24E60F1821D66181007AB419 /* WebShellCoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebShellCoreTests.swift; sourceTree = "<group>"; };
-		24E60F1A21D66181007AB419 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		27448B2320170ABA001FC925 /* WebShellExsample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WebShellExsample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		27448B2620170ABA001FC925 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		27448B2820170ABA001FC925 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -54,8 +52,11 @@
 		27448B3020170ABA001FC925 /* CCCHOOO.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CCCHOOO.entitlements; sourceTree = "<group>"; };
 		27C9DBBE204146A100A87E9E /* WebShell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WebShell.h; sourceTree = "<group>"; };
 		27C9DBBF204146A100A87E9E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		524FEB9B2A7D56CB00632315 /* WebShell */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = WebShell; sourceTree = "<group>"; };
-		52DED82429D5420F001DE51B /* webshell.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = webshell.png; sourceTree = "<group>"; };
+		5294AA432A7E9CB200FE549E /* webshell.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = webshell.png; sourceTree = "<group>"; };
+		5294AA452A7E9CC700FE549E /* LinuxMain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LinuxMain.swift; sourceTree = "<group>"; };
+		5294AA472A7E9CC700FE549E /* WebShellCoreTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebShellCoreTests.swift; sourceTree = "<group>"; };
+		5294AA482A7E9CC700FE549E /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5294AA4E2A7E9CEF00FE549E /* WebShell */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = WebShell; path = ..; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,40 +71,21 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				524FEB9D2A7D570C00632315 /* WebShell in Frameworks */,
+				5294AA502A7E9D5100FE549E /* WebShell in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		24113A3F2371DB9F00AEDEAA /* Tests */ = {
-			isa = PBXGroup;
-			children = (
-				242C07222371E8480037D3C2 /* LinuxMain.swift */,
-				24E60F1721D66181007AB419 /* WebShellCoreTests */,
-			);
-			path = Tests;
-			sourceTree = "<group>";
-		};
-		24E60F1721D66181007AB419 /* WebShellCoreTests */ = {
-			isa = PBXGroup;
-			children = (
-				24E60F1821D66181007AB419 /* WebShellCoreTests.swift */,
-				24E60F1A21D66181007AB419 /* Info.plist */,
-			);
-			path = WebShellCoreTests;
-			sourceTree = "<group>";
-		};
 		27448B1A20170ABA001FC925 = {
 			isa = PBXGroup;
 			children = (
+				5294AA442A7E9CC700FE549E /* Tests */,
+				5294AA422A7E9CB200FE549E /* Doc */,
 				524FEB9A2A7D56CB00632315 /* Packages */,
-				52DED82329D53BFB001DE51B /* Doc */,
 				27448B2520170ABA001FC925 /* CCCHOOO */,
 				27C9DBBD204146A100A87E9E /* WebShell */,
-				24113A3F2371DB9F00AEDEAA /* Tests */,
-				24113A3C2371D95C00AEDEAA /* README.md */,
 				246FF0F6228A6F2500B8BE0B /* WebShellExsample.entitlements */,
 				27448B2420170ABA001FC925 /* Products */,
 				635FEE0E25528D3500FEE0FD /* Frameworks */,
@@ -144,17 +126,37 @@
 		524FEB9A2A7D56CB00632315 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				524FEB9B2A7D56CB00632315 /* WebShell */,
+				5294AA4E2A7E9CEF00FE549E /* WebShell */,
 			);
 			name = Packages;
 			sourceTree = "<group>";
 		};
-		52DED82329D53BFB001DE51B /* Doc */ = {
+		5294AA422A7E9CB200FE549E /* Doc */ = {
 			isa = PBXGroup;
 			children = (
-				52DED82429D5420F001DE51B /* webshell.png */,
+				5294AA432A7E9CB200FE549E /* webshell.png */,
 			);
-			path = Doc;
+			name = Doc;
+			path = ../Doc;
+			sourceTree = "<group>";
+		};
+		5294AA442A7E9CC700FE549E /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				5294AA452A7E9CC700FE549E /* LinuxMain.swift */,
+				5294AA462A7E9CC700FE549E /* WebShellCoreTests */,
+			);
+			name = Tests;
+			path = ../Tests;
+			sourceTree = "<group>";
+		};
+		5294AA462A7E9CC700FE549E /* WebShellCoreTests */ = {
+			isa = PBXGroup;
+			children = (
+				5294AA472A7E9CC700FE549E /* WebShellCoreTests.swift */,
+				5294AA482A7E9CC700FE549E /* Info.plist */,
+			);
+			path = WebShellCoreTests;
 			sourceTree = "<group>";
 		};
 		635FEE0E25528D3500FEE0FD /* Frameworks */ = {
@@ -200,7 +202,7 @@
 			);
 			name = WebShellExsample;
 			packageProductDependencies = (
-				524FEB9C2A7D570C00632315 /* WebShell */,
+				5294AA4F2A7E9D5100FE549E /* WebShell */,
 			);
 			productName = CCCHOOO;
 			productReference = 27448B2320170ABA001FC925 /* WebShellExsample.app */;
@@ -259,6 +261,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5294AA4B2A7E9CC700FE549E /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -278,7 +281,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				24E60F1921D66181007AB419 /* WebShellCoreTests.swift in Sources */,
+				5294AA4A2A7E9CC700FE549E /* WebShellCoreTests.swift in Sources */,
+				5294AA492A7E9CC700FE549E /* LinuxMain.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -550,7 +554,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		524FEB9C2A7D570C00632315 /* WebShell */ = {
+		5294AA4F2A7E9D5100FE549E /* WebShell */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WebShell;
 		};

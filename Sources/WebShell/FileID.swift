@@ -38,7 +38,7 @@ extension FileIDFinder where Self == FileIDMatch {
 
 /// 从链接中提取fileid，`http://xxxx/file-123456.html`提取fileid`123456`
 public struct FileIDMatch: FileIDFinder {
-    var pattern = "\\-(\\w+)\\.\\w+"
+    var pattern = "\\-(\\w+)\\.\\w+$"
     
     public init(_ pattern: String) {
         self.pattern = pattern
@@ -49,7 +49,7 @@ public struct FileIDMatch: FileIDFinder {
             let regx = try Regex(pattern)
             guard let match = text.firstMatch(of: regx),
                     let fileid = match.output[1].substring else {
-                throw ShellError.badURL(text)
+                throw ShellError.regulaNotMatch(text)
             }
             return String(fileid)
         } else {
@@ -57,7 +57,7 @@ public struct FileIDMatch: FileIDFinder {
             let regx = try NSRegularExpression(pattern: pattern)
             let nsString = text as NSString
             guard let result = regx.firstMatch(in: text, range: .init(location: 0, length: nsString.length)) else {
-                throw ShellError.badURL(text)
+                throw ShellError.regulaNotMatch(text)
             }
             return regx.replacementString(for: result, in: text, offset: 0, template: "$1")
         }

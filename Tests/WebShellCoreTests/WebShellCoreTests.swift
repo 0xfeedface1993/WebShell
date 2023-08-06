@@ -51,4 +51,8 @@ class WebShellCoreTests: XCTestCase {
         XCTAssert(link != nil, "未找到地址")
         XCTAssert(link!.absoluteString == fileLink, "地址解析失败：\(link!.absoluteString)")
     }
+    
+    func testAsciiMD5() throws {
+        XCTAssert("f273dad1289b7bfd1a9be6376813b922".asciiHexMD5String() == "043dab3b1919027b4df82aea32a649b8", "md5 failed!")
+    }
 }

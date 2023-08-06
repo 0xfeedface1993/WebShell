@@ -16,3 +16,31 @@ extension String {
         return addingPercentEncoding(withAllowedCharacters: sets) ?? ""
     }
 }
+
+public protocol URLValidator {
+    /// 读取URL的host和scheme
+    func baseComponents() throws -> (host: String, scheme: String)
+}
+
+extension String: URLValidator {
+    public func baseComponents() throws -> (host: String, scheme: String) {
+        guard let url = URL(string: self) else {
+            throw ShellError.badURL(self)
+        }
+        return try url.baseComponents()
+    }
+}
+
+extension URL: URLValidator {
+    public func baseComponents() throws -> (host: String, scheme: String) {
+        guard let component = URLComponents(url: self, resolvingAgainstBaseURL: false) else {
+            throw ShellError.badURL(absoluteString)
+        }
+        
+        guard let host = component.host, let scheme = component.scheme else {
+            throw ShellError.badURL(absoluteString)
+        }
+        
+        return (host, scheme)
+    }
+}
