@@ -9,7 +9,11 @@
 import Cocoa
 import WebKit
 import WebShell
+#if COMBINE_LINUX && canImport(CombineX)
+import CombineX
+#else
 import Combine
+#endif
 
 class ViewController: NSViewController {
     @IBOutlet var DownloadStateController: NSArrayController!

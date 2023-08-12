@@ -7,7 +7,11 @@
 //
 
 import Foundation
+#if COMBINE_LINUX && canImport(CombineX)
+import CombineX
+#else
 import Combine
+#endif
 import Logging
 #if canImport(Durex)
 import Durex

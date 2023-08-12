@@ -6,7 +6,11 @@
 //
 
 import Foundation
+#if COMBINE_LINUX && canImport(CombineX)
+import CombineX
+#else
 import Combine
+#endif
 import Logging
 
 internal let logger = Logger(label: "com.ascp.download")

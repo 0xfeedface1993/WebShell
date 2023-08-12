@@ -10,7 +10,11 @@
 import Durex
 #endif
 import Foundation
+#if COMBINE_LINUX && canImport(CombineX)
+import CombineX
+#else
 import Combine
+#endif
 
 /// 从多个下载下载链接中下载文件, 保存到`Downloads`目录，目前只使用第一个链接
 public struct Saver: SessionableCondom {

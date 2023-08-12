@@ -3,6 +3,8 @@
 
 import PackageDescription
 
+let swiftSettings: [SwiftSetting] = [.define("COMBINE_LINUX", .when(platforms: [.linux]))]
+
 let package = Package(
     name: "WebShell",
     platforms: [
@@ -14,15 +16,29 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.2"),
+        //        .package(url: "https://github.com/0xfeedface1993/OpenCombine.git", from: "0.15.0"),
+        .package(url: "https://github.com/cx-org/CombineX.git", from: "0.4.0"),
     ],
     targets: [
-        .target(name: "WebShell", dependencies: ["Durex"]),
-        .testTarget(name: "WebShellCoreTests", dependencies: ["WebShell"]),
+        .target(
+            name: "WebShell",
+            dependencies: ["Durex"],
+            swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "WebShellCoreTests",
+            dependencies: ["WebShell"],
+            swiftSettings: swiftSettings
+        ),
         .target(
             name: "AnyErase",
-            dependencies: ["Logging"]),
+            dependencies: ["Logging", "CombineX"],
+            swiftSettings: swiftSettings
+        ),
         .target(
             name: "Durex",
-            dependencies: ["AnyErase"]),
+            dependencies: ["AnyErase"],
+            swiftSettings: swiftSettings
+        ),
     ]
 )

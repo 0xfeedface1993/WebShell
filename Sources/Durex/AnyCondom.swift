@@ -6,7 +6,11 @@
 //
 
 import Foundation
+#if COMBINE_LINUX && canImport(CombineX)
+import CombineX
+#else
 import Combine
+#endif
 
 public struct AnyCondom<Input, Output>: Condom where Input: ContextValue, Output: ContextValue {
     @usableFromInline

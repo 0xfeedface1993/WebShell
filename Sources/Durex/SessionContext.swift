@@ -6,7 +6,12 @@
 //
 
 import Foundation
+#if COMBINE_LINUX && canImport(CombineX)
+import CombineX
+import CXFoundation
+#else
 import Combine
+#endif
 #if canImport(AnyErase)
 import AnyErase
 #endif
@@ -100,7 +105,7 @@ enum Sessions: Hashable {
 }
 
 public final class SessionPoolState {
-    @Published var context: SessionContext?
+    var context: SessionContext?
     
     init(_ context: SessionContext?) {
         self.context = context
@@ -114,7 +119,7 @@ public enum SessionPool {
 extension SessionPool {
     private static func state(for key: any Hashable) -> AnyPublisher<SessionPoolState, Error> {
         Just(Sessions(key))
-            .receive(on: DispatchQueue.main)
+            .receive(on: DispatchQueue.main.scheduler)
             .tryMap {
                 try $0.take()
             }
@@ -123,7 +128,7 @@ extension SessionPool {
     
     public static func register(_ pool: SessionContext, forKey key: any Hashable) -> AnyPublisher<SessionContext, Never> {
         Just(Sessions(key))
-            .receive(on: DispatchQueue.main)
+            .receive(on: DispatchQueue.main.scheduler)
             .map {
                 $0.store(pool)
             }
@@ -132,7 +137,7 @@ extension SessionPool {
     
     public static func remove(by key: any Hashable) -> AnyPublisher<Void, Never> {
         Just(Sessions(key))
-            .receive(on: DispatchQueue.main)
+            .receive(on: DispatchQueue.main.scheduler)
             .map {
                 $0.clear()
             }
@@ -141,7 +146,7 @@ extension SessionPool {
     
     public static func context(_ key: any Hashable) -> AnyPublisher<SessionContext, Error> {
         Just(Sessions(key))
-            .receive(on: DispatchQueue.main)
+            .receive(on: DispatchQueue.main.scheduler)
             .tryMap {
                 try $0.take().context
             }
@@ -215,7 +220,7 @@ public struct PoolMaker {
                 .eraseToAnyPublisher()
         }
         return AnyValue((context, key))
-            .receive(on: DispatchQueue.main)
+            .receive(on: DispatchQueue.main.scheduler)
             .follow(_store(_:forKey:))
             .map(\.0)
             .eraseToAnyPublisher()

@@ -7,7 +7,9 @@
 
 import Foundation
 
-#if canImport(Combine)
+#if COMBINE_LINUX && canImport(CombineX)
+import CombineX
+#else
 import Combine
 #endif
 
@@ -40,7 +42,7 @@ public struct Delay<T, V>: Condom {
     public func empty() -> AnyPublisher<Output, Error> {
         Just(.empty)
             .setFailureType(to: Error.self)
-            .delay(for: 2, tolerance: nil, scheduler: RunLoop.current)
+            .delay(for: 2, tolerance: nil, scheduler: RunLoop.current.scheduler)
             .eraseToAnyPublisher()
     }
 }

@@ -6,7 +6,11 @@
 //
 
 import Foundation
+#if COMBINE_LINUX && canImport(CombineX)
+import CombineX
+#else
 import Combine
+#endif
 import os.log
 #if canImport(AnyErase)
 import AnyErase
