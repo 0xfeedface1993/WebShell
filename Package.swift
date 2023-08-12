@@ -18,6 +18,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.2"),
         //        .package(url: "https://github.com/0xfeedface1993/OpenCombine.git", from: "0.15.0"),
         .package(url: "https://github.com/cx-org/CombineX.git", from: "0.4.0"),
+        .package(url: "https://github.com/apple/swift-crypto.git", .upToNextMajor(from: "2.0.0")),
     ],
     targets: [
         .target(
@@ -37,7 +38,7 @@ let package = Package(
         ),
         .target(
             name: "Durex",
-            dependencies: ["AnyErase"],
+            dependencies: ["AnyErase", .product(name: "Crypto", package: "swift-crypto")],
             swiftSettings: swiftSettings
         ),
     ]

@@ -6,7 +6,12 @@
 //
 
 import Foundation
+
+#if COMBINE_LINUX && canImport(CombineX)
+import Crypto
+#else
 import CryptoKit
+#endif
 
 struct MD5Crypto {
     let text: String
