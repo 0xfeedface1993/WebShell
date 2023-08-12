@@ -11,7 +11,7 @@ import CombineX
 #else
 import Combine
 #endif
-import os.log
+import Logging
 #if canImport(AnyErase)
 import AnyErase
 #endif
