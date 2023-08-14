@@ -1,4 +1,4 @@
-// swift-tools-version:5.1
+// swift-tools-version:5.8
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -17,7 +17,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.2"),
         //        .package(url: "https://github.com/0xfeedface1993/OpenCombine.git", from: "0.15.0"),
-        .package(url: "https://github.com/cx-org/CombineX.git", from: "0.4.0"),
+        .package(url: "https://github.com/0xfeedface1993/CombineX.git", branch: "master"),
         .package(url: "https://github.com/apple/swift-crypto.git", .upToNextMajor(from: "2.0.0")),
     ],
     targets: [
