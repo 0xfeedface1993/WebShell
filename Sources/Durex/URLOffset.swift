@@ -22,18 +22,7 @@ public struct URLOffset {
     }
     
     private func host() -> String? {
-        if #available(macOS 13.0, *) {
-            guard let host = rawURL.host(percentEncoded: false) else {
-                return nil
-            }
-            return host
-        } else {
-            // Fallback on earlier versions
-            guard let host = rawURL.host else {
-                return nil
-            }
-            return host
-        }
+        rawURL.unitiedHost()
     }
     
     private func matchHost(in string: String) throws -> String {
@@ -65,5 +54,20 @@ public struct URLOffset {
 #endif
             return (string as NSString).substring(with: range)
         }
+    }
+}
+
+extension URL {
+    func unitiedHost() -> String? {
+        #if os(macOS) && os(iOS) && os(watchOS)
+        if #available(macOS 13.0, *) {
+            return host(percentEncoded: false)
+        } else {
+            // Fallback on earlier versions
+            return host
+        }
+        #else
+        return host
+        #endif
     }
 }
