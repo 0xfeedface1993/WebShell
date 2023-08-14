@@ -33,12 +33,18 @@ let package = Package(
         ),
         .target(
             name: "AnyErase",
-            dependencies: ["Logging", "CombineX"],
+            dependencies: [
+                .product(name: "CombineX", package: "CombineX"),
+                .product(name: "Logging", package: "swift-log"),
+            ],
             swiftSettings: swiftSettings
         ),
         .target(
             name: "Durex",
-            dependencies: ["AnyErase", .product(name: "Crypto", package: "swift-crypto")],
+            dependencies: [
+                "AnyErase",
+                .product(name: "Crypto", package: "swift-crypto")
+            ],
             swiftSettings: swiftSettings
         ),
     ]
