@@ -8,6 +8,10 @@
 
 import Foundation
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 public enum WebShellError: Error {
     public enum RequestReason {
         case emptyRequest

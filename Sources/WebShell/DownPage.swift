@@ -16,6 +16,10 @@ import CombineX
 import Combine
 #endif
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 /// 从下载链接中抓取fileid，并生成下载link页面请求，
 /// 如：`/file-12345.html` -> 取出`12345`，
 /// 然后生成`action=load_down_addr1&file_id=12345的body`请求`ajax.php`

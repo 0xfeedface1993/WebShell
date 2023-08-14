@@ -12,8 +12,13 @@ import CombineX
 #else
 import Combine
 #endif
+
 #if canImport(Durex)
 import Durex
+#endif
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
 #endif
 
 /// 从下载链接中抓取fileid，并生成下载link页面请求，

@@ -14,6 +14,10 @@ import CombineX
 import Combine
 #endif
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 struct TowerCookieUpdate: SessionableCondom {
     typealias Input = URLRequest
     typealias Output = String

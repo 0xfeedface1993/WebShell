@@ -13,6 +13,10 @@ import CombineX
 import Combine
 #endif
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 public enum URLRequestBuilderError: Error, LocalizedError {
     case badURL(String?)
     

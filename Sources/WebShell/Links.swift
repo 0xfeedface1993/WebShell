@@ -10,10 +10,15 @@ import Foundation
 #if canImport(Durex)
 import Durex
 #endif
+
 #if COMBINE_LINUX && canImport(CombineX)
 import CombineX
 #else
 import Combine
+#endif
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
 #endif
 
 public struct SignPHPFileDownload: DownloadRequestBuilder {

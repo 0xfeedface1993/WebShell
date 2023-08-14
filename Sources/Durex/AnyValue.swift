@@ -13,6 +13,10 @@ import CombineX
 import Combine
 #endif
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 public struct AnyValue<T>: Publisher {
     public typealias Output = T
     public typealias Failure = Error

@@ -17,6 +17,10 @@ import Logging
 import Durex
 #endif
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 internal let shellLogger = Logger(label: "com.ascp.webshell")
 
 public enum ShellError: Error {

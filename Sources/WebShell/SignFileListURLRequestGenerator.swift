@@ -16,6 +16,10 @@ import Combine
 import Durex
 #endif
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 /// 下载网页内容并转成字符串，在网页内匹配sign值和fileid，然后在生成文件下载地址请求。
 /// 如：`/file-1234.html` -> 取出`1234`就是Fileid，
 /// 然后访问`/down-1234.htm` -> 取出`sign=abcdefg` -> `abcdefg`就是sign值，

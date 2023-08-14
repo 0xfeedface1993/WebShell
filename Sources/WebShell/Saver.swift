@@ -16,6 +16,10 @@ import CombineX
 import Combine
 #endif
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 /// 从多个下载下载链接中下载文件, 保存到`Downloads`目录，目前只使用第一个链接
 public struct Saver: SessionableCondom {
     public typealias Input = [URLRequest]

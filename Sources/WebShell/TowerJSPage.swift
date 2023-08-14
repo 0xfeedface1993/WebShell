@@ -14,6 +14,10 @@ import CombineX
 import Combine
 #endif
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 public struct TowerJSPage: SessionableCondom {
     public typealias Input = String
     

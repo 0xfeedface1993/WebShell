@@ -16,6 +16,10 @@ import CombineX
 import Combine
 #endif
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 public protocol FileIDFinder {
     init(_ pattern: String)
     
