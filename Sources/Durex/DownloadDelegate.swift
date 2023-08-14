@@ -162,7 +162,7 @@ public enum TaskNews {
         public let filename: String?
         public let identifier: Int
         
-        public static let none = State(progress: .init(), filename: nil, identifier: 0)
+        public static let none = State(progress: .init(totalUnitCount: 0), filename: nil, identifier: 0)
         
         init(progress: Progress, filename: String?, identifier: Int) {
             self.progress = progress
