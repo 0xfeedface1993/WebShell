@@ -16,6 +16,10 @@ import Combine
 import AnyErase
 #endif
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 public struct SessionError: Error, LocalizedError {
     let pool: SessionPool?
     let context: (any SessionContext)?

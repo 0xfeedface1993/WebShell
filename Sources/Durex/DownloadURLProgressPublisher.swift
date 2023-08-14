@@ -16,6 +16,10 @@ import Logging
 import AnyErase
 #endif
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 struct OptionalIntWrapper<Item: Equatable> {
     let lhs: Item?
     let rhs: Item

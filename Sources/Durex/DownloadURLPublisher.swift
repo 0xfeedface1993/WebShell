@@ -16,6 +16,10 @@ import Logging
 import AnyErase
 #endif
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 public struct DownloadURLPublisher: Publisher {
     public typealias Output = (URL, URLResponse)
     public typealias Failure = Error

@@ -11,6 +11,11 @@ import CombineX
 #else
 import Combine
 #endif
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 import Logging
 
 internal let logger = Logger(label: "com.ascp.download")

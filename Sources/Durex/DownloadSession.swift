@@ -14,7 +14,13 @@ import Combine
 #if canImport(AnyErase)
 import AnyErase
 #endif
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 import Logging
+
 
 public protocol CustomURLSession {
     /// 下载数据，下载后的数据会转换成Data，大数据下载推荐使用``download(with:)``方法
