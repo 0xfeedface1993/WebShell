@@ -23,11 +23,17 @@ struct CookieMaster {
         let configure = URLSessionConfiguration.ephemeral
         configure.timeoutIntervalForRequest = 20 * 60
         configure.timeoutIntervalForResource = 15 * 24 * 3600
-        let cookies = HTTPCookieStorage()
-        configure.httpCookieStorage = cookies
+//        let cookies = HTTPCookieStorage()
+//        configure.httpCookieStorage = cookies
         
         self.session = URLSession(configuration: configure, delegate: delegator, delegateQueue: nil)
-        self.cookies = cookies
+        if let storage = configure.httpCookieStorage {
+            self.cookies = storage
+        }   else    {
+            let message = "empty httpCookieStorage in configure \(configure)."
+            logger.error(.init(stringLiteral: message))
+            fatalError(message)
+        }
     }
     
     func clearAllCookies() {
