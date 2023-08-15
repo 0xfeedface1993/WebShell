@@ -22,6 +22,13 @@ let package = Package(
     ],
     targets: [
         .target(
+            name: "AnyErase",
+            dependencies: [
+                .product(name: "Logging", package: "swift-log"),
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .target(
             name: "WebShell",
             dependencies: ["Durex"],
             swiftSettings: swiftSettings
@@ -29,14 +36,6 @@ let package = Package(
         .testTarget(
             name: "WebShellCoreTests",
             dependencies: ["WebShell"],
-            swiftSettings: swiftSettings
-        ),
-        .target(
-            name: "AnyErase",
-            dependencies: [
-                .product(name: "CombineX", package: "CombineX"),
-                .product(name: "Logging", package: "swift-log"),
-            ],
             swiftSettings: swiftSettings
         ),
         .target(
@@ -53,5 +52,8 @@ let package = Package(
 #if os(Linux)
 package.dependencies += [
     .package(url: "https://github.com/0xfeedface1993/CombineX.git", branch: "master")
+]
+package.targets.first?.dependencies += [
+    .product(name: "CombineX", package: "CombineX")
 ]
 #endif
