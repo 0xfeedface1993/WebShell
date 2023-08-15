@@ -17,7 +17,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.2"),
         //        .package(url: "https://github.com/0xfeedface1993/OpenCombine.git", from: "0.15.0"),
-        .package(url: "https://github.com/0xfeedface1993/CombineX.git", branch: "master"),
+//        .package(url: "https://github.com/0xfeedface1993/CombineX.git", branch: "master"),
         .package(url: "https://github.com/apple/swift-crypto.git", .upToNextMajor(from: "2.0.0")),
     ],
     targets: [
@@ -49,3 +49,9 @@ let package = Package(
         ),
     ]
 )
+
+#if os(Linux)
+package.dependencies += [
+    .package(url: "https://github.com/0xfeedface1993/CombineX.git", branch: "master")
+]
+#endif
