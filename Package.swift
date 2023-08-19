@@ -4,6 +4,9 @@
 import PackageDescription
 
 let swiftSettings: [SwiftSetting] = [.define("COMBINE_LINUX", .when(platforms: [.linux]))]
+let dependencies: [Target.Dependency] = [
+//    .product(name: "CombineX", package: "CombineX")
+]
 
 let package = Package(
     name: "WebShell",
@@ -43,7 +46,7 @@ let package = Package(
             dependencies: [
                 "AnyErase",
                 .product(name: "Crypto", package: "swift-crypto")
-            ],
+            ] + dependencies,
             swiftSettings: swiftSettings
         ),
     ]

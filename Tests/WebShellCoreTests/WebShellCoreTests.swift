@@ -9,6 +9,12 @@
 import XCTest
 @testable import WebShell
 
+#if COMBINE_LINUX && canImport(CombineX)
+import CombineX
+#else
+import Combine
+#endif
+
 class WebShellCoreTests: XCTestCase {
 
     override func setUp() {
@@ -35,5 +41,22 @@ class WebShellCoreTests: XCTestCase {
     
     func testAsciiMD5() throws {
         XCTAssert("f273dad1289b7bfd1a9be6376813b922".asciiHexMD5String() == "043dab3b1919027b4df82aea32a649b8", "md5 failed!")
+    }
+    
+    
+    func testPublisherToAsyncValue() async throws {
+        let origin = "happy world!"
+        let text = try await Just(origin)
+            .delay(for: .seconds(3), scheduler: DispatchQueue.global().scheduler)
+            .asyncValue
+        XCTAssertEqual(text, origin)
+    }
+    
+    func testZonesPublisherToAsyncValue() async throws {
+        let text = try await URLSession.shared
+            .dataTaskPublisher(for: URL(string: "https://www.google.com")!)
+            .map(\.data)
+            .asyncValue
+        XCTAssert(!text.isEmpty)
     }
 }
