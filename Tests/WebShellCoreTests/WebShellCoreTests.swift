@@ -31,18 +31,10 @@ class WebShellCoreTests: XCTestCase {
         let url = URL(string: "http://sportal.wa54.space/portal/file/download?id=302826")!
         XCTAssert(url.absoluteString == "http://sportal.wa54.space/portal/file/download?id=302826", "错误地址")
     }
-
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
-    }
     
     func testAsciiMD5() throws {
         XCTAssert("f273dad1289b7bfd1a9be6376813b922".asciiHexMD5String() == "043dab3b1919027b4df82aea32a649b8", "md5 failed!")
     }
-    
     
     func testPublisherToAsyncValue() async throws {
         let origin = "happy world!"
@@ -53,7 +45,12 @@ class WebShellCoreTests: XCTestCase {
     }
     
     func testZonesPublisherToAsyncValue() async throws {
-        let text = try await URLSession.shared
+#if COMBINE_LINUX && canImport(CombineX)
+        let session = URLSession.shared.cx
+#else
+        let session = URLSession.shared
+#endif
+        let text = try await session
             .dataTaskPublisher(for: URL(string: "https://www.google.com")!)
             .map(\.data)
             .asyncValue
