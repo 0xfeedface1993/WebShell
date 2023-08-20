@@ -9,6 +9,10 @@
 import XCTest
 @testable import WebShell
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 #if COMBINE_LINUX && canImport(CombineX)
 import CombineX
 #else
