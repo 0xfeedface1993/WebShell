@@ -54,10 +54,8 @@ class WebShellCoreTests: XCTestCase {
 #else
         let session = URLSession.shared
 #endif
-        let text = try await session
-            .dataTaskPublisher(for: URL(string: "https://www.google.com")!)
-            .map(\.data)
-            .asyncValue
-        XCTAssert(!text.isEmpty)
+        let request = URLRequest(url: URL(string: "https://www.google.com")!)
+        let (data, _) = try await session.data(for: request)
+        XCTAssert(!data.isEmpty)
     }
 }
