@@ -18,7 +18,7 @@ public enum URLSessionAsyncErrors: Error {
 /// An extension that provides async support for fetching a URL
 ///
 /// Needed because the Linux version of Swift does not support async URLSession yet.
-public extension URLSession {
+extension URLSession {
  
     /// A reimplementation of `URLSession.shared.data(from: url)` required for Linux
     ///
@@ -28,8 +28,17 @@ public extension URLSession {
     /// - Usage:
     ///
     ///     let (data, response) = try await URLSession.shared.asyncData(from: url)
-    func asyncData(from url: URLRequest) async throws -> (Data, URLResponse) {
+    public func asyncData(from url: URLRequest) async throws -> (Data, URLResponse) {
         logger.info("\(url.curlString)")
+        let result = try await _asyncData(from: url)
+#if os(Linux)
+        CookiesHandler(request: url, response: result.1, session: self).setCookies()
+#endif
+        return result
+    }
+    
+    @usableFromInline
+    func _asyncData(from url: URLRequest) async throws -> (Data, URLResponse) {
 #if os(Linux)
         return try await withCheckedThrowingContinuation { continuation in
             let task = self.dataTask(with: url) { data, response, error in
@@ -52,6 +61,52 @@ public extension URLSession {
 #else
         return try await data(for: url)
 #endif
+    }
+}
+
+struct CookiesHandler {
+    let request: URLRequest
+    let response: URLResponse
+    let session: URLSession
+    
+    func setCookies() {
+        let allHeaderFields = (response as? HTTPURLResponse)?.allHeaderFields ?? [:]
+        logger.info("response Set-Coookies: \(allHeaderFields)")
+        var headers = stringPairs(allHeaderFields)
+        if let host = request.url?.removeURLPath() {
+            let cookies = HTTPCookie.cookies(withResponseHeaderFields: headers, for: host)
+            logger.info("found \(cookies.count) cookies for \(host), try set it.")
+            session.configuration.httpCookieStorage?.setCookies(cookies, for: host, mainDocumentURL: nil)
+            logger.info("set-cookies status: \(CookiesReader(session).sortCookiesDescription())")
+        }   else    {
+            logger.warning("invalid url for \(request).")
+        }
+    }
+    
+    @inlinable
+    func stringPairs(_ rawHeader: [AnyHashable: Any]) -> [String: String] {
+        let lists: [(String, String)] = rawHeader.compactMap({
+            guard let key = $0.key as? String, let value = $0.value as? String else {
+                return nil
+            }
+            return (key, value)
+        })
+        
+        var headers = [String: String]()
+        for (key, value) in lists {
+            headers[key] = value
+        }
+        return headers
+    }
+}
+
+extension URL {
+    public func removeURLPath() -> URL {
+        let components = URLComponents(url: self, resolvingAgainstBaseURL: false)
+        var next = URLComponents()
+        next.host = components?.host
+        next.scheme = components?.scheme
+        return next.url ?? self
     }
 }
 
