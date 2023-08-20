@@ -50,7 +50,8 @@ class WebShellCoreTests: XCTestCase {
     
     func testZonesPublisherToAsyncValue() async throws {
         let session = URLSession.shared
-        let request = URLRequest(url: URL(string: "http://xn--6qq49im8t7ha.cc")!)
+        var request = URLRequest(url: URL(string: "http://xn--6qq49im8t7ha.cc")!)
+        request.addValue("Mozilla/5.0 (iPhone; CPU iPhone OS 15_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Mobile/15E148 Safari/604.1", forHTTPHeaderField: "User-Agent")
         let (data, _) = try await session.data(for: request)
         XCTAssert(!data.isEmpty)
     }
