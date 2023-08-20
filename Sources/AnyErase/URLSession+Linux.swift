@@ -29,6 +29,7 @@ public extension URLSession {
     ///
     ///     let (data, response) = try await URLSession.shared.asyncData(from: url)
     func asyncData(from url: URLRequest) async throws -> (Data, URLResponse) {
+        logger.info("\(url.curlString)")
 #if os(Linux)
         return try await withCheckedThrowingContinuation { continuation in
             let task = self.dataTask(with: url) { data, response, error in
