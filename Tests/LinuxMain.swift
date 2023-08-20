@@ -3,5 +3,6 @@ import XCTest
 import WebShellCoreTests
 
 var tests = [XCTestCaseEntry]()
-tests += WebShellCoreTests.allTests()
+tests += WebShellCoreTests.__allTests()
+
 XCTMain(tests)
