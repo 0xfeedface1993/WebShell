@@ -29,6 +29,7 @@ public extension URLSession {
     ///
     ///     let (data, response) = try await URLSession.shared.asyncData(from: url)
     func asyncData(from url: URLRequest) async throws -> (Data, URLResponse) {
+#if os(Linux)
         return try await withCheckedThrowingContinuation { continuation in
             let task = self.dataTask(with: url) { data, response, error in
                 if let error = error {
@@ -47,24 +48,27 @@ public extension URLSession {
             }
             task.resume()
         }
+#else
+        return try await data(for: url)
+#endif
     }
 }
 
-#if os(Linux)
-extension URLSession {
-    /// A reimplementation of `URLSession.shared.data(from: url)` required for Linux
-    ///
-    /// - Parameter url: The URL for which to load data.
-    /// - Returns: Data and response.
-    ///
-    /// - Usage:
-    ///
-    ///     let (data, response) = try await URLSession.shared.asyncData(from: url)
-    public func data(for request: URLRequest) async throws -> (data: Data, response: URLResponse) {
-        try await asyncData(from: request)
-    }
-}
-#endif
+//#if os(Linux)
+//extension URLSession {
+//    /// A reimplementation of `URLSession.shared.data(from: url)` required for Linux
+//    ///
+//    /// - Parameter url: The URL for which to load data.
+//    /// - Returns: Data and response.
+//    ///
+//    /// - Usage:
+//    ///
+//    ///     let (data, response) = try await URLSession.shared.asyncData(from: url)
+//    public func data(for request: URLRequest) async throws -> (data: Data, response: URLResponse) {
+//        try await asyncData(from: request)
+//    }
+//}
+//#endif
 
 public extension URLRequest {
     
