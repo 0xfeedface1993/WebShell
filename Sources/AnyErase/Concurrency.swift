@@ -20,7 +20,7 @@ struct CheckedContinuationSlide<T: Publisher> {
         self.publisher = publisher
     }
     
-    func resume(in continuation: UnsafeContinuation<T.Output, Error>) -> AnyCancellable {
+    func resume(in continuation: CheckedContinuation<T.Output, Error>) -> AnyCancellable {
         var flag = true
         let type = "\(publisher.self)"
         let cancellable = publisher.sink { completion in
@@ -49,7 +49,7 @@ extension Publisher {
             let slide = CheckedContinuationSlide(self)
             // Swift Concurrency release local variables until block value return or execute complete.
             var cancellable: AnyCancellable?
-            let result = try await withUnsafeThrowingContinuation({ continuation in
+            let result = try await withCheckedThrowingContinuation({ continuation in
                 cancellable = slide.resume(in: continuation)
             })
             logger.info("bridge CombineX publisher \(self) dismiss \(String(describing: cancellable)).")

@@ -49,11 +49,7 @@ class WebShellCoreTests: XCTestCase {
     }
     
     func testZonesPublisherToAsyncValue() async throws {
-#if COMBINE_LINUX && canImport(CombineX)
-        let session = URLSession.shared.cx
-#else
         let session = URLSession.shared
-#endif
         let request = URLRequest(url: URL(string: "https://www.google.com")!)
         let (data, _) = try await session.data(for: request)
         XCTAssert(!data.isEmpty)
