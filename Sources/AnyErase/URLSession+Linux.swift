@@ -61,7 +61,7 @@ extension URLSession {
     ///
     ///     let (data, response) = try await URLSession.shared.asyncData(from: url)
     public func data(for request: URLRequest) async throws -> (data: Data, response: URLResponse) {
-        try await asyncData(for: request)
+        try await asyncData(from: request)
     }
 }
 #endif
