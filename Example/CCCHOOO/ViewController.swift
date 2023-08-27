@@ -27,22 +27,22 @@ class ViewController: NSViewController {
 
         // Do any additional setup after loading the view.
         
-        let link = "https://www.iycdn.com/file-213019.html"
-        
-        cancellable = TowerGroup("load_down_addr2")
-            .join(PHPLinks())
-            .join(Saver(.override))
-            .publisher(for: link)
-            .sink { complete in
-                switch complete {
-                case .finished:
-                    break
-                case .failure(let error):
-                    print(">>> download error \(error)")
-                }
-            } receiveValue: { url in
-                print(">>> download file at \(url)")
-            }
+//        let link = "https://www.iycdn.com/file-213019.html"
+//
+//        cancellable = TowerGroup("load_down_addr2")
+//            .join(PHPLinks())
+//            .join(Saver(.override))
+//            .publisher(for: link)
+//            .sink { complete in
+//                switch complete {
+//                case .finished:
+//                    break
+//                case .failure(let error):
+//                    print(">>> download error \(error)")
+//                }
+//            } receiveValue: { url in
+//                print(">>> download file at \(url)")
+//            }
         
 //        let link = "http://www.xueqiupan.com/file-672734.html"
 //
@@ -78,22 +78,23 @@ class ViewController: NSViewController {
 //                print(">>> download file at \(url)")
 //            }
         
-//        let link = "http://www.xunniu-pan.com/down-4067902.html"
-//
-//        cancellable = DownPage(.default)
-//            .join(PHPLinks())
-//            .join(Saver(.override))
-//            .publisher(for: link)
-//            .sink { complete in
-//                switch complete {
-//                case .finished:
-//                    break
-//                case .failure(let error):
-//                    print(">>> download error \(error)")
-//                }
-//            } receiveValue: { url in
-//                print(">>> download file at \(url)")
-//            }
+        let link = "http://www.xunniu-pan.com/file-4067902.html"
+
+        cancellable = RedirectEnablePage()
+            .join(DownPage(.default))
+            .join(PHPLinks())
+            .join(Saver(.override))
+            .publisher(for: link)
+            .sink { complete in
+                switch complete {
+                case .finished:
+                    break
+                case .failure(let error):
+                    print(">>> download error \(error)")
+                }
+            } receiveValue: { url in
+                print(">>> download file at \(url)")
+            }
             
 //        let link = "http://www.xingyaoclouds.com/fs/2l66xn9ubrzzwba"
 //        cancellable = RedirectEnablePage()
