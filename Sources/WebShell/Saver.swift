@@ -41,20 +41,10 @@ public struct Saver: SessionableCondom {
     }
     
     public func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
-        guard let request = inputValue.first else {
-            return Fail(error: ShellError.emptyRequest).eraseToAnyPublisher()
+        Future {
+            try await AsyncSaver(policy, configures: .shared, key: key).execute(for: inputValue.map(URLRequestBuilder.init(_:)))
         }
-        
-        return SessionPool
-            .context(key)
-            .flatMap({ context in
-                context.download(with: request)
-            })
-            .tryMap {
-                try MoveToDownloads(tempURL: $0.0, suggestedFilename: $0.1.suggestedFilename, policy: policy).move()
-            }
-            .eraseToAnyPublisher()
-            
+        .eraseToAnyPublisher()
     }
     
     public func empty() -> AnyPublisher<Output, Error> {
@@ -63,6 +53,36 @@ public struct Saver: SessionableCondom {
     
     public func sessionKey(_ value: AnyHashable) -> Saver {
         Saver(policy, key: value)
+    }
+}
+
+public struct AsyncSaver: SessionableDirtyware {
+    public typealias Input = [URLRequestBuilder]
+    public typealias Output = URL
+    
+    let policy: Saver.Policy
+    public var key: AnyHashable
+    public let configures: AsyncURLSessionConfiguration
+    
+    public init(_ policy: Saver.Policy = .normal, configures: AsyncURLSessionConfiguration, key: AnyHashable = "default") {
+        self.policy = policy
+        self.key = key
+        self.configures = configures
+    }
+    
+    public func execute(for inputValue: Input) async throws -> Output {
+        guard let request = inputValue.first else {
+            throw ShellError.emptyRequest
+        }
+        
+        let context = try await AsyncSession(configures).context(key)
+        let (url, response) = try await context.download(with: request)
+        let next = try MoveToDownloads(tempURL: url, suggestedFilename: response.suggestedFilename, policy: policy).move()
+        return next
+    }
+    
+    public func sessionKey(_ value: AnyHashable) -> Self {
+        .init(policy, configures: configures, key: value)
     }
 }
 
@@ -117,76 +137,5 @@ public struct MoveToDownloads {
             count += 1
         }
         return next
-    }
-}
-
-/// 使用自定义URLSession下载模块
-public struct BridgeSaver: SessionableCondom {
-    public typealias Input = [URLRequest]
-    public typealias Output = URL
-    
-    public var key: AnyHashable = "default"
-    let sessionBundle: SessionBundle
-    let policy: Saver.Policy
-    let tag: Int?
-    
-    public init(_ bundle: SessionBundle, policy: Saver.Policy = .normal, tag: Int? = nil) {
-        self.policy = policy
-        self.sessionBundle = bundle
-        self.tag = tag
-        self.key = sessionBundle.sessionKey
-    }
-    
-    public func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
-        guard let request = inputValue.first else {
-            return Fail(error: ShellError.emptyRequest).eraseToAnyPublisher()
-        }
-        
-        return SessionPool
-            .context(key)
-            .flatMap { $0.downloadWithProgress(request, tag: tag) }
-            .tryMap(moveToDownloadsFolder(_:))
-            .compactMap { $0 }
-            .eraseToAnyPublisher()
-    }
-    
-    private func moveToDownloadsFolder(_ update: TaskNews) throws -> URL? {
-        guard case .file(let value) = update else {
-            return nil
-        }
-        return try MoveToDownloads(tempURL: value.url, suggestedFilename: value.response.suggestedFilename, policy: policy).move()
-    }
-    
-    public func empty() -> AnyPublisher<Output, Error> {
-        Empty().eraseToAnyPublisher()
-    }
-    
-    public func sessionKey(_ value: AnyHashable) -> BridgeSaver {
-        BridgeSaver(.init(value), policy: policy, tag: tag)
-    }
-}
-
-//public protocol URLUpdator {
-//    typealias Output = DownloadURLProgressPublisher.News.State
-//    func updateURLSubject() -> PassthroughSubject<Output, Never>
-//}
-
-public struct SessionBundle {
-//    public let session: URLSession
-//    public let urlUpdateSubject: PassthroughSubject<URL, Never>
-//
-//    public init(_ session: URLSession, subject: PassthroughSubject<URL, Never>) {
-//        self.session = session
-//        self.urlUpdateSubject = subject
-//    }
-//
-//    public func updateURLSubject() -> PassthroughSubject<URL, Never> {
-//        urlUpdateSubject
-//    }
-    public let sessionKey: AnyHashable
-//    public let urlUpdateSubject: PassthroughSubject<Output, Never>
-    
-    public init(_ sessionKey: AnyHashable) {
-        self.sessionKey = sessionKey
     }
 }

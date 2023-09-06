@@ -12,14 +12,33 @@ import FoundationNetworking
 
 /// Defines the possible errors
 public enum URLSessionAsyncErrors: Error {
-    case invalidUrlResponse, missingResponseData
+    case invalidUrlResponse, missingResponseData, missingTmpFile
+}
+
+public protocol URLTask: AnyObject {
+    var taskIdentifier: Int { get }
+    func resume()
+    func cancel()
+}
+
+extension URLSessionTask: URLTask {
+    
+}
+
+/// An protocol that provides async support for fetching a URL
+public protocol URLClient {
+    func asyncData(from url: URLRequest) async throws -> (Data, URLResponse)
+    /// download large file at tmp directory, not use custom delegate response
+    func asyncDownload(from url: URLRequest) async throws -> (URL, URLResponse)
+    /// create download task, 
+    func asyncDataTask(from url: URLRequest) -> URLTask
 }
 
 /// An extension that provides async support for fetching a URL
 ///
 /// Needed because the Linux version of Swift does not support async URLSession yet.
-extension URLSession {
- 
+extension URLSession: URLClient {
+    
     /// A reimplementation of `URLSession.shared.data(from: url)` required for Linux
     ///
     /// - Parameter url: The URL for which to load data.
@@ -62,51 +81,84 @@ extension URLSession {
         return try await data(for: url)
 #endif
     }
-}
-
-struct CookiesHandler {
-    let request: URLRequest
-    let response: URLResponse
-    let session: URLSession
     
-    func setCookies() {
-        let allHeaderFields = (response as? HTTPURLResponse)?.allHeaderFields ?? [:]
-        logger.info("response Set-Coookies: \(allHeaderFields)")
-        var headers = stringPairs(allHeaderFields)
-        if let host = request.url?.removeURLPath() {
-            let cookies = HTTPCookie.cookies(withResponseHeaderFields: headers, for: host)
-            logger.info("found \(cookies.count) cookies for \(host), try set it.")
-            session.configuration.httpCookieStorage?.setCookies(cookies, for: host, mainDocumentURL: nil)
-            logger.info("set-cookies status: \(CookiesReader(session).sortCookiesDescription())")
-        }   else    {
-            logger.warning("invalid url for \(request).")
-        }
+    public func asyncDownload(from url: URLRequest) async throws -> (URL, URLResponse) {
+        logger.info("\(url.curlString)")
+        let result = try await _asyncDownload(from: url)
+#if os(Linux)
+        CookiesHandler(request: url, response: result.1, session: self).setCookies()
+#endif
+        return result
     }
     
-    @inlinable
-    func stringPairs(_ rawHeader: [AnyHashable: Any]) -> [String: String] {
-        let lists: [(String, String)] = rawHeader.compactMap({
-            guard let key = $0.key as? String, let value = $0.value as? String else {
-                return nil
+    @usableFromInline
+    func _asyncDownload(from url: URLRequest) async throws -> (URL, URLResponse) {
+#if os(Linux)
+        return try await withCheckedThrowingContinuation { continuation in
+            let task = self.dataTask(with: url) { data, response, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                guard let response = response as? HTTPURLResponse else {
+                    continuation.resume(throwing: URLSessionAsyncErrors.invalidUrlResponse)
+                    return
+                }
+                guard let data = data else {
+                    continuation.resume(throwing: URLSessionAsyncErrors.missingResponseData)
+                    return
+                }
+                continuation.resume(returning: (data, response))
             }
-            return (key, value)
-        })
-        
-        var headers = [String: String]()
-        for (key, value) in lists {
-            headers[key] = value
+            task.resume()
         }
-        return headers
+#else
+        return try await defaultDownload(url)
+#endif
     }
-}
-
-extension URL {
-    public func removeURLPath() -> URL {
-        let components = URLComponents(url: self, resolvingAgainstBaseURL: false)
-        var next = URLComponents()
-        next.host = components?.host
-        next.scheme = components?.scheme
-        return next.url ?? self
+    
+    @usableFromInline
+    func defaultDownload(_ url: URLRequest) async throws -> (URL, URLResponse) {
+        if #available(macOS 12.0, iOS 15.0, *) {
+            return try await download(for: url)
+        } else {
+            // Fallback on earlier versions
+            let curl = url.curlString
+            return try await withCheckedThrowingContinuation { continuation in
+                let task = downloadTask(with: url, completionHandler: { fileURL, response, error in
+                    if let error = error {
+                        continuation.resume(throwing: error)
+                        return
+                    }
+                    guard let response = response as? HTTPURLResponse else {
+                        continuation.resume(throwing: URLSessionAsyncErrors.invalidUrlResponse)
+                        return
+                    }
+                    guard let fileURL = fileURL else {
+                        continuation.resume(throwing: URLSessionAsyncErrors.missingTmpFile)
+                        return
+                    }
+                    
+                    let filename = UUID().uuidString
+                    let cachedURL = FileManager.default.temporaryDirectory
+                    let location = cachedURL.appendingPathComponent(filename)
+                    
+                    do {
+                        try FileManager.default.moveItem(at: fileURL, to: location)
+                        logger.info("move tmp file to \(url)")
+                        continuation.resume(returning: (location, response))
+                    } catch {
+                        logger.info("\(#function) download file failed \(error), curl: \(curl)")
+                        continuation.resume(throwing: error)
+                    }
+                })
+                task.resume()
+            }
+        }
+    }
+    
+    public func asyncDataTask(from url: URLRequest) -> URLTask {
+        dataTask(with: url)
     }
 }
 

@@ -12,6 +12,8 @@ import Foundation
 import FoundationNetworking
 #endif
 
+import Durex
+
 public protocol URLRegularExpressionMatchTemplate {
     func template() -> String
     func rawTemplate() -> Int
@@ -77,5 +79,5 @@ public protocol ContentMatch {
 }
 
 public protocol DownloadRequestBuilder {
-    func make(_ url: String, refer: String) throws -> URLRequest
+    func make(_ url: String, refer: String) -> URLRequestBuilder
 }

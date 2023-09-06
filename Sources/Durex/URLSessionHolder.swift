@@ -9,12 +9,13 @@ import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
+import AnyErase
 
-struct CookieMaster {
-    let session: URLSession
+struct URLSessionHolder {
+    let session: any URLClient
     let cookies: HTTPCookieStorage
     
-    init(session: URLSession, cookies: HTTPCookieStorage) {
+    init(session: any URLClient, cookies: HTTPCookieStorage) {
         self.session = session
         self.cookies = cookies
     }
@@ -27,6 +28,23 @@ struct CookieMaster {
 //        configure.httpCookieStorage = cookies
         
         self.session = URLSession(configuration: configure, delegate: delegator, delegateQueue: nil)
+        if let storage = configure.httpCookieStorage {
+            self.cookies = storage
+        }   else    {
+            let message = "empty httpCookieStorage in configure \(configure)."
+            logger.error(.init(stringLiteral: message))
+            fatalError(message)
+        }
+    }
+    
+    init(_ delegate: any AsyncURLSessiobDownloadDelegate) {
+        let configure = URLSessionConfiguration.ephemeral
+        configure.timeoutIntervalForRequest = 20 * 60
+        configure.timeoutIntervalForResource = 15 * 24 * 3600
+//        let cookies = HTTPCookieStorage()
+//        configure.httpCookieStorage = cookies
+        
+        self.session = URLSession(configuration: configure, delegate: delegate, delegateQueue: nil)
         if let storage = configure.httpCookieStorage {
             self.cookies = storage
         }   else    {

@@ -116,6 +116,10 @@ public struct URLRequestBuilder {
         return urlRequest
     }
     
+    public init(_ request: URLRequest) {
+        self.init(url: request.url?.absoluteString, method: .init(rawValue: request.httpMethod ?? "GET") ?? .get, headers: request.allHTTPHeaderFields, body: request.httpBody)
+    }
+    
     public func condom() throws -> Request {
         Request(self)
     }
@@ -134,6 +138,12 @@ extension URLRequestBuilder: ContextValue {
         headers: \(headers ?? [:])
         body: \(body?.count ?? 0) bytes
         """
+    }
+}
+
+extension Array: ContextValue where Element: ContextValue {
+    public var valueDescription: String {
+        map(\.valueDescription).joined(separator: "\n------------------------------\n")
     }
 }
 
@@ -203,5 +213,20 @@ public struct Request: Condom {
             return Fail(error: error)
                 .eraseToAnyPublisher()
         }
+    }
+}
+
+public struct AsyncRequest: Dirtyware {
+    public typealias Input = String
+    public typealias Output = URLRequest
+    
+    let prorider: URLRequestProvider
+    
+    public init(_ provider: URLRequestProvider) {
+        self.prorider = provider
+    }
+    
+    public func execute(for inputValue: String) async throws -> Output {
+        return try prorider.accept(inputValue)
     }
 }

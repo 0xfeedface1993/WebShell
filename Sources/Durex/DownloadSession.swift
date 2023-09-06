@@ -20,40 +20,7 @@ import FoundationNetworking
 #endif
 
 import Logging
-
-
-public protocol CustomURLSession {
-    /// 下载数据，下载后的数据会转换成Data，大数据下载推荐使用``download(with:)``方法
-    /// - Parameter request: 网络请求
-    /// - Returns: 异步数据
-    func data(with request: URLRequest) -> AnyPublisher<Data, Error>
-    
-    /// 下载文件，文件存储在临时区域，拿到URL后进行复制或者移动
-    /// - Parameter request: 下载文件请求
-    /// - Returns: 异步文件URL
-    func download(with request: URLRequest) -> AnyPublisher<(URL, URLResponse), Error>
-    
-    /// 下载文件, 包含进度信息更新、下载完成、失败
-    /// - Parameter request: 下载文件请求
-    /// - Returns: 异步文件进度+文件URL
-    func downloadWithProgress(_ request: URLRequest, tag: AnyHashable?) -> DownloadURLProgressPublisher
-    
-    /// 其他模块想要获取当前下载任务的进度、完成通知则使用此方法获取Publisher,
-    /// 注意：此Publisher不会finished，终止的情况只会是error，所以只要监听receiveValue和error即可。
-    /// - Parameter identifier: 下载任务唯一key，使用它的hashValue
-    /// - Returns: 任务状态
-    func downloadNews(for identifier: AnyHashable) -> AnyPublisher<UpdateNews, Error>
-    
-    /// 其他模块想要获取当前下载任务的进度、完成通知则使用此方法获取Publisher,
-    /// 注意：此Publisher不会finished，也不会出现error，所以只要监听receiveValue，抛出的错误就是`.error()`枚举。
-    /// - Parameter identifier: 下载任务唯一key，使用它的hashValue
-    /// - Returns: 任务状态
-    func downloadWrapNews(for identifier: AnyHashable) -> AnyPublisher<UpdateNews, Never>
-    
-    /// 其他模块想要获取所有下载任务的进度、完成通知则使用此方法获取Publisher,
-    /// - Returns: 任务状态
-    func downloadNews() -> AnyPublisher<UpdateNews, Never>
-}
+import AsyncExtensions
 
 extension CustomURLSession {
     /// 全局共享下载session
@@ -63,40 +30,10 @@ extension CustomURLSession {
     }
 }
 
-public protocol SessionProvider {
-    /// 绑定URLSession下载任务和任务tag，用于后续任务查询
-    /// - Parameters:
-    ///   - task: URLSession下载任务
-    ///   - tag: 任务tag
-    func bind(task: URLSessionDownloadTask, tagHashValue: Int)
-    
-    /// 解除URLSession下载任务和任务tag的绑定，下载任务结束后解除绑定
-    /// - Parameter task: URLSession下载任务
-    func unbind(task: URLSessionDownloadTask)
-    
-    /// 系统原始的URLSession
-    func systemSession() -> URLSession
-    
-    /// 匹配下载任务id
-    /// - Parameter task: URLSession下载任务
-    /// - Returns: 任务id
-    func tag(for task: URLSessionDownloadTask) -> Int
-    
-    /// 匹配下载任务id
-    /// - Parameter task: URLSession下载任务taskIdentifier
-    /// - Returns: 任务id
-    func tag(for taskIdentifier: Int) -> Int
-    
-    /// 根据任务id查下载任务taskIdentifier
-    /// - Parameter tag: 任务id
-    /// - Returns: taskIdentifier
-    func taskIdentifier(for tag: Int) -> Int?
-}
-
 public final class DownloadSession: CustomURLSession {
     fileprivate static let _shared = DownloadSession()
     private let delegator = URLSessionDelegator()
-    private lazy var _session = CookieMaster(delegator)
+    private lazy var _session = URLSessionHolder(delegator)
     private var tagsCached = [Int: Int]()
     private let lock = Lock()
     
@@ -113,7 +50,7 @@ public final class DownloadSession: CustomURLSession {
     }
     
     public func download(with request: URLRequest) -> AnyPublisher<(URL, URLResponse), Error> {
-        DownloadURLPublisher(request: request, session: _session.session)
+        DownloadURLPublisher(request: request, session: systemSession())
             .eraseToAnyPublisher()
     }
     
@@ -152,7 +89,7 @@ public final class DownloadSession: CustomURLSession {
 
 extension DownloadSession: SessionProvider {
     public func systemSession() -> URLSession {
-        _session.session
+        _session.session as? URLSession ?? .shared
     }
     
     public func bind(task: URLSessionDownloadTask, tagHashValue: Int) {
@@ -203,5 +140,80 @@ extension DownloadSession: SessionProvider {
 //            os_log(.debug, log: logger, "download tag %d has no task", tag)
 //        }
         return value
+    }
+}
+
+public struct AsyncDownloadSession: AsyncCustomURLSession {
+    public let delegate: AsyncURLSessiobDownloadDelegate
+    public let tagsTaskIdenfier: any TaskIdentifiable
+    private let urlSessionContainer: URLSessionHolder
+    
+    public init(delegate: AsyncURLSessiobDownloadDelegate, tagsTaskIdenfier: any TaskIdentifiable) {
+        self.delegate = delegate
+        self.tagsTaskIdenfier = tagsTaskIdenfier
+        self.urlSessionContainer = URLSessionHolder(delegate)
+    }
+    
+    public func data(with request: URLRequestBuilder) async throws -> Data {
+        let (url, _) = try await download(with: request)
+        return try Data(contentsOf: url)
+    }
+    
+    public func download(with request: URLRequestBuilder) async throws -> (URL, URLResponse) {
+        try await AsyncDownloadURLPublisher(request)
+            .session(urlSessionContainer.session)
+            .download()
+    }
+    
+    public func downloadWithProgress<TagValue>(_ request: URLRequestBuilder, tag: TagValue?) async throws -> AnyAsyncSequence<AsyncUpdateNews> where TagValue : Hashable {
+        try await AsyncDownloadURLProgressPublisher(request: request, tag: tag, delegtor: delegate, sessionProvider: self)
+            .download()
+            .map({
+                AsyncUpdateNews(value: $0, tag: tag)
+            })
+            .eraseToAnyAsyncSequence()
+    }
+    
+    public func downloadNews<TagValue>(_ tag: TagValue?) -> AsyncExtensions.AnyAsyncSequence<AsyncUpdateNews> where TagValue : Hashable {
+        delegate.news(self, tag: tag)
+            .map({
+                AsyncUpdateNews(value: $0, tag: tag)
+            })
+            .eraseToAnyAsyncSequence()
+    }
+    
+    public func downloadNews() -> AnyAsyncSequence<AsyncUpdateNews> {
+        delegate
+            .statePassthroughSubject
+            .map {
+                await AsyncUpdateNews(value: $0, tag: self.tag(for: $0.identifier))
+            }
+            .eraseToAnyAsyncSequence()
+    }
+}
+
+extension AsyncDownloadSession: AsyncSessionProvider {
+    public func unbind(tag: HashValue) async {
+        await tagsTaskIdenfier.remove(tag: AnyHashable(tag))
+    }
+    
+    public func bind(task: TaskIdentifier, tag: HashValue) async {
+        await tagsTaskIdenfier.set(AnyHashable(tag), for: task)
+    }
+    
+    public func unbind(task: TaskIdentifier) async {
+        await tagsTaskIdenfier.remove(taskIdentifier: task)
+    }
+    
+    public func client() -> AnyErase.URLClient {
+        urlSessionContainer.session
+    }
+    
+    public func tag(for taskIdentifier: TaskIdentifier) async -> HashValue {
+        await tagsTaskIdenfier.tag(for: taskIdentifier)
+    }
+    
+    public func taskIdentifier(for tag: HashValue) async -> TaskIdentifier? {
+        await tagsTaskIdenfier.taskIdentifier(for: AnyHashable(tag))
     }
 }

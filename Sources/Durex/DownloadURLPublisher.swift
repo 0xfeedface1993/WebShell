@@ -137,3 +137,30 @@ public struct DownloadURLPublisher: Publisher {
     }
     
 }
+
+struct AsyncDownloadURLPublisher {
+    typealias Output = (URL, URLResponse)
+    typealias Failure = Error
+    
+    let request: URLRequestBuilder
+    let session: any URLClient
+    
+    init(_ request: URLRequestBuilder) {
+        self.request = request
+        self.session = URLSession.shared
+    }
+    
+    init(_ request: URLRequestBuilder, session: any URLClient) {
+        self.request = request
+        self.session = session
+    }
+    
+    func session(_ value: any URLClient) -> Self {
+        .init(request, session: session)
+    }
+    
+    func download() async throws -> Output {
+        let next = try request.build()
+        return try await session.asyncDownload(from: next)
+    }
+}

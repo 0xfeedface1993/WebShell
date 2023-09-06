@@ -50,18 +50,49 @@ public struct FileListURLRequestGenerator: Condom {
     }
     
     public func publisher(for inputValue: String) -> AnyPublisher<Output, Error> {
-        do {
-            return AnyValue(try request(inputValue)).eraseToAnyPublisher()
-        } catch {
-            return Fail(error: error).eraseToAnyPublisher()
+        Future {
+            try await AsyncFileListURLRequestGenerator(finder, action: action)
+                .execute(for: inputValue)
+                .build()
         }
+        .eraseToAnyPublisher()
     }
     
     public func empty() -> AnyPublisher<Output, Error> {
         Empty().eraseToAnyPublisher()
     }
+}
+
+public struct AsyncFileListURLRequestGenerator: Dirtyware {
+    public typealias Input = String
+    public typealias Output = URLRequestBuilder
     
-    private func request(_ string: String) throws -> URLRequest {
+    let finder: FileIDFinder
+    let action: String
+    
+    public init(_ finder: FileIDFinder, action: String) {
+        self.finder = finder
+        self.action = action
+    }
+    
+    public init(_ finder: FileIDFinder) {
+        self.finder = finder
+        self.action = ""
+    }
+    
+    public func action(_ value: String) -> Self {
+        .init(finder, action: value)
+    }
+    
+    public func finder(_ value: FileIDFinder) -> Self {
+        .init(value, action: action)
+    }
+    
+    public func execute(for inputValue: String) async throws -> URLRequestBuilder {
+        try request(inputValue)
+    }
+    
+    private func request(_ string: String) throws -> URLRequestBuilder {
         guard let url = URL(string: string),
                 let component = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
             throw ShellError.badURL(string)
@@ -72,9 +103,10 @@ public struct FileListURLRequestGenerator: Condom {
         }
         
         let fileid = try finder.extract(string)
-        return try ReferDownPageRequest(fileid: fileid, refer: string, scheme: scheme, host: host, action: action).make()
+        return ReferDownPageRequest(fileid: fileid, refer: string, scheme: scheme, host: host, action: action).make()
     }
 }
+   
 
 /// 下载网页内容并转成字符串，在网页内匹配id，然后在生成文件下载地址请求。
 /// 如：`/abcde.html` -> 取出`down_process(1002)` -> `10002`就是Fileid，
@@ -94,36 +126,46 @@ public struct FileListURLRequestInPageGenerator: SessionableCondom {
     }
     
     public func publisher(for inputValue: String) -> AnyPublisher<Output, Error> {
-        do {
-            let data = try request(inputValue)
-            return StringParserDataTask(request: data, encoding: .utf8, sessionKey: key)
-                .publisher()
-                .tryMap { try finder.extract($0) }
-                .tryMap { try referRequest(inputValue, fileid: $0) }
-                .eraseToAnyPublisher()
-        } catch {
-            return Fail(error: error).eraseToAnyPublisher()
+        Future {
+            try await AsyncFileListURLRequestInPageGenerator(finder, action: action, configures: .shared, key: key).execute(for: inputValue).build()
         }
+        .eraseToAnyPublisher()
     }
     
     public func empty() -> AnyPublisher<Output, Error> {
         Empty().eraseToAnyPublisher()
     }
     
-    func request(_ string: String) throws -> URLRequest {
-        guard let url = URL(string: string),
-                let component = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
-            throw ShellError.badURL(string)
-        }
-        
-        guard let host = component.host, let scheme = component.scheme else {
-            throw ShellError.badURL(string)
-        }
-        
-        return try DashDownPageRequest(refer: string, scheme: scheme, host: host).make()
+    public func sessionKey(_ value: AnyHashable) -> Self {
+        Self(finder, action: action, key: value)
+    }
+}
+
+public struct AsyncFileListURLRequestInPageGenerator: SessionableDirtyware {
+    public typealias Input = String
+    public typealias Output = URLRequestBuilder
+    
+    public var key: AnyHashable
+    public let finder: FileIDFinder
+    public let action: String
+    public let configures: Durex.AsyncURLSessionConfiguration
+    
+    public init(_ finder: FileIDFinder, action: String, configures: Durex.AsyncURLSessionConfiguration, key: AnyHashable = "default") {
+        self.finder = finder
+        self.key = key
+        self.action = action
+        self.configures = configures
     }
     
-    func referRequest(_ string: String, fileid: String) throws -> URLRequest {
+    public func execute(for inputValue: String) async throws -> URLRequestBuilder {
+        let request = try request(inputValue)
+        let string = try await AsyncStringParserDataTask(request: request, encoding: .utf8, sessionKey: key, configures: configures).asyncValue()
+        let fileid = try finder.extract(string)
+        let next = try referRequest(string, fileid: fileid)
+        return next
+    }
+    
+    func request(_ string: String) throws -> URLRequestBuilder {
         guard let url = URL(string: string),
                 let component = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
             throw ShellError.badURL(string)
@@ -133,11 +175,24 @@ public struct FileListURLRequestInPageGenerator: SessionableCondom {
             throw ShellError.badURL(string)
         }
         
-        return try ReferDownPageRequest(fileid: fileid, refer: string, scheme: scheme, host: host, action: action).make()
+        return DashDownPageRequest(refer: string, scheme: scheme, host: host).make()
+    }
+    
+    func referRequest(_ string: String, fileid: String) throws -> URLRequestBuilder {
+        guard let url = URL(string: string),
+                let component = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            throw ShellError.badURL(string)
+        }
+        
+        guard let host = component.host, let scheme = component.scheme else {
+            throw ShellError.badURL(string)
+        }
+        
+        return ReferDownPageRequest(fileid: fileid, refer: string, scheme: scheme, host: host, action: action).make()
     }
     
     public func sessionKey(_ value: AnyHashable) -> Self {
-        Self(finder, action: action, key: value)
+        Self(finder, action: action, configures: configures, key: value)
     }
 }
 
@@ -156,13 +211,38 @@ public struct HTTPString: SessionableCondom {
     }
     
     public func publisher(for inputValue: String) -> AnyPublisher<String, Error> {
-        if inputValue.hasPrefix("http") {
-            return AnyValue(inputValue).eraseToAnyPublisher()
+        Future {
+            try await AsyncHTTPString(.shared, key: key).execute(for: inputValue)
         }
-        return AnyValue("http://\(inputValue)").eraseToAnyPublisher()
+        .eraseToAnyPublisher()
     }
     
     public func empty() -> AnyPublisher<String, Error> {
         Empty().eraseToAnyPublisher()
+    }
+}
+
+public struct AsyncHTTPString: SessionableDirtyware {
+    
+    public typealias Input = String
+    public typealias Output = String
+    
+    public var key: AnyHashable
+    public let configures: Durex.AsyncURLSessionConfiguration
+    
+    public init(_ configures: Durex.AsyncURLSessionConfiguration, key: AnyHashable = "default") {
+        self.key = key
+        self.configures = configures
+    }
+    
+    public func sessionKey(_ value: AnyHashable) -> Self {
+        .init(configures, key: value)
+    }
+    
+    public func execute(for inputValue: String) async throws -> String {
+        if inputValue.hasPrefix("http") {
+            return inputValue
+        }
+        return "http://\(inputValue)"
     }
 }

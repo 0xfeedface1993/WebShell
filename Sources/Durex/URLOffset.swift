@@ -30,7 +30,7 @@ public struct URLOffset {
             let regx = try Regex("(\\w+\\.)+\\w+")
             guard let match = string.firstMatch(of: regx)?.0 else {
 #if DEBUG
-            logger.error("[\(type(of: self))] no host in \(string)")
+                logger.error("[\(type(of: self))] no host in \(string)")
 #endif
                 throw DurexError.missingHost
             }
@@ -45,7 +45,7 @@ public struct URLOffset {
             let regx = try NSRegularExpression(pattern: "(\\w+\\.)+\\w+")
             guard let range = regx.firstMatch(in: string, range: NSRange(location: 0, length: string.count))?.range else {
 #if DEBUG
-            logger.error("[\(type(of: self))] no host in \(string)")
+                logger.error("[\(type(of: self))] no host in \(string)")
 #endif
                 throw DurexError.missingHost
             }
@@ -59,15 +59,15 @@ public struct URLOffset {
 
 extension URL {
     func unitiedHost() -> String? {
-        #if os(macOS) && os(iOS) && os(watchOS)
+#if os(macOS) && os(iOS) && os(watchOS)
         if #available(macOS 13.0, *) {
             return host(percentEncoded: false)
         } else {
             // Fallback on earlier versions
             return host
         }
-        #else
+#else
         return host
-        #endif
+#endif
     }
 }

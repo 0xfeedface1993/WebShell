@@ -101,8 +101,8 @@ extension Publisher {
 }
 #endif
 
-extension Array: ContextValue where Element == URLRequest {
-    public var valueDescription: String {
-        "\(self)"
-    }
-}
+//extension Array: ContextValue where Element == URLRequest {
+//    public var valueDescription: String {
+//        "\(self)"
+//    }
+//}
