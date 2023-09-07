@@ -296,25 +296,6 @@ struct DownloadURLErrorFilter {
     }
 }
 
-//struct RawNews {
-//    let data: DownloadURLProgressPublisher.News
-//    let taskIdentifier: Int
-//
-//    init(_ data: DownloadURLProgressPublisher.News, taskIdentifier: Int) {
-//        self.data = data
-//        self.taskIdentifier = taskIdentifier
-//    }
-//
-//    func tag(_ value: Int) -> Self {
-//        switch data {
-//        case .state(let state):
-//            return .init(.state(state.tag(value)), taskIdentifier: taskIdentifier)
-//        case .file(_):
-//            return .init(data, taskIdentifier: taskIdentifier)
-//        }
-//    }
-//}
-
 extension SessionTaskState {
     /// 内部下载状态转换为外部News状态
     /// - Parameters:
@@ -359,7 +340,7 @@ struct AsyncDownloadURLProgressPublisher<Tag: Hashable> {
     func download() async throws -> AnyAsyncSequence<TaskNews> {
         let task = sessionProvider
             .client()
-            .asyncDataTask(from: try request.build())
+            .asyncDownloadTask(from: try request.build())
         await sessionProvider.bind(task: task.taskIdentifier, tag: tag)
         defer {
             task.resume()
@@ -393,7 +374,17 @@ extension AsyncURLSessiobDownloadDelegate {
     
     func filter<TagValue: Hashable>(_ session: AsyncSessionProvider, tag: TagValue) -> AnyAsyncSequence<TaskNews> {
         statePassthroughSubject
-            .filter({ await session.taskIdentifier(for: tag) == $0.identifier })
+//            .map({ values in
+//                logger.info("recive data for task identifier \(values.identifier)")
+//                return values
+//            })
+            .filter({
+                await session.taskIdentifier(for: tag) == $0.identifier
+            })
+//            .map({ values in
+//                logger.info("filter task \(values.identifier) for tag \(tag)")
+//                return values
+//            })
             .eraseToAnyAsyncSequence()
     }
     

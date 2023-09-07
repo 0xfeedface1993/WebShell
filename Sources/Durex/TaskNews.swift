@@ -67,13 +67,17 @@ public struct UpdateNews {
 }
 
 public struct AsyncUpdateNews {
-    public typealias TagValue = any Hashable
+    public typealias TagValue = AnyHashable
     
     public let value: TaskNews
-    public let tag: TagValue
+    private let tag: TagValue
     
     public init(value: TaskNews, tag: TagValue) {
         self.value = value
         self.tag = tag
+    }
+    
+    public func tagValue<T>() -> T? {
+        tag as? T
     }
 }

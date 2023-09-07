@@ -70,9 +70,9 @@ public protocol AsyncCustomURLSession {
     /// 下载文件, 包含进度信息更新、下载完成、失败
     /// - Parameter request: 下载文件请求
     /// - Returns: 异步文件进度+文件URL
-    func downloadWithProgress<TagValue: Hashable>(_ request: URLRequestBuilder, tag: TagValue?) async throws -> AnyAsyncSequence<AsyncUpdateNews>
+    func downloadWithProgress<TagValue: Hashable>(_ request: URLRequestBuilder, tag: TagValue) async throws -> AnyAsyncSequence<AsyncUpdateNews>
     
-    func downloadNews<TagValue: Hashable>(_ tag: TagValue?) -> AnyAsyncSequence<AsyncUpdateNews>
+    func downloadNews<TagValue: Hashable>(_ tag: TagValue) -> AnyAsyncSequence<AsyncUpdateNews>
     
     /// 其他模块想要获取所有下载任务的进度、完成通知则使用此方法获取Publisher,
     /// - Returns: 任务状态

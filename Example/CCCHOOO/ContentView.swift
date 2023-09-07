@@ -13,19 +13,59 @@ struct ContentView: View {
     @State var list = [DemoTaskObject]()
     
     var body: some View {
-        ScrollView {
-            VStack {
-                ForEach(list, id: \.url) { object in
-                    Section(object.title) {
-                        DemoListItemView(object: object)
-                            .onTapGesture {
-                                Task {
-                                    await object.start()
-                                }
-                            }
-                    }
-                }
+//        ScrollView {
+//            VStack {
+////                ForEach(list, id: \.url) { object in
+////                    Section(object.title) {
+////                        DemoListItemView(object: object)
+////                            .onTapGesture {
+////                                Task {
+////                                    await object.start()
+////                                }
+////                            }
+////                    }
+////                }
+//
+//                Table(list) {
+//                    TableColumn("网盘", value: \.title)
+//                    TableColumn("下载地址", value: \.url)
+//                    TableColumn("状态", value: \.state)
+//                    TableColumn("下载进度", value: \.state)
+//                    TableColumn("下载按钮") { row in
+//                        Button("下载") {
+//                            Task {
+//                                await row.start()
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+        Table(list) {
+            TableColumn("网盘") { row in
+                DummyTextView(object: row, keypath: \.title)
             }
+            .width(min: 40)
+            TableColumn("下载地址") { row in
+                DummyTextView(object: row, keypath: \.url)
+            }
+            .width(min: 100)
+            TableColumn("状态") { row in
+                DummyTextView(object: row, keypath: \.state)
+            }
+            .width(min: 40)
+            TableColumn("文件大小") { row in
+                DummyTextView(object: row, keypath: \.fileSize)
+            }
+            .width(min: 40)
+            TableColumn("下载进度") { row in
+                DummyTextView(object: row, keypath: \.formatterProgress)
+            }
+            .width(min: 80)
+            TableColumn("下载按钮") { row in
+                DemoListItemView(object: row)
+            }
+            .width(min: 40)
         }
         .task {
             list = [

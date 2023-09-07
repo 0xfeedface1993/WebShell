@@ -19,6 +19,7 @@ struct DownloadSessionError: Error {
 
 public enum DownloadSessionRawError: Error {
     case invalidResponse
+    case unknown
 }
 
 public struct DownloadURLError: Error {
@@ -42,27 +43,6 @@ public struct UpdateFailure {
     
     public func tag(_ value: Int) -> Self {
         .init(error: error, identifier: value)
-    }
-}
-
-public struct SessionError: Error, LocalizedError {
-    let pool: SessionPool?
-    let context: (any SessionContext)?
-    
-    public var errorDescription: String? {
-        if let _ = pool, let _ = context {
-            return "No Session Error."
-        }
-        
-        if let context = context {
-            return "Make session failed only context \(context) exist."
-        }
-        
-        if let pool = pool {
-            return "Make session failed only pool \(pool) exist."
-        }
-        
-        return "No Session Error."
     }
 }
 

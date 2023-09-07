@@ -31,7 +31,7 @@ public protocol URLClient {
     /// download large file at tmp directory, not use custom delegate response
     func asyncDownload(from url: URLRequest) async throws -> (URL, URLResponse)
     /// create download task, 
-    func asyncDataTask(from url: URLRequest) -> URLTask
+    func asyncDownloadTask(from url: URLRequest) -> URLTask
 }
 
 /// An extension that provides async support for fetching a URL
@@ -120,6 +120,8 @@ extension URLSession: URLClient {
     @usableFromInline
     func defaultDownload(_ url: URLRequest) async throws -> (URL, URLResponse) {
         if #available(macOS 12.0, iOS 15.0, *) {
+//            let downloadTask = downloadTask(with: url)
+//            downloadTask.countOfBytesReceived
             return try await download(for: url)
         } else {
             // Fallback on earlier versions
@@ -157,8 +159,8 @@ extension URLSession: URLClient {
         }
     }
     
-    public func asyncDataTask(from url: URLRequest) -> URLTask {
-        dataTask(with: url)
+    public func asyncDownloadTask(from url: URLRequest) -> URLTask {
+        downloadTask(with: url)
     }
 }
 

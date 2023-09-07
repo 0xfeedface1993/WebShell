@@ -20,6 +20,7 @@
 		5294AA4A2A7E9CC700FE549E /* WebShellCoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5294AA472A7E9CC700FE549E /* WebShellCoreTests.swift */; };
 		5294AA4B2A7E9CC700FE549E /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5294AA482A7E9CC700FE549E /* Info.plist */; };
 		5294AA502A7E9D5100FE549E /* WebShell in Frameworks */ = {isa = PBXBuildFile; productRef = 5294AA4F2A7E9D5100FE549E /* WebShell */; };
+		52D3B4C52AA9BD6100A9DDF3 /* DummyTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52D3B4C42AA9BD5C00A9DDF3 /* DummyTextView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,6 +68,7 @@
 		5294AA472A7E9CC700FE549E /* WebShellCoreTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebShellCoreTests.swift; sourceTree = "<group>"; };
 		5294AA482A7E9CC700FE549E /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5294AA4E2A7E9CEF00FE549E /* WebShell */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = WebShell; path = ..; sourceTree = "<group>"; };
+		52D3B4C42AA9BD5C00A9DDF3 /* DummyTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DummyTextView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,6 +120,7 @@
 				27448B2820170ABA001FC925 /* ViewController.swift */,
 				528CE5062AA8ED3200BEA44E /* HostingView.swift */,
 				528CE4FE2AA8CB6B00BEA44E /* ContentView.swift */,
+				52D3B4C42AA9BD5C00A9DDF3 /* DummyTextView.swift */,
 				528CE5042AA8CE7100BEA44E /* StatefulPreviewWrapper.swift */,
 				528CE5022AA8CDF300BEA44E /* DemoListItemView.swift */,
 				528CE5002AA8CC0A00BEA44E /* DemoTaskObject.swift */,
@@ -308,6 +311,7 @@
 			files = (
 				27448B2920170ABA001FC925 /* ViewController.swift in Sources */,
 				27448B2720170ABA001FC925 /* AppDelegate.swift in Sources */,
+				52D3B4C52AA9BD6100A9DDF3 /* DummyTextView.swift in Sources */,
 				528CE5012AA8CD1900BEA44E /* DemoTaskObject.swift in Sources */,
 				528CE4FF2AA8CB6F00BEA44E /* ContentView.swift in Sources */,
 				528CE5052AA8CE7100BEA44E /* StatefulPreviewWrapper.swift in Sources */,

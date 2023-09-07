@@ -14,7 +14,7 @@ import Logging
 
 let logger = Logger(label: "com.webshell.demo")
 
-final class DemoTaskObject: ObservableObject {
+final class DemoTaskObject: ObservableObject, Identifiable {
     typealias DirtyValue = any Dirtyware<URL, String>
     
     @Published var url: String = ""
@@ -24,8 +24,15 @@ final class DemoTaskObject: ObservableObject {
     @Published var file: URL?
     @Published var tag: String
     
-    var loading: Bool = false
+    @Published var state: String = ""
+    @Published var formatterProgress: String = ""
+    @Published var loading: Bool = false
+    @Published var fileSize = ""
+    
+    let id = UUID()
+    
     let dirty: DirtyValue
+    private var updateTask: Task<Void, Never>?
     
     init(_ dirty: DirtyValue, tag: String) {
         self.dirty = dirty
@@ -64,17 +71,24 @@ final class DemoTaskObject: ObservableObject {
         }
         
         loading = true
-        defer {
-            loading = false
+        updateTask?.cancel()
+
+        updateTask = Task {
+            try? await self.observerState()
         }
+        await self.download()
+        
+        loading = false
+    }
+    
+    private func download() async {
         do {
-            Task {
-                try await observerState()
-            }
             let fileURL = try await dirty.execute(for: url)
-            file = fileURL
+            await update(fileURL)
+            logger.error("download file complete at \(fileURL)")
         } catch {
             logger.error("download file failed, \(error)")
+            await update(error)
         }
     }
     
@@ -85,10 +99,12 @@ final class DemoTaskObject: ObservableObject {
         for try await state in states {
             switch state.value {
             case .state(let value):
+//                logger.info("tag \(tag) progress \(value.progress.fractionCompleted)")
                 await update(value.progress)
             case .file(_):
-                break
+                return
             case .error(let failure):
+                logger.error("tag \(tag) failed, \(failure.error)")
                 throw failure.error
             }
         }
@@ -96,6 +112,22 @@ final class DemoTaskObject: ObservableObject {
     
     @MainActor
     func update(_ progress: Progress) async {
-        self.progress = Double(progress.completedUnitCount) / Double(max(progress.totalUnitCount, 1))
+        self.progress = progress.fractionCompleted
+        if self.progress < 1 {
+            self.state = "下载中"
+        }
+        self.formatterProgress = progress.fractionCompleted.formatted(.percent)
+        self.fileSize = progress.totalUnitCount.formatted(.byteCount(style: .decimal))
+    }
+    
+    @MainActor
+    func update(_ error: Error) async {
+        self.state = "\(error)"
+    }
+    
+    @MainActor
+    func update(_ file: URL) async {
+        self.file = file
+        self.state = "下载完成"
     }
 }

@@ -22,5 +22,6 @@ public enum WebShellError: Error {
         case invalidURLResponse(response: URLResponse)
         case invalidHTTPStatusCode(response: HTTPURLResponse)
         case URLSessionError(error: Error)
+        case unknown
     }
 }

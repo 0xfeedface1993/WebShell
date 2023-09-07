@@ -76,9 +76,22 @@ public struct AsyncSaver: SessionableDirtyware {
         }
         
         let context = try await AsyncSession(configures).context(key)
-        let (url, response) = try await context.download(with: request)
-        let next = try MoveToDownloads(tempURL: url, suggestedFilename: response.suggestedFilename, policy: policy).move()
-        return next
+        let states = try await context.downloadWithProgress(request, tag: key)
+        for try await state in states {
+            switch state.value {
+            case .state(let value):
+                shellLogger.info("download task \(value.identifier) progress \(value.progress.fractionCompleted)")
+                continue
+            case .file(let file):
+                let next = try MoveToDownloads(tempURL: file.url, suggestedFilename: file.response.suggestedFilename, policy: policy).move()
+                return next
+            case .error(let failure):
+                shellLogger.info("download task \(failure.identifier) failed, \(failure.error)")
+                throw failure.error
+            }
+        }
+        shellLogger.info("Ooops! download task unexcepted finished")
+        throw DownloadSessionRawError.unknown
     }
     
     public func sessionKey(_ value: AnyHashable) -> Self {

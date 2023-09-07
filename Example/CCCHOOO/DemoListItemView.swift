@@ -13,36 +13,43 @@ struct DemoListItemView: View {
     @ObservedObject var object: DemoTaskObject
     
     var body: some View {
-        VStack {
-            HStack {
-                Text(object.url)
-                    .font(.body)
-                    .multilineTextAlignment(.leading)
-                
-                Spacer()
-                
-                if let error = object.error {
-                    Text(error)
-                        .bold()
-                        .foregroundColor(.red.opacity(0.6))
-                }
-                
-                if object.progress == 1 {
-                    Text("下载完成")
-                        .bold()
-                        .foregroundColor(.green.opacity(0.6))
-                }   else if object.progress > 0   {
-                    Text("\(object.progress.formatted(.percent))")
-                }
-            }
-            
-            if object.progress > 0 {
-                ProgressView(value: object.progress)
-                    .progressViewStyle(.linear)
-                    .foregroundColor(.accentColor)                
+//        VStack {
+//            HStack {
+//                Text(object.url)
+//                    .font(.body)
+//                    .multilineTextAlignment(.leading)
+//
+//                Spacer()
+//
+//                if let error = object.error {
+//                    Text(error)
+//                        .bold()
+//                        .foregroundColor(.red.opacity(0.6))
+//                }
+//
+//                if object.progress == 1 {
+//                    Text("下载完成")
+//                        .bold()
+//                        .foregroundColor(.green.opacity(0.6))
+//                }   else if object.progress > 0   {
+//                    Text("\(object.progress.formatted(.percent))")
+//                }
+//            }
+//
+//            if object.progress > 0 {
+//                ProgressView(value: object.progress)
+//                    .progressViewStyle(.linear)
+//                    .foregroundColor(.accentColor)
+//            }
+//        }
+//        .padding(.all, 8)
+        Button("下载") {
+            Task {
+                await object.start()
             }
         }
-        .padding(.all, 8)
+        .buttonStyle(.borderedProminent)
+        .disabled(object.loading)
     }
 }
 
