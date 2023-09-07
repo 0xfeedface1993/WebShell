@@ -73,7 +73,7 @@ public struct AsyncTowerFileListRequestGenerator: Dirtyware {
     }
     
     public func execute(for inputValue: String) async throws -> URLRequestBuilder {
-        try request(inputValue, fileid: fileid)
+        try request(url, fileid: fileid)
     }
     
     func request(_ string: String, fileid: String) throws -> URLRequestBuilder {

@@ -338,12 +338,15 @@ struct AsyncDownloadURLProgressPublisher<Tag: Hashable> {
     let sessionProvider: AsyncSessionProvider
     
     func download() async throws -> AnyAsyncSequence<TaskNews> {
+        let urlRequest = try request.build()
+        
         let task = sessionProvider
             .client()
-            .asyncDownloadTask(from: try request.build())
+            .asyncDownloadTask(from: urlRequest)
         await sessionProvider.bind(task: task.taskIdentifier, tag: tag)
         defer {
             task.resume()
+            logger.info("get file curl: \n\(urlRequest.curlString)")
         }
         return delegtor.news(sessionProvider, tag: tag)
     }
@@ -356,12 +359,34 @@ extension AsyncURLSessiobDownloadDelegate {
     ///   - tag: 任务标识的hashValue，因为存储任务标识本身比较消耗内存，使用hashValue代替
     /// - Returns: 下载任务事件
     func news<TagValue: Hashable>(_ session: AsyncSessionProvider, tag: TagValue) -> AnyAsyncSequence<TaskNews> {
+//        AsyncThrowingStream(TaskNews.self, bufferingPolicy: .unbounded) { continuation in
+//            Task.detached {
+//                for try await value in self.filter(session, tag: tag) {
+//                    switch value {
+//                    case .error(let error):
+//                        await session.unbind(tag: tag)
+//                        continuation.finish(throwing: error.error)
+//                        return
+//                    case .file(_):
+//                        await session.unbind(tag: tag)
+//                        continuation.yield(with: .success(value))
+//                        continuation.finish()
+//                        return
+//                    default:
+//                        continuation.yield(with: .success(value))
+//                    }
+//                }
+//            }
+//        }
+//        .eraseToAnyAsyncSequence()
+
         filter(session, tag: tag)
             .map({ value in
                 switch value {
-                case .error(let error):
+                case .error(_):
                     await session.unbind(tag: tag)
-                    throw error.error
+//                    throw error.error
+                    return value
                 case .file(_):
                     await session.unbind(tag: tag)
                     return value

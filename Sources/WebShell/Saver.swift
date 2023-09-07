@@ -71,27 +71,51 @@ public struct AsyncSaver: SessionableDirtyware {
     }
     
     public func execute(for inputValue: Input) async throws -> Output {
-        guard let request = inputValue.first else {
-            throw ShellError.emptyRequest
-        }
-        
-        let context = try await AsyncSession(configures).context(key)
-        let states = try await context.downloadWithProgress(request, tag: key)
-        for try await state in states {
-            switch state.value {
-            case .state(let value):
-                shellLogger.info("download task \(value.identifier) progress \(value.progress.fractionCompleted)")
-                continue
-            case .file(let file):
-                let next = try MoveToDownloads(tempURL: file.url, suggestedFilename: file.response.suggestedFilename, policy: policy).move()
-                return next
-            case .error(let failure):
-                shellLogger.info("download task \(failure.identifier) failed, \(failure.error)")
-                throw failure.error
+        var _error: Error?
+        for url in inputValue {
+            do {
+                return try await downloadFile(url)
+            }   catch   {
+                shellLogger.error("download file [\(url.url ?? "Ooops!")] failed, try next one. \(error)")
+                _error = error
             }
         }
-        shellLogger.info("Ooops! download task unexcepted finished")
-        throw DownloadSessionRawError.unknown
+        throw _error ?? ShellError.emptyRequest
+    }
+    
+    private func downloadFile(_ url: URLRequestBuilder) async throws -> URL {
+        let context = try await AsyncSession(configures).context(key)
+        let states = try await context.downloadWithProgress(url, tag: key)
+        var news: TaskNews?
+        
+        // 在for-in loop内抛出错误则会影响其他地方的监听 导致只有一个接受者收到错误信息
+        for try await state in states {
+            if case .error(_) = state.value {
+                news = state.value
+                break
+            }
+            if case .file(_) = state.value {
+                news = state.value
+                break
+            }
+        }
+        
+        guard let news = news else {
+            shellLogger.info("Ooops! download task unexcepted finished")
+            throw DownloadSessionRawError.unknown
+        }
+        
+        switch news {
+        case .state(_):
+            shellLogger.info("Ooops! download task unexcepted finished")
+            throw DownloadSessionRawError.unknown
+        case .file(let file):
+            let next = try MoveToDownloads(tempURL: file.url, suggestedFilename: file.response.suggestedFilename, policy: policy).move()
+            return next
+        case .error(let failure):
+            shellLogger.info("download task \(failure.identifier) failed, \(failure.error)")
+            throw failure.error
+        }
     }
     
     public func sessionKey(_ value: AnyHashable) -> Self {

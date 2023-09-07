@@ -88,17 +88,13 @@ public struct AsyncFileIDStringInDomSearchGroup: SessionableDirtyware {
     }
     
     private func search(_ request: URLRequestBuilder) throws -> AnyDirtyware<Input, Output> {
-        guard let url = request.url, let next = URL(string: url),
-                let component = URLComponents(url: next, resolvingAgainstBaseURL: false) else {
+        guard let url = request.url else {
             throw ShellError.badURL(request.url ?? "")
         }
         
-        guard let host = component.host, let scheme = component.scheme else {
-            throw ShellError.badURL(next.absoluteString)
-        }
-        
+        let (host, scheme) = try url.baseComponents()
         let searchid = AsyncFileIDStringInDomSearch(finder, configures: configures, key: key)
-        let page = AsyncGeneralDownPageByID(scheme: scheme, host: host, refer: next.absoluteString)
+        let page = AsyncGeneralDownPageByID(scheme: scheme, host: host, refer: url)
         
         return searchid.join(page)
     }

@@ -54,6 +54,17 @@ public enum TaskNews {
             return error.identifier
         }
     }
+    
+    public var isCompleted: Bool {
+        switch self {
+        case .file(_):
+            return true
+        case .state(_):
+            return false
+        case .error(_):
+            return true
+        }
+    }
 }
 
 public struct UpdateNews {

@@ -159,9 +159,8 @@ public struct AsyncFileListURLRequestInPageGenerator: SessionableDirtyware {
     
     public func execute(for inputValue: String) async throws -> URLRequestBuilder {
         let request = try request(inputValue)
-        let string = try await AsyncStringParserDataTask(request: request, encoding: .utf8, sessionKey: key, configures: configures).asyncValue()
-        let fileid = try finder.extract(string)
-        let next = try referRequest(string, fileid: fileid)
+        let fileid = try await AsyncFileIDStringInDomSearch(finder, configures: configures).execute(for: request)
+        let next = try referRequest(inputValue, fileid: fileid)
         return next
     }
     

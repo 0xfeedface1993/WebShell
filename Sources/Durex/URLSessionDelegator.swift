@@ -129,6 +129,14 @@ class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate {
         super.init()
     }
     
+    func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest) async -> URLRequest? {
+        var next = request
+//        response.
+//        next.setValue("", forHTTPHeaderField: "")
+        logger.info("task \(task.taskIdentifier) redirecting to curl: \n----------------\n\(request.curlString)")
+        return next
+    }
+    
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         let filename = UUID().uuidString
         let cachedURL = cachedFolder
@@ -144,7 +152,7 @@ class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate {
         } catch {
             let failure = UpdateFailure(error: error, identifier: downloadTask.taskIdentifier)
             let news = TaskNews.error(failure)
-            logger.info("\(#function) download file task [\(downloadTask.taskIdentifier)] failed \(error), curl: \(downloadTask.currentRequest?.cURL(pretty: true) ??  "Ooops!") ")
+            logger.info("\(#function) download file task [\(downloadTask.taskIdentifier)] failed \(error), \n--------------\n curl: \(downloadTask.currentRequest?.cURL(pretty: true) ??  "Ooops!") ")
             statePassthroughSubject.send(news)
         }
         
@@ -181,7 +189,7 @@ class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate {
         if let error = error {
             let failure = UpdateFailure(error: error, identifier: task.taskIdentifier)
             let news = TaskNews.error(failure)
-            logger.info("\(#function) download file task [\(task.taskIdentifier)] failed \(error), curl: \(task.currentRequest?.cURL(pretty: true) ??  "Ooops!") ")
+            logger.info("\(#function) download file task [\(task.taskIdentifier)] failed \(error), \n--------------\n curl: \(task.currentRequest?.cURL(pretty: true) ??  "Ooops!") ")
             statePassthroughSubject.send(news)
             return
         }

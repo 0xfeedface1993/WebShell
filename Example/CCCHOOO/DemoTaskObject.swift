@@ -71,10 +71,8 @@ final class DemoTaskObject: ObservableObject, Identifiable {
         }
         
         loading = true
-        updateTask?.cancel()
-
-        updateTask = Task {
-            try? await self.observerState()
+        Task {
+            try await self.observerState()
         }
         await self.download()
         
@@ -99,13 +97,11 @@ final class DemoTaskObject: ObservableObject, Identifiable {
         for try await state in states {
             switch state.value {
             case .state(let value):
-//                logger.info("tag \(tag) progress \(value.progress.fractionCompleted)")
                 await update(value.progress)
             case .file(_):
                 return
-            case .error(let failure):
-                logger.error("tag \(tag) failed, \(failure.error)")
-                throw failure.error
+            case .error(_):
+                return
             }
         }
     }
