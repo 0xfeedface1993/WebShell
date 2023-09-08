@@ -22,6 +22,8 @@ import FoundationNetworking
 import AnyErase
 #endif
 
+import AsyncExtensions
+
 actor AsyncSessionPool {
     private var cache = [Sessions: any AsyncCustomURLSession]()
     
@@ -51,6 +53,62 @@ actor AsyncSessionPool {
             return value
         }
     }
+    
+//    /// 当前下载池中所有session
+//    func sessions() -> [any AsyncCustomURLSession] {
+//        cache.map(\.value)
+//    }
+}
+
+actor AsyncTaskPool {
+    typealias TaskValue = Task<Void, Never>
+    private var tasks = [Sessions: TaskValue]()
+    
+    @usableFromInline
+    func set<Context>(_ context: Context, subject: AsyncPassthroughSubject<AsyncUpdateNews>, for key: Sessions) where Context: AsyncCustomURLSession {
+        let updates = context.downloadNews()
+        removeTask(forKey: key)
+        tasks[key] = task(updates, subject: subject, forKey: key)
+    }
+    
+    @usableFromInline
+    func remove(_ key: Sessions) {
+        removeTask(forKey: key)
+    }
+    
+    @usableFromInline
+    func task(forKey key: Sessions) -> TaskValue? {
+        tasks[key]
+    }
+    
+    func task(_ updates: AnyAsyncSequence<AsyncUpdateNews>, subject: AsyncPassthroughSubject<AsyncUpdateNews>, forKey key: Sessions) -> TaskValue {
+        TaskValue {
+            logger.info("observer session \(key)")
+            defer {
+                logger.info("finished observer session \(key)")
+            }
+            do {
+                for try await news in updates {
+                    subject.send(news)
+                }
+            } catch {
+                logger.info("catch error from observer session \(key), \(error)")
+            }
+        }
+    }
+    
+    func removeTask(forKey key: Sessions) {
+        if let oldTask = tasks[key], !oldTask.isCancelled {
+            oldTask.cancel()
+            logger.info("remove task observer for session \(key)")
+        }
+    }
+}
+
+struct ResoucesPool {
+    let sessions = AsyncSessionPool()
+    let tasks = AsyncTaskPool()
+    let subject = AsyncPassthroughSubject<AsyncUpdateNews>()
 }
 
 public struct AsyncSession {
@@ -61,27 +119,64 @@ public struct AsyncSession {
     }
     
     public func state<Key>(for key: Key) async throws -> AsyncCustomURLSession where Key: Hashable {
-        try await configures.sessionPool.take(forKey: Sessions(key))
+        let sessionKey = Sessions(key)
+        return try await configures.resourcesPool.sessions.take(forKey: sessionKey)
     }
     
     public func register<Context, Key>(_ context: Context, forKey key: Key) async -> Context where Key: Hashable, Context: AsyncCustomURLSession {
-        await configures.sessionPool.set(context, for: Sessions(key))
+        let sessionKey = Sessions(key)
+        
+        await configures
+            .resourcesPool
+            .sessions
+            .set(context, for: sessionKey)
+        
+        await configures
+            .resourcesPool
+            .tasks
+            .set(context, subject: configures.resourcesPool.subject, for: sessionKey)
+        
+        return context
+    }
+    
+    func registerDefaultContext<Context>(_ context: Context) async -> Context where Context: AsyncCustomURLSession {
+        let sessionKey = Sessions.default
+        
+        await configures
+            .resourcesPool
+            .sessions
+            .set(context, for: sessionKey)
+        
+        await configures
+            .resourcesPool
+            .tasks
+            .set(context, subject: configures.resourcesPool.subject, for: sessionKey)
+        
         return context
     }
     
     public func remove<Key>(by key: Key) async where Key: Hashable {
-        await configures.sessionPool.remove(Sessions(key))
+        let sessionKey = Sessions(key)
+        await configures.resourcesPool.sessions.remove(sessionKey)
     }
     
     public func context<Key>(_ key: Key) async throws -> any AsyncCustomURLSession where Key: Hashable {
+        let sessionKey = Sessions(key)
         do {
-            let context = try await configures.sessionPool.take(forKey: Sessions(key))
-            logger.info("got session \(context) for \(key)")
+            let context = try await configures.resourcesPool.sessions.take(forKey: sessionKey)
+            logger.info("got session \(context) for \(sessionKey)")
             return context
         } catch {
-            logger.error("take session for \(key) failed, \(error)")
+            logger.error("take session for \(sessionKey) failed, \(error)")
             logger.info("use default session \(configures.defaultSession)")
             return configures.defaultSession
         }
+    }
+    
+    public func news() -> AnyAsyncSequence<AsyncUpdateNews> {
+        configures
+            .resourcesPool
+            .subject
+            .eraseToAnyAsyncSequence()
     }
 }
