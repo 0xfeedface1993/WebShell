@@ -26,12 +26,12 @@ public struct BridgeSaver: SessionableDirtyware {
     let tag: AnyHashable
     public let configures: AsyncURLSessionConfiguration
     
-    public init(_ bundle: SessionBundle, policy: Saver.Policy = .normal, configures: AsyncURLSessionConfiguration, tag: AnyHashable) {
+    public init(_ bundle: SessionBundle, policy: Saver.Policy = .normal, tag: AnyHashable) {
         self.policy = policy
         self.sessionBundle = bundle
         self.tag = tag
         self.key = sessionBundle.sessionKey
-        self.configures = configures
+        self.configures = bundle.congifures
     }
     
     public func execute(for inputValue: [URLRequestBuilder]) async throws -> URL {
@@ -66,6 +66,6 @@ public struct BridgeSaver: SessionableDirtyware {
     }
     
     public func sessionKey(_ value: AnyHashable) -> Self {
-        .init(.init(value), policy: policy, configures: configures, tag: tag)
+        .init(.init(sessionKey: value, congifures: configures), policy: policy, tag: tag)
     }
 }

@@ -37,7 +37,7 @@ extension URLRequest: ContextValue {
     }
 }
 
-public struct URLRequestBuilder {
+public struct URLRequestBuilder: CustomStringConvertible {
     public let url: String?
     public let method: Method
     public let headers: [String: String]?
@@ -114,14 +114,18 @@ public struct URLRequestBuilder {
         case get = "GET"
         case post = "POST"
     }
+    
+    public var description: String {
+        valueDescription
+    }
 }
 
 extension URLRequestBuilder: ContextValue {
     public var valueDescription: String {
         """
-        url: \(url ?? "")
-        method: \(method)
-        headers: \(headers ?? [:])
+        url: \(url ?? "")\n
+        method: \(method)\n
+        headers: \(headers ?? [:])\n
         body: \(body?.count ?? 0) bytes
         """
     }

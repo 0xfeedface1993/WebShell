@@ -35,6 +35,7 @@ actor AsyncSessionPool {
     @usableFromInline
     func remove(_ key: Sessions) {
         cache.removeValue(forKey: key)
+        logger.info("remove session context for \(key)")
     }
     
     @usableFromInline
