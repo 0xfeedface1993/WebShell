@@ -7,14 +7,9 @@
 //
 
 import Foundation
+
 #if canImport(Durex)
 import Durex
-#endif
-
-#if COMBINE_LINUX && canImport(CombineX)
-import CombineX
-#else
-import Combine
 #endif
 
 #if canImport(FoundationNetworking)
@@ -119,35 +114,7 @@ public struct FileGeneralLinkMatch {
 }
 
 /// 查找`dl.php`的普通限速下载链接，生成下载请求，可能会有多个下载请求
-public struct PHPLinks: SessionableCondom {
-    public typealias Input = URLRequest
-    public typealias Output = [URLRequest]
-    
-    public var key: AnyHashable
-    
-    public init(_ key: AnyHashable = "default") {
-        self.key = key
-    }
-    
-    public func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
-        Future {
-            try await AsyncPHPLinks(.shared, key: key)
-                .execute(for: .init(inputValue))
-                .compactMap({ try? $0.build() })
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    public func empty() -> AnyPublisher<Output, Error> {
-        Empty().eraseToAnyPublisher()
-    }
-    
-    public func sessionKey(_ value: AnyHashable) -> PHPLinks {
-        PHPLinks(value)
-    }
-}
-
-public struct AsyncPHPLinks: SessionableDirtyware {
+public struct PHPLinks: SessionableDirtyware {
     public typealias Input = URLRequestBuilder
     public typealias Output = [URLRequestBuilder]
     
@@ -162,7 +129,7 @@ public struct AsyncPHPLinks: SessionableDirtyware {
     public func execute(for inputValue: URLRequestBuilder) async throws -> [URLRequestBuilder] {
         let matcher = DLPhpMatch(url: "")
         let builder = PHPFileDownload(url: "", refer: "")
-        return try await AsyncDownloadLinks(key, matcher: matcher, requestBuilder: builder, configures: configures).execute(for: inputValue)
+        return try await DownloadLinks(key, matcher: matcher, requestBuilder: builder, configures: configures).execute(for: inputValue)
     }
     
     public func sessionKey(_ value: AnyHashable) -> Self {

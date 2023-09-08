@@ -3,10 +3,28 @@
     {
       "identity" : "asyncextensions",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/sideeffect-io/AsyncExtensions.git",
+      "location" : "https://github.com/lhoward/AsyncExtensions.git",
       "state" : {
-        "revision" : "1f0729e4f1f6c7166acfac3cec43b3cbe83be0e6",
-        "version" : "0.5.2"
+        "branch" : "linux",
+        "revision" : "2218eaa30dbdb39b063e92644fc28ed22e2cb942"
+      }
+    },
+    {
+      "identity" : "combinex",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/0xfeedface1993/CombineX.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "f73eee728a7826a2855fabb380300187f42f5649"
+      }
+    },
+    {
+      "identity" : "swift-atomics",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-atomics.git",
+      "state" : {
+        "revision" : "6c89474e62719ddcc1e9614989fff2f68208fe10",
+        "version" : "1.1.0"
       }
     },
     {

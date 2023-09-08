@@ -78,10 +78,10 @@ struct DemoListItemView_Previews: PreviewProvider {
     
     static func task(_ builder: (DemoTaskObject) -> Void) -> DemoTaskObject {
         let task = DemoTaskObject(
-            AsyncRedirectEnablePage(.shared)
-                .join(AsyncDownPage(.default))
-                .join(AsyncPHPLinks(.shared))
-                .join(AsyncSaver(.override, configures: .shared)), tag: "default"
+            RedirectEnablePage(.shared)
+                .join(DownPage(.default))
+                .join(PHPLinks(.shared))
+                .join(Saver(.override, configures: .shared)), tag: "default"
         )
         task.url = "https://test.com/download/sss.zip"
         task.progress = 0.522

@@ -346,7 +346,7 @@ struct AsyncDownloadURLProgressPublisher<Tag: Hashable> {
         await sessionProvider.bind(task: task.taskIdentifier, tag: tag)
         defer {
             task.resume()
-            logger.info("get file curl: \n\(urlRequest.curlString)")
+            logger.info("get file curl: \n\(urlRequest.cURL())")
         }
         return delegtor.news(sessionProvider, tag: tag)
     }

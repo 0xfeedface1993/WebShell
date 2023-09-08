@@ -7,12 +7,6 @@
 
 import Foundation
 
-#if COMBINE_LINUX && canImport(CombineX)
-import CombineX
-#else
-import Combine
-#endif
-
 #if canImport(Durex)
 import Durex
 #endif
@@ -22,19 +16,6 @@ import FoundationNetworking
 #endif
 
 public struct StringParserDataTask {
-    let request: URLRequest
-    let encoding: String.Encoding
-    let sessionKey: AnyHashable
-    
-    func publisher() -> AnyPublisher<String, Error> {
-        Future {
-            try await AsyncStringParserDataTask(request: .init(request), encoding: encoding, sessionKey: sessionKey, configures: .shared).asyncValue()
-        }
-        .eraseToAnyPublisher()
-    }
-}
-
-public struct AsyncStringParserDataTask {
     let request: URLRequestBuilder
     let encoding: String.Encoding
     let sessionKey: any Hashable

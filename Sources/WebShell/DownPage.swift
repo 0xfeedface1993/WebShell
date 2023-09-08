@@ -7,13 +7,9 @@
 //
 
 import Foundation
+
 #if canImport(Durex)
 import Durex
-#endif
-#if COMBINE_LINUX && canImport(CombineX)
-import CombineX
-#else
-import Combine
 #endif
 
 #if canImport(FoundationNetworking)
@@ -23,29 +19,7 @@ import FoundationNetworking
 /// 从下载链接中抓取fileid，并生成下载link页面请求，
 /// 如：`/file-12345.html` -> 取出`12345`，
 /// 然后生成`action=load_down_addr1&file_id=12345的body`请求`ajax.php`
-public struct DownPage: Condom {
-    public typealias Input = String
-    public typealias Output = URLRequest
-    
-    let finder: FileIDFinder
-    
-    public init(_ finder: FileIDFinder) {
-        self.finder = finder
-    }
-    
-    public func publisher(for inputValue: String) -> AnyPublisher<Output, Error> {
-        Future {
-            try await AsyncDownPage(finder).execute(for: inputValue).build()
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    public func empty() -> AnyPublisher<Output, Error> {
-        Empty().eraseToAnyPublisher()
-    }
-}
-
-public struct AsyncDownPage: Dirtyware {
+public struct DownPage: Dirtyware {
     public typealias Input = String
     public typealias Output = URLRequestBuilder
     
@@ -56,7 +30,7 @@ public struct AsyncDownPage: Dirtyware {
     }
     
     public func execute(for inputValue: String) async throws -> URLRequestBuilder {
-        try await AsyncFileListURLRequestGenerator(finder, action: "load_down_addr1").execute(for: inputValue)
+        try await FileListURLRequestGenerator(finder, action: "load_down_addr1").execute(for: inputValue)
     }
 }
 

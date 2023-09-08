@@ -7,12 +7,6 @@
 
 import Foundation
 
-#if COMBINE_LINUX && canImport(CombineX)
-import CombineX
-#else
-import Combine
-#endif
-
 #if canImport(Durex)
 import Durex
 #endif
@@ -21,29 +15,7 @@ import Durex
 import FoundationNetworking
 #endif
 
-public struct SignFileDownPage: Condom {
-    public typealias Input = String
-    public typealias Output = URLRequest
-    
-    public let fileid: String
-    
-    public init(fileid: String) {
-        self.fileid = fileid
-    }
-    
-    public func publisher(for inputValue: String) -> AnyPublisher<Output, Error> {
-        Future {
-            try await AsyncSignFileDownPage(fileid: fileid).execute(for: inputValue).build()
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    public func empty() -> AnyPublisher<Output, Error> {
-        Empty().eraseToAnyPublisher()
-    }
-}
-
-public struct AsyncSignFileDownPage: Dirtyware {
+public struct SignFileDownPage: Dirtyware {
     public typealias Input = String
     public typealias Output = URLRequestBuilder
     

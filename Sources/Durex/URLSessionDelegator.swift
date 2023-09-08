@@ -134,7 +134,7 @@ class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate {
         let next = request
         //        response.
         //        next.setValue("", forHTTPHeaderField: "")
-        logger.info("task \(task.taskIdentifier) redirecting to curl: \n----------------\n\(next.curlString)")
+        logger.info("task \(task.taskIdentifier) redirecting to curl: \n----------------\n\(next.cURL())")
         return next
     }
 #endif

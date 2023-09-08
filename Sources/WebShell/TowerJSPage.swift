@@ -8,44 +8,11 @@
 import Foundation
 import Durex
 
-#if COMBINE_LINUX && canImport(CombineX)
-import CombineX
-#else
-import Combine
-#endif
-
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
 
-public struct TowerJSPage: SessionableCondom {
-    public typealias Input = String
-    
-    public typealias Output = URLRequest
-    
-    public let key: AnyHashable
-    
-    public func publisher(for inputValue: String) -> AnyPublisher<URLRequest, Error> {
-        Future {
-            try await AsyncTowerJSPage(.shared, key: key).execute(for: inputValue).build()
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    public func empty() -> AnyPublisher<URLRequest, Error> {
-        Empty().eraseToAnyPublisher()
-    }
-    
-    public init(_ key: AnyHashable = "default") {
-        self.key = key
-    }
-    
-    public func sessionKey(_ value: AnyHashable) -> TowerJSPage {
-        .init(value)
-    }
-}
-
-public struct AsyncTowerJSPage: SessionableDirtyware {
+public struct TowerJSPage: SessionableDirtyware {
     public typealias Input = String
     
     public typealias Output = URLRequestBuilder
@@ -55,7 +22,7 @@ public struct AsyncTowerJSPage: SessionableDirtyware {
     
     public func execute(for inputValue: String) async throws -> URLRequestBuilder {
         let request = try pageRequest(inputValue).make()
-        let string = try await AsyncStringParserDataTask(request: request, encoding: .utf8, sessionKey: key, configures: configures).asyncValue()
+        let string = try await StringParserDataTask(request: request, encoding: .utf8, sessionKey: key, configures: configures).asyncValue()
         let url = try url(string, url: inputValue)
         return url
     }
@@ -82,7 +49,7 @@ public struct AsyncTowerJSPage: SessionableDirtyware {
         self.configures = configures
     }
     
-    public func sessionKey(_ value: AnyHashable) -> AsyncTowerJSPage {
+    public func sessionKey(_ value: AnyHashable) -> TowerJSPage {
         .init(configures, key: value)
     }
 }

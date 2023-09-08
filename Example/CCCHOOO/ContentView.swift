@@ -70,68 +70,68 @@ struct ContentView: View {
         .task {
             list = [
                 .init(
-                    AsyncRedirectEnablePage(.shared, key: "a")
-                        .join(AsyncDownPage(.default))
-                        .join(AsyncPHPLinks(.shared, key: "a"))
-                        .join(AsyncSaver(.override, configures: .shared, key: "a")), tag: "a"
+                    RedirectEnablePage(.shared, key: "a")
+                        .join(DownPage(.default))
+                        .join(PHPLinks(.shared, key: "a"))
+                        .join(Saver(.override, configures: .shared, key: "a")), tag: "a"
                 )
                 .title("迅牛盘")
                 .url("http://www.xunniufxp.com/file-4182005.html"),
                 .init(
-                    AsyncRedirectEnablePage(.shared, key: "b")
-                        .join(AsyncActionDownPage())
-                        .join(AsyncPHPLinks(.shared, key: "b"))
-                        .join(AsyncSaver(.override, configures: .shared, key: "b")), tag: "b"
+                    RedirectEnablePage(.shared, key: "b")
+                        .join(ActionDownPage())
+                        .join(PHPLinks(.shared, key: "b"))
+                        .join(Saver(.override, configures: .shared, key: "b")), tag: "b"
                 )
                 .title("XY盘")
                 .url("http://www.xingyaoclouds.com/fs/2nyqunuubbegazo"),
                 .init(
-                    AsyncRedirectEnablePage(.shared, key: "b")
-                        .join(AsyncAppendDownPath())
-                        .join(AsyncFileIDStringInDomSearchGroup(.loadDownAddr1, configures: .shared, key: "c"))
-                        .join(AsyncGeneralLinks(.shared, key: "c"))
-                        .join(AsyncSaver(.override, configures: .shared, key: "c")), tag: "c"
+                    RedirectEnablePage(.shared, key: "b")
+                        .join(AppendDownPath())
+                        .join(FileIDStringInDomSearchGroup(.loadDownAddr1, configures: .shared, key: "c"))
+                        .join(GeneralLinks(.shared, key: "c"))
+                        .join(Saver(.override, configures: .shared, key: "c")), tag: "c"
                 )
                 .title("ROSE盘")
                 .url("https://rosefile.net/6emc775g2p/s_MTGBHJKL.rar.html"),
                 .init(
-                    AsyncHTTPString(.shared, key: "d")
-                        .join(AsyncRedirectEnablePage(.shared, key: "d"))
-                        .join(AsyncFileListURLRequestInPageGenerator(.downProcess4, action: "load_down_addr5", configures: .shared))
-                        .join(AsyncPHPLinks(.shared, key: "d"))
-                        .join(AsyncSaver(.override, configures: .shared, key: "d")), tag: "d"
+                    HTTPString(.shared, key: "d")
+                        .join(RedirectEnablePage(.shared, key: "d"))
+                        .join(FileListURLRequestInPageGenerator(.downProcess4, action: "load_down_addr5", configures: .shared))
+                        .join(PHPLinks(.shared, key: "d"))
+                        .join(Saver(.override, configures: .shared, key: "d")), tag: "d"
                 )
                 .title("RARP盘")
                 .url("www.rarp.cc/fs/2494xuqmbg7wgha"),
                 .init(
-                    AsyncRedirectEnablePage(.shared, key: "e")
-                        .join(AsyncDownPage(.default))
-                        .join(AsyncPHPLinks(.shared, key: "e"))
-                        .join(AsyncSaver(.override, configures: .shared, key: "e")), tag: "e"
+                    RedirectEnablePage(.shared, key: "e")
+                        .join(DownPage(.default))
+                        .join(PHPLinks(.shared, key: "e"))
+                        .join(Saver(.override, configures: .shared, key: "e")), tag: "e"
                 )
                 .title("雪球盘")
                 .url("http://www.xueqiupan.com/file-761588.html"),
                 .init(
-                    AsyncRedirectEnablePage(.shared, key: "f")
-                        .join(AsyncFileListURLRequestGenerator(.default, action: "load_down_addr1"))
-                        .join(AsyncCDLinks(.shared, key: "f"))
-                        .join(AsyncSaver(.override, configures: .shared, key: "f")), tag: "f"
+                    RedirectEnablePage(.shared, key: "f")
+                        .join(FileListURLRequestGenerator(.default, action: "load_down_addr1"))
+                        .join(CDLinks(.shared, key: "f"))
+                        .join(Saver(.override, configures: .shared, key: "f")), tag: "f"
                 )
                 .title("exp盘")
                 .url("http://www.expfile.com/file-1622046.html"),
                 .init(
-                    AsyncRedirectEnablePage(.shared, key: "g")
-                        .join(AsyncSignFileListURLRequestGenerator(.default, action: "load_down_addr10", configures: .shared))
-                        .join(AsyncSignLinks(.shared, key: "g"))
-                        .join(AsyncSaver(.override, configures: .shared, key: "g")), tag: "g"
+                    RedirectEnablePage(.shared, key: "g")
+                        .join(SignFileListURLRequestGenerator(.default, action: "load_down_addr10", configures: .shared))
+                        .join(SignLinks(.shared, key: "g"))
+                        .join(Saver(.override, configures: .shared, key: "g")), tag: "g"
                 )
                 .title("567盘")
                 .url("https://www.567yun.cn/file-2293462.html"),
                 .init(
-                    AsyncRedirectEnablePage(.shared, key: "h")
-                        .join(AsyncTowerGroup("load_down_addr2", configures: .shared, key: "h"))
-                        .join(AsyncPHPLinks(.shared, key: "h"))
-                        .join(AsyncSaver(.override, configures: .shared, key: "h")), tag: "h"
+                    RedirectEnablePage(.shared, key: "h")
+                        .join(TowerGroup("load_down_addr2", configures: .shared, key: "h"))
+                        .join(PHPLinks(.shared, key: "h"))
+                        .join(Saver(.override, configures: .shared, key: "h")), tag: "h"
                 )
                 .title("IY盘")
                 .url("https://www.iycdn.com/file-213019.html"),

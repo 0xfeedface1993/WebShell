@@ -7,12 +7,6 @@
 
 import Foundation
 
-#if COMBINE_LINUX && canImport(CombineX)
-import CombineX
-#else
-import Combine
-#endif
-
 #if canImport(Durex)
 import Durex
 #endif
@@ -21,37 +15,7 @@ import Durex
 import FoundationNetworking
 #endif
 
-public struct TowerFileListRequestGeneratorGroup: SessionableCondom {
-    public typealias Input = URLRequest
-    public typealias Output = URLRequest
-    
-    public let fileid: String
-    public let action: String
-    public var key: AnyHashable
-    
-    public init(_ fileid: String, action: String, key: AnyHashable = "default") {
-        self.fileid = fileid
-        self.action = action
-        self.key = key
-    }
-    
-    public func sessionKey(_ value: AnyHashable) -> Self {
-        .init(fileid, action: action, key: value)
-    }
-    
-    public func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
-        Future {
-            try await AsyncTowerFileListRequestGeneratorGroup(fileid, action: action, configures: .shared, key: key).execute(for: URLRequestBuilder(inputValue)).build()
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    public func empty() -> AnyPublisher<Output, Error> {
-        Empty().eraseToAnyPublisher()
-    }
-}
-
-public struct AsyncTowerFileListRequestGeneratorGroup: SessionableDirtyware {
+public struct TowerFileListRequestGeneratorGroup: SessionableDirtyware {
     public typealias Input = URLRequestBuilder
     public typealias Output = URLRequestBuilder
     
@@ -72,8 +36,8 @@ public struct AsyncTowerFileListRequestGeneratorGroup: SessionableDirtyware {
     }
     
     public func execute(for inputValue: URLRequestBuilder) async throws -> URLRequestBuilder {
-        try await AsyncTowerCookieUpdate(fileid: fileid, key: key, configures: configures)
-            .join(AsyncTowerFileListRequestGenerator(fileid, action: action, url: inputValue.url ?? "", key: key))
+        try await TowerCookieUpdate(fileid: fileid, key: key, configures: configures)
+            .join(TowerFileListRequestGenerator(fileid, action: action, url: inputValue.url ?? "", key: key))
             .execute(for: inputValue)
     }
 }

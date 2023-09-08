@@ -33,6 +33,8 @@ public protocol URLClient {
     func asyncDownload(from url: URLRequest) async throws -> (URL, URLResponse)
     /// create download task, 
     func asyncDownloadTask(from url: URLRequest) -> URLTask
+    /// set current session all cookies in request header
+    func requestBySetCookies(with request: URLRequest) -> URLRequest
 }
 
 /// An extension that provides async support for fetching a URL
@@ -49,7 +51,7 @@ extension URLSession: URLClient {
     ///
     ///     let (data, response) = try await URLSession.shared.asyncData(from: url)
     public func asyncData(from url: URLRequest) async throws -> (Data, URLResponse) {
-        logger.info("\(url.curlString)")
+        logger.info("\(url.cURL())")
         let result = try await _asyncData(from: url)
 #if COMBINE_LINUX && canImport(CombineX)
         CookiesHandler(request: url, response: result.1, session: self).setCookies()
@@ -84,7 +86,7 @@ extension URLSession: URLClient {
     }
     
     public func asyncDownload(from url: URLRequest) async throws -> (URL, URLResponse) {
-        logger.info("\(url.curlString)")
+        logger.info("\(url.cURL())")
         let result = try await _asyncDownload(from: url)
 #if COMBINE_LINUX && canImport(CombineX)
         CookiesHandler(request: url, response: result.1, session: self).setCookies()
@@ -119,7 +121,7 @@ extension URLSession: URLClient {
     
     @usableFromInline
     func leagacyAsyncDownloadTask(from url: URLRequest) async throws -> (URL, URLResponse) {
-        let curl = url.curlString
+        let curl = url.cURL()
         return try await withCheckedThrowingContinuation { continuation in
             let task = downloadTask(with: url, completionHandler: { fileURL, response, error in
                 if let error = error {
@@ -170,33 +172,44 @@ extension URLSession: URLClient {
 //#endif
 
 public extension URLRequest {
-    
     /// Returns a cURL command representation of this URL request.
-    var curlString: String {
-        guard let url = url else { return "" }
-        var baseCommand = #"curl "\#(url.absoluteString)""#
-
-        if httpMethod == "HEAD" {
-            baseCommand += " --head"
-        }
-
-        var command = [baseCommand]
-
-        if let method = httpMethod, method != "GET" && method != "HEAD" {
-            command.append("-X \(method)")
-        }
-
-        if let headers = allHTTPHeaderFields {
-            for (key, value) in headers where key != "Cookie" {
-                command.append("-H '\(key): \(value)'")
+    func cURL(pretty: Bool = false) -> String {
+        let newLine = pretty ? "\\\n" : ""
+        let method = (pretty ? "--request " : "-X ") + "\(self.httpMethod ?? "GET") \(newLine)"
+        let url: String = (pretty ? "--url " : "") + "\'\(self.url?.absoluteString ?? "")\' \(newLine)"
+        
+        var cURL = "curl "
+        var header = ""
+        var data: String = ""
+        
+        if let httpHeaders = self.allHTTPHeaderFields, httpHeaders.keys.count > 0 {
+            for (key,value) in httpHeaders {
+                header += (pretty ? "--header " : "-H ") + "\'\(key): \(value)\' \(newLine)"
             }
         }
-
-        if let data = httpBody, let body = String(data: data, encoding: .utf8) {
-            command.append("-d '\(body)'")
+        
+        if let bodyData = self.httpBody, let bodyString = String(data: bodyData, encoding: .utf8),  !bodyString.isEmpty {
+            data = "--data '\(bodyString)'"
         }
+        
+        cURL += method + url + header + data
+        
+        return cURL
+    }
+}
 
-        return command.joined(separator: " \\\n\t")
+extension URLSession {
+    @inlinable
+    var cookiesHeader: [String: String] {
+        CookiesReader(self).requestHeaderFields()
     }
     
+    public func requestBySetCookies(with request: URLRequest) -> URLRequest {
+        let cookies = cookiesHeader
+        var next = request
+        for (key, value) in cookies {
+            next.setValue(value, forHTTPHeaderField: key)
+        }
+        return next
+    }
 }

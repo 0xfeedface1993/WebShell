@@ -6,14 +6,10 @@
 //  Copyright © 2023 ascp. All rights reserved.
 //
 
+import Foundation
+
 #if canImport(Durex)
 import Durex
-#endif
-import Foundation
-#if COMBINE_LINUX && canImport(CombineX)
-import CombineX
-#else
-import Combine
 #endif
 
 #if canImport(FoundationNetworking)
@@ -21,8 +17,8 @@ import FoundationNetworking
 #endif
 
 /// 从多个下载下载链接中下载文件, 保存到`Downloads`目录，目前只使用第一个链接
-public struct Saver: SessionableCondom {
-    public typealias Input = [URLRequest]
+public struct Saver: SessionableDirtyware {
+    public typealias Input = [URLRequestBuilder]
     public typealias Output = URL
     
     public enum Policy {
@@ -31,34 +27,6 @@ public struct Saver: SessionableCondom {
         /// 覆盖同名文件
         case `override`
     }
-    
-    let policy: Policy
-    public var key: AnyHashable
-    
-    public init(_ policy: Policy = .normal, key: AnyHashable = "default") {
-        self.policy = policy
-        self.key = key
-    }
-    
-    public func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
-        Future {
-            try await AsyncSaver(policy, configures: .shared, key: key).execute(for: inputValue.map(URLRequestBuilder.init(_:)))
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    public func empty() -> AnyPublisher<Output, Error> {
-        Empty().eraseToAnyPublisher()
-    }
-    
-    public func sessionKey(_ value: AnyHashable) -> Saver {
-        Saver(policy, key: value)
-    }
-}
-
-public struct AsyncSaver: SessionableDirtyware {
-    public typealias Input = [URLRequestBuilder]
-    public typealias Output = URL
     
     let policy: Saver.Policy
     public var key: AnyHashable

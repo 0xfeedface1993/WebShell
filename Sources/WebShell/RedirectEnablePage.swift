@@ -10,43 +10,12 @@ import Foundation
 #if canImport(Durex)
 import Durex
 #endif
-#if COMBINE_LINUX && canImport(CombineX)
-import CombineX
-#else
-import Combine
-#endif
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
 
-public struct RedirectEnablePage: SessionableCondom {
-    public typealias Input = String
-    public typealias Output = String
-    
-    public var key: AnyHashable
-    
-    public init(_ key: AnyHashable = "default") {
-        self.key = key
-    }
-    
-    public func publisher(for inputValue: String) -> AnyPublisher<Output, Error> {
-        Future {
-            try await AsyncRedirectEnablePage(.shared, key: key).execute(for: inputValue)
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    public func empty() -> AnyPublisher<Output, Error> {
-        Empty().eraseToAnyPublisher()
-    }
-    
-    public func sessionKey(_ value: AnyHashable) -> RedirectEnablePage {
-        RedirectEnablePage(value)
-    }
-}
-
-public struct AsyncRedirectEnablePage: SessionableDirtyware {
+public struct RedirectEnablePage: SessionableDirtyware {
     public typealias Input = String
     public typealias Output = String
     

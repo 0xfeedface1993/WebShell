@@ -11,36 +11,12 @@ import Foundation
 import Durex
 #endif
 
-#if COMBINE_LINUX && canImport(CombineX)
-import CombineX
-#else
-import Combine
-#endif
-
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
 
 /// 生成下载链接获取请求，给path添加`/d`前缀，如：`https://xxx/6emc775g2p/apple.rar.html` -> `https://xxx/d/6emc775g2p/apple.rar.html`
-public struct AppendDownPath: Condom {
-    public typealias Input = String
-    public typealias Output = URLRequest
-    
-    public init() { }
-    
-    public func publisher(for inputValue: String) -> AnyPublisher<Output, Error> {
-        Future {
-            try await AsyncAppendDownPath().execute(for: inputValue).build()
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    public func empty() -> AnyPublisher<Output, Error> {
-        Empty().eraseToAnyPublisher()
-    }
-}
-
-public struct AsyncAppendDownPath: Dirtyware {
+public struct AppendDownPath: Dirtyware {
     public typealias Input = String
     public typealias Output = URLRequestBuilder
     

@@ -34,6 +34,11 @@ public struct CookiesReader {
         return cookies
     }
     
+    /// 生成请求头的header键值对
+    public func requestHeaderFields() -> [String: String] {
+        HTTPCookie.requestHeaderFields(with: rawCookies())
+    }
+    
     /// 所有的cookies转化为键值对
     public func allCookies() -> [String: String] {
         let cookies = rawCookies()

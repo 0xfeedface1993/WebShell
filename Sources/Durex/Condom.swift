@@ -57,7 +57,7 @@ extension Dirtyware {
         AnyDirtyware(self, last: box)
     }
     
-    public func eraseToAnyCondom() -> AnyDirtyware<Input, Output> {
+    public func eraseToAnyDirtyware() -> AnyDirtyware<Input, Output> {
         AnyDirtyware(self)
     }
 }

@@ -8,40 +8,11 @@
 import Foundation
 import Durex
 
-#if COMBINE_LINUX && canImport(CombineX)
-import CombineX
-#else
-import Combine
-#endif
-
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
 
-struct TowerCookieUpdate: SessionableCondom {
-    typealias Input = URLRequestBuilder
-    typealias Output = String
-    
-    let fileid: String
-    let key: AnyHashable
-    
-    func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
-        Future {
-            try await AsyncTowerCookieUpdate(fileid: fileid, key: key, configures: .shared).execute(for: inputValue)
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    func empty() -> AnyPublisher<Output, Error> {
-        Empty().eraseToAnyPublisher()
-    }
-    
-    func sessionKey(_ value: AnyHashable) -> TowerCookieUpdate {
-        .init(fileid: fileid, key: value)
-    }
-}
-
-struct AsyncTowerCookieUpdate: SessionableDirtyware {
+struct TowerCookieUpdate: SessionableDirtyware {
     typealias Input = URLRequestBuilder
     typealias Output = String
     
@@ -59,9 +30,9 @@ struct AsyncTowerCookieUpdate: SessionableDirtyware {
         guard let urlString = inputValue.url, let url = URL(string: urlString) else {
             throw ShellError.badURL(inputValue.url ?? "nil")
         }
-        let content = try await AsyncStringParserDataTask(request: inputValue, encoding: .utf8, sessionKey: key, configures: configures).asyncValue()
+        let content = try await StringParserDataTask(request: inputValue, encoding: .utf8, sessionKey: key, configures: configures).asyncValue()
         let next = try request(url, content: content).make()
-        let string = try await AsyncStringParserDataTask(request: next, encoding: .utf8, sessionKey: key, configures: configures).asyncValue()
+        let string = try await StringParserDataTask(request: next, encoding: .utf8, sessionKey: key, configures: configures).asyncValue()
         return string
     }
     

@@ -10,39 +10,12 @@ import Foundation
 #if canImport(Durex)
 import Durex
 #endif
-#if COMBINE_LINUX && canImport(CombineX)
-import CombineX
-#else
-import Combine
-#endif
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
 
-public struct RawDownPage: Condom {
-    public typealias Input = String
-    public typealias Output = URLRequest
-    
-    public let fileid: String
-    
-    public init(fileid: String) {
-        self.fileid = fileid
-    }
-    
-    public func publisher(for inputValue: String) -> AnyPublisher<Output, Error> {
-        Future {
-            try await AsyncRawDownPage(fileid: fileid).execute(for: inputValue).build()
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    public func empty() -> AnyPublisher<Output, Error> {
-        Empty().eraseToAnyPublisher()
-    }
-}
-
-public struct AsyncRawDownPage: Dirtyware {
+public struct RawDownPage: Dirtyware {
     public typealias Input = String
     public typealias Output = URLRequestBuilder
     

@@ -11,45 +11,11 @@ import Foundation
 import Durex
 #endif
 
-#if COMBINE_LINUX && canImport(CombineX)
-import CombineX
-#else
-import Combine
-#endif
-
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
 
-public struct SignLinks: SessionableCondom {
-    public typealias Input = URLRequest
-    public typealias Output = [URLRequest]
-    
-    public var key: AnyHashable
-    
-    public init(_ key: AnyHashable = "default") {
-        self.key = key
-    }
-    
-    public func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
-        Future {
-            try await AsyncSignLinks(.shared, key: key)
-                .execute(for: .init(inputValue))
-                .compactMap({ try? $0.build() })
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    public func empty() -> AnyPublisher<Output, Error> {
-        Empty().eraseToAnyPublisher()
-    }
-    
-    public func sessionKey(_ value: AnyHashable) -> SignLinks {
-        SignLinks(value)
-    }
-}
-
-public struct AsyncSignLinks: SessionableDirtyware {
+public struct SignLinks: SessionableDirtyware {
     public typealias Input = URLRequestBuilder
     public typealias Output = [URLRequestBuilder]
     
@@ -66,7 +32,7 @@ public struct AsyncSignLinks: SessionableDirtyware {
             shellLogger.error("inputValue url is nil. \(inputValue)")
             return []
         }
-        let string = try await AsyncStringParserDataTask(request: inputValue, encoding: .utf8, sessionKey: key, configures: configures).asyncValue()
+        let string = try await StringParserDataTask(request: inputValue, encoding: .utf8, sessionKey: key, configures: configures).asyncValue()
         let urls = try FileGeneralLinkMatch(html: string).extract()
         let refer = inputURL.removeURLPath().absoluteString
         let next = urls.compactMap {

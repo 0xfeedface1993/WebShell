@@ -193,6 +193,10 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
             }
             .eraseToAnyAsyncSequence()
     }
+    
+    public func requestBySetCookies(with request: URLRequestBuilder) throws -> URLRequestBuilder {
+        try request.setCookies(with: urlSessionContainer.session)
+    }
 }
 
 extension AsyncDownloadSession: AsyncSessionProvider {

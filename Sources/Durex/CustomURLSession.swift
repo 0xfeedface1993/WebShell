@@ -77,4 +77,7 @@ public protocol AsyncCustomURLSession {
     /// 其他模块想要获取所有下载任务的进度、完成通知则使用此方法获取Publisher,
     /// - Returns: 任务状态
     func downloadNews() -> AnyAsyncSequence<AsyncUpdateNews>
+    
+    /// 读取设置Cookies缓存到请求的header内
+    func requestBySetCookies(with request: URLRequestBuilder) throws -> URLRequestBuilder
 }

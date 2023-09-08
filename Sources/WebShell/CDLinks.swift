@@ -11,42 +11,11 @@ import Foundation
 import Durex
 #endif
 
-#if COMBINE_LINUX && canImport(CombineX)
-import CombineX
-#else
-import Combine
-#endif
-
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
 
-public struct CDLinks: SessionableCondom {
-    public typealias Input = URLRequest
-    public typealias Output = [URLRequest]
-    
-    public var key: AnyHashable
-    
-    public init(_ key: AnyHashable = "default") {
-        self.key = key
-    }
-    
-    public func publisher(for inputValue: Input) -> AnyPublisher<Output, Error> {
-        DownloadLinks(key, matcher: CDPhpMatch(host: BaseURL(url: inputValue.url).domainURL()),
-                      requestBuilder: PHPFileDownload(url: "", refer: ""))
-            .publisher(for: inputValue)
-    }
-    
-    public func empty() -> AnyPublisher<Output, Error> {
-        Empty().eraseToAnyPublisher()
-    }
-    
-    public func sessionKey(_ value: AnyHashable) -> Self {
-        CDLinks(value)
-    }
-}
-
-public struct AsyncCDLinks: SessionableDirtyware {
+public struct CDLinks: SessionableDirtyware {
     public typealias Input = URLRequestBuilder
     public typealias Output = [URLRequestBuilder]
     
@@ -62,7 +31,7 @@ public struct AsyncCDLinks: SessionableDirtyware {
         let domainURL = BaseURL(url: URL(string: inputValue.url ?? "")).domainURL()
         let matcher = CDPhpMatch(host: domainURL)
         let builder = PHPFileDownload(url: "", refer: "")
-        return try await AsyncDownloadLinks(key, matcher: matcher, requestBuilder: builder, configures: configures).execute(for: inputValue)
+        return try await DownloadLinks(key, matcher: matcher, requestBuilder: builder, configures: configures).execute(for: inputValue)
     }
     
     public func sessionKey(_ value: AnyHashable) -> Self {
