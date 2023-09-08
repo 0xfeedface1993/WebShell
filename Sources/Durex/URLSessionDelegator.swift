@@ -129,13 +129,15 @@ class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate {
         super.init()
     }
     
+#if DEBUG
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest) async -> URLRequest? {
-        var next = request
-//        response.
-//        next.setValue("", forHTTPHeaderField: "")
-        logger.info("task \(task.taskIdentifier) redirecting to curl: \n----------------\n\(request.curlString)")
+        let next = request
+        //        response.
+        //        next.setValue("", forHTTPHeaderField: "")
+        logger.info("task \(task.taskIdentifier) redirecting to curl: \n----------------\n\(next.curlString)")
         return next
     }
+#endif
     
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         let filename = UUID().uuidString

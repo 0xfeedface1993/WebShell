@@ -4,9 +4,6 @@
 import PackageDescription
 
 let swiftSettings: [SwiftSetting] = [.define("COMBINE_LINUX", .when(platforms: [.linux]))]
-let dependencies: [Target.Dependency] = [
-//    .product(name: "CombineX", package: "CombineX")
-]
 
 let package = Package(
     name: "WebShell",
@@ -23,12 +20,14 @@ let package = Package(
         //        .package(url: "https://github.com/0xfeedface1993/CombineX.git", branch: "master"),
         .package(url: "https://github.com/sideeffect-io/AsyncExtensions.git", from: "0.5.2"),
         .package(url: "https://github.com/apple/swift-crypto.git", .upToNextMajor(from: "2.0.0")),
+        .package(url: "https://github.com/0xfeedface1993/CombineX.git", branch: "master")
     ],
     targets: [
         .target(
             name: "AnyErase",
             dependencies: [
                 .product(name: "Logging", package: "swift-log"),
+                .product(name: "CombineX", package: "CombineX", condition: .when(platforms: [.linux]))
             ],
             swiftSettings: swiftSettings
         ),
@@ -48,17 +47,8 @@ let package = Package(
                 "AnyErase",
                 .product(name: "Crypto", package: "swift-crypto"),
                 .product(name: "AsyncExtensions", package: "AsyncExtensions")
-            ] + dependencies,
+            ],
             swiftSettings: swiftSettings
         ),
     ]
 )
-
-#if os(Linux)
-package.dependencies += [
-    .package(url: "https://github.com/0xfeedface1993/CombineX.git", branch: "master")
-]
-package.targets.first?.dependencies += [
-    .product(name: "CombineX", package: "CombineX")
-]
-#endif
