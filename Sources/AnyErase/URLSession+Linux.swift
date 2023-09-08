@@ -6,6 +6,7 @@
 //
 
 import Foundation
+
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
@@ -50,7 +51,7 @@ extension URLSession: URLClient {
     public func asyncData(from url: URLRequest) async throws -> (Data, URLResponse) {
         logger.info("\(url.curlString)")
         let result = try await _asyncData(from: url)
-#if os(Linux)
+#if COMBINE_LINUX && canImport(CombineX)
         CookiesHandler(request: url, response: result.1, session: self).setCookies()
 #endif
         return result
@@ -58,7 +59,7 @@ extension URLSession: URLClient {
     
     @usableFromInline
     func _asyncData(from url: URLRequest) async throws -> (Data, URLResponse) {
-#if os(Linux)
+#if COMBINE_LINUX && canImport(CombineX)
         return try await withCheckedThrowingContinuation { continuation in
             let task = self.dataTask(with: url) { data, response, error in
                 if let error = error {
@@ -85,7 +86,7 @@ extension URLSession: URLClient {
     public func asyncDownload(from url: URLRequest) async throws -> (URL, URLResponse) {
         logger.info("\(url.curlString)")
         let result = try await _asyncDownload(from: url)
-#if os(Linux)
+#if COMBINE_LINUX && canImport(CombineX)
         CookiesHandler(request: url, response: result.1, session: self).setCookies()
 #endif
         return result
@@ -93,9 +94,9 @@ extension URLSession: URLClient {
     
     @usableFromInline
     func _asyncDownload(from url: URLRequest) async throws -> (URL, URLResponse) {
-#if os(Linux)
+#if COMBINE_LINUX && canImport(CombineX)
         return try await withCheckedThrowingContinuation { continuation in
-            let task = self.dataTask(with: url) { data, response, error in
+            let task = self.downloadTask(with: url) { data, response, error in
                 if let error = error {
                     continuation.resume(throwing: error)
                     return

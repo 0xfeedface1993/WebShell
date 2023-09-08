@@ -3,7 +3,9 @@
 
 import PackageDescription
 
-let swiftSettings: [SwiftSetting] = [.define("COMBINE_LINUX", .when(platforms: [.linux]))]
+let platforms: [PackageDescription.Platform] = [.linux]
+//let platforms: [PackageDescription.Platform] = [.macOS]
+let swiftSettings: [SwiftSetting] = [.define("COMBINE_LINUX", .when(platforms: platforms))]
 
 let package = Package(
     name: "WebShell",
@@ -28,7 +30,7 @@ let package = Package(
             name: "AnyErase",
             dependencies: [
                 .product(name: "Logging", package: "swift-log"),
-                .product(name: "CombineX", package: "CombineX", condition: .when(platforms: [.linux]))
+                .product(name: "CombineX", package: "CombineX", condition: .when(platforms: platforms))
             ],
             swiftSettings: swiftSettings
         ),
