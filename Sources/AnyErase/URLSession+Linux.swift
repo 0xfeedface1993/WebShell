@@ -95,24 +95,7 @@ extension URLSession: URLClient {
     @usableFromInline
     func _asyncDownload(from url: URLRequest) async throws -> (URL, URLResponse) {
 #if COMBINE_LINUX && canImport(CombineX)
-        return try await withCheckedThrowingContinuation { continuation in
-            let task = self.downloadTask(with: url) { data, response, error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                    return
-                }
-                guard let response = response as? HTTPURLResponse else {
-                    continuation.resume(throwing: URLSessionAsyncErrors.invalidUrlResponse)
-                    return
-                }
-                guard let data = data else {
-                    continuation.resume(throwing: URLSessionAsyncErrors.missingResponseData)
-                    return
-                }
-                continuation.resume(returning: (data, response))
-            }
-            task.resume()
-        }
+        return try await leagacyAsyncDownloadTask(from: url)
 #else
         return try await defaultDownload(url)
 #endif
@@ -121,47 +104,50 @@ extension URLSession: URLClient {
     @usableFromInline
     func defaultDownload(_ url: URLRequest) async throws -> (URL, URLResponse) {
         if #available(macOS 12.0, iOS 15.0, *) {
-//            let downloadTask = downloadTask(with: url)
-//            downloadTask.countOfBytesReceived
             return try await download(for: url)
         } else {
             // Fallback on earlier versions
-            let curl = url.curlString
-            return try await withCheckedThrowingContinuation { continuation in
-                let task = downloadTask(with: url, completionHandler: { fileURL, response, error in
-                    if let error = error {
-                        continuation.resume(throwing: error)
-                        return
-                    }
-                    guard let response = response as? HTTPURLResponse else {
-                        continuation.resume(throwing: URLSessionAsyncErrors.invalidUrlResponse)
-                        return
-                    }
-                    guard let fileURL = fileURL else {
-                        continuation.resume(throwing: URLSessionAsyncErrors.missingTmpFile)
-                        return
-                    }
-                    
-                    let filename = UUID().uuidString
-                    let cachedURL = FileManager.default.temporaryDirectory
-                    let location = cachedURL.appendingPathComponent(filename)
-                    
-                    do {
-                        try FileManager.default.moveItem(at: fileURL, to: location)
-                        logger.info("move tmp file to \(url)")
-                        continuation.resume(returning: (location, response))
-                    } catch {
-                        logger.info("\(#function) download file failed \(error), curl: \(curl)")
-                        continuation.resume(throwing: error)
-                    }
-                })
-                task.resume()
-            }
+            return try await leagacyAsyncDownloadTask(from: url)
         }
     }
     
     public func asyncDownloadTask(from url: URLRequest) -> URLTask {
         downloadTask(with: url)
+    }
+    
+    @usableFromInline
+    func leagacyAsyncDownloadTask(from url: URLRequest) async throws -> (URL, URLResponse) {
+        let curl = url.curlString
+        return try await withCheckedThrowingContinuation { continuation in
+            let task = downloadTask(with: url, completionHandler: { fileURL, response, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                guard let response = response as? HTTPURLResponse else {
+                    continuation.resume(throwing: URLSessionAsyncErrors.invalidUrlResponse)
+                    return
+                }
+                guard let fileURL = fileURL else {
+                    continuation.resume(throwing: URLSessionAsyncErrors.missingTmpFile)
+                    return
+                }
+                
+                let filename = UUID().uuidString
+                let cachedURL = FileManager.default.temporaryDirectory
+                let location = cachedURL.appendingPathComponent(filename)
+                
+                do {
+                    try FileManager.default.moveItem(at: fileURL, to: location)
+                    logger.info("move tmp file to \(url)")
+                    continuation.resume(returning: (location, response))
+                } catch {
+                    logger.info("\(#function) download file failed \(error), curl: \(curl)")
+                    continuation.resume(throwing: error)
+                }
+            })
+            task.resume()
+        }
     }
 }
 
