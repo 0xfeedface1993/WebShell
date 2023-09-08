@@ -101,6 +101,7 @@ extension URLSession: URLClient {
 #endif
     }
     
+#if !COMBINE_LINUX
     @usableFromInline
     func defaultDownload(_ url: URLRequest) async throws -> (URL, URLResponse) {
         if #available(macOS 12.0, iOS 15.0, *) {
@@ -110,6 +111,7 @@ extension URLSession: URLClient {
             return try await leagacyAsyncDownloadTask(from: url)
         }
     }
+#endif
     
     public func asyncDownloadTask(from url: URLRequest) -> URLTask {
         downloadTask(with: url)
