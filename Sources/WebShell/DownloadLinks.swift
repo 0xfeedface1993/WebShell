@@ -51,6 +51,11 @@ public struct DownloadLinks<Matcher: ContentMatch, RequestBuilder: DownloadReque
         let next = urls.compactMap {
             requestBuilder.make($0.absoluteString, refer: domainURL)
         }
+        
+#if DEBUG
+        let curl = try configures.defaultSession.requestBySetCookies(with: next.first!).build().cURL(pretty: true)
+        shellLogger.info("cookies curl: \(curl)")
+#endif
         return next
     }
     

@@ -21,11 +21,12 @@ struct URLSessionHolder {
     }
     
     init(_ delegator: URLSessionDelegator) {
-        let configure = URLSessionConfiguration.ephemeral
+        let configure = URLSessionConfiguration.default
         configure.timeoutIntervalForRequest = 20 * 60
         configure.timeoutIntervalForResource = 15 * 24 * 3600
 //        let cookies = HTTPCookieStorage()
 //        configure.httpCookieStorage = cookies
+        configure.httpCookieStorage?.removeCookies(since: Date(timeIntervalSinceReferenceDate: 0))
         
         self.session = URLSession(configuration: configure, delegate: delegator, delegateQueue: nil)
         if let storage = configure.httpCookieStorage {
@@ -38,11 +39,13 @@ struct URLSessionHolder {
     }
     
     init(_ delegate: any AsyncURLSessiobDownloadDelegate) {
-        let configure = URLSessionConfiguration.ephemeral
+        let configure = URLSessionConfiguration.default
         configure.timeoutIntervalForRequest = 20 * 60
         configure.timeoutIntervalForResource = 15 * 24 * 3600
 //        let cookies = HTTPCookieStorage()
+//        cookies.cookieAcceptPolicy = .always
 //        configure.httpCookieStorage = cookies
+        configure.httpCookieStorage?.removeCookies(since: Date(timeIntervalSinceReferenceDate: 0))
         
         self.session = URLSession(configuration: configure, delegate: delegate, delegateQueue: nil)
         if let storage = configure.httpCookieStorage {
