@@ -85,7 +85,7 @@ public struct FileListURLRequestInPageGenerator: SessionableDirtyware {
     
     public func execute(for inputValue: String) async throws -> URLRequestBuilder {
         let request = try request(inputValue)
-        let fileid = try await FileIDStringInDomSearch(finder, configures: configures).execute(for: request)
+        let fileid = try await FindStringInDomSearch(finder, configures: configures).execute(for: request)
         let next = try referRequest(inputValue, fileid: fileid)
         return next
     }

@@ -38,32 +38,38 @@ extension FileIDFinder where Self == FileIDMatch {
     public static var lastPath: Self {
         FileIDMatch("/([\\w\\d]+)$")
     }
+    
+    public static var formhash: Self {
+        FileIDMatch("name=\"formhash\"\\s+value=\"([^\"]+)\"")
+    }
+    
+    public static var sign: Self {
+        FileIDMatch("&sign=(\\w+)&")
+    }
 }
 
 /// 从链接中提取fileid，`http://xxxx/file-123456.html`提取fileid`123456`
 public struct FileIDMatch: FileIDFinder {
-    var pattern = "\\-(\\w+)\\.\\w+$"
+    let pattern: String
+    let template: Templates
     
     public init(_ pattern: String) {
+        self.init(pattern: pattern)
+    }
+    
+    init(pattern: String = "\\-(\\w+)\\.\\w+$", template: Templates = .dollar(1)) {
         self.pattern = pattern
+        self.template = template
+    }
+    
+    func template(_ value: Templates) -> Self {
+        .init(pattern: pattern, template: value)
     }
     
     public func extract(_ text: String) throws -> String {
-        if #available(iOS 16.0, macOS 13.0, *) {
-            let regx = try Regex(pattern)
-            guard let match = text.firstMatch(of: regx),
-                    let fileid = match.output[1].substring else {
-                throw ShellError.regulaNotMatch(text)
-            }
-            return String(fileid)
-        } else {
-            // Fallback on earlier versions
-            let regx = try NSRegularExpression(pattern: pattern)
-            let nsString = text as NSString
-            guard let result = regx.firstMatch(in: text, range: .init(location: 0, length: nsString.length)) else {
-                throw ShellError.regulaNotMatch(text)
-            }
-            return regx.replacementString(for: result, in: text, offset: 0, template: "$1")
-        }
+        try ExpressionMatch(text)
+            .pattern(pattern)
+            .template(template)
+            .takeFirst()
     }
 }

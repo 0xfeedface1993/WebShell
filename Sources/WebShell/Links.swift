@@ -80,7 +80,7 @@ public struct DLPhpMatch: ContentMatch {
     }
     
     public func extract(_ text: String) throws -> [URL] {
-        try URLRegularExpressionMatch(url: text, pattern: pattern, template: Templates.dollar(0))
+        try URLRegularExpressionMatch(string: text, pattern: pattern, template: Templates.dollar(0))
             .extract()
     }
 }
@@ -90,7 +90,7 @@ public struct CDPhpMatch: ContentMatch {
     let pattern = "cd\\w*\\.php\\?[^\"]+"
     
     public func extract(_ url: String) throws -> [URL] {
-        let results = try URLRegularExpressionMatch(url: url, pattern: pattern, template: Templates.dollar(0))
+        let results = try URLRegularExpressionMatch(string: url, pattern: pattern, template: Templates.dollar(0))
             .extract()
         if let hostURL = URL(string: host) {
             return results
@@ -108,7 +108,7 @@ public struct FileGeneralLinkMatch {
     let pattern = "\"(https?://[^\"]+)\""
     
     func extract() throws -> [URL] {
-        try URLRegularExpressionMatch(url: html, pattern: pattern, template: Templates.dollar(1))
+        try URLRegularExpressionMatch(string: html, pattern: pattern, template: Templates.dollar(1))
             .extract()
     }
 }

@@ -39,7 +39,7 @@ public struct FileIDStringInDomSearchGroup: SessionableDirtyware {
         }
         
         let (host, scheme) = try url.baseComponents()
-        let searchid = FileIDStringInDomSearch(finder, configures: configures, key: key)
+        let searchid = FindStringInDomSearch(finder, configures: configures, key: key)
         let page = GeneralDownPageByID(scheme: scheme, host: host, refer: url)
         
         return searchid.join(page)

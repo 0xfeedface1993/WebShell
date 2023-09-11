@@ -41,7 +41,7 @@ public struct SignFileListURLRequestGenerator: SessionableDirtyware {
         let fileid = try finder.extract(inputValue)
         let request = try await SignFileDownPage(fileid: fileid).execute(for: inputValue)
         let string = try await StringParserDataTask(request: request, encoding: .utf8, sessionKey: key, configures: configures).asyncValue()
-        let sign = try SingValueMatch().extract(string)
+        let sign = try FileIDMatch.sign.extract(string)
         shellLogger.info("[\(type(of: self))] match sign \(sign) for origin link \(inputValue).")
         return try makeRequest(inputValue, fileid: fileid, sign: sign)
     }
@@ -61,14 +61,6 @@ public struct SignFileListURLRequestGenerator: SessionableDirtyware {
     
     public func sessionKey(_ value: AnyHashable) -> Self {
         Self(finder, action: action, configures: configures, key: value)
-    }
-}
-
-public struct SingValueMatch {
-    let pattern = "&sign=(\\w+)&"
-    
-    public func extract(_ text: String) throws -> String {
-        try FileIDMatch(pattern).extract(text)
     }
 }
 

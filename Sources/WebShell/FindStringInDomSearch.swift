@@ -15,8 +15,8 @@ import Durex
 import FoundationNetworking
 #endif
 
-/// 从html代码中获取fileid模块，规则详见``FileIDInFunctionParameter``
-public struct FileIDStringInDomSearch: SessionableDirtyware {
+/// 从html代码中搜索第一个符合正则表达式的结果，一般是字符串
+public struct FindStringInDomSearch: SessionableDirtyware {
     public typealias Input = URLRequestBuilder
     public typealias Output = String
     
