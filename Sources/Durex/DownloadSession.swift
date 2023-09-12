@@ -197,6 +197,10 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
     public func requestBySetCookies(with request: URLRequestBuilder) throws -> URLRequestBuilder {
         try request.setCookies(with: urlSessionContainer.session)
     }
+    
+    public func c() -> [HTTPCookie] {
+        urlSessionContainer.cookies.cookies ?? []
+    }
 }
 
 extension AsyncDownloadSession: AsyncSessionProvider {

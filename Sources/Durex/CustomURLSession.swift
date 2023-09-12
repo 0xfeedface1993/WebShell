@@ -80,4 +80,7 @@ public protocol AsyncCustomURLSession {
     
     /// 读取设置Cookies缓存到请求的header内
     func requestBySetCookies(with request: URLRequestBuilder) throws -> URLRequestBuilder
+    
+    /// 获取当前的所有cookie
+    func cookies() -> [HTTPCookie]
 }
