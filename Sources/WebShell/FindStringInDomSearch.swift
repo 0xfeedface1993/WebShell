@@ -39,3 +39,27 @@ public struct FindStringInDomSearch: SessionableDirtyware {
         .init(finder, configures: configures, key: value)
     }
 }
+
+public struct FindStringsInDomSearch: SessionableDirtyware {
+    public typealias Input = URLRequestBuilder
+    public typealias Output = [String]
+    
+    let finder: BatchSearchFinder
+    public var key: AnyHashable
+    public let configures: AsyncURLSessionConfiguration
+    
+    public init(_ finder: BatchSearchFinder, configures: AsyncURLSessionConfiguration, key: AnyHashable = "default") {
+        self.finder = finder
+        self.key = key
+        self.configures = configures
+    }
+    
+    public func execute(for inputValue: URLRequestBuilder) async throws -> [String] {
+        let string = try await StringParserDataTask(request: inputValue, encoding: .utf8, sessionKey: key, configures: configures).asyncValue()
+        return try finder.batch(string)
+    }
+    
+    public func sessionKey(_ value: AnyHashable) -> Self {
+        .init(finder, configures: configures, key: value)
+    }
+}

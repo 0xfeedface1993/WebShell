@@ -63,9 +63,7 @@ class URLSessionDelegator: NSObject, URLSessionDownloadDelegate {
         
         do {
             try FileManager.default.moveItem(at: location, to: url)
-#if DEBUG
             logger.info("move tmp file to \(url)")
-#endif
             SessionComplete(task: downloadTask, data: url)
                 .pass(to: downloadTaskCompletion)
         } catch {
@@ -146,9 +144,7 @@ class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate {
         
         do {
             try FileManager.default.moveItem(at: location, to: url)
-#if DEBUG
             logger.info("move tmp file to \(url)")
-#endif
             let news = SessionComplete(task: downloadTask, data: url).fileStone()
             statePassthroughSubject.send(news)
         } catch {
@@ -176,7 +172,7 @@ class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate {
         //#if DEBUG
         //        print(">>> [\(type(of: self))] file download state update: \(downloadTask), \(bytesWritten) / \(totalBytesExpectedToWrite)")
         //#endif
-        logger.info("file download state update: \(downloadTask), \(bytesWritten) / \(totalBytesExpectedToWrite)")
+//        logger.info("file download state update: \(downloadTask), \(totalBytesWritten) / \(totalBytesExpectedToWrite)")
         
         let state = SessionTaskState(downloadTask)
             .reciveBytes(bytesWritten)

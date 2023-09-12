@@ -44,6 +44,10 @@ public enum ShellError: Error {
     case redirect(URL)
     /// 没有正则匹配
     case regulaNotMatch(String)
+    /// 没有下载链接
+    case noDownloadFiles
+    /// 验证码长度错误
+    case invalidCode(String)
 }
 
 #if DEBUG

@@ -49,19 +49,32 @@ public final class KeyStore: ContextValue {
         try take(forKey: key)
     }
     
+    public func requests(_ key: Key) throws -> [URLRequestBuilder] {
+        try take(forKey: key)
+    }
+    
     public var valueDescription: String {
         "\(self): \(cached)"
     }
 }
 
 public extension KeyStore.Key {
+    /// 登录页面formhash
     static let formhash = KeyStore.Key("formhash")
+    /// 验证码
     static let code = KeyStore.Key("code")
+    /// 登录用户名
     static let username = KeyStore.Key("username")
+    /// 登录密码
     static let password = KeyStore.Key("password")
+    /// 上一个模块发起的网络请求
     static let lastRequest = KeyStore.Key("last_request")
-    static let lastOutput = KeyStore.Key("output")
+    /// 上一个模块输出的数据
+    static let output = KeyStore.Key("output")
+    /// 下载文件的sign值
     static let sign = KeyStore.Key("sign")
+    /// 下载文件id
     static let fileid = KeyStore.Key("fileid")
+    /// 包含下载文件id的url
     static let fileidURL = KeyStore.Key("fileid_url")
 }

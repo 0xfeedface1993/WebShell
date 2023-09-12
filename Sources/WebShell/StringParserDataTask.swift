@@ -38,6 +38,7 @@ public struct StringParserDataTask {
                 let file = tmp.appendingPathComponent("\(UUID().uuidString).txt")
                 do {
                     try data.write(to: file)
+                    shellLogger.info("cache response at: \(file)")
                 } catch {
                     shellLogger.error("cache text data faild at \(file), full text: \(text)")
                 }

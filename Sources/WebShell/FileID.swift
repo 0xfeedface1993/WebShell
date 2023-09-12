@@ -22,6 +22,10 @@ public protocol FileIDFinder {
     func extract(_ text: String) throws -> String
 }
 
+public protocol BatchSearchFinder: FileIDFinder {
+    func batch(_ text: String) throws -> [String]
+}
+
 extension FileIDFinder where Self == FileIDMatch {
     public static var `default`: Self {
         FileIDMatch("\\-(\\w+)\\.\\w+$")
@@ -45,6 +49,10 @@ extension FileIDFinder where Self == FileIDMatch {
     
     public static var sign: Self {
         FileIDMatch("&sign=(\\w+)&")
+    }
+    
+    public static var href: Self {
+        FileIDMatch("href=\"([^\"]+)\"")
     }
 }
 
@@ -71,5 +79,14 @@ public struct FileIDMatch: FileIDFinder {
             .pattern(pattern)
             .template(template)
             .takeFirst()
+    }
+}
+
+extension FileIDMatch: BatchSearchFinder {
+    public func batch(_ text: String) throws -> [String] {
+        try ExpressionMatch(text)
+            .pattern(pattern)
+            .template(template)
+            .extract()
     }
 }

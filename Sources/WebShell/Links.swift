@@ -20,7 +20,7 @@ public struct SignPHPFileDownload: DownloadRequestBuilder {
     let url: String
     let refer: String
 
-    func make() throws -> URLRequestBuilder {
+    func make() -> URLRequestBuilder {
         make(url, refer: refer)
     }
 

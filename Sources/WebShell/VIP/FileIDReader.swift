@@ -13,12 +13,30 @@ public struct FileIDReader<T: FileIDFinder>: Dirtyware {
     public typealias Output = KeyStore
     
     public let finder: T
+    
+    public init(finder: T) {
+        self.finder = finder
+    }
 
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
         let url = try inputValue.string(.fileidURL)
         let fileid = try finder.extract(url)
         return inputValue
             .assign(fileid, forKey: .fileid)
-            .assign(fileid, forKey: .lastOutput)
+            .assign(fileid, forKey: .output)
+    }
+}
+
+public struct FileIDURLReader: Dirtyware {
+    public typealias Input = KeyStore
+    public typealias Output = KeyStore
+    
+    public init() {
+        
+    }
+
+    public func execute(for inputValue: KeyStore) async throws -> KeyStore {
+        let url = try inputValue.string(.output)
+        return inputValue.assign(url, forKey: .fileidURL)
     }
 }

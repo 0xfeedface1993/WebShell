@@ -27,7 +27,7 @@ public struct CodeImageRequest: SessionableDirtyware {
             throw ShellError.badURL(lastRequest.url ?? "")
         }
         let next = try Request(url: url).make()
-        return inputValue.assign(next, forKey: .lastOutput)
+        return inputValue.assign(next, forKey: .output)
     }
     
     public func sessionKey(_ value: AnyHashable) -> Self {

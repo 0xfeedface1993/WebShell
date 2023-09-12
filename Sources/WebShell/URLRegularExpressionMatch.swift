@@ -89,7 +89,7 @@ public protocol DownloadRequestBuilder {
 }
 
 enum ExpressionMatchError: Error {
-    case noMatchedValue
+    case noMatchedValue(pattern: String)
 }
 
 public struct ExpressionMatch {
@@ -116,7 +116,7 @@ public struct ExpressionMatch {
     
     func takeFirst() throws -> String {
         guard let first = try extract().first else {
-            throw ExpressionMatchError.noMatchedValue
+            throw ExpressionMatchError.noMatchedValue(pattern: pattern)
         }
         return first
     }

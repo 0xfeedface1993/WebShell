@@ -11,6 +11,7 @@ import Combine
 import WebShell
 import Durex
 import Logging
+import CoreGraphics
 
 let logger = Logger(label: "com.webshell.demo")
 
@@ -28,6 +29,7 @@ final class DemoTaskObject: ObservableObject, Identifiable {
     @Published var formatterProgress: String = ""
     @Published var loading: Bool = false
     @Published var fileSize = ""
+    @Published var imageCode: CGImage?
     
     let id = UUID()
     

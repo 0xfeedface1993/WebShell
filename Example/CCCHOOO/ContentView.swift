@@ -66,6 +66,10 @@ struct ContentView: View {
                 DemoListItemView(object: row)
             }
             .width(min: 40)
+            TableColumn("验证码") { row in
+                VerifyCodeImage(object: row)
+            }
+            .width(min: 40)
         }
         .task {
             list = [
@@ -120,13 +124,37 @@ struct ContentView: View {
                 .title("exp盘")
                 .url("http://www.expfile.com/file-1622046.html"),
                 .init(
-                    RedirectEnablePage(.shared, key: "g")
-                        .join(SignFileListURLRequestGenerator(.default, action: "load_down_addr10", configures: .shared))
-                        .join(SignLinks(.shared, key: "g"))
-                        .join(Saver(.override, configures: .shared, key: "g")), tag: "g"
+                    RedirectFollowPage(.shared, key: "g")
+                        .join(FileIDURLReader())
+                        .join(FileIDReader(finder: FileIDMatch.default))
+                        .join(LoginByFormhashAndCode(ProcessInfo.processInfo.environment["username_567"] ?? "",
+                                                     password: ProcessInfo.processInfo.environment["pwd_567"] ?? "",
+                                                     configures: .shared,
+                                                     key: "g", retry: 3,
+                                                     reader: ImageCodeReader(tag: "g", completion: { image, tag in
+                                                         Task { @MainActor in
+                                                             let object = list.first(where: { $0.tag == tag })
+                                                             object?.imageCode = image
+                                                             object?.objectWillChange.send()
+                                                         }
+                                                     })))
+                        .join(SignInDownPageRequest())
+                        .join(SignInDownPageReader(.shared, key: "g"))
+                        .join(DowloadsListWithSignFileIDRequest(action: "load_down_addr10"))
+                        .join(DowloadsListWithSignFileIDReader(.shared, key: "g"))
+                        .join(FileDefaultSaver(.override, configures: .shared, key: "g"))
+                    , tag: "g"
                 )
                 .title("567盘")
-                .url("https://www.567yun.cn/file-2293462.html"),
+                .url("https://www.567yun.cn/file-2283887.html"),
+                .init(
+                    RedirectEnablePage(.shared, key: "i")
+                        .join(SignFileListURLRequestGenerator(.default, action: "load_down_addr10", configures: .shared))
+                        .join(SignLinks(.shared, key: "i"))
+                        .join(Saver(.override, configures: .shared, key: "i")), tag: "i"
+                )
+                .title("567盘-free")
+                .url("https://www.567yun.cn/file-2286747.html"),
                 .init(
                     RedirectEnablePage(.shared, key: "h")
                         .join(TowerGroup("load_down_addr2", configures: .shared, key: "h"))

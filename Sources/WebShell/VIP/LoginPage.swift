@@ -9,12 +9,15 @@ import Foundation
 import Durex
 
 public struct LoginPage: Dirtyware {
-    public typealias Input = String
+    public typealias Input = KeyStore
     public typealias Output = KeyStore
     
-    public func execute(for inputValue: String) async throws -> KeyStore {
-        let request = try Request(url: inputValue).make()
-        return KeyStore().assign(request, forKey: .lastOutput)
+    public init() {}
+    
+    public func execute(for inputValue: KeyStore) async throws -> KeyStore {
+        let url = try inputValue.string(.fileidURL)
+        let request = try Request(url: url).make()
+        return inputValue.assign(request, forKey: .output)
     }
     
     struct Request {

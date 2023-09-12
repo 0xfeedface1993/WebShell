@@ -8,7 +8,7 @@
 import Foundation
 import Durex
 
-public struct SignInDownPageReader: SessionableDirtyware {
+public struct DowloadsListWithSignFileIDReader: SessionableDirtyware {
     public typealias Input = KeyStore
     public typealias Output = KeyStore
     
@@ -22,10 +22,17 @@ public struct SignInDownPageReader: SessionableDirtyware {
     
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
         let request = try inputValue.request(.output)
-        let sign = try await FindStringInDomSearch(FileIDMatch.sign, configures: configures, key: key).execute(for: request)
+        guard let url = request.url else {
+            throw ShellError.badURL(request.url ?? "")
+        }
+        let (host, scheme) = try url.baseComponents()
+        let links = try await FindStringsInDomSearch(FileIDMatch.href, configures: configures, key: key).execute(for: request)
+        let refer = "\(scheme)://\(host)"
+        let next = links.map {
+            SignPHPFileDownload(url: $0, refer: refer).make()
+        }
         return inputValue
-            .assign(sign, forKey: .sign)
-            .assign(sign, forKey: .output)
+            .assign(next, forKey: .output)
             .assign(request, forKey: .lastRequest)
     }
     
