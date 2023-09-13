@@ -61,31 +61,7 @@ extension URLSession: URLClient {
     
     @usableFromInline
     func _asyncData(from url: URLRequest) async throws -> (Data, URLResponse) {
-#if COMBINE_LINUX && canImport(CombineX)
-        return try await withCheckedThrowingContinuation { continuation in
-            let task = self.dataTask(with: url) { data, response, error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                    return
-                }
-                guard let response = response as? HTTPURLResponse else {
-                    continuation.resume(throwing: URLSessionAsyncErrors.invalidUrlResponse)
-                    return
-                }
-                guard let data = data else {
-                    continuation.resume(throwing: URLSessionAsyncErrors.missingResponseData)
-                    return
-                }
-                continuation.resume(returning: (data, response))
-            }
-            
-            logCookies(for: task)
-            
-            task.resume()
-        }
-#else
-        return try await data(for: url)
-#endif
+        try await URLSessionHelper(self).asyncData(from: url)
     }
     
     public func asyncDownload(from url: URLRequest) async throws -> (URL, URLResponse) {
@@ -124,75 +100,7 @@ extension URLSession: URLClient {
     
     @usableFromInline
     func leagacyAsyncDownloadTask(from url: URLRequest) async throws -> (URL, URLResponse) {
-        let curl = url.cURL()
-        return try await withCheckedThrowingContinuation { continuation in
-            let task = downloadTask(with: url, completionHandler: { fileURL, response, error in
-                if let error = error {
-                    logger.info("error from URLSession, maybe os problem, mark on \(error)")
-                    continuation.resume(throwing: error)
-                    return
-                }
-                guard let response = response as? HTTPURLResponse else {
-                    continuation.resume(throwing: URLSessionAsyncErrors.invalidUrlResponse)
-                    return
-                }
-                guard let fileURL = fileURL else {
-                    continuation.resume(throwing: URLSessionAsyncErrors.missingTmpFile)
-                    return
-                }
-                
-                let filename = UUID().uuidString
-                let cachedURL = FileManager.default.temporaryDirectory
-                let location = cachedURL.appendingPathComponent(filename)
-                
-                do {
-                    try FileManager.default.moveItem(at: fileURL, to: location)
-                    logger.info("move tmp file to \(fileURL)")
-                    continuation.resume(returning: (location, response))
-                } catch {
-                    logger.info("\(#function) download file failed \(error), curl: \(curl)")
-                    continuation.resume(throwing: error)
-                }
-            })
-            
-            logCookies(for: task)
-            
-            task.resume()
-        }
-    }
-    
-    private func logCookies(for task: URLSessionTask) {
-        let cookies = CookiesReader(self).rawCookies()
-        var cached = [String: [HTTPCookie]]()
-        for cookie in cookies {
-            var values = cached[cookie.domain] ?? []
-            values.append(cookie)
-            cached[cookie.domain] = values
-        }
-        
-        logger.info("session \(self) has \(cookies.count) host cookies")
-        
-        let info = cached.map {
-            let value = $0.value.map({ cookie in
-                "'\(cookie.name)':'\(cookie.value)'"
-            }).joined(separator: ", ")
-            return "[\($0.key)] \($0.value.count) items, \(value)"
-        }
-        
-        for i in info {
-            logger.info("\(i)")
-        }
-        
-        guard let next = configuration.httpCookieStorage?.asyncCookies(for: task) else {
-            logger.info("no cookies for task \(task)")
-            return
-        }
-        
-        let taskCookies = next.map({ cookie in
-            "'\(cookie.name)':'\(cookie.value)'"
-        }).joined(separator: ", ")
-        
-        logger.info("task [\(task.taskIdentifier)] cookies -> \(taskCookies)")
+        try await URLSessionHelper(self).leagacyAsyncDownloadTask(from: url)
     }
 }
 
@@ -206,22 +114,6 @@ extension HTTPCookieStorage {
         return cookies(for: url) ?? []
     }
 }
-
-//#if os(Linux)
-//extension URLSession {
-//    /// A reimplementation of `URLSession.shared.data(from: url)` required for Linux
-//    ///
-//    /// - Parameter url: The URL for which to load data.
-//    /// - Returns: Data and response.
-//    ///
-//    /// - Usage:
-//    ///
-//    ///     let (data, response) = try await URLSession.shared.asyncData(from: url)
-//    public func data(for request: URLRequest) async throws -> (data: Data, response: URLResponse) {
-//        try await asyncData(from: request)
-//    }
-//}
-//#endif
 
 public extension URLRequest {
     /// Returns a cURL command representation of this URL request.
@@ -265,3 +157,112 @@ extension URLSession {
         return next
     }
 }
+
+struct URLSessionHelper {
+    let session: URLSession
+    
+    init(_ session: URLSession) {
+        self.session = session
+    }
+    
+    func leagacyAsyncDownloadTask(from url: URLRequest) async throws -> (URL, URLResponse) {
+        try await withCheckedThrowingContinuation { continuation in
+            let task = session.downloadTask(with: url, completionHandler: { fileURL, response, error in
+                if let error = error {
+                    logger.info("error from URLSession, maybe os problem, mark on \(error)")
+                    continuation.resume(throwing: error)
+                    return
+                }
+                guard let response = response as? HTTPURLResponse else {
+                    continuation.resume(throwing: URLSessionAsyncErrors.invalidUrlResponse)
+                    return
+                }
+                guard let fileURL = fileURL else {
+                    continuation.resume(throwing: URLSessionAsyncErrors.missingTmpFile)
+                    return
+                }
+                
+                let filename = UUID().uuidString
+                let cachedURL = FileManager.default.temporaryDirectory
+                let location = cachedURL.appendingPathComponent(filename)
+                
+                do {
+                    try FileManager.default.copyItem(at: fileURL, to: location)
+                    logger.info("copy tmp file to \(location)")
+                    continuation.resume(returning: (location, response))
+                } catch {
+                    logger.info("\(#function) download file failed \(error), curl: \(url.cURL())")
+                    continuation.resume(throwing: error)
+                }
+            })
+            
+            logCookies(for: task)
+            
+            task.resume()
+        }
+    }
+    
+    func logCookies(for task: URLSessionTask) {
+        let cookies = CookiesReader(session).rawCookies()
+        var cached = [String: [HTTPCookie]]()
+        for cookie in cookies {
+            var values = cached[cookie.domain] ?? []
+            values.append(cookie)
+            cached[cookie.domain] = values
+        }
+        
+        logger.info("session \(self) has \(cookies.count) host cookies")
+        
+        let info = cached.map {
+            let value = $0.value.map({ cookie in
+                "'\(cookie.name)':'\(cookie.value)'"
+            }).joined(separator: ", ")
+            return "[\($0.key)] \($0.value.count) items, \(value)"
+        }
+        
+        for i in info {
+            logger.info("\(i)")
+        }
+        
+        guard let next = session.configuration.httpCookieStorage?.asyncCookies(for: task) else {
+            logger.info("no cookies for task \(task)")
+            return
+        }
+        
+        let taskCookies = next.map({ cookie in
+            "'\(cookie.name)':'\(cookie.value)'"
+        }).joined(separator: ", ")
+        
+        logger.info("task [\(task.taskIdentifier)] cookies -> \(taskCookies)")
+    }
+    
+    func asyncData(from url: URLRequest) async throws -> (Data, URLResponse) {
+#if COMBINE_LINUX && canImport(CombineX)
+        return try await withCheckedThrowingContinuation { continuation in
+            let task = session.dataTask(with: url) { data, response, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                guard let response = response as? HTTPURLResponse else {
+                    continuation.resume(throwing: URLSessionAsyncErrors.invalidUrlResponse)
+                    return
+                }
+                guard let data = data else {
+                    continuation.resume(throwing: URLSessionAsyncErrors.missingResponseData)
+                    return
+                }
+                continuation.resume(returning: (data, response))
+            }
+            
+            logCookies(for: task)
+            
+            task.resume()
+        }
+#else
+        return try await session.data(for: url)
+#endif
+    }
+}
+
+
