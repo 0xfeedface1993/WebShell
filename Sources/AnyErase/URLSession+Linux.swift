@@ -259,29 +259,35 @@ struct URLSessionHelper {
     func asyncData(from url: URLRequest) async throws -> (Data, URLResponse) {
 #if COMBINE_LINUX && canImport(CombineX)
         return try await withCheckedThrowingContinuation { continuation in
-            let task = session.dataTask(with: url) { data, response, error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                    return
-                }
-                guard let response = response as? HTTPURLResponse else {
-                    continuation.resume(throwing: URLSessionAsyncErrors.invalidUrlResponse)
-                    return
-                }
-                guard let data = data else {
-                    continuation.resume(throwing: URLSessionAsyncErrors.missingResponseData)
-                    return
-                }
-                continuation.resume(returning: (data, response))
+            DispatchQueue.main.async {
+                fireAtMain(url, continuation: continuation)
             }
-            
-            logCookies(for: task)
-            
-            task.resume()
         }
 #else
         return try await session.data(for: url)
 #endif
+    }
+    
+    private func fireAtMain(_ url: URLRequest, continuation: UnsafeContinuation<(Data, URLResponse), Error>) {
+        let task = session.dataTask(with: url) { data, response, error in
+            if let error = error {
+                continuation.resume(throwing: error)
+                return
+            }
+            guard let response = response as? HTTPURLResponse else {
+                continuation.resume(throwing: URLSessionAsyncErrors.invalidUrlResponse)
+                return
+            }
+            guard let data = data else {
+                continuation.resume(throwing: URLSessionAsyncErrors.missingResponseData)
+                return
+            }
+            continuation.resume(returning: (data, response))
+        }
+        
+        logCookies(for: task)
+        
+        task.resume()
     }
 }
 
