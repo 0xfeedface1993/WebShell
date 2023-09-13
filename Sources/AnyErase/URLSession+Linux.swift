@@ -167,7 +167,8 @@ struct URLSessionHelper {
     
     func leagacyAsyncDownloadTask(from url: URLRequest) async throws -> (URL, URLResponse) {
         try await withCheckedThrowingContinuation { continuation in
-            let task = session.downloadTask(with: url, completionHandler: { fileURL, response, error in
+            var tempTask: URLSessionDownloadTask?
+            let task = session.downloadTask(with: url, completionHandler: { [weak tempTask] fileURL, response, error in
                 if let error = error {
                     logger.info("error from URLSession, maybe os problem, mark on \(error)")
                     continuation.resume(throwing: error)
@@ -186,6 +187,10 @@ struct URLSessionHelper {
                 let cachedURL = FileManager.default.temporaryDirectory
                 let location = cachedURL.appendingPathComponent(filename)
                 
+                defer {
+                    tempTask?.cancel()
+                }
+                
                 do {
                     try FileManager.default.copyItem(at: fileURL, to: location)
                     logger.info("copy tmp file to \(location)")
@@ -198,6 +203,7 @@ struct URLSessionHelper {
             
             logCookies(for: task)
             
+            tempTask = tempTask
             task.resume()
         }
     }
