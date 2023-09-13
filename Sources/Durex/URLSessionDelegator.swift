@@ -63,7 +63,7 @@ class URLSessionDelegator: NSObject, URLSessionDownloadDelegate {
         
         do {
             try FileManager.default.moveItem(at: location, to: url)
-            logger.info("move tmp file to \(url)")
+            logger.info("move tmp file to \(location)")
             SessionComplete(task: downloadTask, data: url)
                 .pass(to: downloadTaskCompletion)
         } catch {
@@ -144,7 +144,7 @@ class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate {
         
         do {
             try FileManager.default.moveItem(at: location, to: url)
-            logger.info("move tmp file to \(url)")
+            logger.info("move tmp file to \(location)")
             let news = SessionComplete(task: downloadTask, data: url).fileStone()
             statePassthroughSubject.send(news)
         } catch {

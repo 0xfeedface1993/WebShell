@@ -143,7 +143,7 @@ extension URLSession: URLClient {
                 
                 do {
                     try FileManager.default.moveItem(at: fileURL, to: location)
-                    logger.info("move tmp file to \(url)")
+                    logger.info("move tmp file to \(fileURL)")
                     continuation.resume(returning: (location, response))
                 } catch {
                     logger.info("\(#function) download file failed \(error), curl: \(curl)")
