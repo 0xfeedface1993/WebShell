@@ -78,6 +78,9 @@ extension URLSession: URLClient {
                 }
                 continuation.resume(returning: (data, response))
             }
+            
+            logCookies(for: task)
+            
             task.resume()
         }
 #else
@@ -152,6 +155,50 @@ extension URLSession: URLClient {
             })
             task.resume()
         }
+    }
+    
+    private func logCookies(for task: URLSessionTask) async {
+        let cookies = CookiesReader(self).rawCookies()
+        var cached = [String: [HTTPCookie]]()
+        for cookie in cookies {
+            var values = cached[cookie.domain] ?? []
+            values.append(cookie)
+            cached[cookie.domain] = values
+        }
+        
+        logger.debug("session \(self) has \(cookies.count) host cookies")
+        
+        let info = cached.map {
+            let value = $0.value.map({ cookie in
+                "'\(cookie.name)':'\(cookie.value)'"
+            }).joined(separator: ", ")
+            return "[\($0.key)] \($0.value.count) items, \(value)"
+        }
+        
+        for i in info {
+            logger.debug("\(i)")
+        }
+        
+        guard let next = await configuration.httpCookieStorage?.asyncCookies(for: task) else {
+            logger.debug("no cookies for task \(task)")
+            return
+        }
+        
+        let taskCookies = next.map({ cookie in
+            "'\(cookie.name)':'\(cookie.value)'"
+        }).joined(separator: ", ")
+        
+        logger.debug("task [\(task.taskIdentifier)] cookies -> \(taskCookies)")
+    }
+}
+
+extension HTTPCookieStorage {
+    func asyncCookies(for task: URLSessionTask) async -> [HTTPCookie] {
+        await withCheckedContinuation({ continuation in
+            self.getCookiesFor(task) { cookies in
+                continuation.resume(returning: cookies ?? [])
+            }
+        })
     }
 }
 

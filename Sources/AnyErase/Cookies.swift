@@ -41,8 +41,7 @@ public struct CookiesReader {
     
     /// 所有的cookies转化为键值对
     public func allCookies() -> [String: String] {
-        let cookies = rawCookies()
-        let allFields = HTTPCookie.requestHeaderFields(with: cookies)
+        let allFields = requestHeaderFields()
         logger.info("requestHeaderFields: \(allFields)")
         return allFields["Cookie"]?
             .replacingOccurrences(of: " ", with: "")

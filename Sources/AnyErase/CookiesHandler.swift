@@ -18,8 +18,8 @@ struct CookiesHandler {
     
     func setCookies() {
         let allHeaderFields = (response as? HTTPURLResponse)?.allHeaderFields ?? [:]
-        logger.info("response Set-Coookies: \(allHeaderFields)")
         let headers = stringPairs(allHeaderFields)
+        logger.info("response Set-Coookies: \(headers)")
         if let host = request.url?.removeURLPath() {
             let cookies = HTTPCookie.cookies(withResponseHeaderFields: headers, for: host)
             logger.info("found \(cookies.count) cookies for \(host), try set it.")
