@@ -128,6 +128,7 @@ extension URLSession: URLClient {
         return try await withCheckedThrowingContinuation { continuation in
             let task = downloadTask(with: url, completionHandler: { fileURL, response, error in
                 if let error = error {
+                    logger.info("error from URLSession, maybe os problem, mark on \(error)")
                     continuation.resume(throwing: error)
                     return
                 }
@@ -153,6 +154,9 @@ extension URLSession: URLClient {
                     continuation.resume(throwing: error)
                 }
             })
+            
+            logCookies(for: task)
+            
             task.resume()
         }
     }
