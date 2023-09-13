@@ -33,7 +33,7 @@ public struct LoginPage: Dirtyware {
                 .add(value: userAgent, forKey: "user-agent")
                 .add(value: refer, forKey: "referer")
                 .add(value: "en-US,en;q=0.9", forKey: "accept-language")
-                .add(value: "keep-alive", forKey: "Connection")
+//                .add(value: "keep-alive", forKey: "Connection")
         }
     }
 }

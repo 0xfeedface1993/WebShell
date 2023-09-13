@@ -47,7 +47,7 @@ public struct CodeImageRequest: SessionableDirtyware {
                 .add(value: userAgent, forKey: "user-agent")
                 .add(value: url, forKey: "referer")
                 .add(value: "en-US,en;q=0.9", forKey: "accept-language")
-                .add(value: "keep-alive", forKey: "Connection")
+//                .add(value: "keep-alive", forKey: "Connection")
         }
     }
 }
