@@ -11,6 +11,10 @@ import Foundation
 import FoundationNetworking
 #endif
 
+#if COMBINE_LINUX && canImport(CombineX)
+import CombineX
+#endif
+
 /// Defines the possible errors
 public enum URLSessionAsyncErrors: Error {
     case invalidUrlResponse, missingResponseData, missingTmpFile
@@ -167,8 +171,7 @@ struct URLSessionHelper {
     
     func leagacyAsyncDownloadTask(from url: URLRequest) async throws -> (URL, URLResponse) {
 //        try await withCheckedThrowingContinuation { continuation in
-//            var tempTask: URLSessionDownloadTask?
-//            let task = session.downloadTask(with: url, completionHandler: { [weak tempTask] fileURL, response, error in
+//            let task = session.downloadTask(with: url, completionHandler: { fileURL, response, error in
 //                if let error = error {
 //                    logger.info("error from URLSession, maybe os problem, mark on \(error)")
 //                    continuation.resume(throwing: error)
@@ -187,12 +190,8 @@ struct URLSessionHelper {
 //                let cachedURL = FileManager.default.temporaryDirectory
 //                let location = cachedURL.appendingPathComponent(filename)
 //
-//                defer {
-//                    tempTask?.cancel()
-//                }
-//
 //                do {
-//                    try FileManager.default.copyItem(at: fileURL, to: location)
+//                    try FileManager.default.moveItem(at: fileURL, to: location)
 //                    logger.info("copy tmp file to \(location)")
 //                    continuation.resume(returning: (location, response))
 //                } catch {
@@ -203,21 +202,20 @@ struct URLSessionHelper {
 //
 //            logCookies(for: task)
 //
-//            tempTask = tempTask
 //            task.resume()
 //        }
         let (data, response) = try await asyncData(from: url)
-        
+
         let filename = UUID().uuidString
         let cachedURL = FileManager.default.temporaryDirectory
         let location = cachedURL.appendingPathComponent(filename)
-        
+
         guard FileManager.default.createFile(atPath: location.path, contents: data) else {
             let reason = "\(#function) download file failed, curl: can't create \(data.count) bytes file at \(location)"
             logger.error("\(reason)")
             throw CocoaError(.fileWriteUnknown, userInfo: [NSLocalizedDescriptionKey: reason, NSLocalizedFailureReasonErrorKey: reason])
         }
-        
+
         logger.info("create tmp file to \(location)")
         return (location, response)
     }
@@ -258,37 +256,33 @@ struct URLSessionHelper {
     
     func asyncData(from url: URLRequest) async throws -> (Data, URLResponse) {
 #if COMBINE_LINUX && canImport(CombineX)
-        return try await withCheckedThrowingContinuation { continuation in
-            session.reset {
-                fireAtMain(url, continuation: continuation)
-            }
-        }
+        return try await session.cx.dataTaskPublisher(for: url).asyncValue
 #else
         return try await session.data(for: url)
 #endif
     }
     
-    private func fireAtMain(_ url: URLRequest, continuation: CheckedContinuation<(Data, URLResponse), Error>) {
-        let task = session.dataTask(with: url) { data, response, error in
-            if let error = error {
-                continuation.resume(throwing: error)
-                return
-            }
-            guard let response = response as? HTTPURLResponse else {
-                continuation.resume(throwing: URLSessionAsyncErrors.invalidUrlResponse)
-                return
-            }
-            guard let data = data else {
-                continuation.resume(throwing: URLSessionAsyncErrors.missingResponseData)
-                return
-            }
-            continuation.resume(returning: (data, response))
-        }
-        
-        logCookies(for: task)
-        
-        task.resume()
-    }
+//    private func fireAtMain(_ url: URLRequest, continuation: CheckedContinuation<(Data, URLResponse), Error>) {
+//        let task = session.dataTask(with: url) { data, response, error in
+//            if let error = error {
+//                continuation.resume(throwing: error)
+//                return
+//            }
+//            guard let response = response as? HTTPURLResponse else {
+//                continuation.resume(throwing: URLSessionAsyncErrors.invalidUrlResponse)
+//                return
+//            }
+//            guard let data = data else {
+//                continuation.resume(throwing: URLSessionAsyncErrors.missingResponseData)
+//                return
+//            }
+//            continuation.resume(returning: (data, response))
+//        }
+//
+//        logCookies(for: task)
+//
+//        task.resume()
+//    }
 }
 
 
