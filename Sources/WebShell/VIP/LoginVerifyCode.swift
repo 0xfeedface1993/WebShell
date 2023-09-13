@@ -97,7 +97,7 @@ public struct LoginVerifyCode: SessionableDirtyware {
                 .add(value: refer, forKey: "referer")
                 .add(value: base, forKey: "origin")
                 .add(value: "en-US,en;q=0.9", forKey: "accept-language")
-//                .add(value: "keep-alive", forKey: "Connection")
+                .add(value: "keep-alive", forKey: "Connection")
                 .body(body)
         }
     }

@@ -31,7 +31,7 @@ public struct SignPHPFileDownload: DownloadRequestBuilder {
             .add(value: "en-US,en;q=0.9", forKey: "accept-language")
             .add(value: userAgent, forKey: "user-agent")
             .add(value: refer, forKey: "referer")
-//            .add(value: "keep-alive", forKey: "Connection")
+            .add(value: "keep-alive", forKey: "Connection")
     }
 }
 
@@ -52,7 +52,7 @@ public struct PHPFileDownload: DownloadRequestBuilder {
             .add(value: userAgent, forKey: "User-Agent")
             .add(value: refer, forKey: "Referer")
             .add(value: "zh-CN,zh-Hans;q=0.9", forKey: "Accept-Language")
-//            .add(value: "keep-alive", forKey: "Connection")
+            .add(value: "keep-alive", forKey: "Connection")
     }
 }
 
@@ -67,7 +67,7 @@ public struct GeneralFileDownload {
             .add(value: userAgent, forKey: "user-agent")
             .add(value: refer, forKey: "referer")
             .add(value: "zh-CN,zh-Hans;q=0.9", forKey: "accept-language")
-//            .add(value: "keep-alive", forKey: "Connection")
+            .add(value: "keep-alive", forKey: "Connection")
     }
 }
 
