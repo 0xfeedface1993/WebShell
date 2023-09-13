@@ -79,7 +79,7 @@ extension URLSession: URLClient {
                 continuation.resume(returning: (data, response))
             }
             
-            detachLogCookies(for: task)
+            logCookies(for: task)
             
             task.resume()
         }
@@ -157,13 +157,7 @@ extension URLSession: URLClient {
         }
     }
     
-    private func detachLogCookies(for task: URLSessionTask) {
-        Task {
-            await logCookies(for: task)
-        }
-    }
-    
-    private func logCookies(for task: URLSessionTask) async {
+    private func logCookies(for task: URLSessionTask) {
         let cookies = CookiesReader(self).rawCookies()
         var cached = [String: [HTTPCookie]]()
         for cookie in cookies {
@@ -185,7 +179,7 @@ extension URLSession: URLClient {
             logger.debug("\(i)")
         }
         
-        guard let next = await configuration.httpCookieStorage?.asyncCookies(for: task) else {
+        guard let next = configuration.httpCookieStorage?.asyncCookies(for: task) else {
             logger.debug("no cookies for task \(task)")
             return
         }
@@ -199,12 +193,13 @@ extension URLSession: URLClient {
 }
 
 extension HTTPCookieStorage {
-    func asyncCookies(for task: URLSessionTask) async -> [HTTPCookie] {
-        await withCheckedContinuation({ continuation in
-            self.getCookiesFor(task) { cookies in
-                continuation.resume(returning: cookies ?? [])
-            }
-        })
+    func asyncCookies(for task: URLSessionTask) -> [HTTPCookie] {
+        guard let url = task.currentRequest?.url else {
+            logger.debug("no url in currentRequest [\(task.taskIdentifier)]")
+            return []
+        }
+        
+        return cookies(for: url) ?? []
     }
 }
 

@@ -28,6 +28,7 @@ struct URLSessionHolder {
 //        configure.httpCookieStorage = cookies
         configure.httpCookieStorage?.removeCookies(since: Date(timeIntervalSinceReferenceDate: 0))
         configure.httpCookieStorage?.cookieAcceptPolicy = .always
+        configure.httpShouldSetCookies = true
         
         self.session = URLSession(configuration: configure, delegate: delegator, delegateQueue: nil)
         if let storage = configure.httpCookieStorage {
@@ -48,6 +49,7 @@ struct URLSessionHolder {
 //        configure.httpCookieStorage = cookies
         configure.httpCookieStorage?.removeCookies(since: Date(timeIntervalSinceReferenceDate: 0))
         configure.httpCookieStorage?.cookieAcceptPolicy = .always
+        configure.httpShouldSetCookies = true
         
         self.session = URLSession(configuration: configure, delegate: delegate, delegateQueue: nil)
         if let storage = configure.httpCookieStorage {
