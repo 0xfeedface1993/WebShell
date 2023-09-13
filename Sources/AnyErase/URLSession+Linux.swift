@@ -268,7 +268,7 @@ struct URLSessionHelper {
 #endif
     }
     
-    private func fireAtMain(_ url: URLRequest, continuation: UnsafeContinuation<(Data, URLResponse), Error>) {
+    private func fireAtMain(_ url: URLRequest, continuation: CheckedContinuation<(Data, URLResponse), Error>) {
         let task = session.dataTask(with: url) { data, response, error in
             if let error = error {
                 continuation.resume(throwing: error)
