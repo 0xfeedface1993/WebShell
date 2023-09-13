@@ -53,9 +53,9 @@ extension URLSession: URLClient {
     public func asyncData(from url: URLRequest) async throws -> (Data, URLResponse) {
         logger.info("\(url.cURL())")
         let result = try await _asyncData(from: url)
-#if COMBINE_LINUX && canImport(CombineX)
-        CookiesHandler(request: url, response: result.1, session: self).setCookies()
-#endif
+//#if COMBINE_LINUX && canImport(CombineX)
+//        CookiesHandler(request: url, response: result.1, session: self).setCookies()
+//#endif
         return result
     }
     
@@ -67,9 +67,9 @@ extension URLSession: URLClient {
     public func asyncDownload(from url: URLRequest) async throws -> (URL, URLResponse) {
         logger.info("\(url.cURL())")
         let result = try await _asyncDownload(from: url)
-#if COMBINE_LINUX && canImport(CombineX)
-        CookiesHandler(request: url, response: result.1, session: self).setCookies()
-#endif
+//#if COMBINE_LINUX && canImport(CombineX)
+//        CookiesHandler(request: url, response: result.1, session: self).setCookies()
+//#endif
         return result
     }
     
