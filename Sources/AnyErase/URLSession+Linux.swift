@@ -166,7 +166,7 @@ extension URLSession: URLClient {
             cached[cookie.domain] = values
         }
         
-        logger.debug("session \(self) has \(cookies.count) host cookies")
+        logger.info("session \(self) has \(cookies.count) host cookies")
         
         let info = cached.map {
             let value = $0.value.map({ cookie in
@@ -176,11 +176,11 @@ extension URLSession: URLClient {
         }
         
         for i in info {
-            logger.debug("\(i)")
+            logger.info("\(i)")
         }
         
         guard let next = configuration.httpCookieStorage?.asyncCookies(for: task) else {
-            logger.debug("no cookies for task \(task)")
+            logger.info("no cookies for task \(task)")
             return
         }
         
@@ -188,14 +188,14 @@ extension URLSession: URLClient {
             "'\(cookie.name)':'\(cookie.value)'"
         }).joined(separator: ", ")
         
-        logger.debug("task [\(task.taskIdentifier)] cookies -> \(taskCookies)")
+        logger.info("task [\(task.taskIdentifier)] cookies -> \(taskCookies)")
     }
 }
 
 extension HTTPCookieStorage {
     func asyncCookies(for task: URLSessionTask) -> [HTTPCookie] {
         guard let url = task.currentRequest?.url else {
-            logger.debug("no url in currentRequest [\(task.taskIdentifier)]")
+            logger.info("no url in currentRequest [\(task.taskIdentifier)]")
             return []
         }
         
