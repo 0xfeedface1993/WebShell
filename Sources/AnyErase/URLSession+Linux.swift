@@ -215,7 +215,7 @@ struct URLSessionHelper {
         guard FileManager.default.createFile(atPath: location.path, contents: data) else {
             let reason = "\(#function) download file failed, curl: can't create \(data.count) bytes file at \(location)"
             logger.error("\(reason)")
-            throw CocoaError(.fileWriteUnknown, userInfo: [NSLocalizedDescriptionKey: reason, NSLocalizedFailureErrorKey: reason])
+            throw CocoaError(.fileWriteUnknown, userInfo: [NSLocalizedDescriptionKey: reason, NSLocalizedFailureReasonErrorKey: reason])
         }
         
         logger.info("create tmp file to \(location)")
