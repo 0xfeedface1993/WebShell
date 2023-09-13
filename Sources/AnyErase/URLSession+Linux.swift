@@ -258,10 +258,9 @@ struct URLSessionHelper {
     
     func asyncData(from url: URLRequest) async throws -> (Data, URLResponse) {
 #if COMBINE_LINUX && canImport(CombineX)
+        try await Task.sleep(nanoseconds: 5000000000)
         return try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.main.async {
-                fireAtMain(url, continuation: continuation)
-            }
+            fireAtMain(url, continuation: continuation)
         }
 #else
         return try await session.data(for: url)
