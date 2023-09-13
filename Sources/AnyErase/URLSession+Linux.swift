@@ -256,7 +256,9 @@ struct URLSessionHelper {
     
     func asyncData(from url: URLRequest) async throws -> (Data, URLResponse) {
 #if COMBINE_LINUX && canImport(CombineX)
-        return try await session.cx.dataTaskPublisher(for: url).asyncValue
+        var request = url
+        request.addValue("*", forHTTPHeaderField: "Accept-Encoding")
+        return try await session.cx.dataTaskPublisher(for: request).asyncValue
 #else
         return try await session.data(for: url)
 #endif
