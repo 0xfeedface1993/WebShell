@@ -79,7 +79,7 @@ extension URLSession: URLClient {
                 continuation.resume(returning: (data, response))
             }
             
-            logCookies(for: task)
+            detachLogCookies(for: task)
             
             task.resume()
         }
@@ -154,6 +154,12 @@ extension URLSession: URLClient {
                 }
             })
             task.resume()
+        }
+    }
+    
+    private func detachLogCookies(for task: URLSessionTask) {
+        Task {
+            await logCookies(for: task)
         }
     }
     
