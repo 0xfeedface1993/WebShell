@@ -166,46 +166,60 @@ struct URLSessionHelper {
     }
     
     func leagacyAsyncDownloadTask(from url: URLRequest) async throws -> (URL, URLResponse) {
-        try await withCheckedThrowingContinuation { continuation in
-            var tempTask: URLSessionDownloadTask?
-            let task = session.downloadTask(with: url, completionHandler: { [weak tempTask] fileURL, response, error in
-                if let error = error {
-                    logger.info("error from URLSession, maybe os problem, mark on \(error)")
-                    continuation.resume(throwing: error)
-                    return
-                }
-                guard let response = response as? HTTPURLResponse else {
-                    continuation.resume(throwing: URLSessionAsyncErrors.invalidUrlResponse)
-                    return
-                }
-                guard let fileURL = fileURL else {
-                    continuation.resume(throwing: URLSessionAsyncErrors.missingTmpFile)
-                    return
-                }
-                
-                let filename = UUID().uuidString
-                let cachedURL = FileManager.default.temporaryDirectory
-                let location = cachedURL.appendingPathComponent(filename)
-                
-                defer {
-                    tempTask?.cancel()
-                }
-                
-                do {
-                    try FileManager.default.copyItem(at: fileURL, to: location)
-                    logger.info("copy tmp file to \(location)")
-                    continuation.resume(returning: (location, response))
-                } catch {
-                    logger.info("\(#function) download file failed \(error), curl: \(url.cURL())")
-                    continuation.resume(throwing: error)
-                }
-            })
-            
-            logCookies(for: task)
-            
-            tempTask = tempTask
-            task.resume()
+//        try await withCheckedThrowingContinuation { continuation in
+//            var tempTask: URLSessionDownloadTask?
+//            let task = session.downloadTask(with: url, completionHandler: { [weak tempTask] fileURL, response, error in
+//                if let error = error {
+//                    logger.info("error from URLSession, maybe os problem, mark on \(error)")
+//                    continuation.resume(throwing: error)
+//                    return
+//                }
+//                guard let response = response as? HTTPURLResponse else {
+//                    continuation.resume(throwing: URLSessionAsyncErrors.invalidUrlResponse)
+//                    return
+//                }
+//                guard let fileURL = fileURL else {
+//                    continuation.resume(throwing: URLSessionAsyncErrors.missingTmpFile)
+//                    return
+//                }
+//
+//                let filename = UUID().uuidString
+//                let cachedURL = FileManager.default.temporaryDirectory
+//                let location = cachedURL.appendingPathComponent(filename)
+//
+//                defer {
+//                    tempTask?.cancel()
+//                }
+//
+//                do {
+//                    try FileManager.default.copyItem(at: fileURL, to: location)
+//                    logger.info("copy tmp file to \(location)")
+//                    continuation.resume(returning: (location, response))
+//                } catch {
+//                    logger.info("\(#function) download file failed \(error), curl: \(url.cURL())")
+//                    continuation.resume(throwing: error)
+//                }
+//            })
+//
+//            logCookies(for: task)
+//
+//            tempTask = tempTask
+//            task.resume()
+//        }
+        let (data, response) = try await asyncData(from: url)
+        
+        let filename = UUID().uuidString
+        let cachedURL = FileManager.default.temporaryDirectory
+        let location = cachedURL.appendingPathComponent(filename)
+        
+        guard FileManager.default.createFile(atPath: location.path, contents: data) else {
+            let reason = "\(#function) download file failed, curl: can't create \(data.count) bytes file at \(location)"
+            logger.error("\(reason)")
+            throw CocoaError(.fileWriteUnknown, userInfo: [NSLocalizedDescriptionKey: reason, NSLocalizedFailureErrorKey: reason])
         }
+        
+        logger.info("create tmp file to \(location)")
+        return (location, response)
     }
     
     func logCookies(for task: URLSessionTask) {
