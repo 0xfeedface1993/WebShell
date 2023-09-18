@@ -22,11 +22,11 @@ public struct FilterRelativeURLRequest: Dirtyware {
     
     public func execute(for inputValue: [URLRequestBuilder]) async throws -> [URLRequestBuilder] {
         let requests = inputValue
-        let next = requests.compactMap({ $0.url?.hasPrefix(prefix) ?? false })
+        let next = requests.compactMap({ $0.url?.hasPrefix(prefix) ?? false ? $0:nil })
         let diff = requests.count - next.count
         if diff > 0 {
             shellLogger.info("\(diff) requests filtered by non-prefix [\(prefix)], \(requests.compactMap { $0.url })")
         }
-        return inputValue
+        return next
     }
 }
