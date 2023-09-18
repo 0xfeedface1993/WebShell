@@ -36,13 +36,7 @@ public struct SignLinks: SessionableDirtyware {
         let urls = try FileGeneralLinkMatch(html: string).extract()
         let refer = inputURL.removeURLPath().absoluteString
         let next = urls.compactMap {
-            do {
-                return try SignPHPFileDownload(url: $0.absoluteString, refer: refer).make()
-            }   catch   {
-                shellLogger.error("download url make failed \(error)")
-                return nil
-            }
-            
+            SignPHPFileDownload(url: $0.absoluteString, refer: refer).make()
         }
         shellLogger.error("find download links \(next)")
         return next
