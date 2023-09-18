@@ -25,7 +25,7 @@ public struct FilterRelativeURLRequest: Dirtyware {
         let next = requests.compactMap({ $0.url?.hasPrefix(prefix) ?? false })
         let diff = requests.count - next.count
         if diff > 0 {
-            logger.info("\(diff) requests filtered by non-prefix [\(prefix)], \(request.compactMap { $0.url?.absoluteString })")
+            shellLogger.info("\(diff) requests filtered by non-prefix [\(prefix)], \(requests.compactMap { $0.url })")
         }
         return inputValue
             .assign(next, forKey: .output)
