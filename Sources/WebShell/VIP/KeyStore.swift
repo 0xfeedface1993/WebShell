@@ -53,6 +53,10 @@ public final class KeyStore: ContextValue {
         try take(forKey: key)
     }
     
+    public func url(_ key: Key) throws -> URL {
+        try take(forKey: key)
+    }
+    
     public var valueDescription: String {
         "\(self): \(cached)"
     }
@@ -77,4 +81,6 @@ public extension KeyStore.Key {
     static let fileid = KeyStore.Key("fileid")
     /// 包含下载文件id的url
     static let fileidURL = KeyStore.Key("fileid_url")
+    /// 上一个网络请求获取的html文件
+    static let htmlFile = KeyStore.Key("html_file")
 }

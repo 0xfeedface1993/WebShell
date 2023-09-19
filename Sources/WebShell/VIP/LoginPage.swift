@@ -12,21 +12,35 @@ public struct LoginPage: Dirtyware {
     public typealias Input = KeyStore
     public typealias Output = KeyStore
     
-    public init() {}
+    let querys: [String: String]
+    
+    public init(_ query: [String: String] = [
+        "action": "login",
+        "ref": "/mydisk.php?item=profile&menu=cp"
+    ]) {
+        self.querys = query
+    }
     
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
         let url = try inputValue.string(.fileidURL)
-        let request = try Request(url: url).make()
+        let request = try Request(url: url, querys: querys).make()
         return inputValue.assign(request, forKey: .output)
     }
     
     struct Request {
         let url: String
+        let querys: [String: String]
         
         func make() throws -> URLRequestBuilder {
             let (host, scheme) = try url.baseComponents()
             let refer = "\(scheme)://\(host)"
-            let next = "\(refer)/account.php?action=login&ref=/mydisk.php?item=profile&menu=cp"
+            let suffix: String
+            if querys.count > 0 {
+                suffix = "?" + querys.map({ "\($0.key)=\($0.value)" }).joined(separator: "&")
+            }   else  {
+                suffix = ""
+            }
+            let next = "\(refer)/account.php\(suffix)"
             return URLRequestBuilder(next)
                 .method(.get)
                 .add(value: fullAccept, forKey: "accept")

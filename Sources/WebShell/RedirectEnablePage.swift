@@ -64,8 +64,9 @@ public struct RedirectFollowPage: SessionableDirtyware {
     public func execute(for inputValue: String) async throws -> KeyStore {
         let request = try JustRequest(url: inputValue).make()
         let context = try await AsyncSession(configures).context(key)
-        let (_, response) = try await context.download(with: request)
+        let (data, response) = try await context.download(with: request)
         let next = KeyStore().assign(request, forKey: .lastRequest)
+        next.assign(data, forKey: .htmlFile)
         if let redirectURL = validRedirectResponse(response, request: request.url) {
             return next.assign(redirectURL.absoluteString, forKey: .output)
         }

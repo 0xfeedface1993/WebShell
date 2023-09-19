@@ -54,6 +54,10 @@ extension FileIDFinder where Self == FileIDMatch {
     public static var href: Self {
         FileIDMatch("href=\"([^\"]+)\"")
     }
+    
+    public static var addRef: Self {
+        FileIDMatch("add_ref\\((\\d+)\\)")
+    }
 }
 
 /// 从链接中提取fileid，`http://xxxx/file-123456.html`提取fileid`123456`

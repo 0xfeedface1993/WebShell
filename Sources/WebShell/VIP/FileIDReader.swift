@@ -40,3 +40,23 @@ public struct FileIDURLReader: Dirtyware {
         return inputValue.assign(url, forKey: .fileidURL)
     }
 }
+
+public struct FileIDInDomReader<F: FileIDFinder>: Dirtyware {
+    public typealias Input = KeyStore
+    public typealias Output = KeyStore
+    
+    public let finder: F
+    
+    public init(_ finder: F) {
+        self.finder = finder
+    }
+
+    public func execute(for inputValue: KeyStore) async throws -> KeyStore {
+        let file = try inputValue.url(.htmlFile)
+        let text = try String(contentsOf: file, encoding: .utf8)
+        let fiieid = try finder.extract(text)
+        return inputValue
+            .assign(fiieid, forKey: .fileid)
+            .assign(fiieid, forKey: .output)
+    }
+}

@@ -96,7 +96,23 @@ struct ContentView: View {
                         .join(GeneralLinks(.shared, key: "c"))
                         .join(Saver(.override, configures: .shared, key: "c")), tag: "c"
                 )
-                .title("ROSE盘")
+                .title("ROSE盘-free")
+                .url("https://rosefile.net/6emc775g2p/s_MTGBHJKL.rar.html"),
+                .init(
+                    RedirectFollowPage(.shared, key: "j")
+                        .join(FileIDURLReader())
+                        .join(FileIDInDomReader(FileIDMatch.addRef))
+                        .join(LoginPage([:]))
+                        .join(LoginFormhash(.shared, key: "j"))
+                        .join(LoginNoCode(username: ProcessInfo.processInfo.environment["username_rose"] ?? "",
+                                          password: ProcessInfo.processInfo.environment["pwd_rose"] ?? "",
+                                          configures: .shared,
+                                          key: "j"))
+                        .join(AjaxFileListPageRequest("load_down_addr1"))
+                        .join(DowloadsListWithSignFileIDReader(.shared, key: "j"))
+                        .join(FileDefaultSaver(.override, configures: .shared, key: "j")), tag: "j"
+                )
+                .title("ROSE盘-vip")
                 .url("https://rosefile.net/6emc775g2p/s_MTGBHJKL.rar.html"),
                 .init(
                     HTTPString(.shared, key: "d")
