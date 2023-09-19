@@ -28,7 +28,7 @@ public struct LoginNoCode: SessionableDirtyware {
         let lastRequest = try inputValue.request(.lastRequest)
         let formhash = try inputValue.string(.formhash)
         let request = try Request(url: lastRequest.url ?? "", username: username, password: password, formhash: formhash).make()
-        let finder = FileIDMatch(pattern: "(Login\\s+successful)|(登錄成功)", template: .dollar(0))
+        let finder = FileIDMatch.logined
         do {
             let html = try await FindStringInDomSearch(finder, configures: configures, key: key).execute(for: request)
             return inputValue

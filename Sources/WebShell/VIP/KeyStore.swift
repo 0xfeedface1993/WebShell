@@ -83,4 +83,75 @@ public extension KeyStore.Key {
     static let fileidURL = KeyStore.Key("fileid_url")
     /// 上一个网络请求获取的html文件
     static let htmlFile = KeyStore.Key("html_file")
+//    /// 上一个网络请求获取的html文本
+//    static let htmlString = KeyStore.Key("html_string")
+}
+
+/// Set instant value to new key store
+public struct ValueReader<T: ContextValue>: Dirtyware {
+    public typealias Input = T
+    public typealias Output = KeyStore
+    
+    public let key: KeyStore.Key
+    
+    public init(_ key: KeyStore.Key) {
+        self.key = key
+    }
+    
+    public func execute(for inputValue: Input) async throws -> KeyStore {
+        KeyStore().assign(inputValue, forKey: key)
+    }
+}
+
+/// Set instant value to current key store
+public struct ExternalValueReader<T>: Dirtyware {
+    public typealias Input = KeyStore
+    public typealias Output = KeyStore
+    
+    public let key: KeyStore.Key
+    public let value: T
+    
+    public init(_ value: T, forKey key: KeyStore.Key) {
+        self.key = key
+        self.value = value
+    }
+    
+    public func execute(for inputValue: Input) async throws -> KeyStore {
+        inputValue.assign(inputValue, forKey: key)
+    }
+}
+
+/// Copy output value to new place in key store
+public struct EraseOutValue: Dirtyware {
+    public typealias Input = KeyStore
+    public typealias Output = KeyStore
+    
+    public let key: KeyStore.Key
+    
+    public init(to key: KeyStore.Key) {
+        self.key = key
+    }
+    
+    public func execute(for inputValue: Input) async throws -> KeyStore {
+        try await CopyOutValue(.output, to: key).execute(for: inputValue)
+    }
+}
+
+/// Copy value between key in key store
+public struct CopyOutValue: Dirtyware {
+    public typealias Input = KeyStore
+    public typealias Output = KeyStore
+    
+    public let to: KeyStore.Key
+    public let from: KeyStore.Key
+    
+    public init(_ from: KeyStore.Key, to key: KeyStore.Key) {
+        self.to = key
+        self.from = from
+    }
+    
+    public func execute(for inputValue: Input) async throws -> KeyStore {
+        let output: Any? = inputValue.value(forKey: from)
+        return inputValue.assign(output, forKey: to)
+    }
 }

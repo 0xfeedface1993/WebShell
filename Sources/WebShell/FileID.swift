@@ -58,6 +58,10 @@ extension FileIDFinder where Self == FileIDMatch {
     public static var addRef: Self {
         FileIDMatch("add_ref\\((\\d+)\\)")
     }
+    
+    public static var logined: Self {
+        FileIDMatch(pattern: "(Login\\s+successful)|(登錄成功)", template: .dollar(0))
+    }
 }
 
 /// 从链接中提取fileid，`http://xxxx/file-123456.html`提取fileid`123456`

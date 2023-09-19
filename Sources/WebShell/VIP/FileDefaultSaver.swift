@@ -36,6 +36,11 @@ public struct FileDefaultSaver: SessionableDirtyware {
     }
     
     private func downloadFile(_ url: URLRequestBuilder) async throws -> URL {
+        let news = try await completeState(url)
+        return try result(news)
+    }
+    
+    func completeState(_ url: URLRequestBuilder) async throws -> TaskNews {
         let context = try await AsyncSession(configures).context(key)
         let states = try await context.downloadWithProgress(url, tag: key)
         var news: TaskNews?
@@ -44,11 +49,11 @@ public struct FileDefaultSaver: SessionableDirtyware {
         for try await state in states {
             if case .error(_) = state.value {
                 news = state.value
-                break
+                return state.value
             }
             if case .file(_) = state.value {
                 news = state.value
-                break
+                return state.value
             }
         }
         
@@ -57,7 +62,7 @@ public struct FileDefaultSaver: SessionableDirtyware {
             throw DownloadSessionRawError.unknown
         }
         
-        return try result(news)
+        return news
     }
     
     private func result(_ news: TaskNews) throws -> URL {

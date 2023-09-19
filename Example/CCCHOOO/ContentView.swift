@@ -47,7 +47,8 @@ struct ContentView: View {
             }
             .width(min: 40)
             TableColumn("下载地址") { row in
-                DummyTextView(object: row, keypath: \.url)
+//                DummyTextView(object: row, keypath: \.url)
+                URLTextFieldView(object: row, keypath: \.url)
             }
             .width(min: 100)
             TableColumn("状态") { row in
@@ -100,14 +101,16 @@ struct ContentView: View {
                 .url("https://rosefile.net/6emc775g2p/s_MTGBHJKL.rar.html"),
                 .init(
                     RedirectFollowPage(.shared, key: "j")
-                        .join(FileIDURLReader())
-                        .join(FileIDInDomReader(FileIDMatch.addRef))
+                        .join(EraseOutValue(to: .fileidURL))
                         .join(LoginPage([:]))
-                        .join(LoginFormhash(.shared, key: "j"))
-                        .join(LoginNoCode(username: ProcessInfo.processInfo.environment["username_rose"] ?? "",
-                                          password: ProcessInfo.processInfo.environment["pwd_rose"] ?? "",
-                                          configures: .shared,
-                                          key: "j"))
+                        .join(
+                            LoginWithFormhashMaybeLogined(ProcessInfo.processInfo.environment["username_rose"] ?? "",
+                                                          password: ProcessInfo.processInfo.environment["pwd_rose"] ?? "",
+                                                          configures: .shared,
+                                                          key: "j")
+                        )
+                        .join(URLPageReader(.fileidURL, configures: .shared, key: "j"))
+                        .join(FileIDInDomReader(FileIDMatch.addRef))
                         .join(AjaxFileListPageRequest("load_down_addr1"))
                         .join(DowloadsListWithSignFileIDReader(.shared, key: "j"))
                         .join(FileDefaultSaver(.override, configures: .shared, key: "j")), tag: "j"
@@ -141,7 +144,7 @@ struct ContentView: View {
                 .url("http://www.expfile.com/file-1622046.html"),
                 .init(
                     RedirectFollowPage(.shared, key: "g")
-                        .join(FileIDURLReader())
+                        .join(EraseOutValue(to: .fileidURL))
                         .join(FileIDReader(finder: FileIDMatch.default))
                         .join(LoginByFormhashAndCode(ProcessInfo.processInfo.environment["username_567"] ?? "",
                                                      password: ProcessInfo.processInfo.environment["pwd_567"] ?? "",

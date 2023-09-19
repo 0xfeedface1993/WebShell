@@ -27,20 +27,6 @@ public struct FileIDReader<T: FileIDFinder>: Dirtyware {
     }
 }
 
-public struct FileIDURLReader: Dirtyware {
-    public typealias Input = KeyStore
-    public typealias Output = KeyStore
-    
-    public init() {
-        
-    }
-
-    public func execute(for inputValue: KeyStore) async throws -> KeyStore {
-        let url = try inputValue.string(.output)
-        return inputValue.assign(url, forKey: .fileidURL)
-    }
-}
-
 public struct FileIDInDomReader<F: FileIDFinder>: Dirtyware {
     public typealias Input = KeyStore
     public typealias Output = KeyStore
@@ -52,11 +38,8 @@ public struct FileIDInDomReader<F: FileIDFinder>: Dirtyware {
     }
 
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
-        let file = try inputValue.url(.htmlFile)
-        let text = try String(contentsOf: file, encoding: .utf8)
-        let fiieid = try finder.extract(text)
-        return inputValue
-            .assign(fiieid, forKey: .fileid)
-            .assign(fiieid, forKey: .output)
+        try await FindStringInFile(.htmlFile, forKey: .fileid, finder: finder)
+            .join(CopyOutValue(.fileid, to: .code))
+            .execute(for: inputValue)
     }
 }

@@ -21,15 +21,13 @@ public struct LoginFormhash: SessionableDirtyware {
     }
     
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
-        let request = try inputValue.request(.output)
-        let html = try await FindStringInDomSearch(FileIDMatch.formhash, configures: configures, key: key).execute(for: request)
-        return inputValue
-            .assign(html, forKey: .formhash)
-            .assign(request, forKey: .lastRequest)
-            .assign(html, forKey: .output)
+        try await URLRequestPageReader(.output, configures: configures, key: key)
+            .join(FindStringInFile(.htmlFile, forKey: .formhash, finder: .formhash))
+            .execute(for: inputValue)
     }
     
     public func sessionKey(_ value: AnyHashable) -> LoginFormhash {
         .init(configures, key: value)
     }
 }
+
