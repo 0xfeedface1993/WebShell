@@ -8,6 +8,10 @@
 import Foundation
 import Durex
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 /// Read url string from key store, and request it, save file to `htmlFile` key, and save url string to `output` key
 public struct URLPageReader: SessionableDirtyware {
     public typealias Input = KeyStore
