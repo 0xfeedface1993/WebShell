@@ -14,6 +14,11 @@ public struct ConditionsGroup<T: Dirtyware, V: Dirtyware>: Dirtyware where T.Inp
     
     public let first: T
     public let last: V
+    
+    public init(_ first: T, _ last: V) {
+        self.first = first
+        self.last = last
+    }
 
     public func execute(for inputValue: T.Input) async throws -> T.Output {
         do {
@@ -24,7 +29,7 @@ public struct ConditionsGroup<T: Dirtyware, V: Dirtyware>: Dirtyware where T.Inp
     }
     
     public func append<K: Dirtyware>(_ next: K) -> ConditionsGroup<Self, K> where T.Input == K.Input, T.Output == K.Output, V.Input == K.Input, V.Output == K.Output {
-        .init(first: self, last: next)
+        .init(self, next)
     }
     
     public func eraseToAnyGroup<X: ContextValue, Y: ContextValue>() -> AnyConditionsGroup<X, Y> where T.Input == X, T.Output == Y {
@@ -47,7 +52,7 @@ public struct AnyConditionsGroup<X: ContextValue, Y: ContextValue>: Dirtyware {
     }
     
     public func append<K: Dirtyware>(_ next: K) -> AnyConditionsGroup<X, Y> where X == K.Input, X == K.Output, Y == K.Input, Y == K.Output {
-        .init(.init(first: self, last: next))
+        .init(.init(self, next))
     }
     
     public func eraseToAnyGroup() -> AnyConditionsGroup<X, Y> {

@@ -30,7 +30,7 @@ public struct LoginWithFormhashMaybeLogined: SessionableDirtyware {
         let loging = FindStringInFile(.htmlFile, forKey: .formhash, finder: .formhash)
         let logined = FindStringInFile(.htmlFile, forKey: .output, finder: .logined)
         let store = try await URLRequestPageReader(.output, configures: configures, key: key)
-            .join(ConditionsGroup(first: loging, last: logined))
+            .join(ConditionsGroup(loging, logined))
             .execute(for: inputValue)
         
         if let hash = formhash(store) {

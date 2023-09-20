@@ -80,7 +80,35 @@ struct ContentView: View {
                         .join(PHPLinks(.shared, key: "a"))
                         .join(Saver(.override, configures: .shared, key: "a")), tag: "a"
                 )
-                .title("迅牛盘")
+                .title("迅牛盘-free")
+                .url("http://www.xunniufxp.com/file-4182005.html"),
+                .init(
+                    RedirectFollowPage(.shared, key: "k")
+                        .join(EraseOutValue(to: .fileidURL))
+                        .join(
+                            ConditionsGroup(FileIDReader(finder: FileIDMatch.default), FileIDInDomReader(FileIDMatch.addRef))
+                        )
+                        .join(
+                            CustomLoginByFormhashAndCode(
+                                .init(ProcessInfo.processInfo.environment["username_xn"] ?? "")
+                                .password(ProcessInfo.processInfo.environment["pwd_xn"] ?? "")
+                                .cookieName("phpdisk_zcore_v2_info")
+                                .codePath("includes/imgcode.inc.php?verycode_type=2")
+                                .retry(3)
+                                .querys([:])
+                                .reader(ImageCodeReader(tag: "k", completion: { image, tag in
+                                    Task { @MainActor in
+                                        let object = list.first(where: { $0.tag == tag })
+                                        object?.imageCode = image
+                                        object?.objectWillChange.send()
+                                    }
+                                })), configures: .shared, key: "k")
+                        )
+                        .join(AjaxFileListPageRequest("load_down_addr1"))
+                        .join(DowloadsListWithSignFileIDReader(.shared, key: "k"))
+                        .join(FileDefaultSaver(.override, configures: .shared, key: "k")), tag: "k"
+                )
+                .title("迅牛盘-vip")
                 .url("http://www.xunniufxp.com/file-4182005.html"),
                 .init(
                     RedirectEnablePage(.shared, key: "b")

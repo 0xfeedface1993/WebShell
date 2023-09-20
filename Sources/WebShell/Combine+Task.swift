@@ -48,6 +48,8 @@ public enum ShellError: Error {
     case noDownloadFiles
     /// 验证码长度错误
     case invalidCode(String)
+    /// 没有验证码解析模块
+    case noCodeReader
 }
 
 #if DEBUG
