@@ -68,7 +68,7 @@ extension FileIDFinder where Self == FileIDMatch {
     }
     
     public static var invalidPassword: Self {
-        FileIDMatch(pattern: "密码不正确", template: .dollar(0))
+        FileIDMatch(pattern: "(密码不正确)|(密碼不正確)|(password is incorrect)", template: .dollar(0))
     }
 }
 
