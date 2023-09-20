@@ -60,7 +60,15 @@ extension FileIDFinder where Self == FileIDMatch {
     }
     
     public static var logined: Self {
-        FileIDMatch(pattern: "(Login\\s+successful)|(登錄成功)", template: .dollar(0))
+        FileIDMatch(pattern: "(Login\\s+successful)|(登錄成功)|(登录成功)|(您已登录)|(欢迎回来)", template: .dollar(0))
+    }
+    
+    public static var invalidCode: Self {
+        FileIDMatch(pattern: "验证码不正确", template: .dollar(0))
+    }
+    
+    public static var invalidPassword: Self {
+        FileIDMatch(pattern: "密码不正确", template: .dollar(0))
     }
 }
 

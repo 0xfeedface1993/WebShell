@@ -10,6 +10,7 @@ import Durex
 
 public enum LoginError: Error {
     case invalidCode
+    case invalidPassword
     case unknown
 }
 
@@ -34,31 +35,23 @@ public struct LoginVerifyCode: SessionableDirtyware {
         let code = try inputValue.string(.code)
         let formhash = try inputValue.string(.formhash)
         let request = try Request(url: lastRequest.url ?? "", username: username, password: password, code: code, formhash: formhash).make()
-        let finder = FileIDMatch(pattern: "(登录成功)|(您已登录)|(欢迎回来)", template: .dollar(0))
-        do {
-            let html = try await FindStringInDomSearch(finder, configures: configures, key: key).execute(for: request)
-            return inputValue
-                .assign(request, forKey: .lastRequest)
-                .assign(html, forKey: .output)
-        } catch {
-            try validateCode(code)
-            throw error
-        }
-    }
-    
-    func validateCode(_ string: String) throws {
-        var found = false
-        do {
-            let finder = FileIDMatch(pattern: "验证码不正确", template: .dollar(0))
-            let _ = try finder.extract(string)
-            found = true
-        } catch {
-            shellLogger.info("can't check code, \(error)")
-        }
-        
-        if found {
-            throw LoginError.invalidCode
-        }
+        return try await ExternalValueReader(request, forKey: .output)
+            .join(URLRequestPageReader(.output, configures: configures, key: key))
+            .join(
+                FindStringInFile(.htmlFile, forKey: .output, finder: FileIDMatch.logined)
+                    .or(
+                        FindStringInFile(.htmlFile, forKey: .output, finder: FileIDMatch.invalidCode)
+                            .throw({ _ in LoginError.invalidCode })
+                    )
+                    .or(
+                        FindStringInFile(.htmlFile, forKey: .output, finder: FileIDMatch.invalidPassword)
+                            .throw({ _ in LoginError.invalidPassword })
+                    )
+            )
+            .map { value in
+                value.assign(request, forKey: .lastRequest)
+            }
+            .execute(for: inputValue)
     }
     
     public func sessionKey(_ value: AnyHashable) -> Self {

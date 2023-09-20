@@ -66,79 +66,31 @@ public struct CustomLoginByFormhashAndCode<Reader: CodeReadable>: SessionableDir
     }
     
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
-        if await isCookieLogind() {
-            return inputValue
-        }   else    {
-            return try await timesLogdin(for: inputValue)
-        }
-    }
-    
-    func timesLogdin(for inputValue: KeyStore) async throws -> KeyStore {
-        var failed: Error?
-        for i in 0..<form.retry {
-            do {
-                return try await process(for: inputValue)
-            } catch {
-                shellLogger.error("login failed at \(i + 1) times, error \(error)")
-                failed = error
-            }
-        }
-        throw failed ?? LoginError.unknown
+        try await process(for: inputValue)
     }
     
     func process(for inputValue: KeyStore) async throws -> KeyStore {
-        let loging = FindStringInFile(.htmlFile, forKey: .formhash, finder: .formhash)
-        let logined = FindStringInFile(.htmlFile, forKey: .output, finder: .logined)
-        let store = try await LoginPage(form.querys)
-            .join(URLRequestPageReader(.output, configures: configures, key: key))
-            .join(ConditionsGroup(loging, logined))
-            .execute(for: inputValue)
-        
-        guard let hash = formhash(store) else {
-            return inputValue
-        }
-        
         guard let reader = form.reader else {
             shellLogger.info("please pass code reader")
             throw ShellError.noCodeReader
         }
-        
-        shellLogger.info("user not login, got formhash \(hash), try login")
-        return try await CodeImageCustomPathRequest(form.codePath, configures: configures, key: key)
-            .join(CodeImagePrediction(configures, key: key, reader: reader))
-            .join(LoginVerifyCode(username: form.username, password: form.password, configures: configures, key: key))
-            .execute(for: inputValue)
-    }
-    
-    func formhash(_ store: KeyStore) -> String? {
-        do {
-            return try store.string(.formhash)
-        } catch {
-            shellLogger.error("formhash read failed: \(error), maybe logined? try pass it.")
-            return nil
-        }
-    }
-    
-    /// 检测cookie是否已经登录
-    func isCookieLogind() async -> Bool {
-        if form.cookieName.isEmpty {
-            shellLogger.info("cookie name is empty, skip check cookie")
-            return false
-        }
-        
-        let cookie = try? await AsyncSession(configures)
-            .context(key)
-            .cookies()
-            .first(where: {
-                $0.name == form.cookieName
+        return try await LoginPage(form.querys)
+            .join(URLRequestPageReader(.output, configures: configures, key: key))
+            .join(
+                FindStringInFile(.htmlFile, forKey: .formhash, finder: .formhash)
+                    .or(FindStringInFile(.htmlFile, forKey: .output, finder: .logined))
+            )
+            .join(
+                CodeImageCustomPathRequest(form.codePath, configures: configures, key: key)
+                .join(CodeImagePrediction(configures, key: key, reader: reader))
+                .join(LoginVerifyCode(username: form.username, password: form.password, configures: configures, key: key))
+                .if(exists: .formhash)
+            )
+            .retry(3)
+            .maybe({ value, task in
+                form.cookieName.isEmpty || !((try? value.configures(.configures).defaultSession.cookies().contains(where: { $0.name == form.cookieName })) ?? false)
             })
-        
-        guard let cookie = cookie else {
-            shellLogger.info("user may logined, cookie \(form.cookieName) not exists")
-            return false
-        }
-        shellLogger.info("user may logined, cookie \(form.cookieName): \(cookie) exists")
-        return true
+            .execute(for: inputValue)
     }
     
     public func sessionKey(_ value: AnyHashable) -> Self {

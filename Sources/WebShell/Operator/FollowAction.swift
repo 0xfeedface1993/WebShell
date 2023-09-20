@@ -12,14 +12,20 @@ public struct FollowAction<Value>: Dirtyware where Value: ContextValue {
     public typealias Input = Value
     public typealias Output = Value
     
-    public let action: (Value) -> Void
+    public let action: (Value) async throws -> Void
     
-    public init(action: @escaping (Value) -> Void) {
+    public init(action: @escaping (Value) async throws -> Void) {
         self.action = action
     }
 
     public func execute(for inputValue: Value) async throws -> Value {
-        action(inputValue)
+        try await action(inputValue)
         return inputValue
+    }
+}
+
+extension Dirtyware {
+    public func map(_ action: @escaping (Self.Output) async throws -> Void) -> AnyDirtyware<Self.Input, Self.Output> {
+        join(FollowAction(action: action))
     }
 }

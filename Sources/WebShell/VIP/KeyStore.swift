@@ -57,6 +57,10 @@ public final class KeyStore: ContextValue {
         try take(forKey: key)
     }
     
+    public func configures(_ key: Key) throws -> AsyncURLSessionConfiguration {
+        try take(forKey: key)
+    }
+    
     public var valueDescription: String {
         "\(self): \(cached)"
     }
@@ -85,6 +89,8 @@ public extension KeyStore.Key {
     static let htmlFile = KeyStore.Key("html_file")
 //    /// 上一个网络请求获取的html文本
 //    static let htmlString = KeyStore.Key("html_string")
+    /// 当前网络相关配置
+    static let configures = KeyStore.Key("configures")
 }
 
 /// Set instant value to new key store
@@ -117,7 +123,7 @@ public struct ExternalValueReader<T>: Dirtyware {
     }
     
     public func execute(for inputValue: Input) async throws -> KeyStore {
-        inputValue.assign(inputValue, forKey: key)
+        inputValue.assign(value, forKey: key)
     }
 }
 

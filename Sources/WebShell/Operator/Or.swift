@@ -60,13 +60,19 @@ public struct AnyConditionsGroup<X: ContextValue, Y: ContextValue>: Dirtyware {
     }
 }
 
-public struct FlatMap<T: ContextValue, V: ContextValue>: Dirtyware {
-    public typealias Input = T
-    public typealias Output = V
-    
-    public let tranform: (T) -> any Dirtyware<Output, Input>
+//public struct FlatMap<T: ContextValue, V: ContextValue>: Dirtyware {
+//    public typealias Input = T
+//    public typealias Output = V
+//    
+//    public let tranform: (T) -> any Dirtyware<Output, Input>
+//
+//    public func execute(for inputValue: T) async throws -> V {
+//        try await tranform(inputValue).execute(for: inputValue)
+//    }
+//}
 
-    public func execute(for inputValue: T) async throws -> V {
-        try await tranform(inputValue).execute(for: inputValue)
+extension Dirtyware {
+    public func or<T: Dirtyware>(_ task: T) -> ConditionsGroup<Self, T> where T.Input == Self.Input, T.Output == Self.Output {
+        .init(self, task)
     }
 }

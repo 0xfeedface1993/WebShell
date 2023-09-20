@@ -8,6 +8,7 @@
 
 import SwiftUI
 import WebShell
+import Durex
 
 struct ContentView: View {
     @State var list = [DemoTaskObject]()
@@ -85,24 +86,30 @@ struct ContentView: View {
                 .init(
                     RedirectFollowPage(.shared, key: "k")
                         .join(EraseOutValue(to: .fileidURL))
+                        .join(ExternalValueReader(AsyncURLSessionConfiguration.shared, forKey: .configures))
                         .join(
-                            ConditionsGroup(FileIDReader(finder: FileIDMatch.default), FileIDInDomReader(FileIDMatch.addRef))
+                            FileIDReader(finder: FileIDMatch.default)
+                                .or(FileIDInDomReader(FileIDMatch.addRef))
                         )
                         .join(
-                            CustomLoginByFormhashAndCode(
-                                .init(ProcessInfo.processInfo.environment["username_xn"] ?? "")
-                                .password(ProcessInfo.processInfo.environment["pwd_xn"] ?? "")
-                                .cookieName("phpdisk_zcore_v2_info")
-                                .codePath("includes/imgcode.inc.php?verycode_type=2")
+                            LoginPage([:])
+                                .join(URLRequestPageReader(.output, configures: .shared, key: "k"))
+                                .join(
+                                    FindStringInFile(.htmlFile, forKey: .formhash, finder: .formhash)
+                                        .or(FindStringInFile(.htmlFile, forKey: .output, finder: .logined))
+                                )
+                                .join(
+                                    CodeImageCustomPathRequest("includes/imgcode.inc.php?verycode_type=2", configures: .shared, key: "k")
+                                        .join(CodeImagePrediction(.shared, key: "k", reader: codeReader(for: "k")))
+                                        .join(LoginVerifyCode(username: ProcessInfo.processInfo.environment["username_xn"] ?? "",
+                                                              password: ProcessInfo.processInfo.environment["pwd_xn"] ?? "",
+                                                              configures: .shared, key: "k"))
+                                        .if(exists: .formhash)
+                                )
                                 .retry(3)
-                                .querys([:])
-                                .reader(ImageCodeReader(tag: "k", completion: { image, tag in
-                                    Task { @MainActor in
-                                        let object = list.first(where: { $0.tag == tag })
-                                        object?.imageCode = image
-                                        object?.objectWillChange.send()
-                                    }
-                                })), configures: .shared, key: "k")
+                                .maybe({ value, task in
+                                    !v2Exists(value)
+                                })
                         )
                         .join(AjaxFileListPageRequest("load_down_addr1"))
                         .join(DowloadsListWithSignFileIDReader(.shared, key: "k"))
@@ -132,10 +139,17 @@ struct ContentView: View {
                         .join(EraseOutValue(to: .fileidURL))
                         .join(LoginPage([:]))
                         .join(
-                            LoginWithFormhashMaybeLogined(ProcessInfo.processInfo.environment["username_rose"] ?? "",
-                                                          password: ProcessInfo.processInfo.environment["pwd_rose"] ?? "",
-                                                          configures: .shared,
-                                                          key: "j")
+                            URLRequestPageReader(.output, configures: .shared, key: "j")
+                                .join(
+                                    FindStringInFile(.htmlFile, forKey: .formhash, finder: .formhash)
+                                        .or(FindStringInFile(.htmlFile, forKey: .output, finder: .logined))
+                                )
+                                .join(
+                                    LoginNoCode(username: ProcessInfo.processInfo.environment["username_rose"] ?? "",
+                                                password: ProcessInfo.processInfo.environment["pwd_rose"] ?? "",
+                                                configures: .shared, key: "j")
+                                    .if(exists: .formhash)
+                                )
                         )
                         .join(URLPageReader(.fileidURL, configures: .shared, key: "j"))
                         .join(FileIDInDomReader(FileIDMatch.addRef))
@@ -174,17 +188,27 @@ struct ContentView: View {
                     RedirectFollowPage(.shared, key: "g")
                         .join(EraseOutValue(to: .fileidURL))
                         .join(FileIDReader(finder: FileIDMatch.default))
-                        .join(LoginByFormhashAndCode(ProcessInfo.processInfo.environment["username_567"] ?? "",
-                                                     password: ProcessInfo.processInfo.environment["pwd_567"] ?? "",
-                                                     configures: .shared,
-                                                     key: "g", retry: 3,
-                                                     reader: ImageCodeReader(tag: "g", completion: { image, tag in
-                                                         Task { @MainActor in
-                                                             let object = list.first(where: { $0.tag == tag })
-                                                             object?.imageCode = image
-                                                             object?.objectWillChange.send()
-                                                         }
-                                                     })))
+                        .join(ExternalValueReader(AsyncURLSessionConfiguration.shared, forKey: .configures))
+                        .join(
+                            LoginPage([:])
+                                .join(URLRequestPageReader(.output, configures: .shared, key: "g"))
+                                .join(
+                                    FindStringInFile(.htmlFile, forKey: .formhash, finder: .formhash)
+                                        .or(FindStringInFile(.htmlFile, forKey: .output, finder: .logined))
+                                )
+                                .join(
+                                    CodeImageCustomPathRequest("includes/imgcode.inc.php?verycode_type=2", configures: .shared, key: "g")
+                                        .join(CodeImagePrediction(.shared, key: "g", reader: codeReader(for: "g")))
+                                        .join(LoginVerifyCode(username: ProcessInfo.processInfo.environment["username_567"] ?? "",
+                                                              password: ProcessInfo.processInfo.environment["pwd_567"] ?? "",
+                                                              configures: .shared, key: "g"))
+                                        .if(exists: .formhash)
+                                )
+                                .retry(3)
+                                .maybe({ value, task in
+                                    !v2Exists(value)
+                                })
+                        )
                         .join(SignInDownPageRequest())
                         .join(SignInDownPageReader(.shared, key: "g"))
                         .join(DowloadsListWithSignFileIDRequest(action: "load_down_addr10"))
@@ -213,6 +237,29 @@ struct ContentView: View {
             ]
         }
         .frame(minWidth: 500, minHeight: 200)
+    }
+    
+    func codeReader(for tag: String) -> ImageCodeReader {
+        ImageCodeReader(tag: tag, completion: { image, tag in
+            Task { @MainActor in
+                let object = list.first(where: { $0.tag == tag })
+                object?.imageCode = image
+                object?.objectWillChange.send()
+            }
+        })
+    }
+    
+    func v2Exists(_ store: KeyStore) -> Bool {
+        do {
+            return try store.configures(.configures)
+                .defaultSession
+                .cookies()
+                .contains(where: {
+                    $0.name == "phpdisk_zcore_v2_info"
+                })
+        } catch {
+            return false
+        }
     }
 }
 
