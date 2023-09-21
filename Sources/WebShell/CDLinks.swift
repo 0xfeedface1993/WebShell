@@ -30,7 +30,7 @@ public struct CDLinks: SessionableDirtyware {
     public func execute(for inputValue: URLRequestBuilder) async throws -> [URLRequestBuilder] {
         let domainURL = BaseURL(url: URL(string: inputValue.url ?? "")).domainURL()
         let matcher = CDPhpMatch(host: domainURL)
-        let builder = PHPFileDownload(url: "", refer: "")
+        let builder = PHPFileDownload()
         return try await DownloadLinks(key, matcher: matcher, requestBuilder: builder, configures: configures).execute(for: inputValue)
     }
     

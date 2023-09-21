@@ -45,6 +45,10 @@ public final class KeyStore: ContextValue {
         try take(forKey: key)
     }
     
+    public func strings(_ key: Key) throws -> [String] {
+        try take(forKey: key)
+    }
+    
     public func request(_ key: Key) throws -> URLRequestBuilder {
         try take(forKey: key)
     }

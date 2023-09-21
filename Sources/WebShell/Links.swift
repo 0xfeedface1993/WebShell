@@ -17,12 +17,14 @@ import FoundationNetworking
 #endif
 
 public struct SignPHPFileDownload: DownloadRequestBuilder {
-    let url: String
-    let refer: String
+//    let url: String
+//    let refer: String
 
-    func make() -> URLRequestBuilder {
-        make(url, refer: refer)
-    }
+//    func make() -> URLRequestBuilder {
+//        make(url, refer: refer)
+//    }
+    
+    public init() {}
 
     public func make(_ url: String, refer: String) -> URLRequestBuilder {
         URLRequestBuilder(url)
@@ -37,12 +39,14 @@ public struct SignPHPFileDownload: DownloadRequestBuilder {
 
 
 public struct PHPFileDownload: DownloadRequestBuilder {
-    let url: String
-    let refer: String
+//    let url: String
+//    let refer: String
     
-    func make() -> URLRequestBuilder {
-        make(url, refer: refer)
-    }
+//    func make() -> URLRequestBuilder {
+//        make(url, refer: refer)
+//    }
+    
+    public init() {}
     
     public func make(_ url: String, refer: String) -> URLRequestBuilder {
         URLRequestBuilder(url)
@@ -128,7 +132,7 @@ public struct PHPLinks: SessionableDirtyware {
     
     public func execute(for inputValue: URLRequestBuilder) async throws -> [URLRequestBuilder] {
         let matcher = DLPhpMatch(url: "")
-        let builder = PHPFileDownload(url: "", refer: "")
+        let builder = PHPFileDownload()
         return try await DownloadLinks(key, matcher: matcher, requestBuilder: builder, configures: configures).execute(for: inputValue)
     }
     

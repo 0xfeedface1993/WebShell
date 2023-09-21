@@ -197,9 +197,9 @@ struct ContentView: View {
                                         .join(LoginVerifyCode(username: ProcessInfo.processInfo.environment["username_xq"] ?? "",
                                                               password: ProcessInfo.processInfo.environment["pwd_xq"] ?? "",
                                                               configures: .shared, key: "l"))
-                                        .retry(3)
                                         .if(exists: .formhash)
                                 )
+                                .retry(3)
                                 .maybe({ value, task in
                                     !v2Exists(value)
                                 })
@@ -222,7 +222,10 @@ struct ContentView: View {
                 .init(
                     RedirectFollowPage(.shared, key: "g")
                         .join(EraseOutValue(to: .fileidURL))
-                        .join(FileIDReader(finder: FileIDMatch.default))
+                        .join(
+                            FileIDReader(finder: FileIDMatch.default)
+                                .or(FileIDInDomReader(FileIDMatch.addRef))
+                        )
                         .join(ExternalValueReader(AsyncURLSessionConfiguration.shared, forKey: .configures))
                         .join(
                             LoginPage([:])
@@ -237,9 +240,9 @@ struct ContentView: View {
                                         .join(LoginVerifyCode(username: ProcessInfo.processInfo.environment["username_567"] ?? "",
                                                               password: ProcessInfo.processInfo.environment["pwd_567"] ?? "",
                                                               configures: .shared, key: "g"))
-                                        .retry(3)
                                         .if(exists: .formhash)
                                 )
+                                .retry(3)
                                 .maybe({ value, task in
                                     !v2Exists(value)
                                 })
@@ -251,7 +254,7 @@ struct ContentView: View {
                         .join(FileDefaultSaver(.override, configures: .shared, key: "g"))
                     , tag: "g"
                 )
-                .title("567盘")
+                .title("567盘-vip")
                 .url("https://www.567yun.cn/file-2283887.html"),
                 .init(
                     RedirectEnablePage(.shared, key: "i")
@@ -267,7 +270,53 @@ struct ContentView: View {
                         .join(PHPLinks(.shared, key: "h"))
                         .join(Saver(.override, configures: .shared, key: "h")), tag: "h"
                 )
-                .title("IY盘")
+                .title("爱优盘-free")
+                .url("https://www.iycdn.com/file-213019.html"),
+                .init(
+//                    RedirectEnablePage(.shared, key: "h")
+//                        .join(TowerGroup("load_down_addr2", configures: .shared, key: "h"))
+//                        .join(PHPLinks(.shared, key: "h"))
+//                        .join(Saver(.override, configures: .shared, key: "h")), tag: "h"
+                    RedirectFollowPage(.shared, key: "m")
+                        .join(EraseOutValue(to: .fileidURL))
+                        .join(
+                            FileIDReader(finder: FileIDMatch.default)
+                                .or(FileIDInDomReader(FileIDMatch.addRef))
+                        )
+                        .join(ExternalValueReader(AsyncURLSessionConfiguration.shared, forKey: .configures))
+                        .join(
+                            LoginPage([:])
+                                .join(URLRequestPageReader(.output, configures: .shared, key: "m"))
+                                .join(
+                                    FindStringInFile(.htmlFile, forKey: .formhash, finder: .formhash)
+                                        .or(FindStringInFile(.htmlFile, forKey: .output, finder: .logined))
+                                )
+                                .join(
+                                    CodeImageCustomPathRequest("includes/imgcode.inc.php?verycode_type=2", configures: .shared, key: "m")
+                                        .join(CodeImagePrediction(.shared, key: "m", reader: codeReader(for: "m")))
+                                        .join(LoginVerifyCode(username: ProcessInfo.processInfo.environment["username_ay"] ?? "",
+                                                              password: ProcessInfo.processInfo.environment["pwd_ay"] ?? "",
+                                                              configures: .shared, key: "m"))
+                                        .if(exists: .formhash)
+                                )
+                                .retry(3)
+                                .maybe({ value, task in
+                                    !v2Exists(value)
+                                })
+                        )
+                        .join(AjaxFileListPageRequest("load_down_addr2"))
+                        .join(
+                            URLRequestPageReader(.output, configures: .shared, key: "m")
+                                .join(FindStringsInFile(.htmlFile, forKey: .output, finder: .href))
+                                .join(
+                                    DownloadFileRequests(builder: SignPHPFileDownload())
+                                        .sort(.reverse)
+                                )
+                        )
+                        .join(FileDefaultSaver(.override, configures: .shared, key: "m"))
+                    , tag: "m"
+                )
+                .title("爱优盘-vip")
                 .url("https://www.iycdn.com/file-213019.html"),
             ]
         }
