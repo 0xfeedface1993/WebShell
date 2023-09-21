@@ -174,7 +174,42 @@ struct ContentView: View {
                         .join(PHPLinks(.shared, key: "e"))
                         .join(Saver(.override, configures: .shared, key: "e")), tag: "e"
                 )
-                .title("雪球盘")
+                .title("雪球盘-free")
+                .url("http://www.xueqiupan.com/file-761588.html"),
+                .init(
+                    RedirectFollowPage(.shared, key: "l")
+                        .join(EraseOutValue(to: .fileidURL))
+                        .join(
+                            FileIDReader(finder: FileIDMatch.default)
+                                .or(FileIDInDomReader(FileIDMatch.addRef))
+                        )
+                        .join(ExternalValueReader(AsyncURLSessionConfiguration.shared, forKey: .configures))
+                        .join(
+                            LoginPage([:])
+                                .join(URLRequestPageReader(.output, configures: .shared, key: "l"))
+                                .join(
+                                    FindStringInFile(.htmlFile, forKey: .formhash, finder: .formhash)
+                                        .or(FindStringInFile(.htmlFile, forKey: .output, finder: .logined))
+                                )
+                                .join(
+                                    CodeImageCustomPathRequest("includes/imgcode.inc.php?verycode_type=2", configures: .shared, key: "l")
+                                        .join(CodeImagePrediction(.shared, key: "l", reader: codeReader(for: "l")))
+                                        .join(LoginVerifyCode(username: ProcessInfo.processInfo.environment["username_xq"] ?? "",
+                                                              password: ProcessInfo.processInfo.environment["pwd_xq"] ?? "",
+                                                              configures: .shared, key: "l"))
+                                        .retry(3)
+                                        .if(exists: .formhash)
+                                )
+                                .maybe({ value, task in
+                                    !v2Exists(value)
+                                })
+                        )
+                        .join(AjaxFileListPageRequest("load_down_addr1"))
+                        .join(DowloadsListWithSignFileIDReader(.shared, key: "l"))
+                        .join(FileDefaultSaver(.override, configures: .shared, key: "l"))
+                    , tag: "l"
+                )
+                .title("雪球盘-vip")
                 .url("http://www.xueqiupan.com/file-761588.html"),
                 .init(
                     RedirectEnablePage(.shared, key: "f")
@@ -202,9 +237,9 @@ struct ContentView: View {
                                         .join(LoginVerifyCode(username: ProcessInfo.processInfo.environment["username_567"] ?? "",
                                                               password: ProcessInfo.processInfo.environment["pwd_567"] ?? "",
                                                               configures: .shared, key: "g"))
+                                        .retry(3)
                                         .if(exists: .formhash)
                                 )
-                                .retry(3)
                                 .maybe({ value, task in
                                     !v2Exists(value)
                                 })

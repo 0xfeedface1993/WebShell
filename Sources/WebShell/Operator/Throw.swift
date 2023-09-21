@@ -21,7 +21,7 @@ public struct Throw<T: Dirtyware>: Dirtyware {
     }
 
     public func execute(for inputValue: Input) async throws -> Output {
-        let value = try await task.execute(for: inputValue)
+        let _ = try await task.execute(for: inputValue)
         throw error(inputValue)
     }
 }
