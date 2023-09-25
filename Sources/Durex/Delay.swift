@@ -46,28 +46,3 @@ public struct Delay<T, V>: Condom {
             .eraseToAnyPublisher()
     }
 }
-
-public struct DelayDirtyware<T: Dirtyware, V: Dirtyware>: Dirtyware {
-    public typealias Input = T.Input
-    public typealias Output = V.Output
-    
-    public let out: V.Output
-    
-    init(_ item: T.Input, out: V.Output) {
-        self.out = out
-    }
-    
-    init(_ out: V.Output) {
-        self.out = out
-    }
-    
-    public func execute(for inputValue: Input) async throws -> Output {
-        if #available(macOS 13.0, *) {
-            try await Task.sleep(for: .seconds(2))
-        } else {
-            // Fallback on earlier versions
-            sleep(2000)
-        }
-        return out
-    }
-}

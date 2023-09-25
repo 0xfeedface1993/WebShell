@@ -26,32 +26,23 @@ public struct URLOffset {
     }
     
     private func matchHost(in string: String) throws -> String {
-        if #available(macOS 13.0, *) {
+        if #available(macOS 13.0, iOS 16, *) {
             let regx = try Regex("(\\w+\\.)+\\w+")
             guard let match = string.firstMatch(of: regx)?.0 else {
-#if DEBUG
                 logger.error("[\(type(of: self))] no host in \(string)")
-#endif
                 throw DurexError.missingHost
             }
             
-#if DEBUG
             logger.info("[\(type(of: self))] extract host \(match) from \(string)")
-#endif
-            
             return String(match)
         } else {
             // Fallback on earlier versions
             let regx = try NSRegularExpression(pattern: "(\\w+\\.)+\\w+")
             guard let range = regx.firstMatch(in: string, range: NSRange(location: 0, length: string.count))?.range else {
-#if DEBUG
                 logger.error("[\(type(of: self))] no host in \(string)")
-#endif
                 throw DurexError.missingHost
             }
-#if DEBUG
             logger.info("[\(type(of: self))] extract host \((string as NSString).substring(with: range)) from \(string)")
-#endif
             return (string as NSString).substring(with: range)
         }
     }

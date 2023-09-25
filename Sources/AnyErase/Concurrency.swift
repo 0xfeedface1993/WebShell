@@ -12,6 +12,9 @@ internal let logger = Logger(label: "com.webshell.anyerase")
 
 #if COMBINE_LINUX && canImport(CombineX)
 import CombineX
+#else
+import Combine
+#endif
 
 struct CheckedContinuationSlide<T: Publisher> {
     let publisher: T
@@ -44,7 +47,7 @@ struct CheckedContinuationSlide<T: Publisher> {
 
 extension Publisher {
     /// Bridge to Swift Concurrency
-    public var asyncValue: Output {
+    private var leagacyAyncValue: Output {
         get async throws {
             let slide = CheckedContinuationSlide(self)
             // Swift Concurrency release local variables until block value return or execute complete.
@@ -57,24 +60,34 @@ extension Publisher {
         }
     }
 }
-#else
 
-import Combine
-
+#if COMBINE_LINUX && canImport(CombineX)
 extension Publisher {
     /// Bridge to Swift Concurrency
-    @inlinable
+    public var asyncValue: Output {
+        get async throws {
+            try await leagacyAyncValue
+        }
+    }
+}
+#else
+extension Publisher {
+    /// Bridge to Swift Concurrency
     @available(macOS 12, iOS 13, *)
     public var asyncValue: Output  {
         get async throws {
-            for try await i in self.values {
-                return i
+            if #available(iOS 15.0, *) {
+                for try await i in self.values {
+                    return i
+                }
+            } else {
+                // Fallback on earlier versions
+                return try await leagacyAyncValue
             }
             throw CocoaError.error(.featureUnsupported)
         }
     }
 }
-
 #endif
 
 //import AsyncExtensions
