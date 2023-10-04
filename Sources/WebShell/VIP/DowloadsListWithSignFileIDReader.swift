@@ -37,7 +37,7 @@ public struct DowloadsListWithSignFileIDReader: SessionableDirtyware {
 //            .assign(next, forKey: .output)
 //            .assign(request, forKey: .lastRequest)
         try await URLRequestPageReader(.output, configures: configures, key: key)
-            .join(FindStringInFile(.htmlFile, forKey: .output, finder: .href))
+            .join(FindStringsInFile(.htmlFile, forKey: .output, finder: .href))
             .join(
                 DownloadFileRequests(builder: SignPHPFileDownload())
             )
