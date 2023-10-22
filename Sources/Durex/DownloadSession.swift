@@ -22,127 +22,6 @@ import FoundationNetworking
 import Logging
 import AsyncExtensions
 
-//extension CustomURLSession {
-//    /// 全局共享下载session
-//    /// - Returns: 共享session
-//    static func shared() -> CustomURLSession {
-//        DownloadSession._shared
-//    }
-//}
-
-//public final class DownloadSession: CustomURLSession {
-//    fileprivate static let _shared = DownloadSession()
-//    private let delegator = URLSessionDelegator()
-//    private lazy var _session = URLSessionHolder(delegator)
-//    private var tagsCached = [Int: Int]()
-//    private let lock = Lock()
-//
-//    public init() {
-//
-//    }
-//
-//    deinit {
-//        lock.cleanupLock()
-//    }
-//
-//    public func downloadWithProgress(_ request: URLRequest, tag: AnyHashable? = nil) -> DownloadURLProgressPublisher {
-//        DownloadURLProgressPublisher(request: request, session: self, tag: tag?.hashValue)
-//    }
-//
-//    public func download(with request: URLRequest) -> AnyPublisher<(URL, URLResponse), Error> {
-//        DownloadURLPublisher(request: request, session: systemSession())
-//            .eraseToAnyPublisher()
-//    }
-//
-//    public func data(with request: URLRequest) -> AnyPublisher<Data, Error> {
-//        download(with: request)
-//            .tryMap { url in
-//                try Data(contentsOf: url.0)
-//            }
-//            .eraseToAnyPublisher()
-//    }
-//
-//    public func downloadNews(for identifier: AnyHashable) -> AnyPublisher<UpdateNews, Error> {
-//        delegator.news(self, tag: identifier.hashValue)
-//            .map {
-//                UpdateNews(value: $0, tagHashValue: identifier.hashValue)
-//            }
-//            .eraseToAnyPublisher()
-//    }
-//
-//    public func downloadWrapNews(for identifier: AnyHashable) -> AnyPublisher<UpdateNews, Never> {
-//        delegator.news(self, tag: identifier.hashValue)
-//            .map {
-//                UpdateNews(value: $0, tagHashValue: identifier.hashValue)
-//            }
-//            .eraseToAnyPublisher()
-//    }
-//
-//    public func downloadNews() -> AnyPublisher<UpdateNews, Never> {
-//        delegator.news()
-//            .map {
-//                UpdateNews(value: $0, tagHashValue: self.tag(for: $0.identifier))
-//            }
-//            .eraseToAnyPublisher()
-//    }
-//}
-//
-//extension DownloadSession: SessionProvider {
-//    public func systemSession() -> URLSession {
-//        _session.session as? URLSession ?? .shared
-//    }
-//
-//    public func bind(task: URLSessionDownloadTask, tagHashValue: Int) {
-//        lock.lock()
-//        let identifier = task.taskIdentifier
-//        let value = tagsCached[identifier]
-//        tagsCached[identifier] = tagHashValue
-//        lock.unlock()
-//        if let value = value {
-//            logger.info("download task \(identifier) already has tag \(value)")
-//        }
-//        logger.info("download task \(identifier) add new tag \(tagHashValue)")
-//    }
-//
-//    public func unbind(task: URLSessionDownloadTask) {
-//        lock.lock()
-//        let identifier = task.taskIdentifier
-//        tagsCached.removeValue(forKey: identifier)
-//        lock.unlock()
-//        logger.info("download task \(identifier) remove tag")
-//    }
-//
-//    @inlinable
-//    public func tag(for task: URLSessionDownloadTask) -> Int {
-//        tag(for: task.taskIdentifier)
-//    }
-//
-//    public func tag(for taskIdentifier: Int) -> Int {
-//        lock.lock()
-//        let identifier = taskIdentifier
-//        let value = tagsCached[identifier]
-//        lock.unlock()
-////        if let value = value {
-////            os_log(.debug, log: logger, "download task %d retrive tag %d", identifier, value)
-////        }   else    {
-////            os_log(.debug, log: logger, "download task %d has no tag", identifier)
-////        }
-//        return value ?? identifier
-//    }
-//
-//    public func taskIdentifier(for tag: Int) -> Int? {
-//        lock.lock()
-//        let value = tagsCached.first(where: { $0.value == tag })?.key
-//        lock.unlock()
-////        if let value = value {
-////            os_log(.debug, log: logger, "download tag %d retrive task %d", tag, value)
-////        }   else    {
-////            os_log(.debug, log: logger, "download tag %d has no task", tag)
-////        }
-//        return value
-//    }
-//}
-//
 public struct AsyncDownloadSession: AsyncCustomURLSession {
     public let delegate: AsyncURLSessiobDownloadDelegate
     public let tagsTaskIdenfier: any TaskIdentifiable
@@ -200,6 +79,15 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
     
     public func cookies() -> [HTTPCookie] {
         urlSessionContainer.cookies.cookies ?? []
+    }
+    
+    public func cancel<TagValue: Hashable>(_ tag: TagValue) async throws {
+        let urlClient = client()
+        guard let identifier = await taskIdentifier(for: tag) else {
+            logger.warning("task identifier for tag [\(tag)] not found, unable to cancel it's task")
+            return
+        }
+        try await urlClient.cancelTask(identifier)
     }
 }
 

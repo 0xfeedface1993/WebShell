@@ -14,6 +14,7 @@ import FoundationNetworking
 /// Defines the possible errors
 public enum URLSessionAsyncErrors: Error {
     case invalidUrlResponse, missingResponseData, missingTmpFile
+    case unknownTask
 }
 
 public protocol URLTask: AnyObject {
@@ -35,6 +36,8 @@ public protocol URLClient {
     func asyncDownloadTask(from url: URLRequest) -> URLTask
     /// set current session all cookies in request header
     func requestBySetCookies(with request: URLRequest) -> URLRequest
+    /// Stop download task if it runging
+    func cancelTask(_ taskIdentifier: Int) async throws
 }
 
 /// An extension that provides async support for fetching a URL
@@ -101,6 +104,16 @@ extension URLSession: URLClient {
     @usableFromInline
     func leagacyAsyncDownloadTask(from url: URLRequest) async throws -> (URL, URLResponse) {
         try await URLSessionHelper(self).leagacyAsyncDownloadTask(from: url)
+    }
+    
+    public func cancelTask(_ taskIdentifier: Int) async throws {
+        let task = await allTasks.first(where: { $0.taskIdentifier == taskIdentifier })
+        guard let task = task else {
+            logger.error("task identifier [\(taskIdentifier)] not found in current tasks")
+            throw URLSessionAsyncErrors.unknownTask
+        }
+        task.cancel()
+        logger.info("task identifier [\(taskIdentifier)] cancelled.")
     }
 }
 
