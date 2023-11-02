@@ -107,7 +107,11 @@ extension URLSession: URLClient {
     }
     
     public func cancelTask(_ taskIdentifier: Int) async throws {
+#if COMBINE_LINUX
+        let task = await allTasks().first(where: { $0.taskIdentifier == taskIdentifier })
+#else
         let task = await allTasks.first(where: { $0.taskIdentifier == taskIdentifier })
+#endif
         guard let task = task else {
             logger.error("task identifier [\(taskIdentifier)] not found in current tasks")
             throw URLSessionAsyncErrors.unknownTask
@@ -115,6 +119,16 @@ extension URLSession: URLClient {
         task.cancel()
         logger.info("task identifier [\(taskIdentifier)] cancelled.")
     }
+    
+#if COMBINE_LINUX
+    public func allTasks() async -> [URLSessionTask] {
+        await withCheckedContinuation { continuation in
+            getAllTasks(completionHandler: { tasks in
+                continuation.resume(returning: tasks)
+            })
+        }
+    }
+#endif
 }
 
 extension HTTPCookieStorage {
