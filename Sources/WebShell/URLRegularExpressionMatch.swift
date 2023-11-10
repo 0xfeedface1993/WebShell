@@ -93,11 +93,11 @@ enum ExpressionMatchError: Error {
 }
 
 public struct ExpressionMatch {
-    let string: String
-    let pattern: String
-    let template: URLRegularExpressionMatchTemplate
+    public let string: String
+    public let pattern: String
+    public let template: URLRegularExpressionMatchTemplate
     
-    func extract() throws -> [String] {
+    public  func extract() throws -> [String] {
         if #available(iOS 16.0, macOS 13.0, *) {
             let regx = try Regex(pattern)
             let urls = string.matches(of: regx).compactMap({ $0.output[template.rawTemplate()].substring })
@@ -121,23 +121,23 @@ public struct ExpressionMatch {
         return first
     }
     
-    init(string: String, pattern: String, template: URLRegularExpressionMatchTemplate) {
+    public init(string: String, pattern: String, template: URLRegularExpressionMatchTemplate) {
         self.string = string
         self.pattern = pattern
         self.template = template
     }
     
-    init(_ string: String) {
+    public init(_ string: String) {
         self.string = string
         self.pattern = "\\w"
         self.template = Templates.dollar(0)
     }
     
-    func pattern(_ value: String) -> Self {
+    public func pattern(_ value: String) -> Self {
         .init(string: string, pattern: value, template: template)
     }
     
-    func template(_ value: URLRegularExpressionMatchTemplate) -> Self {
+    public func template(_ value: URLRegularExpressionMatchTemplate) -> Self {
         .init(string: string, pattern: pattern, template: value)
     }
 }
