@@ -63,13 +63,17 @@ actor AsyncSessionPool {
 
 actor AsyncTaskPool {
     typealias TaskValue = Task<Void, Never>
-    private var tasks = [Sessions: TaskValue]()
+    private var tasks = [Sessions: (work: TaskValue, id: UUID)]()
     
     @usableFromInline
     func set<Context>(_ context: Context, subject: AsyncPassthroughSubject<AsyncUpdateNews>, for key: Sessions) where Context: AsyncCustomURLSession {
+        if let bingo = tasks.first(where: { $0.value.id == context.id }) {
+            logger.info("pool has observer for session [\(bingo.key)] uuid [\(bingo.value.id)], try add duplicate observation with \(key), pass...")
+            return
+        }
         let updates = context.downloadNews()
         removeTask(forKey: key)
-        tasks[key] = task(updates, subject: subject, forKey: key)
+        tasks[key] = (task(updates, subject: subject, forKey: key), context.id)
     }
     
     @usableFromInline
@@ -79,7 +83,7 @@ actor AsyncTaskPool {
     
     @usableFromInline
     func task(forKey key: Sessions) -> TaskValue? {
-        tasks[key]
+        tasks[key]?.work
     }
     
     func task(_ updates: AnyAsyncSequence<AsyncUpdateNews>, subject: AsyncPassthroughSubject<AsyncUpdateNews>, forKey key: Sessions) -> TaskValue {
@@ -90,6 +94,8 @@ actor AsyncTaskPool {
             }
             do {
                 for try await news in updates {
+                    // logger.info("send news [\(news)] to [\(key)]")
+                    print("send news [\(news)] to [\(key)]")
                     subject.send(news)
                 }
             } catch {
@@ -99,7 +105,7 @@ actor AsyncTaskPool {
     }
     
     func removeTask(forKey key: Sessions) {
-        if let oldTask = tasks[key], !oldTask.isCancelled {
+        if let oldTask = tasks[key]?.work, !oldTask.isCancelled {
             oldTask.cancel()
             logger.info("remove task observer for session \(key)")
         }

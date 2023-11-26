@@ -172,7 +172,7 @@ class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate {
         //#if DEBUG
         //        print(">>> [\(type(of: self))] file download state update: \(downloadTask), \(bytesWritten) / \(totalBytesExpectedToWrite)")
         //#endif
-//        logger.info("file download state update: \(downloadTask), \(totalBytesWritten) / \(totalBytesExpectedToWrite)")
+        //logger.info("file download state update: \(downloadTask), \(totalBytesWritten) / \(totalBytesExpectedToWrite)")
         
         let state = SessionTaskState(downloadTask)
             .reciveBytes(bytesWritten)

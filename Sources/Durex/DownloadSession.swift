@@ -23,6 +23,7 @@ import Logging
 import AsyncExtensions
 
 public struct AsyncDownloadSession: AsyncCustomURLSession {
+    public let id = UUID()
     public let delegate: AsyncURLSessiobDownloadDelegate
     public let tagsTaskIdenfier: any TaskIdentifiable
     private let urlSessionContainer: URLSessionHolder

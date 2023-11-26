@@ -57,6 +57,9 @@ public protocol CustomURLSession {
 }
 
 public protocol AsyncCustomURLSession {
+    /// 唯一标识符, 标识对象唯一，不同的实例应该是不同的的UUID
+    var id: UUID { get }
+    
     /// 下载数据，下载后的数据会转换成Data，大数据下载推荐使用``download(with:)``方法
     /// - Parameter request: 网络请求
     /// - Returns: 异步数据

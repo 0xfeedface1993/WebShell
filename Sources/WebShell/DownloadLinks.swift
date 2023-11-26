@@ -53,8 +53,10 @@ public struct DownloadLinks<Matcher: ContentMatch, RequestBuilder: DownloadReque
         }
         
 #if DEBUG
-        let curl = try configures.defaultSession.requestBySetCookies(with: next.first!).build().cURL(pretty: true)
-        shellLogger.info("cookies curl: \(curl)")
+        if let item = next.first {
+            let curl = try configures.defaultSession.requestBySetCookies(with: item).build().cURL(pretty: true)
+            shellLogger.info("cookies curl: \(curl)")
+        }
 #endif
         return next
     }
