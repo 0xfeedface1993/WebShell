@@ -58,6 +58,10 @@ extension FileIDFinder where Self == FileIDMatch {
     public static var addRef: Self {
         FileIDMatch("add_ref\\((\\d+)\\)")
     }
+   
+    public static var addCoun: Self {
+        FileIDMatch("add_coun\\((\\d+)\\)")
+    }
     
     public static var logined: Self {
         FileIDMatch(pattern: "(Login\\s+successful)|(登錄成功)|(登录成功)|(您已登录)|(欢迎回来)", template: .dollar(0))

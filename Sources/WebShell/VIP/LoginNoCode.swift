@@ -53,7 +53,7 @@ public struct LoginNoCode: SessionableDirtyware {
             let (host, scheme) = try url.baseComponents()
             let base = "\(scheme)://\(host)"
             let refer = "\(base)/account.php?action=login"
-            let next = "\(base)/account.php?action=login"
+            let next = "\(base)/account.php"
             let params = ["action": "fastlogin",
                         "task": "login",
                         "ref": "",

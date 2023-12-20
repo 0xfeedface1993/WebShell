@@ -137,7 +137,7 @@ struct ContentView: View {
                 .init(
                     RedirectFollowPage(.shared, key: "j")
                         .join(EraseOutValue(to: .fileidURL))
-                        .join(LoginPage([:]))
+                        .join(LoginPage(["action": "login", "job": "deny_share_login"]))
                         .join(
                             URLRequestPageReader(.output, configures: .shared, key: "j")
                                 .join(
@@ -152,8 +152,11 @@ struct ContentView: View {
                                 )
                         )
                         .join(URLPageReader(.fileidURL, configures: .shared, key: "j"))
-                        .join(FileIDInDomReader(FileIDMatch.addRef))
-                        .join(AjaxFileListPageRequest("load_down_addr1"))
+                        .join(
+                            FileIDInDomReader(FileIDMatch.addRef)
+                                .or(FileIDInDomReader(FileIDMatch.addCoun))
+                        )
+                        .join(AjaxFileListPageRequest("check_recaptcha"))
                         .join(DowloadsListWithSignFileIDReader(.shared, key: "j"))
                         .join(FileDefaultSaver(.override, configures: .shared, key: "j")), tag: "j"
                 )
