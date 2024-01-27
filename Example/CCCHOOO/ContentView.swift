@@ -158,6 +158,7 @@ struct ContentView: View {
                         )
                         .join(AjaxFileListPageRequest("check_recaptcha"))
                         .join(DowloadsListWithSignFileIDReader(.shared, key: "j"))
+                        .join(HostDifferFilter())
                         .join(FileDefaultSaver(.override, configures: .shared, key: "j")), tag: "j"
                 )
                 .title("ROSE盘-vip")
