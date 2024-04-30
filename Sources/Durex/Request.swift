@@ -6,9 +6,18 @@
 //
 
 import Foundation
-#if canImport(Combine)
+
+#if COMBINE_LINUX && canImport(CombineX)
+import CombineX
+#else
 import Combine
 #endif
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
+import AnyErase
 
 public enum URLRequestBuilderError: Error, LocalizedError {
     case badURL(String?)
@@ -26,33 +35,9 @@ extension URLRequest: ContextValue {
     public var valueDescription: String {
         description
     }
-    
-    public func cURL(pretty: Bool = false) -> String {
-        let newLine = pretty ? "\\\n" : ""
-        let method = (pretty ? "--request " : "-X ") + "\(self.httpMethod ?? "GET") \(newLine)"
-        let url: String = (pretty ? "--url " : "") + "\'\(self.url?.absoluteString ?? "")\' \(newLine)"
-        
-        var cURL = "curl "
-        var header = ""
-        var data: String = ""
-        
-        if let httpHeaders = self.allHTTPHeaderFields, httpHeaders.keys.count > 0 {
-            for (key,value) in httpHeaders {
-                header += (pretty ? "--header " : "-H ") + "\'\(key): \(value)\' \(newLine)"
-            }
-        }
-        
-        if let bodyData = self.httpBody, let bodyString = String(data: bodyData, encoding: .utf8),  !bodyString.isEmpty {
-            data = "--data '\(bodyString)'"
-        }
-        
-        cURL += method + url + header + data
-        
-        return cURL
-    }
 }
 
-public struct URLRequestBuilder {
+public struct URLRequestBuilder: CustomStringConvertible {
     public let url: String?
     public let method: Method
     public let headers: [String: String]?
@@ -109,6 +94,18 @@ public struct URLRequestBuilder {
         return urlRequest
     }
     
+    public func build(with client: any URLClient) throws -> URLRequest {
+        client.requestBySetCookies(with: try build())
+    }
+    
+    public func setCookies(with client: any URLClient) throws -> Self {
+        .init(client.requestBySetCookies(with: try build()))
+    }
+    
+    public init(_ request: URLRequest) {
+        self.init(url: request.url?.absoluteString, method: .init(rawValue: request.httpMethod ?? "GET") ?? .get, headers: request.allHTTPHeaderFields, body: request.httpBody)
+    }
+    
     public func condom() throws -> Request {
         Request(self)
     }
@@ -117,16 +114,26 @@ public struct URLRequestBuilder {
         case get = "GET"
         case post = "POST"
     }
+    
+    public var description: String {
+        valueDescription
+    }
 }
 
 extension URLRequestBuilder: ContextValue {
     public var valueDescription: String {
         """
-        url: \(url ?? "")
-        method: \(method)
-        headers: \(headers ?? [:])
+        url: \(url ?? "")\n
+        method: \(method)\n
+        headers: \(headers ?? [:])\n
         body: \(body?.count ?? 0) bytes
         """
+    }
+}
+
+extension Array: ContextValue where Element: ContextValue {
+    public var valueDescription: String {
+        map(\.valueDescription).joined(separator: "\n------------------------------\n")
     }
 }
 
@@ -196,5 +203,20 @@ public struct Request: Condom {
             return Fail(error: error)
                 .eraseToAnyPublisher()
         }
+    }
+}
+
+public struct AsyncRequest: Dirtyware {
+    public typealias Input = String
+    public typealias Output = URLRequest
+    
+    let prorider: URLRequestProvider
+    
+    public init(_ provider: URLRequestProvider) {
+        self.prorider = provider
+    }
+    
+    public func execute(for inputValue: String) async throws -> Output {
+        return try prorider.accept(inputValue)
     }
 }

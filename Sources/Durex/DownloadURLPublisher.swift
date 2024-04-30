@@ -6,10 +6,18 @@
 //
 
 import Foundation
+#if COMBINE_LINUX && canImport(CombineX)
+import CombineX
+#else
 import Combine
-import os.log
+#endif
+import Logging
 #if canImport(AnyErase)
 import AnyErase
+#endif
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
 #endif
 
 public struct DownloadURLPublisher: Publisher {
@@ -128,4 +136,31 @@ public struct DownloadURLPublisher: Publisher {
         var playgroundDescription: Any { description }
     }
     
+}
+
+struct AsyncDownloadURLPublisher {
+    typealias Output = (URL, URLResponse)
+    typealias Failure = Error
+    
+    let request: URLRequestBuilder
+    let session: any URLClient
+    
+    init(_ request: URLRequestBuilder) {
+        self.request = request
+        self.session = URLSession.shared
+    }
+    
+    init(_ request: URLRequestBuilder, session: any URLClient) {
+        self.request = request
+        self.session = session
+    }
+    
+    func session(_ value: any URLClient) -> Self {
+        .init(request, session: session)
+    }
+    
+    func download() async throws -> Output {
+        let next = try request.build()
+        return try await session.asyncDownload(from: next)
+    }
 }

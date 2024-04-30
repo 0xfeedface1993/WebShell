@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -11,10 +11,19 @@
 		27448B2920170ABA001FC925 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B2820170ABA001FC925 /* ViewController.swift */; };
 		27448B2B20170ABA001FC925 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 27448B2A20170ABA001FC925 /* Assets.xcassets */; };
 		27448B2E20170ABA001FC925 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 27448B2C20170ABA001FC925 /* Main.storyboard */; };
+		52800DB72AB9C85100737B92 /* URLTextFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52800DB62AB9C85100737B92 /* URLTextFieldView.swift */; };
+		52888B622AB04B0F00B8CFD5 /* ImageCodeReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52888B612AB04B0F00B8CFD5 /* ImageCodeReader.swift */; };
+		52888B642AB057BE00B8CFD5 /* VerifyCodeImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52888B632AB057BE00B8CFD5 /* VerifyCodeImage.swift */; };
+		528CE4FF2AA8CB6F00BEA44E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 528CE4FE2AA8CB6B00BEA44E /* ContentView.swift */; };
+		528CE5012AA8CD1900BEA44E /* DemoTaskObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 528CE5002AA8CC0A00BEA44E /* DemoTaskObject.swift */; };
+		528CE5032AA8CE0A00BEA44E /* DemoListItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 528CE5022AA8CDF300BEA44E /* DemoListItemView.swift */; };
+		528CE5052AA8CE7100BEA44E /* StatefulPreviewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 528CE5042AA8CE7100BEA44E /* StatefulPreviewWrapper.swift */; };
+		528CE5072AA8ED3200BEA44E /* HostingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 528CE5062AA8ED3200BEA44E /* HostingView.swift */; };
 		5294AA492A7E9CC700FE549E /* LinuxMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5294AA452A7E9CC700FE549E /* LinuxMain.swift */; };
 		5294AA4A2A7E9CC700FE549E /* WebShellCoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5294AA472A7E9CC700FE549E /* WebShellCoreTests.swift */; };
 		5294AA4B2A7E9CC700FE549E /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5294AA482A7E9CC700FE549E /* Info.plist */; };
 		5294AA502A7E9D5100FE549E /* WebShell in Frameworks */ = {isa = PBXBuildFile; productRef = 5294AA4F2A7E9D5100FE549E /* WebShell */; };
+		52D3B4C52AA9BD6100A9DDF3 /* DummyTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52D3B4C42AA9BD5C00A9DDF3 /* DummyTextView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,11 +61,20 @@
 		27448B3020170ABA001FC925 /* CCCHOOO.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CCCHOOO.entitlements; sourceTree = "<group>"; };
 		27C9DBBE204146A100A87E9E /* WebShell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WebShell.h; sourceTree = "<group>"; };
 		27C9DBBF204146A100A87E9E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		52800DB62AB9C85100737B92 /* URLTextFieldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLTextFieldView.swift; sourceTree = "<group>"; };
+		52888B612AB04B0F00B8CFD5 /* ImageCodeReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCodeReader.swift; sourceTree = "<group>"; };
+		52888B632AB057BE00B8CFD5 /* VerifyCodeImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyCodeImage.swift; sourceTree = "<group>"; };
+		528CE4FE2AA8CB6B00BEA44E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		528CE5002AA8CC0A00BEA44E /* DemoTaskObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoTaskObject.swift; sourceTree = "<group>"; };
+		528CE5022AA8CDF300BEA44E /* DemoListItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoListItemView.swift; sourceTree = "<group>"; };
+		528CE5042AA8CE7100BEA44E /* StatefulPreviewWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatefulPreviewWrapper.swift; sourceTree = "<group>"; };
+		528CE5062AA8ED3200BEA44E /* HostingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostingView.swift; sourceTree = "<group>"; };
 		5294AA432A7E9CB200FE549E /* webshell.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = webshell.png; sourceTree = "<group>"; };
 		5294AA452A7E9CC700FE549E /* LinuxMain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LinuxMain.swift; sourceTree = "<group>"; };
 		5294AA472A7E9CC700FE549E /* WebShellCoreTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebShellCoreTests.swift; sourceTree = "<group>"; };
 		5294AA482A7E9CC700FE549E /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5294AA4E2A7E9CEF00FE549E /* WebShell */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = WebShell; path = ..; sourceTree = "<group>"; };
+		52D3B4C42AA9BD5C00A9DDF3 /* DummyTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DummyTextView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +124,15 @@
 			children = (
 				27448B2620170ABA001FC925 /* AppDelegate.swift */,
 				27448B2820170ABA001FC925 /* ViewController.swift */,
+				528CE5062AA8ED3200BEA44E /* HostingView.swift */,
+				528CE4FE2AA8CB6B00BEA44E /* ContentView.swift */,
+				52888B632AB057BE00B8CFD5 /* VerifyCodeImage.swift */,
+				52D3B4C42AA9BD5C00A9DDF3 /* DummyTextView.swift */,
+				52800DB62AB9C85100737B92 /* URLTextFieldView.swift */,
+				528CE5042AA8CE7100BEA44E /* StatefulPreviewWrapper.swift */,
+				528CE5022AA8CDF300BEA44E /* DemoListItemView.swift */,
+				528CE5002AA8CC0A00BEA44E /* DemoTaskObject.swift */,
+				52888B612AB04B0F00B8CFD5 /* ImageCodeReader.swift */,
 				27448B2A20170ABA001FC925 /* Assets.xcassets */,
 				27448B2C20170ABA001FC925 /* Main.storyboard */,
 				27448B2F20170ABA001FC925 /* Info.plist */,
@@ -214,8 +241,9 @@
 		27448B1B20170ABA001FC925 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 1010;
-				LastUpgradeCheck = 1420;
+				LastUpgradeCheck = 1430;
 				ORGANIZATIONNAME = ascp;
 				TargetAttributes = {
 					24E60F1521D66180007AB419 = {
@@ -291,7 +319,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				27448B2920170ABA001FC925 /* ViewController.swift in Sources */,
+				52888B622AB04B0F00B8CFD5 /* ImageCodeReader.swift in Sources */,
+				52800DB72AB9C85100737B92 /* URLTextFieldView.swift in Sources */,
 				27448B2720170ABA001FC925 /* AppDelegate.swift in Sources */,
+				52D3B4C52AA9BD6100A9DDF3 /* DummyTextView.swift in Sources */,
+				528CE5012AA8CD1900BEA44E /* DemoTaskObject.swift in Sources */,
+				528CE4FF2AA8CB6F00BEA44E /* ContentView.swift in Sources */,
+				528CE5052AA8CE7100BEA44E /* StatefulPreviewWrapper.swift in Sources */,
+				528CE5072AA8ED3200BEA44E /* HostingView.swift in Sources */,
+				528CE5032AA8CE0A00BEA44E /* DemoListItemView.swift in Sources */,
+				52888B642AB057BE00B8CFD5 /* VerifyCodeImage.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -494,6 +531,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ascp.CCCHOOO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -515,6 +553,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ascp.CCCHOOO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;

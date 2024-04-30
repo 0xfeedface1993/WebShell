@@ -6,11 +6,21 @@
 //
 
 import Foundation
+#if COMBINE_LINUX && canImport(CombineX)
+import CombineX
+#else
 import Combine
-import os.log
+#endif
+import Logging
 #if canImport(AnyErase)
 import AnyErase
 #endif
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
+import AsyncExtensions
 
 struct OptionalIntWrapper<Item: Equatable> {
     let lhs: Item?
@@ -203,96 +213,6 @@ public struct DownloadURLProgressPublisher: Publisher {
 
 
 extension URLSessionDelegator {
-//    /// 分解SessionComplete：，下载文件URL、请求响应、taskIdentifier三部分
-//    /// - Parameter complete: 下载完成SessionComplete事件
-//    /// - Returns: 下载文件URL、请求响应、taskIdentifier
-//    func splitThree(_ complete: SessionComplete) -> (URL, URLResponse, Int)? {
-//        if let response = complete.task.response {
-//            return (complete.data, response, complete.task.taskIdentifier)
-//        }
-//#if DEBUG
-//        logger.info("can't split complete \(complete), because response is nil")
-//#endif
-//        return nil
-//    }
-    
-//    /// 转换内部下载完成事件为外部RawNews，不匹配complete.task.taskIdentifier，没有response则返回nil
-//    /// - Parameter complete: 内部下载完成事件
-//    /// - Returns: 外部下载完成RawNews
-//    func rawCompleteToRawNews(_ complete: SessionComplete) -> RawNews? {
-//        if let response = complete.task.response {
-//            return RawNews(.file(.init(url: complete.data, response: response, identifier: complete.task.taskIdentifier)), taskIdentifier: complete.task.taskIdentifier)
-//        }
-//#if DEBUG
-//        logger.info("can't convert rawCompleteToRawNews \(complete), because response is nil")
-//#endif
-//        return nil
-//    }
-//
-//    fileprivate func newsCompletor(_ taskIdentifier: Int) -> AnyPublisher<DownloadURLProgressPublisher.News, Error> {
-//        downloadTaskCompletion
-//            .tryMap({ job in
-//                try DownloadURLErrorFilter(result: job, compare: { $0 == taskIdentifier })
-//                    .optional()
-//            })
-//            .compactMap({ $0 })
-//            .eraseToAnyPublisher()
-//            .compactMap(splitThree(_:))
-//            .filter { $0.2 == taskIdentifier }
-//            .map { DownloadURLProgressPublisher.News.file(.init(url: $0.0, response: $0.1, identifier: $0.2)) }
-//            .mapError({ $0 as Error })
-//            .eraseToAnyPublisher()
-//    }
-//
-//    fileprivate func newsUpdator(_ taskIdentifier: Int, tag: Int) -> AnyPublisher<DownloadURLProgressPublisher.News, Error> {
-//        downloadTaskUpdate
-//            .filter({ $0.task.taskIdentifier == taskIdentifier })
-//            .map { $0.newsValue(tag: tag) }
-//            .setFailureType(to: Error.self)
-//            .eraseToAnyPublisher()
-//    }
-//
-//    /// 生成新的下载完成事件publisher，这里之所以要匹配taskIdentifier
-//    /// 是因为如果上游的事件被`tryMapResult`转换成failure时不匹配当前任务
-//    /// 则会导致本任务的异常失败，下游无法得到状态更新
-//    /// - Parameter taskIdentifier: 匹配taskIdentifier方法
-//    /// - Returns: 只有有成功完成事件发送
-//    fileprivate func rawNewsCompletor(_ taskIdentifier: @escaping (Int) -> Bool) -> AnyPublisher<RawNews, Error> {
-//        downloadTaskCompletion
-//            .tryMap({ job in
-//                try DownloadURLErrorFilter(result: job, compare: taskIdentifier)
-//                    .optional()
-//            })
-//            .compactMap({ $0 })
-//            .filter({ taskIdentifier($0.task.taskIdentifier) })
-//            .compactMap(rawCompleteToRawNews(_:))
-//            .eraseToAnyPublisher()
-//    }
-//
-//    fileprivate func rawNewsUpdator() -> AnyPublisher<RawNews, Error> {
-//        downloadTaskUpdate
-//            .map { RawNews($0.newsValue(tag: 0), taskIdentifier: $0.task.taskIdentifier) }
-//            .setFailureType(to: Error.self)
-//            .eraseToAnyPublisher()
-//    }
-//
-//    /// 只提取Error事件, 普通的value丢弃，为了处理news里面错误事件无法传递的问题
-//    /// - Parameter taskIdentifier: 匹配taskIdentifier方法
-//    /// - Returns: 只有失败事件发送
-//    private func completeError(_ taskIdentifier: @escaping (Int) -> Bool) -> AnyPublisher<RawNews, Error> {
-//        downloadTaskCompletion
-//            .tryMap({ job in
-//                // 将value转为nil，错误则抛出Error
-//                try DownloadURLErrorFilter(result: job, compare: taskIdentifier)
-//                    .dropValue()
-//            })
-//            // 丢弃nil值
-//            .compactMap({ $0 })
-//            .filter({ taskIdentifier($0.task.taskIdentifier) })
-//            .compactMap(rawCompleteToRawNews(_:))
-//            .eraseToAnyPublisher()
-//    }
-    
     /// 监听指定下载任务的下载进度、下载完成、下载失败事件，下载失败会转化为Error流，失败后会终止此事件流，请勿使用`.error()`枚举类型判断是否是失败
     /// - Parameters:
     ///   - session: session对象，每个session对象都保存对应任务tag的对应关系
@@ -376,25 +296,6 @@ struct DownloadURLErrorFilter {
     }
 }
 
-//struct RawNews {
-//    let data: DownloadURLProgressPublisher.News
-//    let taskIdentifier: Int
-//
-//    init(_ data: DownloadURLProgressPublisher.News, taskIdentifier: Int) {
-//        self.data = data
-//        self.taskIdentifier = taskIdentifier
-//    }
-//
-//    func tag(_ value: Int) -> Self {
-//        switch data {
-//        case .state(let state):
-//            return .init(.state(state.tag(value)), taskIdentifier: taskIdentifier)
-//        case .file(_):
-//            return .init(data, taskIdentifier: taskIdentifier)
-//        }
-//    }
-//}
-
 extension SessionTaskState {
     /// 内部下载状态转换为外部News状态
     /// - Parameters:
@@ -424,5 +325,97 @@ extension Publisher where Output == TaskNews, Failure == Never {
             }
         }
         .eraseToAnyPublisher()
+    }
+}
+
+struct AsyncDownloadURLProgressPublisher<Tag: Hashable> {
+    typealias Output = TaskNews
+    typealias Failure = Error
+    
+    let request: URLRequestBuilder
+    let tag: Tag
+    var delegtor: AsyncURLSessiobDownloadDelegate
+    let sessionProvider: AsyncSessionProvider
+    
+    func download() async throws -> AnyAsyncSequence<TaskNews> {
+        let urlRequest = try request.build()
+        
+        let task = sessionProvider
+            .client()
+            .asyncDownloadTask(from: urlRequest)
+        await sessionProvider.bind(task: task.taskIdentifier, tag: tag)
+        defer {
+            task.resume()
+            logger.info("get file curl: \n\(urlRequest.cURL())")
+        }
+        return delegtor.news(sessionProvider, tag: tag)
+    }
+}
+
+extension AsyncURLSessiobDownloadDelegate {
+    /// 监听指定下载任务的下载进度、下载完成、下载失败事件，下载失败会转化为Error流，失败后会终止此事件流，请勿使用`.error()`枚举类型判断是否是失败
+    /// - Parameters:
+    ///   - session: session对象，每个session对象都保存对应任务tag的对应关系
+    ///   - tag: 任务标识的hashValue，因为存储任务标识本身比较消耗内存，使用hashValue代替
+    /// - Returns: 下载任务事件
+    func news<TagValue: Hashable>(_ session: AsyncSessionProvider, tag: TagValue) -> AnyAsyncSequence<TaskNews> {
+//        AsyncThrowingStream(TaskNews.self, bufferingPolicy: .unbounded) { continuation in
+//            Task.detached {
+//                for try await value in self.filter(session, tag: tag) {
+//                    switch value {
+//                    case .error(let error):
+//                        await session.unbind(tag: tag)
+//                        continuation.finish(throwing: error.error)
+//                        return
+//                    case .file(_):
+//                        await session.unbind(tag: tag)
+//                        continuation.yield(with: .success(value))
+//                        continuation.finish()
+//                        return
+//                    default:
+//                        continuation.yield(with: .success(value))
+//                    }
+//                }
+//            }
+//        }
+//        .eraseToAnyAsyncSequence()
+
+        filter(session, tag: tag)
+            .map({ value in
+                switch value {
+                case .error(_):
+                    await session.unbind(tag: tag)
+//                    throw error.error
+                    return value
+                case .file(_):
+                    await session.unbind(tag: tag)
+                    return value
+                default:
+                    return value
+                }
+            })
+            .eraseToAnyAsyncSequence()
+    }
+    
+    func filter<TagValue: Hashable>(_ session: AsyncSessionProvider, tag: TagValue) -> AnyAsyncSequence<TaskNews> {
+        statePassthroughSubject
+//            .map({ values in
+//                logger.info("recive data for task identifier \(values.identifier)")
+//                return values
+//            })
+            .filter({
+                await session.taskIdentifier(for: tag) == $0.identifier
+            })
+//            .map({ values in
+//                logger.info("filter task \(values.identifier) for tag \(tag)")
+//                return values
+//            })
+            .eraseToAnyAsyncSequence()
+    }
+    
+    func news(for identifer: Int) -> AnyAsyncSequence<TaskNews> {
+        statePassthroughSubject
+            .filter({ $0.identifier == identifer })
+            .eraseToAnyAsyncSequence()
     }
 }

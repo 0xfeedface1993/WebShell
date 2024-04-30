@@ -1,7 +1,11 @@
-// swift-tools-version:5.1
+// swift-tools-version:5.8
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
+
+let platforms: [PackageDescription.Platform] = [.linux]
+//let platforms: [PackageDescription.Platform] = [.macOS]
+let swiftSettings: [SwiftSetting] = [.define("COMBINE_LINUX", .when(platforms: platforms))]
 
 let package = Package(
     name: "WebShell",
@@ -14,15 +18,40 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.2"),
+        //        .package(url: "https://github.com/0xfeedface1993/OpenCombine.git", from: "0.15.0"),
+        //        .package(url: "https://github.com/0xfeedface1993/CombineX.git", branch: "master"),
+//        .package(url: "https://github.com/sideeffect-io/AsyncExtensions.git", from: "0.5.2"),
+        .package(url: "https://github.com/lhoward/AsyncExtensions.git", branch: "linux"),
+        .package(url: "https://github.com/apple/swift-crypto.git", .upToNextMajor(from: "2.0.0")),
+        .package(url: "https://github.com/0xfeedface1993/CombineX.git", branch: "master")
     ],
     targets: [
-        .target(name: "WebShell", dependencies: ["Durex"]),
-        .testTarget(name: "WebShellCoreTests", dependencies: ["WebShell"]),
         .target(
             name: "AnyErase",
-            dependencies: ["Logging"]),
+            dependencies: [
+                .product(name: "Logging", package: "swift-log"),
+                .product(name: "CombineX", package: "CombineX", condition: .when(platforms: platforms))
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .target(
+            name: "WebShell",
+            dependencies: ["Durex"],
+            swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "WebShellCoreTests",
+            dependencies: ["WebShell"],
+            swiftSettings: swiftSettings
+        ),
         .target(
             name: "Durex",
-            dependencies: ["AnyErase"]),
+            dependencies: [
+                "AnyErase",
+                .product(name: "Crypto", package: "swift-crypto"),
+                .product(name: "AsyncExtensions", package: "AsyncExtensions")
+            ],
+            swiftSettings: swiftSettings
+        ),
     ]
 )

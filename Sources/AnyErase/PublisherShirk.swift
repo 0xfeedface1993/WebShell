@@ -5,7 +5,11 @@
 //  Created by john on 2023/3/10.
 //
 
+#if COMBINE_LINUX && canImport(CombineX)
+import CombineX
+#else
 import Combine
+#endif
 
 public struct PublishersShrik<Value, Failure> where Failure: Error {
     let publishers: [AnyPublisher<Value, Failure>]

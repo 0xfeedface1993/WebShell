@@ -7,27 +7,24 @@
 
 import Foundation
 import Durex
-#if canImport(Combine)
-import Combine
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
 #endif
 
-public struct TowerJSPage: SessionableCondom {
+public struct TowerJSPage: SessionableDirtyware {
     public typealias Input = String
     
-    public typealias Output = URLRequest
+    public typealias Output = URLRequestBuilder
     
     public let key: AnyHashable
+    public let configures: AsyncURLSessionConfiguration
     
-    public func publisher(for inputValue: String) -> AnyPublisher<URLRequest, Error> {
-        pagePublisher(inputValue)
-            .tryMap {
-                try url($0, url: inputValue)
-            }
-            .eraseToAnyPublisher()
-    }
-    
-    public func empty() -> AnyPublisher<URLRequest, Error> {
-        Empty().eraseToAnyPublisher()
+    public func execute(for inputValue: String) async throws -> URLRequestBuilder {
+        let request = try pageRequest(inputValue).make()
+        let string = try await StringParserDataTask(request: request, encoding: .utf8, sessionKey: key, configures: configures).asyncValue()
+        let url = try url(string, url: inputValue)
+        return url
     }
     
     private func fileid(_ string: String) throws -> String {
@@ -40,29 +37,20 @@ public struct TowerJSPage: SessionableCondom {
         return TowerFilePageRequest(fileid: fileid, scheme: scheme, host: host)
     }
     
-    private func url(_ content: String, url: String) throws -> URLRequest {
+    private func url(_ content: String, url: String) throws -> URLRequestBuilder {
         let relatePath = try TowerJSMatch().extract(content)
         let fileid = try fileid(url)
         let (host, scheme) = try url.baseComponents()
-        return try TowerJSPageRequest(fileid: fileid, scheme: scheme, host: host, path: relatePath).make()
+        return TowerJSPageRequest(fileid: fileid, scheme: scheme, host: host, path: relatePath).make()
     }
     
-    private func pagePublisher(_ string: String) -> AnyPublisher<String, Error> {
-        do {
-            return StringParserDataTask(request: try pageRequest(string).make(), encoding: .utf8, sessionKey: key)
-                .publisher()
-                .eraseToAnyPublisher()
-        } catch {
-            return Fail(error: error).eraseToAnyPublisher()
-        }
-    }
-    
-    public init(_ key: AnyHashable = "default") {
+    public init(_ configures: AsyncURLSessionConfiguration, key: AnyHashable = "default") {
         self.key = key
+        self.configures = configures
     }
     
     public func sessionKey(_ value: AnyHashable) -> TowerJSPage {
-        .init(value)
+        .init(configures, key: value)
     }
 }
 
@@ -71,15 +59,14 @@ public struct TowerFilePageRequest {
     let scheme: String
     let host: String
     
-    func make() throws -> URLRequest {
+    func make() -> URLRequestBuilder {
         let http = "\(scheme)://\(host)"
         let url = "\(http)/file-\(fileid).html"
-        return try URLRequestBuilder(url)
+        return URLRequestBuilder(url)
             .method(.get)
             .add(value: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", forKey: "accept")
             .add(value: userAgent, forKey: "user-agent")
             .add(value: "en-US,en;q=0.9", forKey: "accept-language")
-            .build()
     }
 }
 
@@ -89,17 +76,16 @@ public struct TowerJSPageRequest {
     let host: String
     let path: String
     
-    func make() throws -> URLRequest {
+    func make() -> URLRequestBuilder {
         let http = "\(scheme)://\(host)"
         let url = "\(http)\(path)"
         let referURL = "\(http)/file-\(fileid).html"
-        return try URLRequestBuilder(url)
+        return URLRequestBuilder(url)
             .method(.get)
             .add(value: "*/*", forKey: "accept")
             .add(value: userAgent, forKey: "user-agent")
             .add(value: "en-US,en;q=0.9", forKey: "accept-language")
             .add(value: referURL, forKey: "referer")
-            .build()
     }
 }
 

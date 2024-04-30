@@ -7,8 +7,14 @@
 
 import Foundation
 
-#if canImport(Combine)
+#if COMBINE_LINUX && canImport(CombineX)
+import CombineX
+#else
 import Combine
+#endif
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
 #endif
 
 public struct AnyValue<T>: Publisher {

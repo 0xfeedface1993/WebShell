@@ -1,6 +1,8 @@
 import Foundation
 
-#if canImport(Combine)
+#if COMBINE_LINUX && canImport(CombineX)
+import CombineX
+#else
 import Combine
 #endif
 

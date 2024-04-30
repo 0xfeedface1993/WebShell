@@ -5,7 +5,11 @@
 //  Created by Peter on 2023/3/2.
 //
 
+#if COMBINE_LINUX && canImport(CombineX)
+import CombineX
+#else
 import Combine
+#endif
 
 extension Publisher {
     /// map中执行action闭包并返回原对象

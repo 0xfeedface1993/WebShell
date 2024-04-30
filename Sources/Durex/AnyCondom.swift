@@ -6,7 +6,11 @@
 //
 
 import Foundation
+#if COMBINE_LINUX && canImport(CombineX)
+import CombineX
+#else
 import Combine
+#endif
 
 public struct AnyCondom<Input, Output>: Condom where Input: ContextValue, Output: ContextValue {
     @usableFromInline
@@ -44,4 +48,27 @@ public struct AnyCondom<Input, Output>: Condom where Input: ContextValue, Output
     }
     
     
+}
+
+public struct AnyDirtyware<Input, Output>: Dirtyware where Input: ContextValue, Output: ContextValue {
+    @usableFromInline
+    internal let makePublisher: (Input) async throws -> Output
+    
+    @inlinable
+    init<T>(_ condom: T) where T: Dirtyware, T.Input == Input, Output == T.Output {
+        self.makePublisher = condom.execute(for:)
+    }
+    
+    @inlinable
+    init<T, V>(_ first: T, last: V) where T: Dirtyware, V: Dirtyware, T.Input == Input, T.Output == V.Input, V.Output == Output {
+        self.makePublisher = { value in
+            let result = try await first.execute(for: value)
+            let next = try await last.execute(for: result)
+            return next
+        }
+    }
+    
+    public func execute(for inputValue: Input) async throws -> Output {
+        try await makePublisher(inputValue)
+    }
 }

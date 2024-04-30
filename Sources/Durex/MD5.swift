@@ -6,9 +6,14 @@
 //
 
 import Foundation
-import CryptoKit
 
-struct MD5Crypto {
+#if COMBINE_LINUX && canImport(CombineX)
+import Crypto
+#else
+import CryptoKit
+#endif
+
+struct MD5Hasher {
     let text: String
     
     init(_ text: String) {
@@ -16,14 +21,14 @@ struct MD5Crypto {
     }
     
     @inlinable
-    func asciiString() -> String {
+    func convertToASCII() -> String {
         text.unicodeScalars
             .map { String(format: "%d", $0.value) }
             .joined()
     }
     
-    func asciiStringToMD5() -> String {
-        let asciiString = asciiString()
+    func calculateMD5Hash() -> String {
+        let asciiString = convertToASCII()
         if let data = asciiString.data(using: .utf8) {
             let md5 = Insecure.MD5.hash(data: data).description
             let hash = md5.components(separatedBy: ": ").last ?? ""
@@ -38,6 +43,6 @@ struct MD5Crypto {
 extension String {
     /// 字符串转换成ASCII码字符串，再计算MD5值，返回MD5字符串小写结果
     public func asciiHexMD5String() -> String {
-        MD5Crypto(self).asciiStringToMD5()
+        MD5Hasher(self).calculateMD5Hash()
     }
 }

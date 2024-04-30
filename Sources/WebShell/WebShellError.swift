@@ -8,6 +8,10 @@
 
 import Foundation
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 public enum WebShellError: Error {
     public enum RequestReason {
         case emptyRequest
@@ -18,5 +22,6 @@ public enum WebShellError: Error {
         case invalidURLResponse(response: URLResponse)
         case invalidHTTPStatusCode(response: HTTPURLResponse)
         case URLSessionError(error: Error)
+        case unknown
     }
 }

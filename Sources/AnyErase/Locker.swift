@@ -7,6 +7,12 @@
 
 import Foundation
 
+#if COMBINE_LINUX && canImport(CombineX)
+import CXUtility
+
+public typealias Lock = CXUtility.Lock
+
+#else
 @available(macOS 10.12, iOS 10.0, tvOS 10.0, watchOS 3.0, *)
 public typealias Lock = os_unfair_lock_t
 
@@ -36,3 +42,5 @@ extension UnsafeMutablePointer where Pointee == os_unfair_lock_s {
         os_unfair_lock_unlock(self)
     }
 }
+#endif
+
