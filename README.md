@@ -92,14 +92,6 @@ DownloadWebPage()
 
 ## Installation
 
-#### carthage
-[Carthage](https://github.com/Carthage/Carthage) is a simple, decentralized dependency manager for Cocoa.
-
-Specify WebShell into your project's `Cartfile`:
-
-```ogdl
-github "0xfeedface1993/WebShell" ~> 3.0
-```
 #### Swift Package Manager (SPM)
 
 From Xcode, select from the menu File > Swift Packages > Add Package Dependency
