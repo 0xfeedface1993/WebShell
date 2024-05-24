@@ -20,6 +20,8 @@ DerivedData/
 *.perspectivev3
 !default.perspectivev3
 xcuserdata/
+Package.resolved
+.vscode/
 
 ## Other
 *.moved-aside
@@ -77,3 +79,5 @@ fastlane/test_output
 iOSInjectionProject/
 
 # End of https://www.gitignore.io/api/swift
+Example/WebShellExsample.xcodeproj/xcshareddata/xcschemes/WebShellExsample.xcscheme
+Package.resolved
