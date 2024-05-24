@@ -22,7 +22,7 @@ let package = Package(
         //        .package(url: "https://github.com/0xfeedface1993/CombineX.git", branch: "master"),
 //        .package(url: "https://github.com/sideeffect-io/AsyncExtensions.git", from: "0.5.2"),
         .package(url: "https://github.com/lhoward/AsyncExtensions.git", branch: "linux"),
-        .package(url: "https://github.com/apple/swift-crypto.git", .upToNextMajor(from: "2.0.0")),
+        .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
         .package(url: "https://github.com/0xfeedface1993/CombineX.git", branch: "master")
     ],
     targets: [
