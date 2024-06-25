@@ -3,10 +3,10 @@
     {
       "identity" : "asyncextensions",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/lhoward/AsyncExtensions.git",
+      "location" : "https://github.com/0xfeedface1993/AsyncExtensions.git",
       "state" : {
-        "branch" : "linux",
-        "revision" : "2218eaa30dbdb39b063e92644fc28ed22e2cb942"
+        "revision" : "0d96d3550ef94f83c2f300021f9985e4fb44f7af",
+        "version" : "1.0.2"
       }
     },
     {
@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/0xfeedface1993/CombineX.git",
       "state" : {
-        "branch" : "master",
-        "revision" : "f73eee728a7826a2855fabb380300187f42f5649"
+        "revision" : "f73eee728a7826a2855fabb380300187f42f5649",
+        "version" : "0.4.1"
       }
     },
     {
@@ -41,8 +41,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-crypto.git",
       "state" : {
-        "revision" : "60f13f60c4d093691934dc6cfdf5f508ada1f894",
-        "version" : "2.6.0"
+        "revision" : "bc1c29221f6dfeb0ebbfbc98eb95cd3d4967868e",
+        "version" : "3.4.0"
       }
     },
     {
