@@ -13,7 +13,7 @@ import FoundationNetworking
 
 import AsyncExtensions
 
-public struct AsyncURLSessionConfiguration {
+public struct AsyncURLSessionConfiguration: Sendable {
     /// 文件临时存放目录，注意需要定时清除测量，或者使用系统tmp目录`FileManager.default.temporaryDirectory`
     var cacheFolder: URL
 //    /// session缓存，不同的站点使用不同的session防止互相影响，后续可以考虑使用cookies独立缓存替代

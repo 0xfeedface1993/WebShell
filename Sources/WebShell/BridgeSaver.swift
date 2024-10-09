@@ -20,13 +20,13 @@ public struct BridgeSaver: SessionableDirtyware {
     public typealias Input = [URLRequestBuilder]
     public typealias Output = URL
     
-    public var key: AnyHashable = "default"
+    public let key: SessionKey
     let sessionBundle: SessionBundle
     let policy: Saver.Policy
-    let tag: AnyHashable
+    let tag: TaskTag
     public let configures: AsyncURLSessionConfiguration
     
-    public init(_ bundle: SessionBundle, policy: Saver.Policy = .normal, tag: AnyHashable) {
+    public init(_ bundle: SessionBundle, policy: Saver.Policy = .normal, tag: TaskTag = .string("default")) {
         self.policy = policy
         self.sessionBundle = bundle
         self.tag = tag
@@ -65,7 +65,7 @@ public struct BridgeSaver: SessionableDirtyware {
         return try MoveToDownloads(tempURL: value.url, suggestedFilename: value.response.suggestedFilename, policy: policy).move()
     }
     
-    public func sessionKey(_ value: AnyHashable) -> Self {
+    public func sessionKey(_ value: SessionKey) -> Self {
         .init(.init(sessionKey: value, congifures: configures), policy: policy, tag: tag)
     }
 }

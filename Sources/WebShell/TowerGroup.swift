@@ -20,16 +20,16 @@ public struct TowerGroup: SessionableDirtyware {
     public typealias Output = URLRequestBuilder
     
     public let action: String
-    public var key: AnyHashable
+    public let key: SessionKey
     public let configures: Durex.AsyncURLSessionConfiguration
     
-    public init(_ action: String, configures: Durex.AsyncURLSessionConfiguration, key: AnyHashable = "default") {
+    public init(_ action: String, configures: Durex.AsyncURLSessionConfiguration, key: SessionKey = .host("default")) {
         self.action = action
         self.key = key
         self.configures = configures
     }
     
-    public func sessionKey(_ value: AnyHashable) -> Self {
+    public func sessionKey(_ value: SessionKey) -> Self {
         .init(action, configures: configures, key: value)
     }
     

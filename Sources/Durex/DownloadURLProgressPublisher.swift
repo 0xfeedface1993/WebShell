@@ -20,7 +20,7 @@ import AnyErase
 import FoundationNetworking
 #endif
 
-import AsyncExtensions
+@preconcurrency import AsyncExtensions
 
 struct OptionalIntWrapper<Item: Equatable> {
     let lhs: Item?
@@ -328,12 +328,12 @@ extension Publisher where Output == TaskNews, Failure == Never {
     }
 }
 
-struct AsyncDownloadURLProgressPublisher<Tag: Hashable> {
+struct AsyncDownloadURLProgressPublisher: Sendable {
     typealias Output = TaskNews
     typealias Failure = Error
     
     let request: URLRequestBuilder
-    let tag: Tag
+    let tag: TaskTag
     var delegtor: AsyncURLSessiobDownloadDelegate
     let sessionProvider: AsyncSessionProvider
     
@@ -358,7 +358,7 @@ extension AsyncURLSessiobDownloadDelegate {
     ///   - session: session对象，每个session对象都保存对应任务tag的对应关系
     ///   - tag: 任务标识的hashValue，因为存储任务标识本身比较消耗内存，使用hashValue代替
     /// - Returns: 下载任务事件
-    func news<TagValue: Hashable>(_ session: AsyncSessionProvider, tag: TagValue) -> AnyAsyncSequence<TaskNews> {
+    func news(_ session: AsyncSessionProvider, tag: TaskTag) -> AnyAsyncSequence<TaskNews> {
 //        AsyncThrowingStream(TaskNews.self, bufferingPolicy: .unbounded) { continuation in
 //            Task.detached {
 //                for try await value in self.filter(session, tag: tag) {
@@ -397,7 +397,7 @@ extension AsyncURLSessiobDownloadDelegate {
             .eraseToAnyAsyncSequence()
     }
     
-    func filter<TagValue: Hashable>(_ session: AsyncSessionProvider, tag: TagValue) -> AnyAsyncSequence<TaskNews> {
+    func filter(_ session: AsyncSessionProvider, tag: TaskTag) -> AnyAsyncSequence<TaskNews> {
         statePassthroughSubject
 //            .map({ values in
 //                logger.info("recive data for task identifier \(values.identifier)")

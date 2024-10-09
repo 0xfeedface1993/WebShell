@@ -6,8 +6,8 @@ import CombineX
 import Combine
 #endif
 
-public protocol ContextValue {
-    var valueDescription: String { get }
+public protocol ContextValue: Sendable {
+    var valueDescription: String { get async }
 }
 
 extension URL: ContextValue {
@@ -16,7 +16,11 @@ extension URL: ContextValue {
     }
 }
 
-public enum ValueBox<T>: ContextValue {
+extension Array: ContextValue where Element: ContextValue {
+    
+}
+
+public enum ValueBox<T>: ContextValue where T: Sendable {
     case empty
     case item(T)
     

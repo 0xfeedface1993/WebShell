@@ -12,16 +12,16 @@ public struct SignInDownPageReader: SessionableDirtyware {
     public typealias Input = KeyStore
     public typealias Output = KeyStore
     
-    public var key: AnyHashable
+    public let key: SessionKey
     public var configures: AsyncURLSessionConfiguration
     
-    public init(_ configures: AsyncURLSessionConfiguration, key: AnyHashable) {
+    public init(_ configures: AsyncURLSessionConfiguration, key: SessionKey) {
         self.key = key
         self.configures = configures
     }
     
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
-        let request = try inputValue.request(.output)
+        let request = try await inputValue.request(.output)
         let sign = try await FindStringInDomSearch(FileIDMatch.sign, configures: configures, key: key).execute(for: request)
         return inputValue
             .assign(sign, forKey: .sign)
@@ -29,7 +29,7 @@ public struct SignInDownPageReader: SessionableDirtyware {
             .assign(request, forKey: .lastRequest)
     }
     
-    public func sessionKey(_ value: AnyHashable) -> Self {
+    public func sessionKey(_ value: SessionKey) -> Self {
         .init(configures, key: value)
     }
 }

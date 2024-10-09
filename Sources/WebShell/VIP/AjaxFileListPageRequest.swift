@@ -17,10 +17,10 @@ public struct AjaxFileListPageRequest: Dirtyware {
     public init(_ action: String) {
         self.action = action
     }
-
+     
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
-        let fileid = try inputValue.string(.fileid)
-        let refer = try inputValue.string(.fileidURL)
+        let fileid = try await inputValue.string(.fileid)
+        let refer = try await inputValue.string(.fileidURL)
         let (host, scheme) = try refer.baseComponents()
         let request = ReferDownPageRequest(fileid: fileid, refer: refer, scheme: scheme, host: host, action: action).make()
         return inputValue.assign(request, forKey: .output)

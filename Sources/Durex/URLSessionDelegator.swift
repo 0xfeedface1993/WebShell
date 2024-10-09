@@ -9,7 +9,7 @@ import Foundation
 #if COMBINE_LINUX && canImport(CombineX)
 import CombineX
 #else
-import Combine
+@preconcurrency import Combine
 #endif
 
 #if canImport(FoundationNetworking)
@@ -21,7 +21,7 @@ import AsyncExtensions
 
 internal let logger = Logger(label: "com.ascp.download")
 
-class URLSessionDelegator: NSObject, URLSessionDownloadDelegate {
+final class URLSessionDelegator: NSObject, URLSessionDownloadDelegate, Sendable {
     private let downloadTaskUpdate = PassthroughSubject<SessionTaskState, Never>()
     private let downloadTaskCompletion = PassthroughSubject<Result<SessionComplete, DownloadURLError>, Never>()
     /// 状态更新，可监听此Subject进行下载进度、下载完成、下载失败三种类型类型事件更新
@@ -29,7 +29,7 @@ class URLSessionDelegator: NSObject, URLSessionDownloadDelegate {
     private let stateCancellable: AnyCancellable
     
 #if DEBUG
-    static var debugFlag = true
+    @MainActor static var debugFlag = true
 #endif
     
     override init() {
@@ -110,7 +110,7 @@ public protocol AsyncURLSessiobDownloadDelegate: URLSessionDownloadDelegate {
     var statePassthroughSubject: AsyncPassthroughSubject<TaskNews> { get }
 }
 
-class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate {
+final class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate {
     //    private let downloadTaskUpdate = PassthroughSubject<SessionTaskState, Never>()
     //    private let downloadTaskCompletion = PassthroughSubject<Result<SessionComplete, DownloadURLError>, Never>()
     /// 状态更新，可监听此Subject进行下载进度、下载完成、下载失败三种类型类型事件更新
@@ -118,7 +118,7 @@ class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate {
     let cachedFolder: URL
     
 #if DEBUG
-    static var debugFlag = true
+    @MainActor static var debugFlag = true
 #endif
     
     init(_ cachedFolder: URL) {

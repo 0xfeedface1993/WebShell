@@ -20,7 +20,7 @@ import FoundationNetworking
 #endif
 
 import Logging
-import AsyncExtensions
+@preconcurrency import AsyncExtensions
 
 public struct AsyncDownloadSession: AsyncCustomURLSession {
     public let id = UUID()
@@ -45,7 +45,7 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
             .download()
     }
 
-    public func downloadWithProgress<TagValue>(_ request: URLRequestBuilder, tag: TagValue) async throws -> AnyAsyncSequence<AsyncUpdateNews> where TagValue : Hashable {
+    public func downloadWithProgress(_ request: URLRequestBuilder, tag: TaskTag) async throws -> AnyAsyncSequence<AsyncUpdateNews> {
         try await AsyncDownloadURLProgressPublisher(request: request, tag: tag, delegtor: delegate, sessionProvider: self)
             .download()
             .map({
@@ -54,7 +54,7 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
             .eraseToAnyAsyncSequence()
     }
 
-    public func downloadNews<TagValue>(_ tag: TagValue) -> AsyncExtensions.AnyAsyncSequence<AsyncUpdateNews> where TagValue : Hashable {
+    public func downloadNews(_ tag: TaskTag) -> AsyncExtensions.AnyAsyncSequence<AsyncUpdateNews> {
         delegate.news(self, tag: tag)
             .map({
                 AsyncUpdateNews(value: $0, tag: tag)
@@ -65,11 +65,11 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
     public func downloadNews() -> AnyAsyncSequence<AsyncUpdateNews> {
         delegate
             .statePassthroughSubject
-            .compactMap {
-                guard let tag = await self.tag(for: $0.identifier) else {
+            .compactMap { item -> AsyncUpdateNews? in
+                guard let tag = await self.tag(for: item.identifier) else {
                     return nil
                 }
-                return AsyncUpdateNews(value: $0, tag: tag)
+                return AsyncUpdateNews(value: item, tag: tag)
             }
             .eraseToAnyAsyncSequence()
     }
@@ -82,7 +82,7 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
         urlSessionContainer.cookies.cookies ?? []
     }
     
-    public func cancel<TagValue: Hashable>(_ tag: TagValue) async throws {
+    public func cancel(_ tag: TaskTag) async throws {
         let urlClient = client()
         guard let identifier = await taskIdentifier(for: tag) else {
             logger.warning("task identifier for tag [\(tag)] not found, unable to cancel it's task")
@@ -93,15 +93,15 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
 }
 
 extension AsyncDownloadSession: AsyncSessionProvider {
-    public func unbind<HashValue: Hashable>(tag: HashValue) async {
-        let represemtTag = AnyHashable(tag)
+    public func unbind(tag: TaskTag) async {
+        let represemtTag = tag
 //        logger.info("unbind tag \(represemtTag)")
         await tagsTaskIdenfier.remove(tag: represemtTag)
     }
     
-    public func bind<HashValue: Hashable>(task: TaskIdentifier, tag: HashValue) async {
+    public func bind(task: TaskIdentifier, tag: TaskTag) async {
 //        logger.info("bind tag \(tag) with task \(task)")
-        await tagsTaskIdenfier.set(AnyHashable(tag), for: task)
+        await tagsTaskIdenfier.set(tag, for: task)
     }
     
     public func unbind(task: TaskIdentifier) async {
@@ -113,7 +113,7 @@ extension AsyncDownloadSession: AsyncSessionProvider {
         urlSessionContainer.session
     }
     
-    public func tag(for taskIdentifier: TaskIdentifier) async -> AnyHashable? {
+    public func tag(for taskIdentifier: TaskIdentifier) async -> TaskTag? {
         let tag = await tagsTaskIdenfier.tag(for: taskIdentifier)
 //        if let tag = tag {
 //            logger.info("get tag \(tag) from task \(taskIdentifier)")
@@ -123,8 +123,8 @@ extension AsyncDownloadSession: AsyncSessionProvider {
         return tag
     }
     
-    public func taskIdentifier<HashValue: Hashable>(for tag: HashValue) async -> TaskIdentifier? {
-        let represemtTag = AnyHashable(tag)
+    public func taskIdentifier(for tag: TaskTag) async -> TaskIdentifier? {
+        let represemtTag = tag
         let task = await tagsTaskIdenfier.taskIdentifier(for: represemtTag)
 //        if let task = task {
 //            logger.info("get task \(task) from tag \(represemtTag)")

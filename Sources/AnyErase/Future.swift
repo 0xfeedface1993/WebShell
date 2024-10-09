@@ -14,9 +14,10 @@ import Combine
 #endif
 
 extension Future where Failure == Error {
-    public convenience init(operation: @escaping () async throws -> Output) {
+    public convenience init(@_implicitSelfCapture operation: @Sendable @escaping () async throws -> Output) {
         self.init { promise in
-            Task.detached {
+            nonisolated(unsafe) let promise = promise
+            let action: @Sendable () async -> Void = {
                 do {
                     let output = try await operation()
                     promise(.success(output))
@@ -24,17 +25,20 @@ extension Future where Failure == Error {
                     promise(.failure(error))
                 }
             }
+            Task(operation: action)
         }
     }
 }
 
 extension Future where Failure == Never {
-    public convenience init(operation: @escaping () async -> Output) {
+    public convenience init(@_implicitSelfCapture operation: @Sendable @escaping () async -> Output) {
         self.init { promise in
-            Task.detached {
+            nonisolated(unsafe) let promise = promise
+            let action: @Sendable () async -> Void = {
                 let output = await operation()
                 promise(.success(output))
             }
+            Task(operation: action)
         }
     }
 }

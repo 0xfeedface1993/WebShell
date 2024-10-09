@@ -13,7 +13,7 @@ import CombineX
 import Combine
 #endif
 
-public protocol Condom<Output, Input> {
+public protocol Condom<Output, Input>: Sendable {
     associatedtype Input: ContextValue
     associatedtype Output: ContextValue
     
@@ -39,10 +39,10 @@ extension Condom {
 public protocol SessionableCondom: Condom {
     var key: AnyHashable { get }
     
-    func sessionKey(_ value: AnyHashable) -> Self
+    func sessionKey(_ value: SessionKey) -> Self
 }
 
-public protocol Dirtyware<Output, Input> {
+public protocol Dirtyware<Output, Input>: Sendable {
     associatedtype Input: ContextValue
     associatedtype Output: ContextValue
     
@@ -62,9 +62,20 @@ extension Dirtyware {
     }
 }
 
+public enum SessionKey: Sendable, Hashable, Equatable, CustomStringConvertible {
+    case host(String)
+    
+    public var description: String {
+        switch self {
+        case .host(let string):
+            return "{host: \(string)}"
+        }
+    }
+}
+
 public protocol SessionableDirtyware: Dirtyware {
-    var key: AnyHashable { get }
+    var key: SessionKey { get }
     var configures: AsyncURLSessionConfiguration { get }
     
-    func sessionKey(_ value: AnyHashable) -> Self
+    func sessionKey(_ value: SessionKey) -> Self
 }

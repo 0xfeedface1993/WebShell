@@ -11,12 +11,12 @@ import Foundation
 import FoundationNetworking
 #endif
 
-public enum TaskNews {
+public enum TaskNews: Equatable, Sendable, Hashable {
     case state(State)
     case file(FileStone)
     case error(UpdateFailure)
     
-    public struct State: Equatable {
+    public struct State: Equatable, Sendable, Hashable {
         public let progress: Progress
         public let filename: String?
         public let identifier: Int
@@ -34,7 +34,7 @@ public enum TaskNews {
         }
     }
     
-    public struct FileStone: Equatable {
+    public struct FileStone: Equatable, Sendable, Hashable {
         public let url: URL
         public let response: URLResponse
         public let identifier: Int
@@ -67,7 +67,7 @@ public enum TaskNews {
     }
 }
 
-public struct UpdateNews {
+public struct UpdateNews: Sendable {
     public let value: TaskNews
     public let tagHashValue: Int
     
@@ -77,8 +77,8 @@ public struct UpdateNews {
     }
 }
 
-public struct AsyncUpdateNews {
-    public typealias TagValue = AnyHashable
+public struct AsyncUpdateNews: Sendable {
+    public typealias TagValue = TaskTag
     
     public let value: TaskNews
     private let tag: TagValue

@@ -20,12 +20,12 @@ public struct DownloadLinks<Matcher: ContentMatch, RequestBuilder: DownloadReque
     public typealias Input = URLRequestBuilder
     public typealias Output = [URLRequestBuilder]
     
-    public var key: AnyHashable
+    public let key: SessionKey
     public let matcher: Matcher
     public let requestBuilder: RequestBuilder
     public var configures: AsyncURLSessionConfiguration
     
-    public init(_ key: AnyHashable = "default", matcher: Matcher, requestBuilder: RequestBuilder, configures: AsyncURLSessionConfiguration) {
+    public init(_ key: SessionKey = .host("default"), matcher: Matcher, requestBuilder: RequestBuilder, configures: AsyncURLSessionConfiguration) {
         self.key = key
         self.matcher = matcher
         self.requestBuilder = requestBuilder
@@ -62,7 +62,7 @@ public struct DownloadLinks<Matcher: ContentMatch, RequestBuilder: DownloadReque
     }
     
     @inlinable
-    public func sessionKey(_ value: AnyHashable) -> Self {
+    public func sessionKey(_ value: SessionKey) -> Self {
        key(value)
     }
 }

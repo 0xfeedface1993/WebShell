@@ -20,10 +20,10 @@ public struct FileIDStringInDomSearchGroup: SessionableDirtyware {
     public typealias Output = URLRequestBuilder
     
     let finder: FileIDFinder
-    public var key: AnyHashable
+    public let key: SessionKey
     public var configures: AsyncURLSessionConfiguration
     
-    public init(_ finder: FileIDFinder, configures: AsyncURLSessionConfiguration, key: AnyHashable = "default") {
+    public init(_ finder: FileIDFinder, configures: AsyncURLSessionConfiguration, key: SessionKey = .host("default")) {
         self.finder = finder
         self.key = key
         self.configures = configures
@@ -45,7 +45,7 @@ public struct FileIDStringInDomSearchGroup: SessionableDirtyware {
         return searchid.join(page)
     }
     
-    public func sessionKey(_ value: AnyHashable) -> Self {
+    public func sessionKey(_ value: SessionKey) -> Self {
         .init(finder, configures: configures, key: value)
     }
 }

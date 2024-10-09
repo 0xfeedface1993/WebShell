@@ -13,9 +13,9 @@ public struct Throw<T: Dirtyware>: Dirtyware {
     public typealias Output = T.Output
     
     public let task: T
-    public let error: (Input) -> Error
+    public let error: @Sendable (Input) -> Error
     
-    public init(_ task: T, error: @escaping (Input) -> Error) {
+    public init(_ task: T, error: @Sendable @escaping (Input) -> Error) {
         self.task = task
         self.error = error
     }
@@ -30,7 +30,7 @@ extension Dirtyware {
     /// 无论如何都会抛出错误，
     /// 1. 任务执行成功，则抛出自定义错误
     /// 2. 任务执行失败，继续向上抛出错误
-    public func `throw`(_ error: @escaping (Input) -> Error) -> Throw<Self> {
+    public func `throw`(_ error: @Sendable @escaping (Input) -> Error) -> Throw<Self> {
         Throw(self, error: error)
     }
 }

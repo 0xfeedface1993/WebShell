@@ -20,10 +20,10 @@ public struct GeneralLinks: SessionableDirtyware {
     public typealias Input = URLRequestBuilder
     public typealias Output = [URLRequestBuilder]
     
-    public var key: AnyHashable
+    public let key: SessionKey
     public var configures: AsyncURLSessionConfiguration
     
-    public init(_ configures: AsyncURLSessionConfiguration, key: AnyHashable = "default") {
+    public init(_ configures: AsyncURLSessionConfiguration, key: SessionKey = .host("default")) {
         self.key = key
         self.configures = configures
     }
@@ -39,7 +39,7 @@ public struct GeneralLinks: SessionableDirtyware {
         return next
     }
     
-    public func sessionKey(_ value: AnyHashable) -> Self {
+    public func sessionKey(_ value: SessionKey) -> Self {
         .init(configures, key: value)
     }
 }

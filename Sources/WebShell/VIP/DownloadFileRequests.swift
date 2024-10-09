@@ -23,8 +23,8 @@ public struct DownloadFileRequests: Dirtyware {
     }
 
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
-        let links = try inputValue.strings(from)
-        let lastRequest = try inputValue.request(.lastRequest)
+        let links = try await inputValue.strings(from)
+        let lastRequest = try await inputValue.request(.lastRequest)
         let refer = lastRequest.url ?? ""
         let requests = links.map {
             builder.make($0, refer: refer)

@@ -22,7 +22,7 @@ import FoundationNetworking
 import AnyErase
 #endif
 
-import AsyncExtensions
+@preconcurrency import AsyncExtensions
 
 actor AsyncSessionPool {
     private var cache = [Sessions: any AsyncCustomURLSession]()
@@ -87,7 +87,7 @@ actor AsyncTaskPool {
     }
     
     func task(_ updates: AnyAsyncSequence<AsyncUpdateNews>, subject: AsyncPassthroughSubject<AsyncUpdateNews>, forKey key: Sessions) -> TaskValue {
-        TaskValue {
+        let action: @Sendable () async -> Void = {
             logger.info("observer session \(key)")
             defer {
                 logger.info("finished observer session \(key)")
@@ -102,6 +102,8 @@ actor AsyncTaskPool {
                 logger.info("catch error from observer session \(key), \(error)")
             }
         }
+        
+        return TaskValue(operation: action)
     }
     
     func removeTask(forKey key: Sessions) {
@@ -118,7 +120,7 @@ struct ResoucesPool {
     let subject = AsyncPassthroughSubject<AsyncUpdateNews>()
 }
 
-public struct AsyncSession {
+public struct AsyncSession: Sendable {
     public let configures: AsyncURLSessionConfiguration
     
     public init(_ configures: AsyncURLSessionConfiguration) {
@@ -126,12 +128,12 @@ public struct AsyncSession {
     }
     
     public func state<Key>(for key: Key) async throws -> AsyncCustomURLSession where Key: Hashable {
-        let sessionKey = Sessions(key)
+        let sessionKey = Sessions(key.hashValue)
         return try await configures.resourcesPool.sessions.take(forKey: sessionKey)
     }
     
     public func register<Context, Key>(_ context: Context, forKey key: Key) async -> Context where Key: Hashable, Context: AsyncCustomURLSession {
-        let sessionKey = Sessions(key)
+        let sessionKey = Sessions(key.hashValue)
         
         await configures
             .resourcesPool
@@ -163,12 +165,12 @@ public struct AsyncSession {
     }
     
     public func remove<Key>(by key: Key) async where Key: Hashable {
-        let sessionKey = Sessions(key)
+        let sessionKey = Sessions(key.hashValue)
         await configures.resourcesPool.sessions.remove(sessionKey)
     }
     
     public func context<Key>(_ key: Key) async throws -> any AsyncCustomURLSession where Key: Hashable {
-        let sessionKey = Sessions(key)
+        let sessionKey = Sessions(key.hashValue)
         do {
             let context = try await configures.resourcesPool.sessions.take(forKey: sessionKey)
             logger.info("got session \(context) for \(sessionKey)")

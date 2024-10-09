@@ -16,7 +16,7 @@ import Durex
 import FoundationNetworking
 #endif
 
-public protocol FileIDFinder {
+public protocol FileIDFinder: Sendable {
     init(_ pattern: String)
     
     func extract(_ text: String) throws -> String

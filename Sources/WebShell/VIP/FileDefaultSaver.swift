@@ -13,17 +13,19 @@ public struct FileDefaultSaver: SessionableDirtyware {
     public typealias Output = URL
     
     public let policy: Saver.Policy
-    public var key: AnyHashable
+    public let tag: TaskTag
+    public let key: SessionKey
     public var configures: AsyncURLSessionConfiguration
     
-    public init(_ policy: Saver.Policy, configures: AsyncURLSessionConfiguration, key: AnyHashable) {
+    public init(_ policy: Saver.Policy, configures: AsyncURLSessionConfiguration, tag: TaskTag, key: SessionKey) {
         self.key = key
         self.configures = configures
         self.policy = policy
+        self.tag = tag
     }
     
     public func execute(for inputValue: KeyStore) async throws -> URL {
-        let requests = try inputValue.requests(.output)
+        let requests = try await inputValue.requests(.output)
         for url in requests {
             do {
                 return try await downloadFile(url)
@@ -42,7 +44,7 @@ public struct FileDefaultSaver: SessionableDirtyware {
     
     func completeState(_ url: URLRequestBuilder) async throws -> TaskNews {
         let context = try await AsyncSession(configures).context(key)
-        let states = try await context.downloadWithProgress(url, tag: key)
+        let states = try await context.downloadWithProgress(url, tag: tag)
         var news: TaskNews?
         
         // 在for-in loop内抛出错误则会影响其他地方的监听 导致只有一个接受者收到错误信息
@@ -79,7 +81,7 @@ public struct FileDefaultSaver: SessionableDirtyware {
         }
     }
     
-    public func sessionKey(_ value: AnyHashable) -> Self {
-        .init(policy, configures: configures, key: value)
+    public func sessionKey(_ value: SessionKey) -> Self {
+        .init(policy, configures: configures, tag: tag, key: value)
     }
 }

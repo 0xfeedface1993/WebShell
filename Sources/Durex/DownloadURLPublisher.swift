@@ -9,7 +9,7 @@ import Foundation
 #if COMBINE_LINUX && canImport(CombineX)
 import CombineX
 #else
-import Combine
+@preconcurrency import Combine
 #endif
 import Logging
 #if canImport(AnyErase)
@@ -20,7 +20,7 @@ import AnyErase
 import FoundationNetworking
 #endif
 
-public struct DownloadURLPublisher: Publisher {
+public struct DownloadURLPublisher: Publisher, Sendable {
     public typealias Output = (URL, URLResponse)
     public typealias Failure = Error
     
@@ -36,7 +36,7 @@ public struct DownloadURLPublisher: Publisher {
         subscriber.receive(subscription: Inner(parent: self, downstream: subscriber))
     }
     
-    private class Inner<Downstream: Subscriber>: Subscription, CustomStringConvertible, CustomReflectable, CustomPlaygroundDisplayConvertible
+    private class Inner<Downstream: Subscriber>: Subscription, CustomStringConvertible, CustomReflectable, CustomPlaygroundDisplayConvertible, @unchecked Sendable
         where
             Downstream.Input == DownloadURLPublisher.Output,
             Downstream.Failure == DownloadURLPublisher.Failure

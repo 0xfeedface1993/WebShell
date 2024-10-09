@@ -56,7 +56,7 @@ public protocol CustomURLSession {
     func downloadNews() -> AnyPublisher<UpdateNews, Never>
 }
 
-public protocol AsyncCustomURLSession {
+public protocol AsyncCustomURLSession: Sendable {
     /// 唯一标识符, 标识对象唯一，不同的实例应该是不同的的UUID
     var id: UUID { get }
     
@@ -73,9 +73,9 @@ public protocol AsyncCustomURLSession {
     /// 下载文件, 包含进度信息更新、下载完成、失败
     /// - Parameter request: 下载文件请求
     /// - Returns: 异步文件进度+文件URL
-    func downloadWithProgress<TagValue: Hashable>(_ request: URLRequestBuilder, tag: TagValue) async throws -> AnyAsyncSequence<AsyncUpdateNews>
+    func downloadWithProgress(_ request: URLRequestBuilder, tag: TaskTag) async throws -> AnyAsyncSequence<AsyncUpdateNews>
     
-    func downloadNews<TagValue: Hashable>(_ tag: TagValue) -> AnyAsyncSequence<AsyncUpdateNews>
+    func downloadNews(_ tag: TaskTag) -> AnyAsyncSequence<AsyncUpdateNews>
     
     /// 其他模块想要获取所有下载任务的进度、完成通知则使用此方法获取Publisher,
     /// - Returns: 任务状态
@@ -88,5 +88,5 @@ public protocol AsyncCustomURLSession {
     func cookies() -> [HTTPCookie]
     
     /// 取消当前下载中的任务，如果任务不存在不会抛出错误，取消任务失败才会抛出错误
-    func cancel<TagValue: Hashable>(_ tag: TagValue) async throws
+    func cancel(_ tag: TaskTag) async throws
 }

@@ -21,7 +21,7 @@ public struct RunIfKeyExists<T: Dirtyware<KeyStore, KeyStore>>: Dirtyware {
     }
     
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
-        let value: Any? = inputValue.value(forKey: key)
+        let value: ContextValue? = await inputValue.value(forKey: key)
         if let value = value {
             shellLogger.info("got \(value) for \(key), execute task \(task)")
             return try await task.execute(for: inputValue)
@@ -36,9 +36,9 @@ public struct RunIfSatisfied<T: Dirtyware>: Dirtyware where T.Output == KeyStore
     public typealias Output = T.Output
     
     public let task: T
-    public let block: (T.Input, T) async -> Bool
+    public let block: @Sendable (T.Input, T) async -> Bool
     
-    public init(_ task: T, block: @escaping (T.Input, T) async -> Bool) {
+    public init(_ task: T, block: @Sendable @escaping (T.Input, T) async -> Bool) {
         self.task = task
         self.block = block
     }
@@ -60,7 +60,7 @@ extension Dirtyware {
     }
     
     /// execute task if condition block return true
-    public func maybe(_ block: @escaping (Self.Input, Self) async -> Bool) -> RunIfSatisfied<Self> where Self.Input == Self.Output {
+    public func maybe(_ block: @Sendable @escaping (Self.Input, Self) async -> Bool) -> RunIfSatisfied<Self> where Self.Input == Self.Output {
         .init(self, block: block)
     }
 }

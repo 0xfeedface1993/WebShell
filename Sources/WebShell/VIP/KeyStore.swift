@@ -12,27 +12,82 @@ public enum KeyStoreError: Error {
     case valueTransformTypeIncorrect
 }
 
+@globalActor
+public actor KeyStoreActor {
+    public static var shared = KeyStoreActor()
+}
+
 public final class KeyStore: ContextValue {
-    public struct Key: Hashable {
-        let base: AnyHashable
+    public struct Key: Hashable, Sendable {
+        public enum Base: Hashable, Sendable {
+            case string(String)
+            case int(Int)
+            case int64(Int64)
+        }
         
-        public init<T: Hashable>(_ base: T) {
-            self.base = AnyHashable(base)
+        let base: Base
+        
+        public init(_ base: Base) {
+            self.base = base
+        }
+        
+        public init(_ text: String) {
+            self.base = .string(text)
         }
     }
     
-    private var cached = [Key: Any]()
+    enum Wrapped: Sendable {
+        case instance(ContextValue)
+        case array([ContextValue])
+    }
+    
+    @KeyStoreActor
+    private var cached = [Key: Wrapped]()
+    
+    public init() { }
     
     @discardableResult
-    public func assign<T>(_ value: T, forKey key: Key) -> Self {
-        cached[key] = value
+    public func assign<T>(_ value: T, forKey key: Key) -> Self where T: ContextValue {
+        Task { @KeyStoreActor in
+            cached[key] = .instance(value)
+        }
         return self
     }
     
-    public func value<T>(forKey key: Key) -> T? {
-        cached[key] as? T
+    @discardableResult
+    public func assign(_ value: [ContextValue], forKey key: Key) -> Self {
+        Task { @KeyStoreActor in
+            cached[key] = .array(value)
+        }
+        return self
     }
     
+    @discardableResult
+    public func assign(_ value: (any ContextValue)?, forKey key: Key) -> Self {
+        Task { @KeyStoreActor in
+            if let value {
+                cached[key] = .instance(value)
+            } else {
+                cached.removeValue(forKey: key)
+            }
+        }
+        return self
+    }
+    
+    @KeyStoreActor
+    public func value<T>(forKey key: Key) -> T? {
+        let wrapped = cached[key]
+        switch wrapped {
+        case .array(let items):
+            return items as? T
+        case .instance(let value):
+            return value as? T
+        case .none:
+            return nil
+        }
+    }
+    
+    @KeyStoreActor
     public func take<T>(forKey key: Key) throws -> T {
         guard let next: T = value(forKey: key) else {
             shellLogger.error("no key [\(key)] store as \(T.self), maybe \(String(describing: cached[key]))")
@@ -41,30 +96,37 @@ public final class KeyStore: ContextValue {
         return next
     }
     
+    @KeyStoreActor
     public func string(_ key: Key) throws -> String {
         try take(forKey: key)
     }
     
+    @KeyStoreActor
     public func strings(_ key: Key) throws -> [String] {
         try take(forKey: key)
     }
     
+    @KeyStoreActor
     public func request(_ key: Key) throws -> URLRequestBuilder {
         try take(forKey: key)
     }
     
+    @KeyStoreActor
     public func requests(_ key: Key) throws -> [URLRequestBuilder] {
         try take(forKey: key)
     }
     
+    @KeyStoreActor
     public func url(_ key: Key) throws -> URL {
         try take(forKey: key)
     }
     
+    @KeyStoreActor
     public func configures(_ key: Key) throws -> AsyncURLSessionConfiguration {
         try take(forKey: key)
     }
     
+    @KeyStoreActor
     public var valueDescription: String {
         "\(self): \(cached)"
     }
@@ -114,7 +176,7 @@ public struct ValueReader<T: ContextValue>: Dirtyware {
 }
 
 /// Set instant value to current key store
-public struct ExternalValueReader<T>: Dirtyware {
+public struct ExternalValueReader<T>: Dirtyware where T: ContextValue {
     public typealias Input = KeyStore
     public typealias Output = KeyStore
     
@@ -160,8 +222,9 @@ public struct CopyOutValue: Dirtyware {
         self.from = from
     }
     
+    @KeyStoreActor
     public func execute(for inputValue: Input) async throws -> KeyStore {
-        let output: Any? = inputValue.value(forKey: from)
+        let output: ContextValue? = inputValue.value(forKey: from)
         return inputValue.assign(output, forKey: to)
     }
 }

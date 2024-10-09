@@ -14,9 +14,9 @@ import Combine
 
 public struct AnyCondom<Input, Output>: Condom where Input: ContextValue, Output: ContextValue {
     @usableFromInline
-    internal let makePublisher: (Input) -> AnyPublisher<Output, Error>
+    internal let makePublisher: @Sendable (Input) -> AnyPublisher<Output, Error>
     @usableFromInline
-    internal let makeEmptyPublisher: () -> AnyPublisher<Output, Error>
+    internal let makeEmptyPublisher: @Sendable () -> AnyPublisher<Output, Error>
     
     @inlinable
     init<T>(_ condom: T) where T: Condom, T.Input == Input, Output == T.Output {
@@ -52,7 +52,7 @@ public struct AnyCondom<Input, Output>: Condom where Input: ContextValue, Output
 
 public struct AnyDirtyware<Input, Output>: Dirtyware where Input: ContextValue, Output: ContextValue {
     @usableFromInline
-    internal let makePublisher: (Input) async throws -> Output
+    internal let makePublisher: @Sendable (Input) async throws -> Output
     
     @inlinable
     init<T>(_ condom: T) where T: Dirtyware, T.Input == Input, Output == T.Output {

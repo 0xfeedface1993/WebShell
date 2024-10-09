@@ -17,10 +17,10 @@ struct TowerCookieUpdate: SessionableDirtyware {
     typealias Output = String
     
     let fileid: String
-    let key: AnyHashable
+    let key: SessionKey
     let configures: AsyncURLSessionConfiguration
     
-    init(fileid: String, key: AnyHashable, configures: AsyncURLSessionConfiguration) {
+    init(fileid: String, key: SessionKey, configures: AsyncURLSessionConfiguration) {
         self.fileid = fileid
         self.key = key
         self.configures = configures
@@ -45,7 +45,7 @@ struct TowerCookieUpdate: SessionableDirtyware {
         return TowerJSPageRequest(fileid: fileid, scheme: scheme, host: host, path: path)
     }
     
-    func sessionKey(_ value: AnyHashable) -> Self {
+    func sessionKey(_ value: SessionKey) -> Self {
         .init(fileid: fileid, key: key, configures: configures)
     }
 }

@@ -19,7 +19,7 @@ public struct FileIDReader<T: FileIDFinder>: Dirtyware {
     }
 
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
-        let url = try inputValue.string(.fileidURL)
+        let url = try await inputValue.string(.fileidURL)
         let fileid = try finder.extract(url)
         return inputValue
             .assign(fileid, forKey: .fileid)

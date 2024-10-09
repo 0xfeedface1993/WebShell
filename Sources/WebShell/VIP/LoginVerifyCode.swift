@@ -20,10 +20,10 @@ public struct LoginVerifyCode: SessionableDirtyware {
     
     public let username: String
     public let password: String
-    public var key: AnyHashable
+    public let key: SessionKey
     public var configures: AsyncURLSessionConfiguration
     
-    public init(username: String, password: String, configures: AsyncURLSessionConfiguration, key: AnyHashable) {
+    public init(username: String, password: String, configures: AsyncURLSessionConfiguration, key: SessionKey) {
         self.username = username
         self.password = password
         self.key = key
@@ -31,9 +31,9 @@ public struct LoginVerifyCode: SessionableDirtyware {
     }
     
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
-        let lastRequest = try inputValue.request(.lastRequest)
-        let code = try inputValue.string(.code)
-        let formhash = try inputValue.string(.formhash)
+        let lastRequest = try await inputValue.request(.lastRequest)
+        let code = try await inputValue.string(.code)
+        let formhash = try await inputValue.string(.formhash)
         let request = try Request(url: lastRequest.url ?? "", username: username, password: password, code: code, formhash: formhash).make()
         return try await ExternalValueReader(request, forKey: .output)
             .join(URLRequestPageReader(.output, configures: configures, key: key))
@@ -54,7 +54,7 @@ public struct LoginVerifyCode: SessionableDirtyware {
             .execute(for: inputValue)
     }
     
-    public func sessionKey(_ value: AnyHashable) -> Self {
+    public func sessionKey(_ value: SessionKey) -> Self {
         .init(username: username, password: password, configures: configures, key: value)
     }
     

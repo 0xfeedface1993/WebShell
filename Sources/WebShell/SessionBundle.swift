@@ -8,21 +8,21 @@
 import Foundation
 import Durex
 
-public struct SessionBundle {
-    public let sessionKey: AnyHashable
+public struct SessionBundle: Sendable {
+    public let sessionKey: SessionKey
     public let congifures: AsyncURLSessionConfiguration
     
-    public init(sessionKey: AnyHashable, congifures: AsyncURLSessionConfiguration) {
+    public init(sessionKey: SessionKey, congifures: AsyncURLSessionConfiguration) {
         self.sessionKey = sessionKey
         self.congifures = congifures
     }
     
-    public init(sessionKey: AnyHashable) {
+    public init(sessionKey: SessionKey) {
         self.sessionKey = sessionKey
         self.congifures = .shared
     }
     
-    func sessionKey(_ value: AnyHashable) -> Self {
+    func sessionKey(_ value: SessionKey) -> Self {
         .init(sessionKey: value, congifures: congifures)
     }
     

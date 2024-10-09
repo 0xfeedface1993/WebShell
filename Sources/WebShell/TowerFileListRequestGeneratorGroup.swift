@@ -21,17 +21,17 @@ public struct TowerFileListRequestGeneratorGroup: SessionableDirtyware {
     
     public let fileid: String
     public let action: String
-    public var key: AnyHashable
+    public let key: SessionKey
     public let configures: AsyncURLSessionConfiguration
     
-    public init(_ fileid: String, action: String, configures: AsyncURLSessionConfiguration, key: AnyHashable = "default") {
+    public init(_ fileid: String, action: String, configures: AsyncURLSessionConfiguration, key: SessionKey = .host("default")) {
         self.fileid = fileid
         self.action = action
         self.key = key
         self.configures = configures
     }
     
-    public func sessionKey(_ value: AnyHashable) -> Self {
+    public func sessionKey(_ value: SessionKey) -> Self {
         .init(fileid, action: action, configures: configures, key: value)
     }
     

@@ -12,14 +12,14 @@ public struct LoginByFormhashAndCode<Reader: CodeReadable>: SessionableDirtyware
     public typealias Input = KeyStore
     public typealias Output = KeyStore
     
-    public var key: AnyHashable
+    public let key: SessionKey
     public var configures: AsyncURLSessionConfiguration
     public let reader: Reader
     public let username: String
     public let password: String
     public let retry: Int
     
-    public init(_ username: String, password: String, configures: AsyncURLSessionConfiguration, key: AnyHashable = "default", retry: Int = 1, reader: Reader) {
+    public init(_ username: String, password: String, configures: AsyncURLSessionConfiguration, key: SessionKey = .host("default"), retry: Int = 1, reader: Reader) {
         self.key = key
         self.configures = configures
         self.reader = reader
@@ -43,7 +43,7 @@ public struct LoginByFormhashAndCode<Reader: CodeReadable>: SessionableDirtyware
         .execute(for: inputValue)
     }
     
-    public func sessionKey(_ value: AnyHashable) -> LoginByFormhashAndCode {
+    public func sessionKey(_ value: SessionKey) -> LoginByFormhashAndCode {
         .init(username, password: password, configures: configures, key: value, retry: retry, reader: reader)
     }
 }
@@ -52,14 +52,14 @@ public struct CustomLoginByFormhashAndCode<Reader: CodeReadable>: SessionableDir
     public typealias Input = KeyStore
     public typealias Output = KeyStore
     
-    public var key: AnyHashable
+    public let key: SessionKey
     public var configures: AsyncURLSessionConfiguration
     public let form: LoginForm<Reader>
     
     /// 检查是否已经登录，首先检测是否有登录状态的cookie，没有的话就发出登录请求，
     /// 登录页面检测是否有成功、已登录字样，有的话就认为登录成功，否则就认为登录失败，
     /// 如果有验证码错误的提示，就重新发出登录请求，直到登录成功或者达到最大重试次数
-    public init(_ form: LoginForm<Reader>, configures: AsyncURLSessionConfiguration, key: AnyHashable = "default") {
+    public init(_ form: LoginForm<Reader>, configures: AsyncURLSessionConfiguration, key: SessionKey = .host("default")) {
         self.key = key
         self.configures = configures
         self.form = form
@@ -88,18 +88,23 @@ public struct CustomLoginByFormhashAndCode<Reader: CodeReadable>: SessionableDir
             )
             .retry(3)
             .maybe({ value, task in
-                form.cookieName.isEmpty || !((try? value.configures(.configures).defaultSession.cookies().contains(where: { $0.name == form.cookieName })) ?? false)
+                if form.cookieName.isEmpty {
+                    return true
+                } else {
+                    let next = (try? await value.configures(.configures).defaultSession.cookies().contains(where: { $0.name == form.cookieName }))
+                    return !(next ?? false)
+                }
             })
             .execute(for: inputValue)
     }
     
-    public func sessionKey(_ value: AnyHashable) -> Self {
+    public func sessionKey(_ value: SessionKey) -> Self {
         .init(form, configures: configures, key: value)
     }
 }
 
 /// login form
-public struct LoginForm<Reader: CodeReadable> {
+public struct LoginForm<Reader: CodeReadable>: Sendable {
     /// username
     public let username: String
     /// password

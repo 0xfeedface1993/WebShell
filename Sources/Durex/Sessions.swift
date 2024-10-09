@@ -23,26 +23,11 @@ import AnyErase
 #endif
 
 @usableFromInline
-enum Sessions: Hashable {
+enum Sessions: Hashable, Equatable, Sendable {
     case `default`
-    case key(any Hashable)
+    case key(Int)
     
-    @usableFromInline
-    static func == (lhs: Sessions, rhs: Sessions) -> Bool {
-        lhs.hashValue == rhs.hashValue
-    }
-    
-    @usableFromInline
-    func hash(into hasher: inout Hasher) {
-        switch self {
-        case .default:
-            hasher.combine("default")
-        case .key(let hashable):
-            hasher.combine(hashable)
-        }
-    }
-    
-    init(_ hash: any Hashable) {
-        self = .key(hash)
+    init(_ hashValue: Int) {
+        self = .key(hashValue)
     }
 }

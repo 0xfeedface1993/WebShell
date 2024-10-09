@@ -22,7 +22,7 @@ public struct LoginPage: Dirtyware {
     }
     
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
-        let url = try inputValue.string(.fileidURL)
+        let url = try await inputValue.string(.fileidURL)
         let request = try Request(url: url, querys: querys).make()
         return inputValue.assign(request, forKey: .output)
     }

@@ -24,13 +24,13 @@ public struct SignFileListURLRequestGenerator: SessionableDirtyware {
     public typealias Input = String
     public typealias Output = URLRequestBuilder
     
-    public var key: AnyHashable
+    public let key: SessionKey
     /// 文件id查找器，这里应该是URL上匹配
     public let finder: FileIDFinder
     public let action: String
     public let configures: AsyncURLSessionConfiguration
     
-    public init(_ finder: FileIDFinder, action: String, configures: AsyncURLSessionConfiguration, key: AnyHashable = "default") {
+    public init(_ finder: FileIDFinder, action: String, configures: AsyncURLSessionConfiguration, key: SessionKey = .host("default")) {
         self.finder = finder
         self.key = key
         self.action = action
@@ -59,7 +59,7 @@ public struct SignFileListURLRequestGenerator: SessionableDirtyware {
         return ReferSignDownPageRequest(fileid: fileid, refer: string, scheme: scheme, host: host, action: action, sign: sign).make()
     }
     
-    public func sessionKey(_ value: AnyHashable) -> Self {
+    public func sessionKey(_ value: SessionKey) -> Self {
         Self(finder, action: action, configures: configures, key: value)
     }
 }

@@ -11,7 +11,7 @@ import FoundationNetworking
 #endif
 import AnyErase
 
-struct URLSessionHolder {
+struct URLSessionHolder: Sendable {
     let session: any URLClient
     let cookies: HTTPCookieStorage
     

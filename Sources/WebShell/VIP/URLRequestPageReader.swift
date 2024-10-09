@@ -17,18 +17,18 @@ public struct URLRequestPageReader: SessionableDirtyware {
     public typealias Input = KeyStore
     public typealias Output = KeyStore
     
-    public var key: AnyHashable
+    public let key: SessionKey
     public var configures: AsyncURLSessionConfiguration
     public var stringKey: KeyStore.Key
     
-    public init(_ stringKey: KeyStore.Key, configures: AsyncURLSessionConfiguration, key: AnyHashable) {
+    public init(_ stringKey: KeyStore.Key, configures: AsyncURLSessionConfiguration, key: SessionKey) {
         self.key = key
         self.configures = configures
         self.stringKey = stringKey
     }
     
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
-        let request = try inputValue.request(stringKey)
+        let request = try await inputValue.request(stringKey)
         let context = try await AsyncSession(configures).context(key)
         let (data, _) = try await context.download(with: request)
         let next = inputValue
@@ -37,7 +37,7 @@ public struct URLRequestPageReader: SessionableDirtyware {
         return next.assign(data, forKey: .output)
     }
     
-    public func sessionKey(_ value: AnyHashable) -> Self {
+    public func sessionKey(_ value: SessionKey) -> Self {
         .init(stringKey, configures: configures, key: value)
     }
 }

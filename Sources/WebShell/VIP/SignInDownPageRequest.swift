@@ -15,8 +15,8 @@ public struct SignInDownPageRequest: Dirtyware {
     public init() {}
 
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
-        let fileid = try inputValue.string(.fileid)
-        let lastRequest = try inputValue.request(.lastRequest)
+        let fileid = try await inputValue.string(.fileid)
+        let lastRequest = try await inputValue.request(.lastRequest)
         guard let url = lastRequest.url else {
             throw ShellError.badURL(lastRequest.url ?? "")
         }

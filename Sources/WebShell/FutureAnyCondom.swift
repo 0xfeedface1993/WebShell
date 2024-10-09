@@ -25,9 +25,9 @@ public struct FutureAnyCondom<OutputValue: ContextValue, InputValue: ContextValu
     public typealias Output = OutputValue
     public typealias Input = InputValue
     
-    public let operation: (Input) async throws -> Output
+    public let operation: @Sendable (Input) async throws -> Output
     
-    public init(_ operation: @escaping (Input) async throws -> Output) {
+    public init(_ operation: @Sendable @escaping (Input) async throws -> Output) {
         self.operation = operation
     }
     

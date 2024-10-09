@@ -28,7 +28,7 @@ extension URLSessionTask: URLTask {
 }
 
 /// An protocol that provides async support for fetching a URL
-public protocol URLClient {
+public protocol URLClient: Sendable {
     func asyncData(from url: URLRequest) async throws -> (Data, URLResponse)
     /// download large file at tmp directory, not use custom delegate response
     func asyncDownload(from url: URLRequest) async throws -> (URL, URLResponse)

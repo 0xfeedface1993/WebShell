@@ -42,7 +42,7 @@ public protocol SessionProvider {
     func taskIdentifier(for tag: Int) -> Int?
 }
 
-public protocol AsyncSessionProvider {
+public protocol AsyncSessionProvider: Sendable {
 //    typealias HashValue = any Hashable
     typealias TaskIdentifier = Int
     
@@ -50,13 +50,13 @@ public protocol AsyncSessionProvider {
     /// - Parameters:
     ///   - task: URLSession下载任务
     ///   - tag: 任务tag
-    func bind<HashValue: Hashable>(task: TaskIdentifier, tag: HashValue) async
+    func bind(task: TaskIdentifier, tag: TaskTag) async
     
     /// 解除URLSession下载任务和任务tag的绑定，下载任务结束后解除绑定
     /// - Parameter task: URLSession下载任务
     func unbind(task: TaskIdentifier) async
     
-    func unbind<HashValue: Hashable>(tag: HashValue) async
+    func unbind(tag: TaskTag) async
     
     /// 系统原始的URLSession
     func client() -> URLClient
@@ -64,10 +64,10 @@ public protocol AsyncSessionProvider {
     /// 匹配下载任务id
     /// - Parameter task: URLSession下载任务taskIdentifier
     /// - Returns: 任务id
-    func tag(for taskIdentifier: TaskIdentifier) async -> AnyHashable?
+    func tag(for taskIdentifier: TaskIdentifier) async -> TaskTag?
     
     /// 根据任务id查下载任务taskIdentifier
     /// - Parameter tag: 任务id
     /// - Returns: taskIdentifier
-    func taskIdentifier<HashValue: Hashable>(for tag: HashValue) async -> TaskIdentifier?
+    func taskIdentifier(for tag: TaskTag) async -> TaskIdentifier?
 }

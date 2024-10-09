@@ -19,10 +19,10 @@ public struct RedirectEnablePage: SessionableDirtyware {
     public typealias Input = String
     public typealias Output = String
     
-    public var key: AnyHashable
+    public let key: SessionKey
     public let configures: Durex.AsyncURLSessionConfiguration
     
-    public init(_ configures: Durex.AsyncURLSessionConfiguration, key: AnyHashable = "default") {
+    public init(_ configures: Durex.AsyncURLSessionConfiguration, key: SessionKey = .host("default")) {
         self.key = key
         self.configures = configures
     }
@@ -44,7 +44,7 @@ public struct RedirectEnablePage: SessionableDirtyware {
         return url
     }
     
-    public func sessionKey(_ value: AnyHashable) -> Self {
+    public func sessionKey(_ value: SessionKey) -> Self {
         .init(configures, key: value)
     }
 }
@@ -53,10 +53,10 @@ public struct RedirectFollowPage: SessionableDirtyware {
     public typealias Input = String
     public typealias Output = KeyStore
     
-    public var key: AnyHashable
+    public let key: SessionKey
     public let configures: Durex.AsyncURLSessionConfiguration
     
-    public init(_ configures: Durex.AsyncURLSessionConfiguration, key: AnyHashable = "default") {
+    public init(_ configures: Durex.AsyncURLSessionConfiguration, key: SessionKey = .host("default")) {
         self.key = key
         self.configures = configures
     }
@@ -67,7 +67,7 @@ public struct RedirectFollowPage: SessionableDirtyware {
             .execute(for: inputValue)
     }
     
-    public func sessionKey(_ value: AnyHashable) -> Self {
+    public func sessionKey(_ value: SessionKey) -> Self {
         .init(configures, key: value)
     }
 }

@@ -17,7 +17,7 @@ public struct HostDifferFilter: Dirtyware {
     public init() {}
     
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
-        let requests = try inputValue.requests(.output)
+        let requests = try await inputValue.requests(.output)
         var options = [URLRequestBuilder]()
         for request in requests {
             guard let host = try? request.url?.baseComponents().host else {

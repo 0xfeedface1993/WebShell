@@ -14,7 +14,7 @@ import FoundationNetworking
 
 import Durex
 
-public protocol URLRegularExpressionMatchTemplate {
+public protocol URLRegularExpressionMatchTemplate: Sendable {
     func template() -> String
     func rawTemplate() -> Int
 }
@@ -48,7 +48,7 @@ extension String: URLRegularExpressionMatchTemplate {
     }
 }
 
-public struct URLRegularExpressionMatch {
+public struct URLRegularExpressionMatch: Sendable {
     let string: String
     let pattern: String
     let template: URLRegularExpressionMatchTemplate
@@ -80,19 +80,19 @@ public struct URLRegularExpressionMatch {
     }
 }
 
-public protocol ContentMatch {
+public protocol ContentMatch: Sendable {
     func extract(_ text: String) throws -> [URL]
 }
 
-public protocol DownloadRequestBuilder {
+public protocol DownloadRequestBuilder: Sendable {
     func make(_ url: String, refer: String) -> URLRequestBuilder
 }
 
-enum ExpressionMatchError: Error {
+enum ExpressionMatchError: Error, Sendable {
     case noMatchedValue(pattern: String)
 }
 
-public struct ExpressionMatch {
+public struct ExpressionMatch: Sendable {
     public let string: String
     public let pattern: String
     public let template: URLRegularExpressionMatchTemplate

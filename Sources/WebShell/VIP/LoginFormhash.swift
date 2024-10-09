@@ -12,10 +12,10 @@ public struct LoginFormhash: SessionableDirtyware {
     public typealias Input = KeyStore
     public typealias Output = KeyStore
     
-    public var key: AnyHashable
+    public let key: SessionKey
     public var configures: AsyncURLSessionConfiguration
     
-    public init(_ configures: AsyncURLSessionConfiguration, key: AnyHashable = "default") {
+    public init(_ configures: AsyncURLSessionConfiguration, key: SessionKey = .host("default")) {
         self.key = key
         self.configures = configures
     }
@@ -26,7 +26,7 @@ public struct LoginFormhash: SessionableDirtyware {
             .execute(for: inputValue)
     }
     
-    public func sessionKey(_ value: AnyHashable) -> LoginFormhash {
+    public func sessionKey(_ value: SessionKey) -> LoginFormhash {
         .init(configures, key: value)
     }
 }

@@ -8,7 +8,7 @@
 import Foundation
 import Durex
 
-public enum SortOrder {
+public enum SortOrder: Sendable {
     case reverse
 }
 
@@ -28,7 +28,7 @@ public struct Sort<T: Dirtyware>: Dirtyware where T.Input == KeyStore {
 
     public func execute(for inputValue: Input) async throws -> Output {
         let value = try await task.execute(for: inputValue)
-        if let output: any Sequence = inputValue.value(forKey: key) {
+        if let output: [ContextValue] = await inputValue.value(forKey: key) {
             switch order {
             case .reverse:
                 shellLogger.info("reversed sequence [\(key)]")

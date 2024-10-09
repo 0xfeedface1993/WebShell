@@ -23,12 +23,12 @@ public struct TowerFileListRequestGenerator: Dirtyware {
     public typealias Input = String
     public typealias Output = URLRequestBuilder
     
-    public var key: AnyHashable
+    public let key: SessionKey
     public let fileid: String
     public let action: String
     public let url: String
     
-    public init(_ fileid: String, action: String, url: String, key: AnyHashable = "default") {
+    public init(_ fileid: String, action: String, url: String, key: SessionKey = .host("default")) {
         self.fileid = fileid
         self.key = key
         self.action = action
@@ -44,7 +44,7 @@ public struct TowerFileListRequestGenerator: Dirtyware {
         return ReferDownPageRequest(fileid: fileid, refer: "\(scheme)://\(host)", scheme: scheme, host: host, action: action).make()
     }
     
-    public func sessionKey(_ value: AnyHashable) -> Self {
+    public func sessionKey(_ value: SessionKey) -> Self {
         Self(fileid, action: action, url: url, key: value)
     }
 }

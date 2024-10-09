@@ -19,9 +19,9 @@ public struct DowloadsListWithSignFileIDRequest: Dirtyware {
     }
 
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
-        let fileid = try inputValue.string(.fileid)
-        let lastRequest = try inputValue.request(.lastRequest)
-        let sign = try inputValue.string(.sign)
+        let fileid = try await inputValue.string(.fileid)
+        let lastRequest = try await inputValue.request(.lastRequest)
+        let sign = try await inputValue.string(.sign)
         guard let url = lastRequest.url else {
             throw ShellError.badURL(lastRequest.url ?? "")
         }

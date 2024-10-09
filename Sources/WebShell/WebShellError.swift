@@ -12,7 +12,7 @@ import Foundation
 import FoundationNetworking
 #endif
 
-public enum WebShellError: Error {
+public enum WebShellError: Error, Sendable {
     public enum RequestReason {
         case emptyRequest
         case invalidateURL(request: URLRequest)

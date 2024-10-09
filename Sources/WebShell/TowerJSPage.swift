@@ -17,7 +17,7 @@ public struct TowerJSPage: SessionableDirtyware {
     
     public typealias Output = URLRequestBuilder
     
-    public let key: AnyHashable
+    public let key: SessionKey
     public let configures: AsyncURLSessionConfiguration
     
     public func execute(for inputValue: String) async throws -> URLRequestBuilder {
@@ -44,12 +44,12 @@ public struct TowerJSPage: SessionableDirtyware {
         return TowerJSPageRequest(fileid: fileid, scheme: scheme, host: host, path: relatePath).make()
     }
     
-    public init(_ configures: AsyncURLSessionConfiguration, key: AnyHashable = "default") {
+    public init(_ configures: AsyncURLSessionConfiguration, key: SessionKey = .host("default")) {
         self.key = key
         self.configures = configures
     }
     
-    public func sessionKey(_ value: AnyHashable) -> TowerJSPage {
+    public func sessionKey(_ value: SessionKey) -> TowerJSPage {
         .init(configures, key: value)
     }
 }

@@ -23,7 +23,7 @@ public struct FindStringInFile: Dirtyware {
     }
     
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
-        let url = try inputValue.url(source)
+        let url = try await inputValue.url(source)
         let string = try String(contentsOf: url, encoding: .utf8)
         let target = try finder.extract(string)
         return inputValue
@@ -47,7 +47,7 @@ public struct FindStringsInFile: Dirtyware {
     }
     
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
-        let url = try inputValue.url(source)
+        let url = try await inputValue.url(source)
         let string = try String(contentsOf: url, encoding: .utf8)
         let target = try finder.batch(string)
         return inputValue

@@ -19,9 +19,9 @@ public struct ActionDownPage: Dirtyware {
     public typealias Input = String
     public typealias Output = URLRequestBuilder
     
-    public var key: AnyHashable
+    public let key: SessionKey
     
-    public init(_ key: AnyHashable = "default") {
+    public init(_ key: SessionKey = .host("default")) {
         self.key = key
     }
     
@@ -30,7 +30,7 @@ public struct ActionDownPage: Dirtyware {
             .execute(for: inputValue)
     }
     
-    public func sessionKey(_ value: AnyHashable) -> Self {
+    public func sessionKey(_ value: SessionKey) -> Self {
         .init(value)
     }
 }

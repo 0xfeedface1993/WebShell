@@ -7,8 +7,28 @@
 
 import Foundation
 
-public protocol TaskIdentifiable {
-    typealias Value = AnyHashable
+public enum TaskTag: Hashable, Equatable, Sendable, CustomStringConvertible {
+    case uid(UUID)
+    case string(String)
+    case int(Int)
+    case int64(Int64)
+    
+    public var description: String {
+        switch self {
+        case .uid(let id):
+            return "{uuid: \(id)}"
+        case .string(let string):
+            return "{string: \(string)}"
+        case .int(let int):
+            return "{int: \(int)}"
+        case .int64(let int64):
+            return "{int64: \(int64)}"
+        }
+    }
+}
+
+public protocol TaskIdentifiable: Sendable {
+    typealias Value = TaskTag
     typealias Key = Int
     
     func tag(for taskIdentifier: Key) async -> Value?

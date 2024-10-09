@@ -11,23 +11,31 @@ import Foundation
 import FoundationNetworking
 #endif
 
-struct DownloadSessionError: Error {
+struct DownloadSessionError: Error, Sendable {
     let originError: Error
     let task: URLSessionTask
     let date = Date()
 }
 
-public enum DownloadSessionRawError: Error {
+public enum DownloadSessionRawError: Error, Sendable {
     case invalidResponse
     case unknown
 }
 
-public struct DownloadURLError: Error {
+public struct DownloadURLError: Error, Sendable {
     public let task: URLSessionTask
     public let error: Error
 }
 
-public struct UpdateFailure {
+public struct UpdateFailure: Equatable, Sendable, Hashable {
+    public static func == (lhs: UpdateFailure, rhs: UpdateFailure) -> Bool {
+        lhs.identifier == rhs.identifier
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(identifier)
+    }
+    
     public enum NoneError: Error {
         case none
     }
@@ -46,6 +54,6 @@ public struct UpdateFailure {
     }
 }
 
-public enum SessionKeyError: Error {
-    case noValidKey(AnyHashable)
+public enum SessionKeyError: Error, Sendable {
+    case noValidKey(TaskIdentifiable.Key)
 }

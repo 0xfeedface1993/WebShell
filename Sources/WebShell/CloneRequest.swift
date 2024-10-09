@@ -12,15 +12,15 @@ public struct CloneRequest: SessionableDirtyware {
     public typealias Input = URLRequestBuilder
     public typealias Output = URLRequestBuilder
     
-    public var key: AnyHashable
+    public var key: SessionKey
     public var configures: Durex.AsyncURLSessionConfiguration
     
-    public init(_ configures: Durex.AsyncURLSessionConfiguration, key: AnyHashable) {
+    public init(_ configures: Durex.AsyncURLSessionConfiguration, key: SessionKey) {
         self.key = key
         self.configures = configures
     }
     
-    public func sessionKey(_ value: AnyHashable) -> Self {
+    public func sessionKey(_ value: SessionKey) -> Self {
         .init(configures, key: value)
     }
     
@@ -35,15 +35,15 @@ public struct BatchCloneRequest: SessionableDirtyware {
     public typealias Input = [URLRequestBuilder]
     public typealias Output = [URLRequestBuilder]
     
-    public var key: AnyHashable
+    public var key: SessionKey
     public var configures: Durex.AsyncURLSessionConfiguration
     
-    public init(_ configures: Durex.AsyncURLSessionConfiguration, key: AnyHashable) {
+    public init(_ configures: Durex.AsyncURLSessionConfiguration, key: SessionKey) {
         self.key = key
         self.configures = configures
     }
     
-    public func sessionKey(_ value: AnyHashable) -> Self {
+    public func sessionKey(_ value: SessionKey) -> Self {
         .init(configures, key: value)
     }
     

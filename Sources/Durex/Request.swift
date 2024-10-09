@@ -37,7 +37,7 @@ extension URLRequest: ContextValue {
     }
 }
 
-public struct URLRequestBuilder: CustomStringConvertible {
+public struct URLRequestBuilder: CustomStringConvertible, Sendable {
     public let url: String?
     public let method: Method
     public let headers: [String: String]?
@@ -110,7 +110,7 @@ public struct URLRequestBuilder: CustomStringConvertible {
         Request(self)
     }
     
-    public enum Method: String {
+    public enum Method: String, Sendable {
         case get = "GET"
         case post = "POST"
     }
@@ -131,13 +131,19 @@ extension URLRequestBuilder: ContextValue {
     }
 }
 
-extension Array: ContextValue where Element: ContextValue {
+extension Array where Element: ContextValue {
     public var valueDescription: String {
-        map(\.valueDescription).joined(separator: "\n------------------------------\n")
+        get async {
+            var units = [String]()
+            for item in self {
+                await units.append(item.valueDescription)
+            }
+            return units.joined(separator: "\n------------------------------\n")
+        }
     }
 }
 
-public protocol URLRequestProvider {
+public protocol URLRequestProvider: Sendable {
     /// 生成URLRequest
     func accept(_ value: any URLRequestComsumer) throws -> URLRequest
 }

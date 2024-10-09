@@ -13,10 +13,10 @@ public struct CodeImageRequest: SessionableDirtyware {
     public typealias Input = KeyStore
     public typealias Output = KeyStore
     
-    public var key: AnyHashable
+    public let key: SessionKey
     public var configures: AsyncURLSessionConfiguration
     
-    public init(_ configures: AsyncURLSessionConfiguration, key: AnyHashable = "default") {
+    public init(_ configures: AsyncURLSessionConfiguration, key: SessionKey = .host("default")) {
         self.key = key
         self.configures = configures
     }
@@ -26,7 +26,7 @@ public struct CodeImageRequest: SessionableDirtyware {
             .execute(for: inputValue)
     }
     
-    public func sessionKey(_ value: AnyHashable) -> Self {
+    public func sessionKey(_ value: SessionKey) -> Self {
         .init(configures, key: value)
     }
 }
@@ -35,18 +35,18 @@ public struct CodeImageCustomPathRequest: SessionableDirtyware {
     public typealias Input = KeyStore
     public typealias Output = KeyStore
     
-    public var key: AnyHashable
+    public let key: SessionKey
     public var configures: AsyncURLSessionConfiguration
     public let path: String
     
-    public init(_ path: String, configures: AsyncURLSessionConfiguration, key: AnyHashable = "default") {
+    public init(_ path: String, configures: AsyncURLSessionConfiguration, key: SessionKey = .host("default")) {
         self.key = key
         self.configures = configures
         self.path = path
     }
     
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
-        let lastRequest = try inputValue.request(.lastRequest)
+        let lastRequest = try await inputValue.request(.lastRequest)
         guard let url = lastRequest.url else {
             throw ShellError.badURL(lastRequest.url ?? "")
         }
@@ -54,7 +54,7 @@ public struct CodeImageCustomPathRequest: SessionableDirtyware {
         return inputValue.assign(next, forKey: .output)
     }
     
-    public func sessionKey(_ value: AnyHashable) -> Self {
+    public func sessionKey(_ value: SessionKey) -> Self {
         .init(path, configures: configures, key: value)
     }
     

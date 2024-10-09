@@ -13,18 +13,18 @@ public struct CodeImagePrediction<Reader: CodeReadable>: SessionableDirtyware {
     public typealias Input = KeyStore
     public typealias Output = KeyStore
     
-    public var key: AnyHashable
+    public var key: SessionKey
     public var configures: AsyncURLSessionConfiguration
     public let reader: Reader
     
-    public init(_ configures: AsyncURLSessionConfiguration, key: AnyHashable = "default", reader: Reader) {
+    public init(_ configures: AsyncURLSessionConfiguration, key: SessionKey = .host("default"), reader: Reader) {
         self.key = key
         self.configures = configures
         self.reader = reader
     }
     
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
-        let lastRequest = try inputValue.request(.output)
+        let lastRequest = try await inputValue.request(.output)
         let data = try await DataTask(request: lastRequest, sessionKey: key, configures: configures).asyncValue()
         let code = try await reader.code(data)
         guard code.count == 4 else {
@@ -35,7 +35,7 @@ public struct CodeImagePrediction<Reader: CodeReadable>: SessionableDirtyware {
             .assign(code, forKey: .output)
     }
     
-    public func sessionKey(_ value: AnyHashable) -> Self {
+    public func sessionKey(_ value: SessionKey) -> Self {
         .init(configures, key: value, reader: reader)
     }
 }

@@ -21,7 +21,7 @@ public enum VoidValue: ContextValue {
     }
 }
 
-public struct Delay<T, V>: Condom {
+public struct Delay<T, V>: Condom where T: Sendable, V: Sendable {
     public typealias Input = ValueBox<T>
     public typealias Output = ValueBox<V>
     
