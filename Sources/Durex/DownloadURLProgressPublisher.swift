@@ -20,8 +20,6 @@ import AnyErase
 import FoundationNetworking
 #endif
 
-@preconcurrency import AsyncExtensions
-
 struct OptionalIntWrapper<Item: Equatable> {
     let lhs: Item?
     let rhs: Item
@@ -337,7 +335,7 @@ struct AsyncDownloadURLProgressPublisher: Sendable {
     var delegtor: AsyncURLSessiobDownloadDelegate
     let sessionProvider: AsyncSessionProvider
     
-    func download() async throws -> AnyAsyncSequence<TaskNews> {
+    func download() async throws -> AsyncThrowingStream<TaskNews, Error> {
         let urlRequest = try request.build()
         
         let task = sessionProvider
@@ -348,6 +346,7 @@ struct AsyncDownloadURLProgressPublisher: Sendable {
             task.resume()
             logger.info("get file curl: \n\(urlRequest.cURL())")
         }
+        
         return delegtor.news(sessionProvider, tag: tag)
     }
 }
@@ -358,64 +357,68 @@ extension AsyncURLSessiobDownloadDelegate {
     ///   - session: session对象，每个session对象都保存对应任务tag的对应关系
     ///   - tag: 任务标识的hashValue，因为存储任务标识本身比较消耗内存，使用hashValue代替
     /// - Returns: 下载任务事件
-    func news(_ session: AsyncSessionProvider, tag: TaskTag) -> AnyAsyncSequence<TaskNews> {
-//        AsyncThrowingStream(TaskNews.self, bufferingPolicy: .unbounded) { continuation in
-//            Task.detached {
-//                for try await value in self.filter(session, tag: tag) {
-//                    switch value {
-//                    case .error(let error):
-//                        await session.unbind(tag: tag)
-//                        continuation.finish(throwing: error.error)
-//                        return
-//                    case .file(_):
-//                        await session.unbind(tag: tag)
-//                        continuation.yield(with: .success(value))
-//                        continuation.finish()
-//                        return
-//                    default:
-//                        continuation.yield(with: .success(value))
-//                    }
-//                }
-//            }
-//        }
-//        .eraseToAnyAsyncSequence()
-
-        filter(session, tag: tag)
-            .map({ value in
-                switch value {
-                case .error(_):
-                    await session.unbind(tag: tag)
-//                    throw error.error
-                    return value
-                case .file(_):
-                    await session.unbind(tag: tag)
-                    return value
-                default:
-                    return value
+    func news(_ session: AsyncSessionProvider, tag: TaskTag) -> AsyncThrowingStream<TaskNews, Error> {
+        let stream = statePassthroughSubject
+        return AsyncThrowingStream { continuation in
+            Task {
+                do {
+                    for try await value in stream.subscribe() {
+                        if await session.taskIdentifier(for: tag) == value.identifier {
+                            let next: TaskNews
+                            switch value {
+                            case .error(let error):
+                                await session.unbind(tag: tag)
+                                throw error.error
+                            case .file(_):
+                                await session.unbind(tag: tag)
+                                next = value
+                            default:
+                                next = value
+                            }
+                            continuation.yield(next)
+                        }
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
                 }
-            })
-            .eraseToAnyAsyncSequence()
+            }
+        }
     }
     
-    func filter(_ session: AsyncSessionProvider, tag: TaskTag) -> AnyAsyncSequence<TaskNews> {
-        statePassthroughSubject
-//            .map({ values in
-//                logger.info("recive data for task identifier \(values.identifier)")
-//                return values
-//            })
-            .filter({
-                await session.taskIdentifier(for: tag) == $0.identifier
-            })
-//            .map({ values in
-//                logger.info("filter task \(values.identifier) for tag \(tag)")
-//                return values
-//            })
-            .eraseToAnyAsyncSequence()
+    func filter(_ session: AsyncSessionProvider, tag: TaskTag) -> AsyncThrowingStream<TaskNews, Error> {
+        let stream = statePassthroughSubject
+        return AsyncThrowingStream { continuation in
+            Task {
+                do {
+                    for try await value in stream.subscribe() {
+                        if await session.taskIdentifier(for: tag) == value.identifier {
+                            continuation.yield(value)
+                        }
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+        }
     }
     
-    func news(for identifer: Int) -> AnyAsyncSequence<TaskNews> {
-        statePassthroughSubject
-            .filter({ $0.identifier == identifer })
-            .eraseToAnyAsyncSequence()
+    func news(for identifer: Int) -> AsyncThrowingStream<TaskNews, Error> {
+        let stream = statePassthroughSubject
+        return AsyncThrowingStream { continuation in
+            Task {
+                do {
+                    for try await value in stream.subscribe() {
+                        if value.identifier == identifer {
+                            continuation.yield(value)
+                        }
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+        }
     }
 }

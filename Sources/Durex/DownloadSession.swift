@@ -20,18 +20,20 @@ import FoundationNetworking
 #endif
 
 import Logging
-@preconcurrency import AsyncExtensions
 
 public struct AsyncDownloadSession: AsyncCustomURLSession {
     public let id = UUID()
     public let delegate: AsyncURLSessiobDownloadDelegate
     public let tagsTaskIdenfier: any TaskIdentifiable
     private let urlSessionContainer: URLSessionHolder
+    private let downloads: AsyncSubject<AsyncUpdateNews>
 
     public init(delegate: AsyncURLSessiobDownloadDelegate, tagsTaskIdenfier: any TaskIdentifiable) {
         self.delegate = delegate
         self.tagsTaskIdenfier = tagsTaskIdenfier
         self.urlSessionContainer = URLSessionHolder(delegate)
+        let downloads = AsyncSubject<AsyncUpdateNews>()
+        self.downloads = downloads
     }
 
     public func data(with request: URLRequestBuilder) async throws -> Data {
@@ -45,33 +47,60 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
             .download()
     }
 
-    public func downloadWithProgress(_ request: URLRequestBuilder, tag: TaskTag) async throws -> AnyAsyncSequence<AsyncUpdateNews> {
-        try await AsyncDownloadURLProgressPublisher(request: request, tag: tag, delegtor: delegate, sessionProvider: self)
+    public func downloadWithProgress(_ request: URLRequestBuilder, tag: TaskTag) async throws -> AsyncThrowingStream<AsyncUpdateNews, Error> {
+        let subject = try await AsyncDownloadURLProgressPublisher(request: request, tag: tag, delegtor: delegate, sessionProvider: self)
             .download()
             .map({
                 AsyncUpdateNews(value: $0, tag: tag)
             })
-            .eraseToAnyAsyncSequence()
-    }
-
-    public func downloadNews(_ tag: TaskTag) -> AsyncExtensions.AnyAsyncSequence<AsyncUpdateNews> {
-        delegate.news(self, tag: tag)
-            .map({
-                AsyncUpdateNews(value: $0, tag: tag)
-            })
-            .eraseToAnyAsyncSequence()
-    }
-
-    public func downloadNews() -> AnyAsyncSequence<AsyncUpdateNews> {
-        delegate
-            .statePassthroughSubject
-            .compactMap { item -> AsyncUpdateNews? in
-                guard let tag = await self.tag(for: item.identifier) else {
-                    return nil
+        return AsyncThrowingStream { continuation in
+            Task {
+                do {
+                    for try await item in subject {
+                        continuation.yield(item)
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
                 }
-                return AsyncUpdateNews(value: item, tag: tag)
             }
-            .eraseToAnyAsyncSequence()
+        }
+    }
+
+    public func downloadNews(_ tag: TaskTag) -> AsyncThrowingStream<AsyncUpdateNews, Error> {
+        let subject = delegate.news(self, tag: tag).map { AsyncUpdateNews(value: $0, tag: tag) }
+        return AsyncThrowingStream { continuation in
+            Task {
+                do {
+                    for try await item in subject {
+                        continuation.yield(item)
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+        }
+    }
+
+    public func downloadNews() -> AsyncThrowingStream<AsyncUpdateNews, Error> {
+        let subject = delegate.statePassthroughSubject
+        return AsyncThrowingStream { continuation in
+            Task {
+                do {
+                    for try await item in subject.subscribe() {
+                        guard let tag = await self.tag(for: item.identifier) else {
+                            continue
+                        }
+                        //  AsyncCompactMapSequence<AsyncThrowingStream<AsyncUpdateNews, Error>, AsyncUpdateNews>
+                        continuation.yield(AsyncUpdateNews(value: item, tag: tag))
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+        }
     }
     
     public func requestBySetCookies(with request: URLRequestBuilder) throws -> URLRequestBuilder {

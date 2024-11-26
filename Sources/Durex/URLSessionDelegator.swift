@@ -17,7 +17,7 @@ import FoundationNetworking
 #endif
 
 import Logging
-import AsyncExtensions
+import AnyErase
 
 internal let logger = Logger(label: "com.ascp.download")
 
@@ -107,14 +107,14 @@ final class URLSessionDelegator: NSObject, URLSessionDownloadDelegate, Sendable 
 
 public protocol AsyncURLSessiobDownloadDelegate: URLSessionDownloadDelegate {
     /// 状态更新，可监听此Subject进行下载进度、下载完成、下载失败三种类型类型事件更新
-    var statePassthroughSubject: AsyncPassthroughSubject<TaskNews> { get }
+    var statePassthroughSubject: AsyncSubject<TaskNews> { get }
 }
 
 final class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate {
     //    private let downloadTaskUpdate = PassthroughSubject<SessionTaskState, Never>()
     //    private let downloadTaskCompletion = PassthroughSubject<Result<SessionComplete, DownloadURLError>, Never>()
     /// 状态更新，可监听此Subject进行下载进度、下载完成、下载失败三种类型类型事件更新
-    let statePassthroughSubject: AsyncPassthroughSubject<TaskNews>
+    let statePassthroughSubject: AsyncSubject<TaskNews>
     let cachedFolder: URL
     
 #if DEBUG
@@ -122,7 +122,7 @@ final class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate 
 #endif
     
     init(_ cachedFolder: URL) {
-        self.statePassthroughSubject = .init()
+        self.statePassthroughSubject = AsyncSubject()
         self.cachedFolder = cachedFolder
         super.init()
     }

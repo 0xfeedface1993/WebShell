@@ -89,23 +89,3 @@ extension Publisher where Output: Sendable {
     }
 }
 #endif
-
-//import AsyncExtensions
-//
-//extension PassthroughSubject {
-//    public var asyncSequeue: AnyAsyncSequence<Output> {
-//        AsyncThrowingStream { continuation in
-//            self.sink { completion in
-//                switch completion {
-//                case .finished:
-//                    continuation.finish()
-//                case .failure(let error):
-//                    continuation.finish(throwing: error)
-//                }
-//            } receiveValue: { value in
-//                continuation.yield(with: .success(value))
-//            }
-//        }
-//        .eraseToAnyAsyncSequence()
-//    }
-//}

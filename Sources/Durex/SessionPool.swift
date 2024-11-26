@@ -22,8 +22,6 @@ import FoundationNetworking
 import AnyErase
 #endif
 
-@preconcurrency import AsyncExtensions
-
 actor AsyncSessionPool {
     private var cache = [Sessions: any AsyncCustomURLSession]()
     
@@ -66,7 +64,7 @@ actor AsyncTaskPool {
     private var tasks = [Sessions: (work: TaskValue, id: UUID)]()
     
     @usableFromInline
-    func set<Context>(_ context: Context, subject: AsyncPassthroughSubject<AsyncUpdateNews>, for key: Sessions) where Context: AsyncCustomURLSession {
+    func set<Context>(_ context: Context, subject: AsyncSubject<AsyncUpdateNews>, for key: Sessions) where Context: AsyncCustomURLSession {
         if let bingo = tasks.first(where: { $0.value.id == context.id }) {
             logger.info("pool has observer for session [\(bingo.key)] uuid [\(bingo.value.id)], try add duplicate observation with \(key), pass...")
             return
@@ -86,8 +84,24 @@ actor AsyncTaskPool {
         tasks[key]?.work
     }
     
-    func task(_ updates: AnyAsyncSequence<AsyncUpdateNews>, subject: AsyncPassthroughSubject<AsyncUpdateNews>, forKey key: Sessions) -> TaskValue {
-        let action: @Sendable () async -> Void = {
+    func task(_ updates: AsyncThrowingStream<AsyncUpdateNews, Error>, subject: AsyncSubject<AsyncUpdateNews>, forKey key: Sessions) -> TaskValue {
+//        let action: @Sendable () async -> Void = {
+//            logger.info("observer session \(key)")
+//            defer {
+//                logger.info("finished observer session \(key)")
+//            }
+//            do {
+//                for try await news in updates {
+//                    // logger.info("send news [\(news)] to [\(key)]")
+//                    print("send news [\(news)] to [\(key)]")
+//                    subject.send(news)
+//                }
+//            } catch {
+//                logger.info("catch error from observer session \(key), \(error)")
+//            }
+//        }
+        
+        return TaskValue(operation: {
             logger.info("observer session \(key)")
             defer {
                 logger.info("finished observer session \(key)")
@@ -101,9 +115,7 @@ actor AsyncTaskPool {
             } catch {
                 logger.info("catch error from observer session \(key), \(error)")
             }
-        }
-        
-        return TaskValue(operation: action)
+        })
     }
     
     func removeTask(forKey key: Sessions) {
@@ -117,7 +129,7 @@ actor AsyncTaskPool {
 struct ResoucesPool {
     let sessions = AsyncSessionPool()
     let tasks = AsyncTaskPool()
-    let subject = AsyncPassthroughSubject<AsyncUpdateNews>()
+    let subject = AsyncSubject<AsyncUpdateNews>()
 }
 
 public struct AsyncSession: Sendable {
@@ -182,10 +194,10 @@ public struct AsyncSession: Sendable {
         }
     }
     
-    public func news() -> AnyAsyncSequence<AsyncUpdateNews> {
+    public func news() -> AsyncThrowingStream<AsyncUpdateNews, Error> {
         configures
             .resourcesPool
             .subject
-            .eraseToAnyAsyncSequence()
+            .subscribe()
     }
 }

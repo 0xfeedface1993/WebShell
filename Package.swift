@@ -10,7 +10,7 @@ let swiftSettings: [SwiftSetting] = [.define("COMBINE_LINUX", .when(platforms: p
 let package = Package(
     name: "WebShell",
     platforms: [
-        .macOS(.v10_15),
+        .macOS(.v11),
         .iOS(.v13)
     ],
     products: [
@@ -18,7 +18,6 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.2"),
-        .package(url: "https://github.com/0xfeedface1993/AsyncExtensions.git", from: "1.0.3"),
         .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
         .package(url: "https://github.com/0xfeedface1993/CombineX.git", from: "0.4.1")
     ],
@@ -45,8 +44,7 @@ let package = Package(
             name: "Durex",
             dependencies: [
                 "AnyErase",
-                .product(name: "Crypto", package: "swift-crypto"),
-                .product(name: "AsyncExtensions", package: "AsyncExtensions")
+                .product(name: "Crypto", package: "swift-crypto")
             ],
             swiftSettings: swiftSettings
         ),

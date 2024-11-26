@@ -11,7 +11,7 @@ import Foundation
 import FoundationNetworking
 #endif
 
-import AsyncExtensions
+import AnyErase
 
 public struct AsyncURLSessionConfiguration: Sendable {
     /// 文件临时存放目录，注意需要定时清除测量，或者使用系统tmp目录`FileManager.default.temporaryDirectory`
@@ -54,7 +54,7 @@ public struct AsyncURLSessionConfiguration: Sendable {
     }
     
     /// 所有下载任务进度、完成、失败回调，异常的话就取.error事件，这个AsyncPassthroughSubject不会抛出错误
-    public func allNews() -> AsyncPassthroughSubject<AsyncUpdateNews> {
+    public func allNews() -> AsyncSubject<AsyncUpdateNews> {
         resourcesPool.subject
     }
     
