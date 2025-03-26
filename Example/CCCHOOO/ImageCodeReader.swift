@@ -23,7 +23,7 @@ protocol ImageOberver {
 
 struct ImageCodeReader: CodeReadable {
     let tag: String
-    let completion: (CGImage, String) -> Void
+    let completion: @Sendable (CGImage, String) -> Void
     
     func code(_ data: Data) async throws -> String {
         try await threshold(data)

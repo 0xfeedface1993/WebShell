@@ -35,7 +35,7 @@ struct VerifyCodeImage_Previews: PreviewProvider {
             RedirectEnablePage(.shared)
                 .join(DownPage(.default))
                 .join(PHPLinks(.shared))
-                .join(Saver(.override, configures: .shared)), tag: "default"
+                .join(Saver(.override, configures: .shared, tag: .string("default"))), tag: "default"
         )
         task.url = "https://test.com/download/sss.zip"
         task.progress = 0.522
