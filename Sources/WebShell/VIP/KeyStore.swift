@@ -14,7 +14,7 @@ public enum KeyStoreError: Error {
 
 @globalActor
 public actor KeyStoreActor {
-    public static var shared = KeyStoreActor()
+    public static let shared = KeyStoreActor()
 }
 
 public final class KeyStore: ContextValue {

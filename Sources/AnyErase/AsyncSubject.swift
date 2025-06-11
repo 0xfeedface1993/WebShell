@@ -9,7 +9,7 @@ import Foundation
 
 @globalActor
 actor AsyncSubjectActor {
-    static var shared = AsyncSubjectActor()
+    static let shared = AsyncSubjectActor()
 }
 
 fileprivate actor AsyncSubjectHolder<T: Sendable> {
@@ -26,9 +26,7 @@ fileprivate actor AsyncSubjectHolder<T: Sendable> {
     }
     
     public func completion(_ error: Error?) {
-        guard !isCompleted else { return }
         recentValue = nil
-        isCompleted = true
         for (_, continuation) in continuations {
             if let error {
                 continuation.finish(throwing: error)
@@ -40,33 +38,8 @@ fileprivate actor AsyncSubjectHolder<T: Sendable> {
     }
     
     public func subscribe() -> Subject {
-        if isCompleted {
-            return Subject { continuation in
-                continuation.finish()
-            }
-        } else {
-            let uuid = UUID()
-            return Subject { continuation in
-                continuation.onTermination = { [weak self] finished in
-                    guard let self else { return }
-                    Task {
-                        await self.drop(uuid)
-                    }
-                }
-                continuations[uuid] = continuation
-                logger.trace("add continuation for \(uuid), total \(continuations.count) subscribers")
-                if let recentValue {
-                    continuation.yield(recentValue)
-                }
-            }
-        }
-    }
-    
-    public func subscribe(_ continuation: Subject.Continuation) {
-        if isCompleted {
-            return
-        } else {
-            let uuid = UUID()
+        let uuid = UUID()
+        return Subject { continuation in
             continuation.onTermination = { [weak self] finished in
                 guard let self else { return }
                 Task {
@@ -74,8 +47,23 @@ fileprivate actor AsyncSubjectHolder<T: Sendable> {
                 }
             }
             continuations[uuid] = continuation
-            logger.trace("add continuation for \(uuid), total \(continuations.count) subscribers")
+            logger.info("add continuation for \(uuid), total \(continuations.count) subscribers")
+            if let recentValue {
+                continuation.yield(recentValue)
+            }
         }
+    }
+    
+    public func subscribe(_ continuation: Subject.Continuation) {
+        let uuid = UUID()
+        continuation.onTermination = { [weak self] finished in
+            guard let self else { return }
+            Task {
+                await self.drop(uuid)
+            }
+        }
+        continuations[uuid] = continuation
+        logger.trace("add continuation for \(uuid), total \(continuations.count) subscribers")
     }
     
     private func drop(_ id: UUID) {
@@ -126,27 +114,3 @@ public struct AsyncSubject<T: Sendable>: Sendable {
         await holder.subscribersCount()
     }
 }
-
-//public protocol AsyncValueDummySequence: AsyncSequence {
-//    
-//}
-//
-//public protocol AsyncValuePatchSequence {
-//    associatedtype Failure: Error
-//}
-//
-//public protocol AsyncValueSequence<Element, Failure>: AsyncValueDummySequence, AsyncValuePatchSequence {
-//    
-//}
-//
-//extension AsyncMapSequence: AsyncValueSequence {
-//    
-//}
-//
-//extension AsyncCompactMapSequence: AsyncValueSequence {
-//    
-//}
-//
-//extension AsyncFilterSequence: AsyncValueSequence {
-//    
-//}
