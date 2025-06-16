@@ -59,6 +59,12 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
                     for try await item in subject {
                         logger.info("[\(tag)] recevice \(item.value)")
                         continuation.yield(item)
+                        switch item.value {
+                        case .error, .file:
+                            break
+                        default:
+                            continue
+                        }
                     }
                     logger.info("[\(tag)] finish continuation.")
                     continuation.finish()
@@ -77,6 +83,12 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
                     for try await item in subject {
                         logger.info("[\(tag)] downloadNews yield \(item.value)")
                         continuation.yield(item)
+                        switch item.value {
+                        case .error, .file:
+                            break
+                        default:
+                            continue
+                        }
                     }
                     logger.info("[\(tag)] downloadNews finished")
                     continuation.finish()
@@ -100,6 +112,12 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
                 do {
                     for try await item in subject {
                         continuation.yield(item)
+                        switch item.value {
+                        case .error, .file:
+                            break
+                        default:
+                            continue
+                        }
                     }
                     continuation.finish()
                 } catch {

@@ -88,7 +88,5 @@ public struct AsyncUpdateNews: Sendable {
         self.tag = tag
     }
     
-    public func tagValue<T>() -> T? {
-        tag as? T
-    }
+    public func tagValue() -> TagValue { tag }
 }

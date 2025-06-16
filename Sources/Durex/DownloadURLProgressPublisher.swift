@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by john on 2023/5/2.
 //
@@ -304,8 +304,8 @@ extension SessionTaskState {
         let progress = Progress(totalUnitCount: totalBytesExpectedToWrite)
         progress.completedUnitCount = totalBytesWritten
         let state = TaskNews.State(progress: progress,
-                               filename: task.response?.suggestedFilename,
-                               identifier: tag)
+                                   filename: task.response?.suggestedFilename,
+                                   identifier: tag)
         return .state(state)
     }
 }
@@ -362,30 +362,20 @@ extension AsyncURLSessiobDownloadDelegate {
             await session.taskIdentifier(for: tag) == $0.identifier
         })
         return AsyncThrowingStream { continuation in
-            Task {
-                do {
-                    for try await value in stream {
-                        let next: TaskNews
-                        switch value {
-                        case .error(let error):
-                            await session.unbind(tag: tag)
-                            throw error.error
-                        case .file(_):
-                            logger.info("[\(tag)] download completed.")
-                            await session.unbind(tag: tag)
-                            next = value
-                            continuation.yield(next)
-                            break
-                        default:
-                            logger.info("[\(tag)] download progress update.")
-                            next = value
-                            continuation.yield(next)
-                        }
-                    }
-                    continuation.finish()
-                } catch {
-                    continuation.finish(throwing: error)
+#if DEBUG
+            continuation.onTermination = { termination in
+                switch termination {
+                case .cancelled:
+                    logger.info("[\(tag)] news down stream cancelled")
+                case .finished(let error):
+                    logger.info("[\(tag)] news down stream finished, error: \(error?.localizedDescription ?? "nil")")
+                @unknown default:
+                    fatalError()
                 }
+            }
+#endif
+            Task {
+                await observeNews(stream, continuation: continuation, session: session, tag: tag)
             }
         }
     }
@@ -395,6 +385,18 @@ extension AsyncURLSessiobDownloadDelegate {
             await session.taskIdentifier(for: tag) == $0.identifier
         })
         return AsyncThrowingStream { continuation in
+#if DEBUG
+            continuation.onTermination = { termination in
+                switch termination {
+                case .cancelled:
+                    logger.info("[\(tag)] filter down stream cancelled")
+                case .finished(let error):
+                    logger.info("[\(tag)] filter down stream finished, error: \(error?.localizedDescription ?? "nil")")
+                @unknown default:
+                    fatalError()
+                }
+            }
+#endif
             Task {
                 do {
                     for try await value in stream {
@@ -413,6 +415,18 @@ extension AsyncURLSessiobDownloadDelegate {
             $0.identifier == identifer
         })
         return AsyncThrowingStream { continuation in
+#if DEBUG
+            continuation.onTermination = { termination in
+                switch termination {
+                case .cancelled:
+                    logger.info("[\(identifer)] \(#function) down stream cancelled")
+                case .finished(let error):
+                    logger.info("[\(identifer)] \(#function) down stream finished, error: \(error?.localizedDescription ?? "nil")")
+                @unknown default:
+                    fatalError()
+                }
+            }
+#endif
             Task {
                 do {
                     for try await value in stream {
@@ -424,5 +438,31 @@ extension AsyncURLSessiobDownloadDelegate {
                 }
             }
         }
+    }
+}
+
+fileprivate func observeNews(_ stream: AsyncFilterSequence<AsyncThrowingStream<TaskNews, any Error>>, continuation: AsyncThrowingStream<TaskNews, Error>.Continuation, session: AsyncSessionProvider, tag: TaskTag) async {
+    do {
+        for try await value in stream {
+            let next: TaskNews
+            switch value {
+            case .error(let error):
+                await session.unbind(tag: tag)
+                throw error.error
+            case .file(_):
+                logger.info("[\(tag)] download completed.")
+                await session.unbind(tag: tag)
+                next = value
+                continuation.yield(next)
+                break
+            default:
+                logger.info("[\(tag)] download progress update.")
+                next = value
+                continuation.yield(next)
+            }
+        }
+        continuation.finish()
+    } catch {
+        continuation.finish(throwing: error)
     }
 }

@@ -16,7 +16,14 @@ fileprivate actor AsyncSubjectHolder<T: Sendable> {
     public typealias Subject = AsyncThrowingStream<T, Error>
     private var continuations = [UUID: Subject.Continuation]()
     fileprivate var recentValue: T?
-    private var isCompleted = false
+    
+    deinit {
+        let cached = continuations
+        continuations.removeAll()
+        for (_, continuation) in cached {
+            continuation.finish()
+        }
+    }
     
     public func send(_ value: T) {
         recentValue = value
@@ -40,8 +47,7 @@ fileprivate actor AsyncSubjectHolder<T: Sendable> {
     public func subscribe() -> Subject {
         let uuid = UUID()
         return Subject { continuation in
-            continuation.onTermination = { [weak self] finished in
-                guard let self else { return }
+            continuation.onTermination = { [unowned self] finished in
                 Task {
                     await self.drop(uuid)
                 }
@@ -56,8 +62,7 @@ fileprivate actor AsyncSubjectHolder<T: Sendable> {
     
     public func subscribe(_ continuation: Subject.Continuation) {
         let uuid = UUID()
-        continuation.onTermination = { [weak self] finished in
-            guard let self else { return }
+        continuation.onTermination = { [unowned self] finished in
             Task {
                 await self.drop(uuid)
             }
@@ -78,7 +83,7 @@ fileprivate actor AsyncSubjectHolder<T: Sendable> {
 
 public struct AsyncSubject<T: Sendable>: Sendable {
     public typealias Subject = AsyncThrowingStream<T, Error>
-    private var holder = AsyncSubjectHolder<T>()
+    private let holder = AsyncSubjectHolder<T>()
     
     public var currentValue: T? {
         get async {
