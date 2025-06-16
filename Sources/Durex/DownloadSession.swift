@@ -57,8 +57,10 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
             Task {
                 do {
                     for try await item in subject {
+                        logger.info("[\(tag)] recevice \(item.value)")
                         continuation.yield(item)
                     }
+                    logger.info("[\(tag)] finish continuation.")
                     continuation.finish()
                 } catch {
                     continuation.finish(throwing: error)
@@ -73,8 +75,10 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
             Task {
                 do {
                     for try await item in subject {
+                        logger.info("[\(tag)] downloadNews yield \(item.value)")
                         continuation.yield(item)
                     }
+                    logger.info("[\(tag)] downloadNews finished")
                     continuation.finish()
                 } catch {
                     continuation.finish(throwing: error)
@@ -84,16 +88,18 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
     }
 
     public func downloadNews() -> AsyncThrowingStream<AsyncUpdateNews, Error> {
-        let subject = delegate.statePassthroughSubject
+        let subject = delegate.statePassthroughSubject.subscribe()
+            .compactMap { item -> AsyncUpdateNews? in
+                guard let tag = await tag(for: item.identifier) else {
+                    return nil
+                }
+                return AsyncUpdateNews(value: item, tag: tag)
+            }
         return AsyncThrowingStream { continuation in
             Task {
                 do {
-                    for try await item in subject.subscribe() {
-                        guard let tag = await self.tag(for: item.identifier) else {
-                            continue
-                        }
-                        //  AsyncCompactMapSequence<AsyncThrowingStream<AsyncUpdateNews, Error>, AsyncUpdateNews>
-                        continuation.yield(AsyncUpdateNews(value: item, tag: tag))
+                    for try await item in subject {
+                        continuation.yield(item)
                     }
                     continuation.finish()
                 } catch {

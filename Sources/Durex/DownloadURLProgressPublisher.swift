@@ -358,23 +358,27 @@ extension AsyncURLSessiobDownloadDelegate {
     ///   - tag: 任务标识的hashValue，因为存储任务标识本身比较消耗内存，使用hashValue代替
     /// - Returns: 下载任务事件
     func news(_ session: AsyncSessionProvider, tag: TaskTag) -> AsyncThrowingStream<TaskNews, Error> {
-        let stream = statePassthroughSubject
+        let stream = statePassthroughSubject.subscribe().filter({
+            await session.taskIdentifier(for: tag) == $0.identifier
+        })
         return AsyncThrowingStream { continuation in
             Task {
                 do {
-                    for try await value in stream.subscribe() {
-                        if await session.taskIdentifier(for: tag) == value.identifier {
-                            let next: TaskNews
-                            switch value {
-                            case .error(let error):
-                                await session.unbind(tag: tag)
-                                throw error.error
-                            case .file(_):
-                                await session.unbind(tag: tag)
-                                next = value
-                            default:
-                                next = value
-                            }
+                    for try await value in stream {
+                        let next: TaskNews
+                        switch value {
+                        case .error(let error):
+                            await session.unbind(tag: tag)
+                            throw error.error
+                        case .file(_):
+                            logger.info("[\(tag)] download completed.")
+                            await session.unbind(tag: tag)
+                            next = value
+                            continuation.yield(next)
+                            break
+                        default:
+                            logger.info("[\(tag)] download progress update.")
+                            next = value
                             continuation.yield(next)
                         }
                     }
@@ -387,14 +391,14 @@ extension AsyncURLSessiobDownloadDelegate {
     }
     
     func filter(_ session: AsyncSessionProvider, tag: TaskTag) -> AsyncThrowingStream<TaskNews, Error> {
-        let stream = statePassthroughSubject
+        let stream = statePassthroughSubject.subscribe().filter({
+            await session.taskIdentifier(for: tag) == $0.identifier
+        })
         return AsyncThrowingStream { continuation in
             Task {
                 do {
-                    for try await value in stream.subscribe() {
-                        if await session.taskIdentifier(for: tag) == value.identifier {
-                            continuation.yield(value)
-                        }
+                    for try await value in stream {
+                        continuation.yield(value)
                     }
                     continuation.finish()
                 } catch {
@@ -405,14 +409,14 @@ extension AsyncURLSessiobDownloadDelegate {
     }
     
     func news(for identifer: Int) -> AsyncThrowingStream<TaskNews, Error> {
-        let stream = statePassthroughSubject
+        let stream = statePassthroughSubject.subscribe().filter({
+            $0.identifier == identifer
+        })
         return AsyncThrowingStream { continuation in
             Task {
                 do {
-                    for try await value in stream.subscribe() {
-                        if value.identifier == identifer {
-                            continuation.yield(value)
-                        }
+                    for try await value in stream {
+                        continuation.yield(value)
                     }
                     continuation.finish()
                 } catch {
