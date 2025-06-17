@@ -238,7 +238,7 @@ struct URLSessionHelper {
             cached[cookie.domain] = values
         }
         
-        logger.info("session \(self) has \(cookies.count) host cookies")
+        logger.info("session \(type(of: self)) has \(cookies.count) host cookies")
         
         let info = cached.map {
             let value = $0.value.map({ cookie in

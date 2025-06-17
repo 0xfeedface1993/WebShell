@@ -358,7 +358,8 @@ extension AsyncURLSessiobDownloadDelegate {
     ///   - tag: 任务标识的hashValue，因为存储任务标识本身比较消耗内存，使用hashValue代替
     /// - Returns: 下载任务事件
     func news(_ session: AsyncSessionProvider, tag: TaskTag) -> AsyncThrowingStream<TaskNews, Error> {
-        let stream = statePassthroughSubject.subscribe().filter({
+        let (rawStream, streamID) = statePassthroughSubject.subscribe()
+        let stream = rawStream.filter({
             await session.taskIdentifier(for: tag) == $0.identifier
         })
         return AsyncThrowingStream { continuation in
@@ -381,7 +382,8 @@ extension AsyncURLSessiobDownloadDelegate {
     }
     
     func filter(_ session: AsyncSessionProvider, tag: TaskTag) -> AsyncThrowingStream<TaskNews, Error> {
-        let stream = statePassthroughSubject.subscribe().filter({
+        let (rawStream, streamID) = statePassthroughSubject.subscribe()
+        let stream = rawStream.filter({
             await session.taskIdentifier(for: tag) == $0.identifier
         })
         return AsyncThrowingStream { continuation in
@@ -389,29 +391,23 @@ extension AsyncURLSessiobDownloadDelegate {
             continuation.onTermination = { termination in
                 switch termination {
                 case .cancelled:
-                    logger.info("[\(tag)] filter down stream cancelled")
+                    logger.info("\(tag) filter down stream cancelled")
                 case .finished(let error):
-                    logger.info("[\(tag)] filter down stream finished, error: \(error?.localizedDescription ?? "nil")")
+                    logger.info("\(tag) filter down stream finished, error: \(error?.localizedDescription ?? "nil")")
                 @unknown default:
                     fatalError()
                 }
             }
 #endif
             Task {
-                do {
-                    for try await value in stream {
-                        continuation.yield(value)
-                    }
-                    continuation.finish()
-                } catch {
-                    continuation.finish(throwing: error)
-                }
+                await observeNews(stream, continuation: continuation, session: session, tag: tag)
             }
         }
     }
     
     func news(for identifer: Int) -> AsyncThrowingStream<TaskNews, Error> {
-        let stream = statePassthroughSubject.subscribe().filter({
+        let (rawStream, streamID) = statePassthroughSubject.subscribe()
+        let stream = rawStream.filter({
             $0.identifier == identifer
         })
         return AsyncThrowingStream { continuation in
@@ -431,6 +427,9 @@ extension AsyncURLSessiobDownloadDelegate {
                 do {
                     for try await value in stream {
                         continuation.yield(value)
+                        if value.isCompleted {
+                            break
+                        }
                     }
                     continuation.finish()
                 } catch {
@@ -450,13 +449,13 @@ fileprivate func observeNews(_ stream: AsyncFilterSequence<AsyncThrowingStream<T
                 await session.unbind(tag: tag)
                 throw error.error
             case .file(_):
-                logger.info("[\(tag)] download completed.")
+                logger.info("\(tag) download completed.")
                 await session.unbind(tag: tag)
                 next = value
                 continuation.yield(next)
                 break
             default:
-                logger.info("[\(tag)] download progress update.")
+                logger.info("\(tag) download progress update.")
                 next = value
                 continuation.yield(next)
             }

@@ -198,6 +198,6 @@ public struct AsyncSession: Sendable {
         configures
             .resourcesPool
             .subject
-            .subscribe()
+            .subscribe().0
     }
 }

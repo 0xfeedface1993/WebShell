@@ -1,4 +1,4 @@
-// swift-tools-version:6.0
+// swift-tools-version:5.7
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -10,8 +10,8 @@ let swiftSettings: [SwiftSetting] = [.define("COMBINE_LINUX", .when(platforms: p
 let package = Package(
     name: "WebShell",
     platforms: [
-        .macOS(.v15),
-        .iOS(.v18)
+        .macOS(.v11),
+        .iOS(.v13)
     ],
     products: [
         .library(name: "WebShell", targets: ["WebShell"]),

@@ -100,8 +100,8 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
     }
 
     public func downloadNews() -> AsyncThrowingStream<AsyncUpdateNews, Error> {
-        let subject = delegate.statePassthroughSubject.subscribe()
-            .compactMap { item -> AsyncUpdateNews? in
+        let (raw, streamID) = delegate.statePassthroughSubject.subscribe()
+        let subject = raw.compactMap { item -> AsyncUpdateNews? in
                 guard let tag = await tag(for: item.identifier) else {
                     return nil
                 }

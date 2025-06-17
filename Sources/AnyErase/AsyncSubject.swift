@@ -44,36 +44,36 @@ fileprivate actor AsyncSubjectHolder<T: Sendable> {
         continuations.removeAll()
     }
     
-    public func subscribe() -> Subject {
+    public func subscribe() -> (Subject, UUID) {
         let uuid = UUID()
-        return Subject { continuation in
-            continuation.onTermination = { [unowned self] finished in
-                Task {
-                    await self.drop(uuid)
-                }
+        return (Subject { [weak self] continuation in
+            guard let self else {
+                continuation.finish()
+                return
             }
-            continuations[uuid] = continuation
-            logger.info("add continuation for \(uuid), total \(continuations.count) subscribers")
-            if let recentValue {
-                continuation.yield(recentValue)
+            
+            Task { @concurrent in
+                await self.subscribe(continuation, uuid: uuid)
             }
-        }
+        }, uuid)
     }
     
-    public func subscribe(_ continuation: Subject.Continuation) {
-        let uuid = UUID()
-        continuation.onTermination = { [unowned self] finished in
+    fileprivate func subscribe(_ continuation: Subject.Continuation, uuid: UUID) {
+        continuation.onTermination = { [weak self] finished in
             Task {
-                await self.drop(uuid)
+                await self?.drop(uuid)
             }
         }
         continuations[uuid] = continuation
-        logger.trace("add continuation for \(uuid), total \(continuations.count) subscribers")
+        logger.trace("add continuation for \(uuid), total \(self.continuations.count) subscribers")
+        if let recentValue {
+            continuation.yield(recentValue)
+        }
     }
     
-    private func drop(_ id: UUID) {
-        logger.trace("remove continuation for \(id), total \(continuations.count) subscribers")
-        self.continuations.removeValue(forKey: id)
+    fileprivate func drop(_ id: UUID) {
+        logger.trace("remove continuation for \(id), total \(self.continuations.count) subscribers")
+        continuations.removeValue(forKey: id)
     }
     
     public func subscribersCount() -> Int {
@@ -96,23 +96,24 @@ public struct AsyncSubject<T: Sendable>: Sendable {
     }
     
     public func send(_ value: T) {
-        Task { @AsyncSubjectActor in
+        Task { @concurrent in
             await holder.send(value)
         }
     }
     
     public func completion(_ error: Error?) {
-        Task { @AsyncSubjectActor in
+        Task { @concurrent in
             await holder.completion(error)
         }
     }
     
-    public func subscribe() -> Subject {
-        Subject { continuation in
-            Task { @AsyncSubjectActor in
-                await holder.subscribe(continuation)
+    public func subscribe() -> (Subject, UUID) {
+        let uuid = UUID()
+        return (Subject { continuation in
+            Task { @concurrent in
+                await holder.subscribe(continuation, uuid: uuid)
             }
-        }
+        }, uuid)
     }
     
     public func subscribersCount() async -> Int {

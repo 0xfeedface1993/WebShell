@@ -6,9 +6,14 @@
 //
 
 import Foundation
+#if COMBINE_LINUX && canImport(CombineX)
 import Logging
-
 internal let logger = Logger(label: "com.webshell.anyerase")
+#else
+import OSLog
+internal let logger = Logger(subsystem: "AnyErase", category: "AnyErase")
+#endif
+
 
 #if COMBINE_LINUX && canImport(CombineX)
 import CombineX
@@ -55,7 +60,7 @@ extension Publisher where Output: Sendable {
             let result = try await withCheckedThrowingContinuation({ continuation in
                 cancellable = slide.resume(in: continuation)
             })
-            logger.info("bridge CombineX publisher \(self) dismiss \(String(describing: cancellable)).")
+            logger.info("bridge CombineX publisher \(type(of: self)) dismiss \(String(describing: cancellable)).")
             return result
         }
     }
