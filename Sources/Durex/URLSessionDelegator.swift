@@ -8,18 +8,22 @@
 import Foundation
 #if COMBINE_LINUX && canImport(CombineX)
 import CombineX
+import Logging
+internal let logger = Logger(label: "com.ascp.download")
 #else
 @preconcurrency import Combine
+import OSLog
+internal let logger = Logger(subsystem: "Durex", category: "")
 #endif
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
 
-import Logging
-import AnyErase
 
-internal let logger = Logger(label: "com.ascp.download")
+import AnyErase
+import AsyncAlgorithms
+import AsyncBroadcaster
 
 final class URLSessionDelegator: NSObject, URLSessionDownloadDelegate, Sendable {
     private let downloadTaskUpdate = PassthroughSubject<SessionTaskState, Never>()
@@ -107,14 +111,15 @@ final class URLSessionDelegator: NSObject, URLSessionDownloadDelegate, Sendable 
 
 public protocol AsyncURLSessiobDownloadDelegate: URLSessionDownloadDelegate {
     /// 状态更新，可监听此Subject进行下载进度、下载完成、下载失败三种类型类型事件更新
-    var statePassthroughSubject: AsyncSubject<TaskNews> { get }
+    var statePassthroughSubject: AsyncBroadcaster<TaskNews> { get }
 }
 
 final class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate {
     //    private let downloadTaskUpdate = PassthroughSubject<SessionTaskState, Never>()
     //    private let downloadTaskCompletion = PassthroughSubject<Result<SessionComplete, DownloadURLError>, Never>()
     /// 状态更新，可监听此Subject进行下载进度、下载完成、下载失败三种类型类型事件更新
-    let statePassthroughSubject: AsyncSubject<TaskNews>
+    let stateChannel: AsyncChannel<TaskNews>
+    let statePassthroughSubject: AsyncBroadcaster<TaskNews>
     let cachedFolder: URL
     
 #if DEBUG
@@ -122,9 +127,15 @@ final class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate 
 #endif
     
     init(_ cachedFolder: URL) {
-        self.statePassthroughSubject = AsyncSubject()
+        let channel = AsyncChannel<TaskNews>()
+        self.stateChannel = channel
+        self.statePassthroughSubject = channel.broadcast()
         self.cachedFolder = cachedFolder
         super.init()
+    }
+    
+    deinit {
+        self.stateChannel.finish()
     }
     
 #if DEBUG
@@ -146,12 +157,16 @@ final class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate 
             try FileManager.default.moveItem(at: location, to: url)
             logger.info("move tmp file to \(location)")
             let news = SessionComplete(task: downloadTask, data: url).fileStone()
-            statePassthroughSubject.send(news)
+            Task {
+                await stateChannel.send(news)
+            }
         } catch {
             let failure = UpdateFailure(error: error, identifier: downloadTask.taskIdentifier)
             let news = TaskNews.error(failure)
             logger.info("\(#function) download file task [\(downloadTask.taskIdentifier)] failed \(error), \n--------------\n curl: \(downloadTask.currentRequest?.cURL(pretty: true) ??  "Ooops!") ")
-            statePassthroughSubject.send(news)
+            Task {
+                await stateChannel.send(news)
+            }
         }
         
         //        #if DEBUG
@@ -180,7 +195,9 @@ final class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate 
             .totalBytesExpectedToWrite(totalBytesExpectedToWrite)
             .newsState()
         let news = TaskNews.state(state)
-        statePassthroughSubject.send(news)
+        Task {
+            await stateChannel.send(news)
+        }
     }
     
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
@@ -188,7 +205,9 @@ final class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate 
             let failure = UpdateFailure(error: error, identifier: task.taskIdentifier)
             let news = TaskNews.error(failure)
             logger.info("\(#function) download file task [\(task.taskIdentifier)] failed \(error), \n--------------\n curl: \(task.currentRequest?.cURL(pretty: true) ??  "Ooops!") ")
-            statePassthroughSubject.send(news)
+            Task {
+                await stateChannel.send(news)
+            }
             return
         }
     }

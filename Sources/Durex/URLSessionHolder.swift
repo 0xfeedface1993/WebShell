@@ -35,7 +35,7 @@ struct URLSessionHolder: Sendable {
             self.cookies = storage
         }   else    {
             let message = "empty httpCookieStorage in configure \(configure)."
-            logger.error(.init(stringLiteral: message))
+            logger.error("\(message)")
             fatalError(message)
         }
 //        self.session = URLSession.shared
@@ -61,7 +61,7 @@ struct URLSessionHolder: Sendable {
             self.cookies = storage
         }   else    {
             let message = "empty httpCookieStorage in configure \(configure)."
-            logger.error(.init(stringLiteral: message))
+            logger.error("\(message)")
             fatalError(message)
         }
         

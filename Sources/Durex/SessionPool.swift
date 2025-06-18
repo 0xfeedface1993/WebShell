@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import AsyncAlgorithms
+import AsyncBroadcaster
 
 #if COMBINE_LINUX && canImport(CombineX)
 import CombineX
@@ -33,7 +35,7 @@ actor AsyncSessionPool {
     @usableFromInline
     func remove(_ key: Sessions) {
         cache.removeValue(forKey: key)
-        logger.info("remove session context for \(key)")
+        logger.info("remove session context for \("\(key)")")
     }
     
     @usableFromInline
@@ -64,9 +66,9 @@ actor AsyncTaskPool {
     private var tasks = [Sessions: (work: TaskValue, id: UUID)]()
     
     @usableFromInline
-    func set<Context>(_ context: Context, subject: AsyncSubject<AsyncUpdateNews>, for key: Sessions) where Context: AsyncCustomURLSession {
+    func set<Context>(_ context: Context, subject: AsyncChannel<AsyncUpdateNews>, for key: Sessions) where Context: AsyncCustomURLSession {
         if let bingo = tasks.first(where: { $0.value.id == context.id }) {
-            logger.info("pool has observer for session [\(bingo.key)] uuid [\(bingo.value.id)], try add duplicate observation with \(key), pass...")
+            logger.info("pool has observer for session [\("\(bingo.key)")] uuid [\(bingo.value.id)], try add duplicate observation with \("\(key)"), pass...")
             return
         }
         let updates = context.downloadNews()
@@ -84,7 +86,7 @@ actor AsyncTaskPool {
         tasks[key]?.work
     }
     
-    func task(_ updates: AsyncThrowingStream<AsyncUpdateNews, Error>, subject: AsyncSubject<AsyncUpdateNews>, forKey key: Sessions) -> TaskValue {
+    func task(_ updates: sending any AsyncSequence<AsyncUpdateNews, Never>, subject: AsyncChannel<AsyncUpdateNews>, forKey key: Sessions) -> TaskValue {
 //        let action: @Sendable () async -> Void = {
 //            logger.info("observer session \(key)")
 //            defer {
@@ -102,18 +104,14 @@ actor AsyncTaskPool {
 //        }
         
         return TaskValue(operation: {
-            logger.info("observer session \(key)")
+            logger.info("observer session \("\(key)")")
             defer {
-                logger.info("finished observer session \(key)")
+                logger.info("finished observer session \("\(key)")")
             }
-            do {
-                for try await news in updates {
-                    // logger.info("send news [\(news)] to [\(key)]")
-                    print("send news [\(news)] to [\(key)]")
-                    subject.send(news)
-                }
-            } catch {
-                logger.info("catch error from observer session \(key), \(error)")
+            for await news in updates {
+                // logger.info("send news [\(news)] to [\(key)]")
+                print("send news [\(news)] to [\(key)]")
+                await subject.send(news)
             }
         })
     }
@@ -121,7 +119,7 @@ actor AsyncTaskPool {
     func removeTask(forKey key: Sessions) {
         if let oldTask = tasks[key]?.work, !oldTask.isCancelled {
             oldTask.cancel()
-            logger.info("remove task observer for session \(key)")
+            logger.info("remove task observer for session \("\(key)")")
         }
     }
 }
@@ -129,7 +127,7 @@ actor AsyncTaskPool {
 struct ResoucesPool {
     let sessions = AsyncSessionPool()
     let tasks = AsyncTaskPool()
-    let subject = AsyncSubject<AsyncUpdateNews>()
+    let subject = AsyncChannel<AsyncUpdateNews>()
 }
 
 public struct AsyncSession: Sendable {
@@ -185,19 +183,19 @@ public struct AsyncSession: Sendable {
         let sessionKey = Sessions(key.hashValue)
         do {
             let context = try await configures.resourcesPool.sessions.take(forKey: sessionKey)
-            logger.info("got session \(context) for \(sessionKey)")
+            logger.info("got session \("\(context)") for \("\(sessionKey)")")
             return context
         } catch {
-            logger.error("take session for \(sessionKey) failed, \(error)")
-            logger.info("use default session \(configures.defaultSession)")
+            logger.error("take session for \("\(sessionKey)") failed, \(error)")
+            logger.info("use default session \("\(configures.defaultSession)")")
             return configures.defaultSession
         }
     }
     
-    public func news() -> AsyncThrowingStream<AsyncUpdateNews, Error> {
-        configures
-            .resourcesPool
-            .subject
-            .subscribe().0
+    public func news() -> AsyncBroadcaster<AsyncUpdateNews> {
+        AsyncBroadcaster(
+            replay: .latest(1),
+            sequence: configures.resourcesPool.subject
+        )
     }
 }

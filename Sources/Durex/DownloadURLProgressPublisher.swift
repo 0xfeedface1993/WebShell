@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import AsyncBroadcaster
+
 #if COMBINE_LINUX && canImport(CombineX)
 import CombineX
 #else
@@ -335,7 +337,7 @@ struct AsyncDownloadURLProgressPublisher: Sendable {
     var delegtor: AsyncURLSessiobDownloadDelegate
     let sessionProvider: AsyncSessionProvider
     
-    func download() async throws -> AsyncThrowingStream<TaskNews, Error> {
+    func download() async throws -> sending any AsyncSequence<TaskNews, Never> {
         let urlRequest = try request.build()
         
         let task = sessionProvider
@@ -357,90 +359,27 @@ extension AsyncURLSessiobDownloadDelegate {
     ///   - session: session对象，每个session对象都保存对应任务tag的对应关系
     ///   - tag: 任务标识的hashValue，因为存储任务标识本身比较消耗内存，使用hashValue代替
     /// - Returns: 下载任务事件
-    func news(_ session: AsyncSessionProvider, tag: TaskTag) -> AsyncThrowingStream<TaskNews, Error> {
-        let (rawStream, streamID) = statePassthroughSubject.subscribe()
-        let stream = rawStream.filter({
-            await session.taskIdentifier(for: tag) == $0.identifier
-        })
-        return AsyncThrowingStream { continuation in
-#if DEBUG
-            continuation.onTermination = { termination in
-                switch termination {
-                case .cancelled:
-                    logger.info("[\(tag)] news down stream cancelled")
-                case .finished(let error):
-                    logger.info("[\(tag)] news down stream finished, error: \(error?.localizedDescription ?? "nil")")
-                @unknown default:
-                    fatalError()
-                }
-            }
-#endif
-            Task {
-                await observeNews(stream, continuation: continuation, session: session, tag: tag)
-            }
-        }
+    func news(_ session: AsyncSessionProvider, tag: TaskTag) -> sending any AsyncSequence<TaskNews, Never> {
+        statePassthroughSubject
+            .filter({
+                await session.taskIdentifier(for: tag) == $0.identifier
+            })
     }
     
-    func filter(_ session: AsyncSessionProvider, tag: TaskTag) -> AsyncThrowingStream<TaskNews, Error> {
-        let (rawStream, streamID) = statePassthroughSubject.subscribe()
-        let stream = rawStream.filter({
-            await session.taskIdentifier(for: tag) == $0.identifier
-        })
-        return AsyncThrowingStream { continuation in
-#if DEBUG
-            continuation.onTermination = { termination in
-                switch termination {
-                case .cancelled:
-                    logger.info("\(tag) filter down stream cancelled")
-                case .finished(let error):
-                    logger.info("\(tag) filter down stream finished, error: \(error?.localizedDescription ?? "nil")")
-                @unknown default:
-                    fatalError()
-                }
-            }
-#endif
-            Task {
-                await observeNews(stream, continuation: continuation, session: session, tag: tag)
-            }
-        }
+    func filter(_ session: AsyncSessionProvider, tag: TaskTag) -> sending any AsyncSequence<TaskNews, Never> {
+        statePassthroughSubject
+            .filter({
+                await session.taskIdentifier(for: tag) == $0.identifier
+            })
     }
     
-    func news(for identifer: Int) -> AsyncThrowingStream<TaskNews, Error> {
-        let (rawStream, streamID) = statePassthroughSubject.subscribe()
-        let stream = rawStream.filter({
-            $0.identifier == identifer
-        })
-        return AsyncThrowingStream { continuation in
-#if DEBUG
-            continuation.onTermination = { termination in
-                switch termination {
-                case .cancelled:
-                    logger.info("[\(identifer)] \(#function) down stream cancelled")
-                case .finished(let error):
-                    logger.info("[\(identifer)] \(#function) down stream finished, error: \(error?.localizedDescription ?? "nil")")
-                @unknown default:
-                    fatalError()
-                }
-            }
-#endif
-            Task {
-                do {
-                    for try await value in stream {
-                        continuation.yield(value)
-                        if value.isCompleted {
-                            break
-                        }
-                    }
-                    continuation.finish()
-                } catch {
-                    continuation.finish(throwing: error)
-                }
-            }
-        }
+    func news(for identifer: Int) -> sending any AsyncSequence<TaskNews, Never> {
+        statePassthroughSubject
+            .filter({ $0.identifier == identifer })
     }
 }
 
-fileprivate func observeNews(_ stream: AsyncFilterSequence<AsyncThrowingStream<TaskNews, any Error>>, continuation: AsyncThrowingStream<TaskNews, Error>.Continuation, session: AsyncSessionProvider, tag: TaskTag) async {
+fileprivate func observeNews(_ stream: any AsyncSequence<TaskNews, Never>, continuation: AsyncThrowingStream<TaskNews, Error>.Continuation, session: AsyncSessionProvider, tag: TaskTag) async {
     do {
         for try await value in stream {
             let next: TaskNews

@@ -20,19 +20,21 @@ import FoundationNetworking
 #endif
 
 import Logging
+import AsyncBroadcaster
+import AsyncAlgorithms
 
 public struct AsyncDownloadSession: AsyncCustomURLSession {
     public let id = UUID()
     public let delegate: AsyncURLSessiobDownloadDelegate
     public let tagsTaskIdenfier: any TaskIdentifiable
     private let urlSessionContainer: URLSessionHolder
-    private let downloads: AsyncSubject<AsyncUpdateNews>
+    private let downloads: AsyncChannel<AsyncUpdateNews>
 
     public init(delegate: AsyncURLSessiobDownloadDelegate, tagsTaskIdenfier: any TaskIdentifiable) {
         self.delegate = delegate
         self.tagsTaskIdenfier = tagsTaskIdenfier
         self.urlSessionContainer = URLSessionHolder(delegate)
-        let downloads = AsyncSubject<AsyncUpdateNews>()
+        let downloads = AsyncChannel<AsyncUpdateNews>()
         self.downloads = downloads
     }
 
@@ -47,84 +49,65 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
             .download()
     }
 
-    public func downloadWithProgress(_ request: URLRequestBuilder, tag: TaskTag) async throws -> AsyncThrowingStream<AsyncUpdateNews, Error> {
-        let subject = try await AsyncDownloadURLProgressPublisher(request: request, tag: tag, delegtor: delegate, sessionProvider: self)
-            .download()
-            .map({
-                AsyncUpdateNews(value: $0, tag: tag)
-            })
-        return AsyncThrowingStream { continuation in
-            Task {
+    public func downloadWithProgress(_ request: URLRequestBuilder, tag: TaskTag) async throws -> sending any AsyncSequence<AsyncUpdateNews, Never> {
+        let publisher = AsyncDownloadURLProgressPublisher(request: request, tag: tag, delegtor: delegate, sessionProvider: self)
+        return AsyncStream { continuation in
+            let task = Task {
                 do {
-                    for try await item in subject {
-                        logger.info("[\(tag)] recevice \(item.value)")
-                        continuation.yield(item)
-                        switch item.value {
+                    for await item in try await publisher.download() {
+                        logger.info("[\("\(tag)")] recevice \("\(item)")")
+                        continuation.yield(AsyncUpdateNews(value: item, tag: tag))
+                        switch item {
                         case .error, .file:
                             break
                         default:
                             continue
                         }
                     }
-                    logger.info("[\(tag)] finish continuation.")
-                    continuation.finish()
                 } catch {
-                    continuation.finish(throwing: error)
+                    continuation.yield(
+                        AsyncUpdateNews(value: .error(.init(error: error, identifier: 900)), tag: tag)
+                    )
                 }
+                logger.info("[\("\(tag)")] finish continuation.")
+                continuation.finish()
+            }
+            continuation.onTermination = { t in
+                task.cancel()
             }
         }
     }
 
-    public func downloadNews(_ tag: TaskTag) -> AsyncThrowingStream<AsyncUpdateNews, Error> {
-        let subject = delegate.news(self, tag: tag).map { AsyncUpdateNews(value: $0, tag: tag) }
-        return AsyncThrowingStream { continuation in
-            Task {
-                do {
-                    for try await item in subject {
-                        logger.info("[\(tag)] downloadNews yield \(item.value)")
-                        continuation.yield(item)
-                        switch item.value {
-                        case .error, .file:
-                            break
-                        default:
-                            continue
-                        }
-                    }
-                    logger.info("[\(tag)] downloadNews finished")
-                    continuation.finish()
-                } catch {
-                    continuation.finish(throwing: error)
+    public func downloadNews(_ tag: TaskTag) -> sending any AsyncSequence<AsyncUpdateNews, Never> {
+        let (stream, continuation) = AsyncStream<AsyncUpdateNews>.makeStream(bufferingPolicy: .bufferingNewest(1))
+        let task = Task {
+            for await item in delegate.news(self, tag: tag) {
+                logger.info("[\("\(tag)")] downloadNews yield \("\(item)")")
+                continuation.yield(AsyncUpdateNews(value: item, tag: tag))
+                switch item {
+                case .error, .file:
+                    break
+                default:
+                    continue
                 }
             }
+            logger.info("[\("\(tag)")] downloadNews finished")
+            continuation.finish()
         }
+        continuation.onTermination = { t in
+            task.cancel()
+        }
+        return stream
     }
-
-    public func downloadNews() -> AsyncThrowingStream<AsyncUpdateNews, Error> {
-        let (raw, streamID) = delegate.statePassthroughSubject.subscribe()
-        let subject = raw.compactMap { item -> AsyncUpdateNews? in
+    
+    public func downloadNews() -> any AsyncSequence<AsyncUpdateNews, Never> {
+        delegate.statePassthroughSubject
+            .compactMap { item -> AsyncUpdateNews? in
                 guard let tag = await tag(for: item.identifier) else {
                     return nil
                 }
                 return AsyncUpdateNews(value: item, tag: tag)
             }
-        return AsyncThrowingStream { continuation in
-            Task {
-                do {
-                    for try await item in subject {
-                        continuation.yield(item)
-                        switch item.value {
-                        case .error, .file:
-                            break
-                        default:
-                            continue
-                        }
-                    }
-                    continuation.finish()
-                } catch {
-                    continuation.finish(throwing: error)
-                }
-            }
-        }
     }
     
     public func requestBySetCookies(with request: URLRequestBuilder) throws -> URLRequestBuilder {
@@ -149,7 +132,7 @@ extension AsyncDownloadSession: AsyncSessionProvider {
     public func unbind(tag: TaskTag) async {
         let represemtTag = tag
 //        logger.info("unbind tag \(represemtTag)")
-        await tagsTaskIdenfier.remove(tag: represemtTag)
+//        await tagsTaskIdenfier.remove(tag: represemtTag)
     }
     
     public func bind(task: TaskIdentifier, tag: TaskTag) async {

@@ -12,6 +12,7 @@ import FoundationNetworking
 #endif
 
 import AnyErase
+import AsyncBroadcaster
 
 public struct AsyncURLSessionConfiguration: Sendable, ContextValue {
     /// 文件临时存放目录，注意需要定时清除测量，或者使用系统tmp目录`FileManager.default.temporaryDirectory`
@@ -54,8 +55,8 @@ public struct AsyncURLSessionConfiguration: Sendable, ContextValue {
     }
     
     /// 所有下载任务进度、完成、失败回调，异常的话就取.error事件，这个AsyncPassthroughSubject不会抛出错误
-    public func allNews() -> AsyncSubject<AsyncUpdateNews> {
-        resourcesPool.subject
+    public func allNews() -> AsyncBroadcaster<AsyncUpdateNews> {
+        resourcesPool.subject.broadcast()
     }
     
     /// 生成新的内部session对象，此对象和defaultsession相似, 共用cacheFolder，如需要自定义session则需自行遵循AsyncCustomURLSession创建新的对象
