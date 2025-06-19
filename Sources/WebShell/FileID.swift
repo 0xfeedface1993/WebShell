@@ -31,6 +31,10 @@ extension FileIDFinder where Self == FileIDMatch {
         FileIDMatch("\\-(\\w+)\\.\\w+$")
     }
     
+    public static var inQueryfileID: Self {
+        FileIDMatch("=(\\d+)$")
+    }
+    
     public static var loadDownAddr1: Self {
         FileIDMatch("load_down_addr1\\('([\\w\\d]+)'\\)")
     }
@@ -53,6 +57,10 @@ extension FileIDFinder where Self == FileIDMatch {
     
     public static var href: Self {
         FileIDMatch("href=\"([^\"]+)\"")
+    }
+    
+    public static var httpHref: Self {
+        FileIDMatch("href=\"(https?:[^\"]+)\"")
     }
     
     public static var addRef: Self {

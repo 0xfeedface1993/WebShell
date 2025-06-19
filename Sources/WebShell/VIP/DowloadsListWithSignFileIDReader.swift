@@ -8,16 +8,20 @@
 import Foundation
 import Durex
 
-public struct DowloadsListWithSignFileIDReader: SessionableDirtyware {
+public struct DowloadsListWithSignFileIDReader<Builder: DownloadRequestBuilder>: SessionableDirtyware {
     public typealias Input = KeyStore
     public typealias Output = KeyStore
     
     public let key: SessionKey
     public var configures: AsyncURLSessionConfiguration
+    public let builder: Builder
+    public let finder: BatchSearchFinder
     
-    public init(_ configures: AsyncURLSessionConfiguration, key: SessionKey) {
+    public init(_ configures: AsyncURLSessionConfiguration, builder: Builder, finder: BatchSearchFinder, key: SessionKey) {
         self.key = key
         self.configures = configures
+        self.builder = builder
+        self.finder = finder
     }
     
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
@@ -37,15 +41,15 @@ public struct DowloadsListWithSignFileIDReader: SessionableDirtyware {
 //            .assign(next, forKey: .output)
 //            .assign(request, forKey: .lastRequest)
         try await URLRequestPageReader(.output, configures: configures, key: key)
-            .join(FindStringsInFile(.htmlFile, forKey: .output, finder: .href))
+            .join(FindStringsInFile(.htmlFile, forKey: .output, finder: finder))
             .join(
-                DownloadFileRequests(builder: SignPHPFileDownload())
+                DownloadFileRequests(builder: builder)
             )
             .execute(for: inputValue)
     }
     
     public func sessionKey(_ value: SessionKey) -> Self {
-        .init(configures, key: value)
+        .init(configures, builder: builder, finder: finder, key: value)
     }
 }
 

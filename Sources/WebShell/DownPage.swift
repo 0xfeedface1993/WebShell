@@ -66,11 +66,44 @@ public struct ReferDownPageRequest {
             .add(value: "text/plain, */*; q=0.01", forKey: "Accept")
             .add(value: "XMLHttpRequest", forKey: "X-Requested-With")
             .add(value: "zh-CN,zh-Hans;q=0.9", forKey: "Accept-Language")
-            .add(value: "application/x-www-form-urlencoded; charset=UTF-8", forKey: "Content-Type")
-            .add(value: http, forKey: "Origin")
+            .add(value: LinkRequestHeader.urlencodedContentType.value, forKey: LinkRequestHeader.urlencodedContentType.key.rawValue)
+            .add(value: http, forKey: LinkRequestHeader.Key.origin.rawValue)
             .add(value: userAgent, forKey: "User-Agent")
             .add(value: refer, forKey: "Referer")
             .body("action=\(action)&file_id=\(fileid)".data(using: .utf8) ?? Data())
+    }
+}
+
+public struct FormDownloadLinksRequest {
+    enum Param: Sendable {
+        case checkCode(fileID: String, action: String, code: String)
+    }
+    
+    let param: Param
+    let refer: String
+    let scheme: String
+    let host: String
+    
+    func make() -> URLRequestBuilder {
+        let http = "\(scheme)://\(host)"
+        let url = "\(http)/ajax.php"
+        var builder = URLRequestBuilder(url)
+            .method(.post)
+            .add(value: LinkRequestHeader.allCapAccept.value, forKey: LinkRequestHeader.allCapAccept.key.rawValue)
+            .add(value: "XMLHttpRequest", forKey: "X-Requested-With")
+            .add(value: "zh-CN,zh-Hans;q=0.9", forKey: LinkRequestHeader.enUSAcceptLanguage.key.rawValue)
+            .add(value: LinkRequestHeader.urlencodedContentType.value, forKey: LinkRequestHeader.urlencodedContentType.key.rawValue)
+            .add(value: http, forKey: LinkRequestHeader.Key.origin.rawValue)
+            .add(value: userAgent, forKey: "User-Agent")
+            .add(value: refer, forKey: "Referer")
+            .add(value: "u=3, i", forKey: LinkRequestHeader.priority.key.rawValue)
+        switch param {
+        case .checkCode(let fileID, let action, let code):
+            builder = builder.body(
+                "action=\(action)&file_id=\(fileID)&code=\(code)".data(using: .utf8) ?? Data()
+            )
+        }
+        return builder
     }
 }
 

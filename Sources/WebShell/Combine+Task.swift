@@ -50,6 +50,8 @@ public enum ShellError: Error {
     case invalidCode(String)
     /// 没有验证码解析模块
     case noCodeReader
+    /// 没有有效的下载的页链接
+    case noPageLink
 }
 
 #if DEBUG

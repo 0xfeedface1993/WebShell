@@ -9,11 +9,21 @@
 import SwiftUI
 import WebShell
 import Durex
+import AsyncAlgorithms
 
 struct ContentView: View {
     @State var list = [DemoTaskObject]()
+    let userInput = AsyncChannel<String>()
+    let completion = AsyncChannel<(CGImage, String)>()
+    @State private var textInput = ""
     
     var body: some View {
+         table
+//        UnitTestActionsView()
+    }
+    
+    @ViewBuilder
+    var table: some View {
 //        ScrollView {
 //            VStack {
 ////                ForEach(list, id: \.url) { object in
@@ -42,37 +52,49 @@ struct ContentView: View {
 //                }
 //            }
 //        }
-        Table(list) {
-            TableColumn("网盘") { row in
-                DummyTextView(object: row, keypath: \.title)
+        VStack {
+            Table(list) {
+                TableColumn("网盘") { row in
+                    DummyTextView(object: row, keypath: \.title)
+                }
+                .width(min: 40)
+                TableColumn("下载地址") { row in
+    //                DummyTextView(object: row, keypath: \.url)
+                    URLTextFieldView(object: row, keypath: \.url)
+                }
+                .width(min: 100)
+                TableColumn("状态") { row in
+                    DummyTextView(object: row, keypath: \.state)
+                }
+                .width(min: 40)
+                TableColumn("文件大小") { row in
+                    DummyTextView(object: row, keypath: \.fileSize)
+                }
+                .width(min: 40)
+                TableColumn("下载进度") { row in
+                    DummyTextView(object: row, keypath: \.formatterProgress)
+                }
+                .width(min: 80)
+                TableColumn("下载按钮") { row in
+                    DemoListItemView(object: row)
+                }
+                .width(min: 40)
+                TableColumn("验证码") { row in
+                    VerifyCodeImage(object: row)
+                }
+                .width(min: 40)
             }
-            .width(min: 40)
-            TableColumn("下载地址") { row in
-//                DummyTextView(object: row, keypath: \.url)
-                URLTextFieldView(object: row, keypath: \.url)
-            }
-            .width(min: 100)
-            TableColumn("状态") { row in
-                DummyTextView(object: row, keypath: \.state)
-            }
-            .width(min: 40)
-            TableColumn("文件大小") { row in
-                DummyTextView(object: row, keypath: \.fileSize)
-            }
-            .width(min: 40)
-            TableColumn("下载进度") { row in
-                DummyTextView(object: row, keypath: \.formatterProgress)
-            }
-            .width(min: 80)
-            TableColumn("下载按钮") { row in
-                DemoListItemView(object: row)
-            }
-            .width(min: 40)
-            TableColumn("验证码") { row in
-                VerifyCodeImage(object: row)
-            }
-            .width(min: 40)
+            
+            TextField("Code", text: $textInput)
         }
+        .onChange(of: textInput, { oldValue, newValue in
+            if newValue.count == 4 {
+                Task {
+                    await userInput.send(newValue)
+                    textInput = ""
+                }
+            }
+        })
         .task {
             list = [
                 .init(
@@ -323,13 +345,30 @@ struct ContentView: View {
 //                .title("爱优盘-vip")
 //                .url("https://www.iycdn.com/file-213019.html"),
                     .init(
-                        RedirectEnablePage(.shared, key: .host("n"))
-                            .join(DownPage(.default))
-                            .join(PHPLinks(.shared, key: .host("n")))
-                            .join(Saver(.override, configures: .shared, tag: .string("n"), key: .host("n"))), tag: "e"
+//                        build116LoginCommands(.shared, key: .host("116"))
+                        RedirectFollowPage(.shared, key: .host("116"))
+                            .join(EraseOutValue(to: .fileidURL))
+                            .join(
+                                FileIDReader(finder: FileIDMatch.inQueryfileID)
+                            )
+                            .join(ExternalValueReader(AsyncURLSessionConfiguration.shared, forKey: .configures))
+                            .join(
+                                CodeImageRequest(.shared, path: .imageCodePHP, key: .host("116"))
+                            )
+                            .join(
+                                CodeImagePrediction(.shared, key: .host("116"), reader: UserImageCodeReader(tag: "116", userInput: userInput, completion: completion))
+                            )
+                            .join(AjaxFileListPageRequest(.checkCode))
+                            .join(
+                                DowloadsListWithSignFileIDReader(.shared, builder: File116Download(), finder: .httpHref, key: .host("116"))
+                            )
+                            .join(
+                                FileDefaultSaver(.override, configures: .shared, tag: .string("116"), key: .host("116"))
+                            ),
+                        tag: "116"
                     )
                     .title("116pan-free")
-                    .url("https://www.116pan.com/viewfile.php?file_id=247904"),
+                    .url("https://www.116pan.com/viewfile.php?file_id=527832"),
                     .init(
                         RedirectFollowPage(.shared, key: .host("n"))
                             .join(EraseOutValue(to: .fileidURL))
@@ -339,7 +378,7 @@ struct ContentView: View {
                             )
                             .join(ExternalValueReader(AsyncURLSessionConfiguration.shared, forKey: .configures))
                             .join(
-                                LoginPage([:])
+                                LoginPage(["action": "login"])
                                     .join(URLRequestPageReader(.output, configures: .shared, key: .host("n")))
                                     .join(
                                         FindStringInFile(.htmlFile, forKey: .formhash, finder: .formhash)
@@ -358,19 +397,39 @@ struct ContentView: View {
                                         await !v2Exists(value)
                                     })
                             )
-                            .join(AjaxFileListPageRequest("check_code"))
-                            .join(DowloadsListWithSignFileIDReader(.shared, key: .host("n")))
-                            .join(FileDefaultSaver(.override, configures: .shared, tag: .string("n"), key: .host("n")))
+                            .join(AjaxFileListPageRequest(.checkCode))
+                            .join(
+                                DowloadsListWithSignFileIDReader(.shared, builder: File116Download(), finder: .href, key: .host("116"))
+                            )
+                            .join(FileDefaultSaver(.override, configures: .shared, tag: .string("116"), key: .host("116")))
                         , tag: "n"
                     )
                     .title("116pan-vip")
-                    .url("https://www.116pan.com/viewfile.php?file_id=247904"),
+                    .url("https://www.116pan.com/viewfile.php?file_id=527832"),
             ]
+            
+            Task {
+                for await (image, tag) in self.completion {
+                    let object = list.first(where: { $0.tag == tag })
+                    object?.imageCode = image
+                    object?.objectWillChange.send()
+                }
+            }
         }
         .frame(minWidth: 500, minHeight: 200)
     }
     
     func codeReader(for tag: String) -> ImageCodeReader {
+        ImageCodeReader(tag: tag, completion: { image, tag in
+            Task { @MainActor in
+                let object = list.first(where: { $0.tag == tag })
+                object?.imageCode = image
+                object?.objectWillChange.send()
+            }
+        })
+    }
+    
+    func manualCodeReader(for tag: String) -> ImageCodeReader {
         ImageCodeReader(tag: tag, completion: { image, tag in
             Task { @MainActor in
                 let object = list.first(where: { $0.tag == tag })

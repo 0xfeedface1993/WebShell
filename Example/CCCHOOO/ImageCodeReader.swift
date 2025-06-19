@@ -11,6 +11,7 @@ import WebShell
 import Vision
 import CoreImage
 import CoreImage.CIFilterBuiltins
+import AsyncAlgorithms
 
 enum ImageCodeReaderError: Error {
     case noImage
@@ -102,5 +103,27 @@ extension VNImageRequestHandler {
                 continuation.resume(with: .failure(error))
             }
         }
+    }
+}
+
+struct UserImageCodeReader: CodeReadable {
+    let tag: String
+    let userInput: AsyncChannel<String>
+    let completion: AsyncChannel<(CGImage, String)>
+    
+    func code(_ data: Data) async throws -> String {
+        // 加载输入图像
+        let inputImage = CIImage(data: data)
+        
+        // 创建 CIContext 来渲染图像
+        let context = CIContext()
+
+        // 渲染输出图像
+        guard let output = inputImage, let cgImage = context.createCGImage(output, from: output.extent) else {
+            throw ImageCodeReaderError.noImage
+        }
+        
+        await completion.send((cgImage, tag))
+        return await userInput.first(where: { !$0.isEmpty }) ?? ""
     }
 }

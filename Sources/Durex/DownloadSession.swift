@@ -118,6 +118,10 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
         urlSessionContainer.cookies.cookies ?? []
     }
     
+    public func mergeCookies(_ newCookies: [HTTPCookie]) {
+        newCookies.forEach(urlSessionContainer.cookies.setCookie)
+    }
+    
     public func cancel(_ tag: TaskTag) async throws {
         let urlClient = client()
         guard let identifier = await taskIdentifier(for: tag) else {

@@ -85,6 +85,8 @@ public protocol AsyncCustomURLSession: Sendable {
     /// 获取当前的所有cookie
     func cookies() -> [HTTPCookie]
     
+    func mergeCookies(_ newCookies: [HTTPCookie])
+    
     /// 取消当前下载中的任务，如果任务不存在不会抛出错误，取消任务失败才会抛出错误
     func cancel(_ tag: TaskTag) async throws
 }

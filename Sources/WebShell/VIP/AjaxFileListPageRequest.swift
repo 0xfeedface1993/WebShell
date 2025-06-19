@@ -8,13 +8,27 @@
 import Foundation
 import Durex
 
+public enum AjaxAction: Sendable {
+    case checkCode
+    case custom(String)
+    
+    var description: String {
+        switch self {
+        case .checkCode:
+            return "check_code"
+        case .custom(let string):
+            return string
+        }
+    }
+}
+
 public struct AjaxFileListPageRequest: Dirtyware {
     public typealias Input = KeyStore
     public typealias Output = KeyStore
     
-    let action: String
+    let action: AjaxAction
     
-    public init(_ action: String) {
+    public init(_ action: AjaxAction) {
         self.action = action
     }
      
@@ -22,7 +36,14 @@ public struct AjaxFileListPageRequest: Dirtyware {
         let fileid = try await inputValue.string(.fileid)
         let refer = try await inputValue.string(.fileidURL)
         let (host, scheme) = try refer.baseComponents()
-        let request = ReferDownPageRequest(fileid: fileid, refer: refer, scheme: scheme, host: host, action: action).make()
-        return inputValue.assign(request, forKey: .output)
+        switch action {
+        case .checkCode:
+            let code = try await inputValue.string(.code)
+            let request = FormDownloadLinksRequest(param: .checkCode(fileID: fileid, action: action.description, code: code), refer: refer, scheme: scheme, host: host)
+            return inputValue.assign(request.make(), forKey: .output)
+        case .custom(let string):
+            let request = ReferDownPageRequest(fileid: fileid, refer: refer, scheme: scheme, host: host, action: string).make()
+            return inputValue.assign(request, forKey: .output)
+        }
     }
 }

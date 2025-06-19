@@ -15,6 +15,8 @@ struct VerifyCodeImage: View {
     var body: some View {
         if let image = object.imageCode {
             Image(image, scale: 1.0, label: Text("code"))
+                .resizable()
+                .frame(width: 200)
         }   else    {
             Text("-")
         }
