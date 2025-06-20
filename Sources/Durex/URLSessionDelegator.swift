@@ -7,7 +7,7 @@
 
 import Foundation
 #if COMBINE_LINUX && canImport(CombineX)
-import CombineX
+@preconcurrency import CombineX
 import Logging
 internal let logger = Logger(label: "com.ascp.download")
 #else

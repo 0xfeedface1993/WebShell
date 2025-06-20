@@ -67,7 +67,7 @@ extension Publisher where Output: Sendable {
 }
 
 #if COMBINE_LINUX && canImport(CombineX)
-extension Publisher {
+extension Publisher where Output: Sendable {
     /// Bridge to Swift Concurrency
     public var asyncValue: Output {
         get async throws {
