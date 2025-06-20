@@ -87,7 +87,7 @@ struct ContentView: View {
             
             TextField("Code", text: $textInput)
         }
-        .onChange(of: textInput, { oldValue, newValue in
+        .onChange(of: textInput, perform: { newValue in
             if newValue.count == 4 {
                 Task {
                     await userInput.send(newValue)
@@ -368,7 +368,7 @@ struct ContentView: View {
                         tag: "116"
                     )
                     .title("116pan-free")
-                    .url("https://www.116pan.com/viewfile.php?file_id=527832"),
+                    .url("https://www.116pan.com/viewfile.php?file_id=463461"),
                     .init(
                         RedirectFollowPage(.shared, key: .host("n"))
                             .join(EraseOutValue(to: .fileidURL))

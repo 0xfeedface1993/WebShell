@@ -49,12 +49,12 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
             .download()
     }
 
-    public func downloadWithProgress(_ request: URLRequestBuilder, tag: TaskTag) async throws -> sending any AsyncSequence<AsyncUpdateNews, Never> {
+    public func downloadWithProgress(_ request: URLRequestBuilder, tag: TaskTag) async throws -> AsyncStream<AsyncUpdateNews> {
         let publisher = AsyncDownloadURLProgressPublisher(request: request, tag: tag, delegtor: delegate, sessionProvider: self)
         return AsyncStream { continuation in
             let task = Task {
                 do {
-                    for await item in try await publisher.download() {
+                    for try await item in try await publisher.download() {
                         logger.info("[\("\(tag)")] recevice \("\(item)")")
                         continuation.yield(AsyncUpdateNews(value: item, tag: tag))
                         switch item {
@@ -78,10 +78,10 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
         }
     }
 
-    public func downloadNews(_ tag: TaskTag) -> sending any AsyncSequence<AsyncUpdateNews, Never> {
+    public func downloadNews(_ tag: TaskTag) -> AsyncStream<AsyncUpdateNews> {
         let (stream, continuation) = AsyncStream<AsyncUpdateNews>.makeStream(bufferingPolicy: .bufferingNewest(1))
         let task = Task {
-            for await item in delegate.news(self, tag: tag) {
+            for try await item in delegate.news(self, tag: tag) {
                 logger.info("[\("\(tag)")] downloadNews yield \("\(item)")")
                 continuation.yield(AsyncUpdateNews(value: item, tag: tag))
                 switch item {
@@ -100,14 +100,26 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
         return stream
     }
     
-    public func downloadNews() -> any AsyncSequence<AsyncUpdateNews, Never> {
-        delegate.statePassthroughSubject
+    public func downloadNews() -> AsyncStream<AsyncUpdateNews> {
+        let sequeue = delegate.statePassthroughSubject
             .compactMap { item -> AsyncUpdateNews? in
                 guard let tag = await tag(for: item.identifier) else {
                     return nil
                 }
                 return AsyncUpdateNews(value: item, tag: tag)
             }
+        
+        return AsyncStream(bufferingPolicy: .bufferingNewest(1)) { continiation in
+            let task = Task {
+                for await value in sequeue {
+                    continiation.yield(value)
+                }
+                continiation.finish()
+            }
+            continiation.onTermination = { _ in
+                task.cancel()
+            }
+        }
     }
     
     public func requestBySetCookies(with request: URLRequestBuilder) throws -> URLRequestBuilder {

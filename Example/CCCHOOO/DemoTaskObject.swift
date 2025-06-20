@@ -15,7 +15,7 @@ import CoreGraphics
 
 let logger = Logger(label: "com.webshell.demo")
 
-final class DemoTaskObject: ObservableObject, Identifiable {
+final class DemoTaskObject: ObservableObject, Identifiable, @unchecked Sendable {
     typealias DirtyValue = any Dirtyware<URL, String>
     
     @Published var url: String = ""

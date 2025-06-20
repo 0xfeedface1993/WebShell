@@ -337,7 +337,7 @@ struct AsyncDownloadURLProgressPublisher: Sendable {
     var delegtor: AsyncURLSessiobDownloadDelegate
     let sessionProvider: AsyncSessionProvider
     
-    func download() async throws -> sending any AsyncSequence<TaskNews, Never> {
+    func download() async throws -> AsyncStream<TaskNews> {
         let urlRequest = try request.build()
         
         let task = sessionProvider
@@ -359,27 +359,60 @@ extension AsyncURLSessiobDownloadDelegate {
     ///   - session: session对象，每个session对象都保存对应任务tag的对应关系
     ///   - tag: 任务标识的hashValue，因为存储任务标识本身比较消耗内存，使用hashValue代替
     /// - Returns: 下载任务事件
-    func news(_ session: AsyncSessionProvider, tag: TaskTag) -> sending any AsyncSequence<TaskNews, Never> {
-        statePassthroughSubject
+    func news(_ session: AsyncSessionProvider, tag: TaskTag) -> AsyncStream<TaskNews> {
+        let sequeue = statePassthroughSubject
             .filter({
                 await session.taskIdentifier(for: tag) == $0.identifier
             })
+        return AsyncStream(bufferingPolicy: .bufferingNewest(1)) { continiation in
+            let task = Task {
+                for await value in sequeue {
+                    continiation.yield(value)
+                }
+                continiation.finish()
+            }
+            continiation.onTermination = { _ in
+                task.cancel()
+            }
+        }
     }
     
-    func filter(_ session: AsyncSessionProvider, tag: TaskTag) -> sending any AsyncSequence<TaskNews, Never> {
-        statePassthroughSubject
+    func filter(_ session: AsyncSessionProvider, tag: TaskTag) -> AsyncStream<TaskNews> {
+        let sequeue = statePassthroughSubject
             .filter({
                 await session.taskIdentifier(for: tag) == $0.identifier
             })
+        return AsyncStream(bufferingPolicy: .bufferingNewest(1)) { continiation in
+            let task = Task {
+                for await value in sequeue {
+                    continiation.yield(value)
+                }
+                continiation.finish()
+            }
+            continiation.onTermination = { _ in
+                task.cancel()
+            }
+        }
     }
     
-    func news(for identifer: Int) -> sending any AsyncSequence<TaskNews, Never> {
-        statePassthroughSubject
+    func news(for identifer: Int) -> AsyncStream<TaskNews> {
+        let sequeue = statePassthroughSubject
             .filter({ $0.identifier == identifer })
+        return AsyncStream(bufferingPolicy: .bufferingNewest(1)) { continiation in
+            let task = Task {
+                for await value in sequeue {
+                    continiation.yield(value)
+                }
+                continiation.finish()
+            }
+            continiation.onTermination = { _ in
+                task.cancel()
+            }
+        }
     }
 }
 
-fileprivate func observeNews(_ stream: any AsyncSequence<TaskNews, Never>, continuation: AsyncThrowingStream<TaskNews, Error>.Continuation, session: AsyncSessionProvider, tag: TaskTag) async {
+fileprivate func observeNews<S: AsyncSequence>(_ stream: S, continuation: AsyncThrowingStream<TaskNews, Error>.Continuation, session: AsyncSessionProvider, tag: TaskTag) async where S.Element == TaskNews {
     do {
         for try await value in stream {
             let next: TaskNews
