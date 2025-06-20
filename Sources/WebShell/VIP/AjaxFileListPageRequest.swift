@@ -10,11 +10,12 @@ import Durex
 
 public enum AjaxAction: Sendable {
     case checkCode
+    case checkNoCode
     case custom(String)
     
     var description: String {
         switch self {
-        case .checkCode:
+        case .checkCode, .checkNoCode:
             return "check_code"
         case .custom(let string):
             return string
@@ -37,8 +38,16 @@ public struct AjaxFileListPageRequest: Dirtyware {
         let refer = try await inputValue.string(.fileidURL)
         let (host, scheme) = try refer.baseComponents()
         switch action {
-        case .checkCode:
-            let code = try await inputValue.string(.code)
+        case .checkCode, .checkNoCode:
+            let code: String
+            switch action {
+            case .checkCode:
+                code = try await inputValue.string(.code)
+            case .checkNoCode:
+                code = ""
+            default:
+                fatalError()
+            }
             let request = FormDownloadLinksRequest(param: .checkCode(fileID: fileid, action: action.description, code: code), refer: refer, scheme: scheme, host: host)
             return inputValue.assign(request.make(), forKey: .output)
         case .custom(let string):
