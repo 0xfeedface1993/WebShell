@@ -8,6 +8,10 @@
 import Foundation
 import Durex
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 public struct Logout: Dirtyware {
     public typealias Input = KeyStore
     public typealias Output = KeyStore
