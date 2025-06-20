@@ -47,7 +47,6 @@ public struct FileDefaultSaver: SessionableDirtyware {
         let states = try await context.downloadWithProgress(url, tag: tag)
         var news: TaskNews?
         
-        // 在for-in loop内抛出错误则会影响其他地方的监听 导致只有一个接受者收到错误信息
         for try await state in states {
             if case .error(_) = state.value {
                 news = state.value

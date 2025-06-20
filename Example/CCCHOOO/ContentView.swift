@@ -363,49 +363,25 @@ struct ContentView: View {
                                 DowloadsListWithSignFileIDReader(.shared, builder: File116Download(), finder: .httpHref, key: .host("116"))
                             )
                             .join(
-                                FileDefaultSaver(.override, configures: .shared, tag: .string("116"), key: .host("116"))
+                                FileDefaultSaver(.override, configures: .shared, tag: .string("116-free"), key: .host("116"))
                             ),
-                        tag: "116"
+                        tag: "116-free"
                     )
                     .title("116pan-free")
                     .url("https://www.116pan.com/viewfile.php?file_id=463461"),
                     .init(
-                        RedirectFollowPage(.shared, key: .host("n"))
-                            .join(EraseOutValue(to: .fileidURL))
-                            .join(
-                                FileIDReader(finder: FileIDMatch.default)
-                                    .or(FileIDInDomReader(FileIDMatch.addRef))
-                            )
-                            .join(ExternalValueReader(AsyncURLSessionConfiguration.shared, forKey: .configures))
-                            .join(
-                                LoginPage(["action": "login"])
-                                    .join(URLRequestPageReader(.output, configures: .shared, key: .host("n")))
-                                    .join(
-                                        FindStringInFile(.htmlFile, forKey: .formhash, finder: .formhash)
-                                            .or(FindStringInFile(.htmlFile, forKey: .output, finder: .logined))
-                                    )
-                                    .join(
-                                        CodeImageCustomPathRequest("includes/imgcode.inc.php?verycode_type=2", configures: .shared, key: .host("n"))
-                                            .join(CodeImagePrediction(.shared, key: .host("n"), reader: codeReader(for: "n")))
-                                            .join(LoginVerifyCode(username: ProcessInfo.processInfo.environment["username_116"] ?? "",
-                                                                  password: ProcessInfo.processInfo.environment["pwd_116"] ?? "",
-                                                                  configures: .shared, key: .host("n")))
-                                            .if(exists: .formhash)
-                                    )
-                                    .retry(3)
-                                    .maybe({ value, task in
-                                        await !v2Exists(value)
-                                    })
-                            )
+                        build116VipLoginCommands(.shared, key: .host("116"))
                             .join(AjaxFileListPageRequest(.checkCode))
                             .join(
-                                DowloadsListWithSignFileIDReader(.shared, builder: File116Download(), finder: .href, key: .host("116"))
+                                DowloadsListWithSignFileIDReader(.shared, builder: File116Download(), finder: .httpHref, key: .host("116"))
                             )
-                            .join(FileDefaultSaver(.override, configures: .shared, tag: .string("116"), key: .host("116")))
-                        , tag: "n"
+                            .join(
+                                FileDefaultSaver(.override, configures: .shared, tag: .string("116-vip"), key: .host("116"))
+                            )
+                        , tag: "116-vip"
                     )
                     .title("116pan-vip")
-                    .url("https://www.116pan.com/viewfile.php?file_id=527832"),
+                    .url("https://www.116pan.com/viewfile.php?file_id=471463"),
             ]
             
             Task {

@@ -184,10 +184,11 @@ final class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate 
     }
     
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
-        //#if DEBUG
-        //        print(">>> [\(type(of: self))] file download state update: \(downloadTask), \(bytesWritten) / \(totalBytesExpectedToWrite)")
-        //#endif
-        //logger.info("file download state update: \(downloadTask), \(totalBytesWritten) / \(totalBytesExpectedToWrite)")
+//        #if DEBUG
+//                print(">>> [\(type(of: self))] file download state update: \(downloadTask), \(bytesWritten) / \(totalBytesExpectedToWrite)")
+//        #endif
+//        logger.info("file download state update: \(downloadTask), \(totalBytesWritten) / \(totalBytesExpectedToWrite)")
+//        logger.info("[\(downloadTask.taskIdentifier)] downloading response: \(downloadTask.response as? HTTPURLResponse)")
         
         let state = SessionTaskState(downloadTask)
             .reciveBytes(bytesWritten)

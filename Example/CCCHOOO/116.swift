@@ -42,8 +42,37 @@ func build116LoginCommands(_ configuration: AsyncURLSessionConfiguration, key: S
                 .join(
                     CodeImageCustomPathRequest("includes/imgcode.inc.php?verycode_type=2", configures: configuration, key: key)
                         .join(CodeImagePrediction(configuration, key: key, reader: codeReader(for: "116")))
-                        .join(LoginVerifyCode(username: ProcessInfo.processInfo.environment["username_116"] ?? "",
-                                              password: ProcessInfo.processInfo.environment["pwd_116"] ?? "",
+                        .join(LoginVerifyCode(username: ProcessInfo.processInfo.environment["username_116_free"] ?? "",
+                                              password: ProcessInfo.processInfo.environment["pwd_116_free"] ?? "",
+                                              configures: configuration, key: key))
+                        .if(exists: .formhash)
+                )
+                .retry(3)
+                .maybe({ value, task in
+                    await !v2Exists(value)
+                })
+        )
+}
+
+func build116VipLoginCommands(_ configuration: AsyncURLSessionConfiguration, key: SessionKey) -> AnyDirtyware<String, KeyStore> {
+    RedirectFollowPage(configuration, key: key)
+        .join(EraseOutValue(to: .fileidURL))
+        .join(
+            FileIDReader(finder: FileIDMatch.inQueryfileID)
+        )
+        .join(ExternalValueReader(configuration, forKey: .configures))
+        .join(
+            LoginPage(["action": "login"])
+                .join(URLRequestPageReader(.output, configures: configuration, key: key))
+                .join(
+                    FindStringInFile(.htmlFile, forKey: .formhash, finder: .formhash)
+                        .or(FindStringInFile(.htmlFile, forKey: .output, finder: .logined))
+                )
+                .join(
+                    CodeImageCustomPathRequest("includes/imgcode.inc.php?verycode_type=2", configures: configuration, key: key)
+                        .join(CodeImagePrediction(configuration, key: key, reader: codeReader(for: "116")))
+                        .join(LoginVerifyCode(username: ProcessInfo.processInfo.environment["username_116_vip"] ?? "",
+                                              password: ProcessInfo.processInfo.environment["pwd_116_vip"] ?? "",
                                               configures: configuration, key: key))
                         .if(exists: .formhash)
                 )
