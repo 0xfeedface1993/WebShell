@@ -56,7 +56,7 @@ public struct AsyncURLSessionConfiguration: Sendable, ContextValue {
     
     /// 所有下载任务进度、完成、失败回调，异常的话就取.error事件，这个AsyncPassthroughSubject不会抛出错误
     public func allNews() -> AsyncBroadcaster<AsyncUpdateNews> {
-        resourcesPool.subject.broadcast()
+        resourcesPool.subject.subscribe()
     }
     
     /// 生成新的内部session对象，此对象和defaultsession相似, 共用cacheFolder，如需要自定义session则需自行遵循AsyncCustomURLSession创建新的对象

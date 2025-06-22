@@ -118,8 +118,10 @@ final class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate 
     //    private let downloadTaskUpdate = PassthroughSubject<SessionTaskState, Never>()
     //    private let downloadTaskCompletion = PassthroughSubject<Result<SessionComplete, DownloadURLError>, Never>()
     /// 状态更新，可监听此Subject进行下载进度、下载完成、下载失败三种类型类型事件更新
-    let stateChannel: AsyncChannel<TaskNews>
-    let statePassthroughSubject: AsyncBroadcaster<TaskNews>
+    let stateSubject: ChannelSubject<TaskNews>
+    var statePassthroughSubject: AsyncBroadcaster<TaskNews> {
+        stateSubject.subscribe()
+    }
     let cachedFolder: URL
     
 #if DEBUG
@@ -127,15 +129,13 @@ final class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate 
 #endif
     
     init(_ cachedFolder: URL) {
-        let channel = AsyncChannel<TaskNews>()
-        self.stateChannel = channel
-        self.statePassthroughSubject = channel.broadcast()
+        self.stateSubject = ChannelSubject<TaskNews>()
         self.cachedFolder = cachedFolder
         super.init()
     }
     
     deinit {
-        self.stateChannel.finish()
+        self.stateSubject.finished()
     }
     
 #if DEBUG
@@ -143,7 +143,8 @@ final class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate 
         let next = request
         //        response.
         //        next.setValue("", forHTTPHeaderField: "")
-        logger.info("task \(task.taskIdentifier) redirecting to curl: \n----------------\n\(next.cURL())")
+        logger.info("[\(task.taskIdentifier)] redirecting to curl: \n----------------\n\(next.cURL())")
+        logger.info("[\(task.taskIdentifier)] redirection response headers: \(response.allHeaderFields)")
         return next
     }
 #endif
@@ -158,14 +159,14 @@ final class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate 
             logger.info("move tmp file to \(location)")
             let news = SessionComplete(task: downloadTask, data: url).fileStone()
             Task {
-                await stateChannel.send(news)
+                await stateSubject.send(news)
             }
         } catch {
             let failure = UpdateFailure(error: error, identifier: downloadTask.taskIdentifier)
             let news = TaskNews.error(failure)
             logger.info("\(#function) download file task [\(downloadTask.taskIdentifier)] failed \(error), \n--------------\n curl: \(downloadTask.currentRequest?.cURL(pretty: true) ??  "Ooops!") ")
             Task {
-                await stateChannel.send(news)
+                await stateSubject.send(news)
             }
         }
         
@@ -188,16 +189,24 @@ final class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate 
 //                print(">>> [\(type(of: self))] file download state update: \(downloadTask), \(bytesWritten) / \(totalBytesExpectedToWrite)")
 //        #endif
 //        logger.info("file download state update: \(downloadTask), \(totalBytesWritten) / \(totalBytesExpectedToWrite)")
-//        logger.info("[\(downloadTask.taskIdentifier)] downloading response: \(downloadTask.response as? HTTPURLResponse)")
+//        logger.info("[\(downloadTask.taskIdentifier)] downloading response: \((downloadTask.response as? HTTPURLResponse)?.allHeaderFields ?? [:])")
+        
+        let bytes: Int64
+        if totalBytesExpectedToWrite < bytesWritten, let contentLength = (downloadTask.response as? HTTPURLResponse)?.allHeaderFields["Content-Length"] as? Int64 {
+            bytes = contentLength
+            logger.info("[\(downloadTask.taskIdentifier)] downloading totalBytesExpectedToWrite \(totalBytesExpectedToWrite) bytes invalid, use task response Content-Length \(bytes) bytes.")
+        } else {
+            bytes = totalBytesExpectedToWrite
+        }
         
         let state = SessionTaskState(downloadTask)
             .reciveBytes(bytesWritten)
             .totalBytesWritten(totalBytesWritten)
-            .totalBytesExpectedToWrite(totalBytesExpectedToWrite)
+            .totalBytesExpectedToWrite(bytes)
             .newsState()
         let news = TaskNews.state(state)
         Task {
-            await stateChannel.send(news)
+            await stateSubject.send(news)
         }
     }
     
@@ -207,7 +216,7 @@ final class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate 
             let news = TaskNews.error(failure)
             logger.info("\(#function) download file task [\(task.taskIdentifier)] failed \(error), \n--------------\n curl: \(task.currentRequest?.cURL(pretty: true) ??  "Ooops!") ")
             Task {
-                await stateChannel.send(news)
+                await stateSubject.send(news)
             }
             return
         }

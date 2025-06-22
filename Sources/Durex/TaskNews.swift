@@ -11,7 +11,7 @@ import Foundation
 import FoundationNetworking
 #endif
 
-public enum TaskNews: Equatable, Sendable, Hashable {
+public enum TaskNews: Equatable, Sendable, Hashable, CustomStringConvertible {
     case state(State)
     case file(FileStone)
     case error(UpdateFailure)
@@ -63,6 +63,17 @@ public enum TaskNews: Equatable, Sendable, Hashable {
             return false
         case .error(_):
             return true
+        }
+    }
+    
+    public var description: String {
+        switch self {
+        case .state(let state):
+            return "progress \(state.progress.fractionCompleted)"
+        case .file(let fileStone):
+            return "save at \(fileStone.url)"
+        case .error(let updateFailure):
+            return "\(updateFailure)"
         }
     }
 }

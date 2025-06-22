@@ -55,7 +55,7 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
             let task = Task {
                 do {
                     for try await item in try await publisher.download() {
-                        logger.info("[\("\(tag)")] recevice \("\(item)")")
+//                        logger.info("[\("\(tag)")] recevice \("\(item)")")
                         continuation.yield(AsyncUpdateNews(value: item, tag: tag))
                         switch item {
                         case .error, .file:
@@ -69,7 +69,7 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
                         AsyncUpdateNews(value: .error(.init(error: error, identifier: 900)), tag: tag)
                     )
                 }
-                logger.info("[\("\(tag)")] finish continuation.")
+//                logger.info("[\("\(tag)")] finish continuation.")
                 continuation.finish()
             }
             continuation.onTermination = { t in
@@ -91,7 +91,7 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
                     continue
                 }
             }
-            logger.info("[\("\(tag)")] downloadNews finished")
+//            logger.info("[\("\(tag)")] downloadNews finished")
             continuation.finish()
         }
         continuation.onTermination = { t in

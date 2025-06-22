@@ -66,7 +66,7 @@ actor AsyncTaskPool {
     private var tasks = [Sessions: (work: TaskValue, id: UUID)]()
     
     @usableFromInline
-    func set<Context>(_ context: Context, subject: AsyncChannel<AsyncUpdateNews>, for key: Sessions) where Context: AsyncCustomURLSession {
+    func set<Context>(_ context: Context, subject: ChannelSubject<AsyncUpdateNews>, for key: Sessions) where Context: AsyncCustomURLSession {
         if let bingo = tasks.first(where: { $0.value.id == context.id }) {
             logger.info("pool has observer for session [\("\(bingo.key)")] uuid [\(bingo.value.id)], try add duplicate observation with \("\(key)"), pass...")
             return
@@ -86,7 +86,7 @@ actor AsyncTaskPool {
         tasks[key]?.work
     }
     
-    func task<S: AsyncSequence>(_ updates: sending S, subject: AsyncChannel<AsyncUpdateNews>, forKey key: Sessions) -> TaskValue where S.Element == AsyncUpdateNews, S: Sendable {
+    func task<S: AsyncSequence>(_ updates: sending S, subject: ChannelSubject<AsyncUpdateNews>, forKey key: Sessions) -> TaskValue where S.Element == AsyncUpdateNews, S: Sendable {
 //        let action: @Sendable () async -> Void = {
 //            logger.info("observer session \(key)")
 //            defer {
@@ -131,7 +131,7 @@ actor AsyncTaskPool {
 struct ResoucesPool {
     let sessions = AsyncSessionPool()
     let tasks = AsyncTaskPool()
-    let subject = AsyncChannel<AsyncUpdateNews>()
+    let subject = ChannelSubject<AsyncUpdateNews>()
 }
 
 public struct AsyncSession: Sendable {
@@ -197,9 +197,6 @@ public struct AsyncSession: Sendable {
     }
     
     public func news() -> AsyncBroadcaster<AsyncUpdateNews> {
-        AsyncBroadcaster(
-            replay: .latest(1),
-            sequence: configures.resourcesPool.subject
-        )
+        configures.resourcesPool.subject.subscribe()
     }
 }
