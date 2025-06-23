@@ -142,6 +142,21 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
         }
         try await urlClient.cancelTask(identifier)
     }
+    
+    public func runningTasks() async -> [(TaskTag, URLSessionDownloadTask)] {
+        let tasks = await urlSessionContainer
+            .session
+            .tasks()
+            .compactMap { $0 as? URLSessionDownloadTask }
+        var temp = [(TaskTag, URLSessionDownloadTask)]()
+        for task in tasks {
+            guard let tag = await tagsTaskIdenfier.tag(for: task.taskIdentifier) else {
+                continue
+            }
+            temp.append((tag, task))
+        }
+        return temp
+    }
 }
 
 extension AsyncDownloadSession: AsyncSessionProvider {

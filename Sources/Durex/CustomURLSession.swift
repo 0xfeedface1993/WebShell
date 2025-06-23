@@ -89,4 +89,6 @@ public protocol AsyncCustomURLSession: Sendable {
     
     /// 取消当前下载中的任务，如果任务不存在不会抛出错误，取消任务失败才会抛出错误
     func cancel(_ tag: TaskTag) async throws
+    
+    func runningTasks() async -> [(TaskTag, URLSessionDownloadTask)]
 }

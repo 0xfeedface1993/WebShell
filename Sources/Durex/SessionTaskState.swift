@@ -17,7 +17,7 @@ import Combine
 import FoundationNetworking
 #endif
 
-struct SessionTaskState {
+struct SessionTaskState: Sendable {
     let task: URLSessionDownloadTask
     let reciveBytes: Int64
     let totalBytesWritten: Int64

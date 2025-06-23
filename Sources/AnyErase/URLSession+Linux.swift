@@ -38,6 +38,7 @@ public protocol URLClient: Sendable {
     func requestBySetCookies(with request: URLRequest) -> URLRequest
     /// Stop download task if it runging
     func cancelTask(_ taskIdentifier: Int) async throws
+    func tasks() async -> [URLSessionTask]
 }
 
 /// An extension that provides async support for fetching a URL
@@ -120,15 +121,13 @@ extension URLSession: URLClient {
         logger.info("task identifier [\(taskIdentifier)] cancelled.")
     }
     
-#if COMBINE_LINUX
-    public func allTasks() async -> [URLSessionTask] {
+    public func tasks() async -> [URLSessionTask] {
         await withCheckedContinuation { continuation in
             getAllTasks(completionHandler: { tasks in
                 continuation.resume(returning: tasks)
             })
         }
     }
-#endif
 }
 
 extension HTTPCookieStorage {
