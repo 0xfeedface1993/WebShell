@@ -364,76 +364,60 @@ extension AsyncURLSessiobDownloadDelegate {
             .filter({
                 await session.taskIdentifier(for: tag) == $0.identifier
             })
-        return AsyncStream(bufferingPolicy: .bufferingNewest(1)) { continiation in
-            let task = Task {
-                for await value in sequeue {
-                    continiation.yield(value)
-                }
-                continiation.finish()
+        let (stream, continiation) = AsyncStream<TaskNews>.makeStream(bufferingPolicy: .bufferingNewest(1))
+        let task = Task {
+            for await value in sequeue {
+                continiation.yield(value)
             }
-            continiation.onTermination = { _ in
-                task.cancel()
-            }
+            continiation.finish()
         }
+        continiation.onTermination = { _ in
+            task.cancel()
+        }
+        return stream
     }
     
     func filter(_ session: AsyncSessionProvider, tag: TaskTag) -> AsyncStream<TaskNews> {
         let sequeue = statePassthroughSubject
             .filter({
-                await session.taskIdentifier(for: tag) == $0.identifier
-            })
-        return AsyncStream(bufferingPolicy: .bufferingNewest(1)) { continiation in
-            let task = Task {
-                for await value in sequeue {
-                    continiation.yield(value)
+                guard let identifer = await session.taskIdentifier(for: tag) else {
+                    logger.info("[tag-\(tag)] not found taskIdentifier in sessions")
+                    return false
                 }
-                continiation.finish()
+                return identifer == $0.identifier
+            })
+        let (stream, continiation) = AsyncStream<TaskNews>.makeStream(bufferingPolicy: .bufferingNewest(1))
+        let task = Task {
+            for await value in sequeue {
+                continiation.yield(value)
             }
-            continiation.onTermination = { _ in
-                task.cancel()
-            }
+            continiation.finish()
         }
+        continiation.onTermination = { _ in
+            task.cancel()
+        }
+        return stream
     }
     
     func news(for identifer: Int) -> AsyncStream<TaskNews> {
         let sequeue = statePassthroughSubject
-            .filter({ $0.identifier == identifer })
-        return AsyncStream(bufferingPolicy: .bufferingNewest(1)) { continiation in
-            let task = Task {
-                for await value in sequeue {
-                    continiation.yield(value)
+            .filter({
+                let matched = $0.identifier == identifer
+                if !matched {
+                    logger.info("[identifier-\(identifer)] not found taskIdentifier in sessions")
                 }
-                continiation.finish()
+                return matched
+            })
+        let (stream, continiation) = AsyncStream<TaskNews>.makeStream(bufferingPolicy: .bufferingNewest(1))
+        let task = Task {
+            for await value in sequeue {
+                continiation.yield(value)
             }
-            continiation.onTermination = { _ in
-                task.cancel()
-            }
+            continiation.finish()
         }
-    }
-}
-
-fileprivate func observeNews<S: AsyncSequence>(_ stream: S, continuation: AsyncThrowingStream<TaskNews, Error>.Continuation, session: AsyncSessionProvider, tag: TaskTag) async where S.Element == TaskNews {
-    do {
-        for try await value in stream {
-            let next: TaskNews
-            switch value {
-            case .error(let error):
-                await session.unbind(tag: tag)
-                throw error.error
-            case .file(_):
-                logger.info("\(tag) download completed.")
-                await session.unbind(tag: tag)
-                next = value
-                continuation.yield(next)
-                break
-            default:
-                logger.info("\(tag) download progress update.")
-                next = value
-                continuation.yield(next)
-            }
+        continiation.onTermination = { _ in
+            task.cancel()
         }
-        continuation.finish()
-    } catch {
-        continuation.finish(throwing: error)
+        return stream
     }
 }

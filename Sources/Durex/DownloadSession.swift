@@ -80,8 +80,9 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
 
     public func downloadNews(_ tag: TaskTag) -> AsyncStream<AsyncUpdateNews> {
         let (stream, continuation) = AsyncStream<AsyncUpdateNews>.makeStream(bufferingPolicy: .bufferingNewest(1))
+        let sequeue = delegate.news(self, tag: tag)
         let task = Task {
-            for try await item in delegate.news(self, tag: tag) {
+            for try await item in sequeue {
                 logger.info("[\("\(tag)")] downloadNews yield \("\(item)")")
                 continuation.yield(AsyncUpdateNews(value: item, tag: tag))
                 switch item {
@@ -163,7 +164,7 @@ extension AsyncDownloadSession: AsyncSessionProvider {
     public func unbind(tag: TaskTag) async {
         let represemtTag = tag
 //        logger.info("unbind tag \(represemtTag)")
-//        await tagsTaskIdenfier.remove(tag: represemtTag)
+        await tagsTaskIdenfier.remove(tag: represemtTag)
     }
     
     public func bind(task: TaskIdentifier, tag: TaskTag) async {

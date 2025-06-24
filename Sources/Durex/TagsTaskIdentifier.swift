@@ -50,6 +50,10 @@ actor TagsTaskIdentifier: TaskIdentifiable {
     }
     
     func set(_ tag: Value, for taskIdentifier: Key) {
+        cached.filter({ $0.value == tag })
+            .forEach {
+                cached.removeValue(forKey: $0.key)
+            }
         cached[taskIdentifier] = tag
     }
     
