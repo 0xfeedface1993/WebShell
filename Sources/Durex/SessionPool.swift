@@ -86,7 +86,7 @@ actor AsyncTaskPool {
         tasks[key]?.work
     }
     
-    func task<S: AsyncSequence>(_ updates: sending S, subject: ChannelSubject<AsyncUpdateNews>, forKey key: Sessions) -> TaskValue where S.Element == AsyncUpdateNews, S: Sendable, S.AsyncIterator: SendableMetatype {
+    func task<S: AsyncSequence>(_ updates: sending S, subject: ChannelSubject<AsyncUpdateNews>, forKey key: Sessions) -> TaskValue where S.Element == AsyncUpdateNews, S: Sendable {
 //        let action: @Sendable () async -> Void = {
 //            logger.info("observer session \(key)")
 //            defer {
