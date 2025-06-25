@@ -62,7 +62,7 @@ extension Dirtyware {
     }
 }
 
-public enum SessionKey: Sendable, Hashable, Equatable, CustomStringConvertible {
+public enum SessionKey: Sendable, Hashable, Equatable, CustomStringConvertible, ContextValue {
     case host(String)
     
     public var description: String {
@@ -70,6 +70,10 @@ public enum SessionKey: Sendable, Hashable, Equatable, CustomStringConvertible {
         case .host(let string):
             return "{host: \(string)}"
         }
+    }
+    
+    public var valueDescription: String {
+        description
     }
 }
 

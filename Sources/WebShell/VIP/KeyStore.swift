@@ -127,6 +127,11 @@ public final class KeyStore: ContextValue {
     }
     
     @KeyStoreActor
+    public func sessionKey(_ key: Key) throws -> SessionKey {
+        try take(forKey: key)
+    }
+    
+    @KeyStoreActor
     public var valueDescription: String {
         "\(self): \(cached)"
     }
@@ -157,6 +162,8 @@ public extension KeyStore.Key {
 //    static let htmlString = KeyStore.Key("html_string")
     /// 当前网络相关配置
     static let configures = KeyStore.Key("configures")
+    static let paid = KeyStore.Key("paid")
+    static let sessionKey = KeyStore.Key("session_key")
 }
 
 /// Set instant value to new key store

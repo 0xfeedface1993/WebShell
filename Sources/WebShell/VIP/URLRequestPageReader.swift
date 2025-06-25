@@ -41,3 +41,28 @@ public struct URLRequestPageReader: SessionableDirtyware {
         .init(stringKey, configures: configures, key: value)
     }
 }
+
+public struct URLRequestPageReaderV2: Dirtyware {
+    public typealias Input = KeyStore
+    public typealias Output = KeyStore
+    
+    public var stringKey: KeyStore.Key
+    
+    public init(_ stringKey: KeyStore.Key) {
+        self.stringKey = stringKey
+    }
+    
+    public func execute(for inputValue: KeyStore) async throws -> KeyStore {
+        guard let request = try await inputValue.requests(stringKey).first else {
+            throw ShellError.emptyRequest
+        }
+        let key = try await inputValue.sessionKey(.sessionKey)
+        let configures = try await inputValue.configures(.configures)
+        let context = try await AsyncSession(configures).context(key)
+        let (data, _) = try await context.download(with: request)
+        let next = inputValue
+            .assign(request, forKey: .lastRequest)
+            .assign(data, forKey: .htmlFile)
+        return next.assign(data, forKey: .output)
+    }
+}

@@ -75,6 +75,22 @@ extension FileIDFinder where Self == FileIDMatch {
         FileIDMatch(pattern: "(Login\\s+successful)|(登錄成功)|(登录成功)|(您已登录)|(欢迎回来)", template: .dollar(0))
     }
     
+    public static var redirectLogined: Self {
+        FileIDMatch(pattern: "Redirecting\\sto\\s<a\\shref=\"([^\"]+)\">", template: .dollar(1))
+    }
+    
+    public static var paidUser: Self {
+        FileIDMatch(pattern: "PAID\\sUSER", template: .dollar(0))
+    }
+    
+    public static var windowHTTP: Self {
+        FileIDMatch(pattern: "window\\.location\\s=\\s'([^']+)'", template: .dollar(1))
+    }
+    
+    public static var userConfig: Self {
+        FileIDMatch(pattern: "帐户设置", template: .dollar(0))
+    }
+    
     public static var invalidCode: Self {
         FileIDMatch(pattern: "验证码不正确", template: .dollar(0))
     }

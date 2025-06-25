@@ -345,6 +345,38 @@ struct ContentView: View {
 //                .title("爱优盘-vip")
 //                .url("https://www.iycdn.com/file-213019.html"),
                     .init(
+                        buildKoolaaVipLoginCommands(.shared, key: .host("koolaa"))
+                            .join(URLRequestPageBuilder(build: { store in
+                                try await [URLRequestBuilder(
+                                    url: store.string(.fileidURL),
+                                    method: .get,
+                                    headers: nil,
+                                    body: nil
+                                )]
+                            }))
+                            .join(URLRequestPageReaderV2(.output))
+                            .join(FindStringInFile(.htmlFile, forKey: .output, finder: .windowHTTP))
+                            .join(URLRequestPageBuilder(build: { store in
+                                try await [URLRequestBuilder(
+                                    url: store.string(.output),
+                                    method: .get,
+                                    headers: [
+                                        LinkRequestHeader.generalAccept.key.rawValue: LinkRequestHeader.generalAccept.value,
+                                        LinkRequestHeader.Key.referer.rawValue: store.string(.fileidURL),
+                                        LinkRequestHeader.enUSAcceptLanguage.key.rawValue: LinkRequestHeader.enUSAcceptLanguage.value,
+                                        LinkRequestHeader.keepAliveConnection.key.rawValue: LinkRequestHeader.keepAliveConnection.value
+                                    ],
+                                    body: nil
+                                )]
+                            }))
+                            .join(
+                                FileDefaultSaver(.override, configures: .shared, tag: .string("koolaa-vip"), key: .host("koolaa"))
+                            )
+                        , tag: "koolaa-vip"
+                    )
+                    .title("koolaa-vip")
+                    .url("https://koolaayun.com/872408c26bfe4a7a/A15607.zip"),
+                    .init(
 //                        build116LoginCommands(.shared, key: .host("116"))
                         RedirectFollowPage(.shared, key: .host("116"))
                             .join(EraseOutValue(to: .fileidURL))
