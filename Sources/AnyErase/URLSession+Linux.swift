@@ -109,7 +109,7 @@ extension URLSession: URLClient {
     
     public func cancelTask(_ taskIdentifier: Int) async throws {
 #if COMBINE_LINUX
-        let task = await allTasks().first(where: { $0.taskIdentifier == taskIdentifier })
+        let task = await tasks().first(where: { $0.taskIdentifier == taskIdentifier })
 #else
         let task = await allTasks.first(where: { $0.taskIdentifier == taskIdentifier })
 #endif
