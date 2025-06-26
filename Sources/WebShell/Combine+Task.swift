@@ -52,6 +52,8 @@ public enum ShellError: Error {
     case noCodeReader
     /// 没有有效的下载的页链接
     case noPageLink
+    /// 帐号密码不正确
+    case invalidAccount(username: String)
 }
 
 #if DEBUG

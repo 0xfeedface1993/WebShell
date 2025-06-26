@@ -66,7 +66,7 @@ extension FileIDFinder where Self == FileIDMatch {
     public static var addRef: Self {
         FileIDMatch("add_ref\\((\\d+)\\)")
     }
-   
+    
     public static var addCoun: Self {
         FileIDMatch("add_coun\\((\\d+)\\)")
     }
@@ -91,12 +91,17 @@ extension FileIDFinder where Self == FileIDMatch {
         FileIDMatch(pattern: "帐户设置", template: .dollar(0))
     }
     
+    
     public static var invalidCode: Self {
         FileIDMatch(pattern: "验证码不正确", template: .dollar(0))
     }
     
     public static var invalidPassword: Self {
         FileIDMatch(pattern: "(密码不正确)|(密碼不正確)|(password is incorrect)", template: .dollar(0))
+    }
+    
+    public static var invalidPassword2: Self {
+        FileIDMatch(pattern: "Your username and password are invalid", template: .dollar(0))
     }
 }
 

@@ -27,15 +27,13 @@ public struct LoginPostForm: SessionableDirtyware {
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
         let fileURL = try await inputValue.string(.fileidURL)
         let request = try Request(url: fileURL, username: username, password: password, submitme: "1").make()
-        let finder = FileIDMatch.userConfig
-        do {
-            let html = try await FindStringInDomSearch(finder, configures: configures, key: key).execute(for: request)
-            return inputValue
-                .assign(request, forKey: .lastRequest)
-                .assign(html, forKey: .output)
-        } catch {
-            throw error
+        let invalidAccount = try? await FindStringInDomSearch(.invalidPassword2, configures: configures, key: key).execute(for: request)
+        guard invalidAccount == nil else {
+            throw ShellError.invalidAccount(username: username)
         }
+        return inputValue
+            .assign(request, forKey: .lastRequest)
+            .assign(invalidAccount, forKey: .output)
     }
     
     public func sessionKey(_ value: SessionKey) -> Self {
