@@ -10,7 +10,6 @@ import Foundation
 import FoundationNetworking
 #endif
 import AnyErase
-import Network
 
 struct URLSessionHolder: Sendable {
     let session: any URLClient
@@ -56,11 +55,6 @@ struct URLSessionHolder: Sendable {
         configure.httpCookieStorage?.removeCookies(since: Date(timeIntervalSinceReferenceDate: 0))
         configure.httpCookieStorage?.cookieAcceptPolicy = .always
         configure.httpShouldSetCookies = true
-        
-        let options = NWProtocolTLS.Options()
-        sec_protocol_options_set_min_tls_protocol_version(options.securityProtocolOptions, .TLSv12)
-        sec_protocol_options_add_tls_application_protocol(options.securityProtocolOptions, "h2")
-        sec_protocol_options_add_tls_application_protocol(options.securityProtocolOptions, "http/1.1")
 
         self.session = URLSession(configuration: configure, delegate: delegate, delegateQueue: nil)
         if let storage = configure.httpCookieStorage {
