@@ -12,8 +12,12 @@ import Logging
 internal let logger = Logger(label: "com.ascp.download")
 #else
 @preconcurrency import Combine
-import OSLog
-internal let logger = Logger(subsystem: "Durex", category: "")
+#if canImport(os.Logger)
+internal let logger = Logger(subsystem: "AnyErase", category: "AnyErase")
+#else
+import Logging
+internal let logger = Logger(label: "com.webshell.anyerase")
+#endif
 #endif
 
 #if canImport(FoundationNetworking)

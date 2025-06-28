@@ -11,7 +11,12 @@ import Logging
 internal let logger = Logger(label: "com.webshell.anyerase")
 #else
 import OSLog
+#if canImport(os.Logger)
 internal let logger = Logger(subsystem: "AnyErase", category: "AnyErase")
+#else
+import Logging
+internal let logger = Logger(label: "com.webshell.anyerase")
+#endif
 #endif
 
 
