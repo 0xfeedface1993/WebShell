@@ -10,6 +10,7 @@
 		180644EA2E03B34000363F06 /* Command1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180644E92E03B34000363F06 /* Command1.swift */; };
 		180644EC2E03C38000363F06 /* UnitTestActionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180644EB2E03C38000363F06 /* UnitTestActionsView.swift */; };
 		181B4B762E0AEFE9009BCBC3 /* Command2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181B4B752E0AEFE9009BCBC3 /* Command2.swift */; };
+		1882C8BB2E0FA15A0019F164 /* UserInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1882C8BA2E0FA15A0019F164 /* UserInfoView.swift */; };
 		27448B2720170ABA001FC925 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B2620170ABA001FC925 /* AppDelegate.swift */; };
 		27448B2920170ABA001FC925 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27448B2820170ABA001FC925 /* ViewController.swift */; };
 		27448B2B20170ABA001FC925 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 27448B2A20170ABA001FC925 /* Assets.xcassets */; };
@@ -56,6 +57,7 @@
 		180644E92E03B34000363F06 /* Command1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command1.swift; sourceTree = "<group>"; };
 		180644EB2E03C38000363F06 /* UnitTestActionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitTestActionsView.swift; sourceTree = "<group>"; };
 		181B4B752E0AEFE9009BCBC3 /* Command2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command2.swift; sourceTree = "<group>"; };
+		1882C8BA2E0FA15A0019F164 /* UserInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInfoView.swift; sourceTree = "<group>"; };
 		246FF0F6228A6F2500B8BE0B /* WebShellExsample.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WebShellExsample.entitlements; sourceTree = "<group>"; };
 		24E60F1621D66180007AB419 /* WebShellCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WebShellCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		27448B2320170ABA001FC925 /* WebShellExsample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WebShellExsample.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -133,6 +135,7 @@
 				528CE5062AA8ED3200BEA44E /* HostingView.swift */,
 				528CE4FE2AA8CB6B00BEA44E /* ContentView.swift */,
 				180644EB2E03C38000363F06 /* UnitTestActionsView.swift */,
+				1882C8BA2E0FA15A0019F164 /* UserInfoView.swift */,
 				52888B632AB057BE00B8CFD5 /* VerifyCodeImage.swift */,
 				52D3B4C42AA9BD5C00A9DDF3 /* DummyTextView.swift */,
 				52800DB62AB9C85100737B92 /* URLTextFieldView.swift */,
@@ -336,6 +339,7 @@
 				52D3B4C52AA9BD6100A9DDF3 /* DummyTextView.swift in Sources */,
 				528CE5012AA8CD1900BEA44E /* DemoTaskObject.swift in Sources */,
 				528CE4FF2AA8CB6F00BEA44E /* ContentView.swift in Sources */,
+				1882C8BB2E0FA15A0019F164 /* UserInfoView.swift in Sources */,
 				528CE5052AA8CE7100BEA44E /* StatefulPreviewWrapper.swift in Sources */,
 				528CE5072AA8ED3200BEA44E /* HostingView.swift in Sources */,
 				528CE5032AA8CE0A00BEA44E /* DemoListItemView.swift in Sources */,

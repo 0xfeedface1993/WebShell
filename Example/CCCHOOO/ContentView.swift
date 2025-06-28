@@ -18,8 +18,8 @@ struct ContentView: View {
     @State private var textInput = ""
     
     var body: some View {
-         table
-//        UnitTestActionsView()
+//         table
+        UnitTestActionsView()
     }
     
     @ViewBuilder

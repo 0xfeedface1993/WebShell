@@ -13,6 +13,8 @@ import WebShell
 enum TestError: Error {
     case v2CookieNotDeleted
     case nov2Cookie
+    case noPaidInfo
+    case notPaidUser
 }
 
 func test116Loggin() {
@@ -51,6 +53,9 @@ func build116LoginCommands(_ configuration: AsyncURLSessionConfiguration, key: S
                 .maybe({ value, task in
                     await !v2Exists(value)
                 })
+                .join(
+                    Paid(configures: configuration, key: key, catcher: FreeUserString(finder: .vipExpired, path: .mydisk, key: key))
+                )
         )
 }
 
@@ -83,7 +88,27 @@ func build116VipLoginCommands(_ configuration: AsyncURLSessionConfiguration, key
         )
 }
 
-func _test116Login() async throws {
+func test116FreeLogin() async -> UserInfo {
+    let username = ProcessInfo.processInfo.environment["username_116_free"]!
+    do {
+        return try await _test116Login()
+    } catch let error as TestError {
+        switch error {
+        case .v2CookieNotDeleted:
+            return .unlogin(username: username)
+        case .nov2Cookie:
+            return .unlogin(username: username)
+        case .noPaidInfo:
+            return .unlogin(username: username)
+        case .notPaidUser:
+            return .logined(username: username, paid: .unpaid)
+        }
+    } catch {
+        return .unlogin(username: username)
+    }
+}
+
+func _test116Login() async throws -> UserInfo {
     let key = SessionKey.host("116")
     let configuration = AsyncURLSessionConfiguration.shared
     
@@ -98,7 +123,14 @@ func _test116Login() async throws {
         throw TestError.nov2Cookie
     }
     
+    let paid: PaidUser? = await context.value(forKey: .paid)
+    guard let paid else {
+        throw TestError.noPaidInfo
+    }
+    
     print("v2 cookies updated.")
+    
+    return .logined(username: ProcessInfo.processInfo.environment["username_116_free"]!, paid: paid)
 }
 
 func test116Logout() {
@@ -109,6 +141,21 @@ func test116Logout() {
             print("[116] logout failed! \(error)")
         }
     }
+}
+
+func test116FreeLogout(_ info: UserInfo) async -> UserInfo {
+    switch info {
+    case .logined(let username, let paid):
+        do {
+            try await _test116Logout()
+            return .unlogin(username: username)
+        } catch {
+            print("[116] logout failed! \(error)")
+            return info
+        }
+    case .unlogin(let username):
+        return info
+    }    
 }
 
 func _test116Logout() async throws {

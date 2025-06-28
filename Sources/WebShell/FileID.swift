@@ -103,6 +103,14 @@ extension FileIDFinder where Self == FileIDMatch {
     public static var invalidPassword2: Self {
         FileIDMatch(pattern: "Your username and password are invalid", template: .dollar(0))
     }
+    
+    public static var vipExpired: Self {
+        FileIDMatch(pattern: "VIP已过期", template: .dollar(0))
+    }
+    
+    public static var notVip: Self {
+        FileIDMatch(pattern: "You are not yet a VIP", template: .dollar(0))
+    }
 }
 
 /// 从链接中提取fileid，`http://xxxx/file-123456.html`提取fileid`123456`

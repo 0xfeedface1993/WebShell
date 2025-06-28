@@ -24,7 +24,7 @@ func buildKoolaaVipLoginCommands(_ configuration: AsyncURLSessionConfiguration, 
                     let user: PaidUser = try await Paid(
                         configures: keyStore.configures(.configures),
                         key: key,
-                        catcher: PaidUserString(finder: .paidUser, key: key)
+                        catcher: PaidUserString(finder: .paidUser, path: .account, key: key)
                     ).execute(for: keyStore).value(forKey: .paid) ?? .unpaid
                     return user == .unpaid
                 } catch {
