@@ -105,10 +105,15 @@ public struct FreeUserString: PaidCatcher {
     public func isPaid(_ keyStore: KeyStore) async throws -> PaidUser {
         let configures = try await keyStore.configures(.configures)
         let request = try await PaidUserString.Request(url: keyStore.request(.lastRequest).url ?? "", path: path).make()
-        let html = try await FindStringInDomSearch(finder, configures: configures, key: key).execute(for: request)
-        keyStore.assign(PaidUser.unpaid, forKey: .paid)
-            .assign(html, forKey: .output)
-        return .unpaid
+        let html = try? await FindStringInDomSearch(finder, configures: configures, key: key).execute(for: request)
+        let state: PaidUser
+        if let html, !html.isEmpty {
+            state = .unpaid
+        } else {
+            state = .paid
+        }
+        keyStore.assign(state, forKey: .paid).assign(html, forKey: .output)
+        return state
     }
 }
 
