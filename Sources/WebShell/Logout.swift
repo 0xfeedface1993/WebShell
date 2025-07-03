@@ -12,14 +12,27 @@ import Durex
 import FoundationNetworking
 #endif
 
+public enum LogoutOptions: Sendable {
+    case accountAction
+    
+    var path: String {
+        switch self {
+        case .accountAction:
+            return "account.php?action=logout"
+        }
+    }
+}
+
 public struct Logout: Dirtyware {
     public typealias Input = KeyStore
     public typealias Output = KeyStore
     
     public let configures: Durex.AsyncURLSessionConfiguration
+    public let option: LogoutOptions
     
-    public init(_ configures: Durex.AsyncURLSessionConfiguration) {
+    public init(_ configures: Durex.AsyncURLSessionConfiguration, option: LogoutOptions) {
         self.configures = configures
+        self.option = option
     }
     
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
@@ -28,10 +41,10 @@ public struct Logout: Dirtyware {
             throw ShellError.noPageLink
         }
         let configures = try await inputValue.configures(.configures)
-        let builder = URLRequestBuilder("\(scheme)://\(host)/account.php?action=logout")
+        let builder = URLRequestBuilder("\(scheme)://\(host)/\(option.path)")
             .method(.get)
-            .add(value: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", forKey: "accept")
-            .add(value: userAgent, forKey: "user-agent")
+            .add(value: LinkRequestHeader.generalAccept.value, forKey: LinkRequestHeader.generalAccept.key.rawValue)
+            .add(value: userAgent, forKey: LinkRequestHeader.customUserAgent.key.rawValue)
             .add(value: host, forKey: "Host")
         let url = try builder.build().url
         let (_, response) = try await configures.defaultSession.download(with: builder)
