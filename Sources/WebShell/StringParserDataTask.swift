@@ -18,7 +18,7 @@ import FoundationNetworking
 public struct StringParserDataTask {
     let request: URLRequestBuilder
     let encoding: String.Encoding
-    let sessionKey: any Hashable
+    let sessionKey: SessionKey
     let configures: Durex.AsyncURLSessionConfiguration
     
     func asyncValue() async throws -> String {
@@ -48,7 +48,7 @@ public struct StringParserDataTask {
         return text
     }
     
-    init(request: URLRequestBuilder, encoding: String.Encoding, sessionKey: any Hashable, configures: Durex.AsyncURLSessionConfiguration) {
+    init(request: URLRequestBuilder, encoding: String.Encoding, sessionKey: SessionKey, configures: Durex.AsyncURLSessionConfiguration) {
         self.request = request
         self.encoding = encoding
         self.sessionKey = sessionKey
@@ -58,7 +58,7 @@ public struct StringParserDataTask {
     init(_ request: URLRequestBuilder) {
         self.request = request
         self.encoding = .utf8
-        self.sessionKey = "default"
+        self.sessionKey = .host("default")
         self.configures = .shared
     }
     
@@ -66,7 +66,7 @@ public struct StringParserDataTask {
         .init(request: request, encoding: value, sessionKey: sessionKey, configures: configures)
     }
     
-    func sessionKey(_ value: any Hashable) -> Self {
+    func sessionKey(_ value: SessionKey) -> Self {
         .init(request: request, encoding: encoding, sessionKey: value, configures: configures)
     }
     func configures(_ value: AsyncURLSessionConfiguration) -> Self {
@@ -80,7 +80,7 @@ public struct StringParserDataTask {
 
 public struct DataTask {
     let request: URLRequestBuilder
-    let sessionKey: any Hashable
+    let sessionKey: SessionKey
     let configures: Durex.AsyncURLSessionConfiguration
     
     func asyncValue() async throws -> Data {
@@ -91,7 +91,16 @@ public struct DataTask {
         return data
     }
     
-    init(request: URLRequestBuilder, sessionKey: any Hashable, configures: Durex.AsyncURLSessionConfiguration) {
+    func asyncValueResponse() async throws -> (URL, URLResponse) {
+        let key = sessionKey
+        let context = try await AsyncSession(configures).context(key)
+        let (url, response) = try await context.download(with: request)
+        let fileSize = (try? url.resourceValues(forKeys: .init([.fileSizeKey])).fileSize) ?? 0
+        shellLogger.info("data downloaded: \(fileSize) bytes, locate \(url)")
+        return (url, response)
+    }
+    
+    init(request: URLRequestBuilder, sessionKey: SessionKey, configures: Durex.AsyncURLSessionConfiguration) {
         self.request = request
         self.sessionKey = sessionKey
         self.configures = configures
@@ -99,11 +108,11 @@ public struct DataTask {
     
     init(_ request: URLRequestBuilder) {
         self.request = request
-        self.sessionKey = "default"
+        self.sessionKey = .host("default")
         self.configures = .shared
     }
     
-    func sessionKey(_ value: any Hashable) -> Self {
+    func sessionKey(_ value: SessionKey) -> Self {
         .init(request: request, sessionKey: value, configures: configures)
     }
     func configures(_ value: AsyncURLSessionConfiguration) -> Self {

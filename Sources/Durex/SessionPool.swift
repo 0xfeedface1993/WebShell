@@ -55,6 +55,15 @@ actor AsyncSessionPool {
         }
     }
     
+    func createIfNotExists(key: Sessions, configurations: AsyncURLSessionConfiguration) -> any AsyncCustomURLSession {
+        if let value = context(forKey: key) {
+            return value
+        }
+        let session = configurations.newsSession()
+        set(session, for: key)
+        return session
+    }
+    
 //    /// 当前下载池中所有session
 //    func sessions() -> [any AsyncCustomURLSession] {
 //        cache.map(\.value)
@@ -141,13 +150,13 @@ public struct AsyncSession: Sendable {
         self.configures = configures
     }
     
-    public func state<Key>(for key: Key) async throws -> AsyncCustomURLSession where Key: Hashable {
-        let sessionKey = Sessions(key.hashValue)
+    public func state(for key: SessionKey) async throws -> AsyncCustomURLSession {
+        let sessionKey = Sessions(key)
         return try await configures.resourcesPool.sessions.take(forKey: sessionKey)
     }
     
-    public func register<Context, Key>(_ context: Context, forKey key: Key) async -> Context where Key: Hashable, Context: AsyncCustomURLSession {
-        let sessionKey = Sessions(key.hashValue)
+    public func register<Context>(_ context: Context, forKey key: SessionKey) async -> Context where Context: AsyncCustomURLSession {
+        let sessionKey = Sessions(key)
         
         await configures
             .resourcesPool
@@ -178,15 +187,15 @@ public struct AsyncSession: Sendable {
         return context
     }
     
-    public func remove<Key>(by key: Key) async where Key: Hashable {
-        let sessionKey = Sessions(key.hashValue)
+    public func remove(by key: SessionKey) async {
+        let sessionKey = Sessions(key)
         await configures.resourcesPool.sessions.remove(sessionKey)
     }
     
-    public func context<Key>(_ key: Key) async throws -> any AsyncCustomURLSession where Key: Hashable {
-        let sessionKey = Sessions(key.hashValue)
+    public func context(_ key: SessionKey) async throws -> any AsyncCustomURLSession {
+        let sessionKey = Sessions(key)
         do {
-            let context = try await configures.resourcesPool.sessions.take(forKey: sessionKey)
+            let context = try await configures.resourcesPool.sessions.createIfNotExists(key: sessionKey, configurations: configures)
             logger.info("got session \("\(context)") for \("\(sessionKey)")")
             return context
         } catch {

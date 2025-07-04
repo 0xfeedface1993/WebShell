@@ -14,11 +14,14 @@ import FoundationNetworking
 
 public enum LogoutOptions: Sendable {
     case accountAction
+    case accountLogout
     
     var path: String {
         switch self {
         case .accountAction:
             return "account.php?action=logout"
+        case .accountLogout:
+            return "account/logout"
         }
     }
 }
@@ -41,13 +44,14 @@ public struct Logout: Dirtyware {
             throw ShellError.noPageLink
         }
         let configures = try await inputValue.configures(.configures)
+        let sessionKey = try await inputValue.sessionKey(.sessionKey)
         let builder = URLRequestBuilder("\(scheme)://\(host)/\(option.path)")
             .method(.get)
             .add(value: LinkRequestHeader.generalAccept.value, forKey: LinkRequestHeader.generalAccept.key.rawValue)
             .add(value: userAgent, forKey: LinkRequestHeader.customUserAgent.key.rawValue)
             .add(value: host, forKey: "Host")
         let url = try builder.build().url
-        let (_, response) = try await configures.defaultSession.download(with: builder)
+        let (_, response) = try await DataTask(builder).configures(configures).sessionKey(sessionKey).asyncValueResponse()
         guard let response = response as? HTTPURLResponse else {
             return inputValue
         }

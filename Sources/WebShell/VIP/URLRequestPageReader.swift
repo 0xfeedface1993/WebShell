@@ -60,6 +60,7 @@ public struct URLRequestPageReaderV2: Dirtyware {
         let configures = try await inputValue.configures(.configures)
         let context = try await AsyncSession(configures).context(key)
         let (data, _) = try await context.download(with: request)
+        shellLogger.info("[\(stringKey)] download at \(data)")
         let next = inputValue
             .assign(request, forKey: .lastRequest)
             .assign(data, forKey: .htmlFile)

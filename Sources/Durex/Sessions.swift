@@ -25,9 +25,9 @@ import AnyErase
 @usableFromInline
 enum Sessions: Hashable, Equatable, Sendable {
     case `default`
-    case key(Int)
+    case key(SessionKey)
     
-    init(_ hashValue: Int) {
+    init(_ hashValue: SessionKey) {
         self = .key(hashValue)
     }
 }
