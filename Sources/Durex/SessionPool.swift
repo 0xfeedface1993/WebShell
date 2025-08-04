@@ -25,6 +25,11 @@ import AnyErase
 #endif
 
 actor AsyncSessionPool {
+    enum SeesionWrapped {
+        case new(AsyncCustomURLSession)
+        case exists(AsyncCustomURLSession)
+    }
+    
     private var cache = [Sessions: any AsyncCustomURLSession]()
     
     @usableFromInline
@@ -55,19 +60,14 @@ actor AsyncSessionPool {
         }
     }
     
-    func createIfNotExists(key: Sessions, configurations: AsyncURLSessionConfiguration) -> any AsyncCustomURLSession {
+    func createIfNotExists(key: Sessions, configurations: AsyncURLSessionConfiguration) -> SeesionWrapped {
         if let value = context(forKey: key) {
-            return value
+            return .exists(value)
         }
         let session = configurations.newsSession()
         set(session, for: key)
-        return session
+        return .new(session)
     }
-    
-//    /// 当前下载池中所有session
-//    func sessions() -> [any AsyncCustomURLSession] {
-//        cache.map(\.value)
-//    }
 }
 
 actor AsyncTaskPool {
@@ -96,22 +96,6 @@ actor AsyncTaskPool {
     }
     
     func task<S: AsyncSequence>(_ updates: sending S, subject: ChannelSubject<AsyncUpdateNews>, forKey key: Sessions) -> TaskValue where S.Element == AsyncUpdateNews, S: Sendable {
-//        let action: @Sendable () async -> Void = {
-//            logger.info("observer session \(key)")
-//            defer {
-//                logger.info("finished observer session \(key)")
-//            }
-//            do {
-//                for try await news in updates {
-//                    // logger.info("send news [\(news)] to [\(key)]")
-//                    print("send news [\(news)] to [\(key)]")
-//                    subject.send(news)
-//                }
-//            } catch {
-//                logger.info("catch error from observer session \(key), \(error)")
-//            }
-//        }
-        
         return TaskValue(operation: {
             logger.info("observer session \("\(key)")")
             defer {
@@ -155,22 +139,6 @@ public struct AsyncSession: Sendable {
         return try await configures.resourcesPool.sessions.take(forKey: sessionKey)
     }
     
-    public func register<Context>(_ context: Context, forKey key: SessionKey) async -> Context where Context: AsyncCustomURLSession {
-        let sessionKey = Sessions(key)
-        
-        await configures
-            .resourcesPool
-            .sessions
-            .set(context, for: sessionKey)
-        
-        await configures
-            .resourcesPool
-            .tasks
-            .set(context, subject: configures.resourcesPool.subject, for: sessionKey)
-        
-        return context
-    }
-    
     func registerDefaultContext<Context>(_ context: Context) async -> Context where Context: AsyncCustomURLSession {
         let sessionKey = Sessions.default
         
@@ -196,8 +164,18 @@ public struct AsyncSession: Sendable {
         let sessionKey = Sessions(key)
         do {
             let context = try await configures.resourcesPool.sessions.createIfNotExists(key: sessionKey, configurations: configures)
-            logger.info("got session \("\(context)") for \("\(sessionKey)")")
-            return context
+            switch context {
+            case .new(let session):
+                await configures
+                    .resourcesPool
+                    .tasks
+                    .set(session, subject: configures.resourcesPool.subject, for: sessionKey)
+                logger.info("create session \("\(context)") for \("\(sessionKey)")")
+                return session
+            case .exists(let session):
+                logger.info("got session \("\(context)") for \("\(sessionKey)")")
+                return session
+            }
         } catch {
             logger.error("take session for \("\(sessionKey)") failed, \(error)")
             logger.info("use default session \("\(configures.defaultSession)")")

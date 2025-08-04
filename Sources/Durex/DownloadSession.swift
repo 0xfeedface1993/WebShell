@@ -102,25 +102,23 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
     }
     
     public func downloadNews() -> AsyncStream<AsyncUpdateNews> {
-        let sequeue = delegate.statePassthroughSubject
-            .compactMap { item -> AsyncUpdateNews? in
+        let subject = delegate.statePassthroughSubject
+        let (stream, continuation) = AsyncStream<AsyncUpdateNews>.makeStream(bufferingPolicy: .bufferingNewest(1))
+        let task = Task {
+            for await value in subject.compactMap { item -> AsyncUpdateNews? in
                 guard let tag = await tag(for: item.identifier) else {
                     return nil
                 }
                 return AsyncUpdateNews(value: item, tag: tag)
+            } {
+                continuation.yield(value)
             }
-        
-        return AsyncStream(bufferingPolicy: .bufferingNewest(1)) { continiation in
-            let task = Task {
-                for await value in sequeue {
-                    continiation.yield(value)
-                }
-                continiation.finish()
-            }
-            continiation.onTermination = { _ in
-                task.cancel()
-            }
+            continuation.finish()
         }
+        continuation.onTermination = { _ in
+            task.cancel()
+        }
+        return stream
     }
     
     public func requestBySetCookies(with request: URLRequestBuilder) throws -> URLRequestBuilder {
