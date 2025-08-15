@@ -13,10 +13,10 @@ public struct ChannelSubject<T: Sendable>: Sendable {
     private let channel: AsyncChannel<T>
     private let broadcast: AsyncBroadcaster<T>
     
-    public init() {
+    public init(_ replay: AsyncBuffer = .latest(1)) {
         let channel = AsyncChannel<T>()
         self.channel = channel
-        self.broadcast = AsyncBroadcaster(replay: .latest(1), sequence: channel)
+        self.broadcast = AsyncBroadcaster(replay: replay, sequence: channel)
     }
     
     public func send(_ element: T) async {
@@ -25,6 +25,14 @@ public struct ChannelSubject<T: Sendable>: Sendable {
     
     public func subscribe() -> AsyncBroadcaster<T> {
         broadcast
+    }
+    
+    public func subscribe<V: AsyncSequence>(_ replay: AsyncBuffer = .latest(1), transfrom: @Sendable @escaping (AsyncBroadcaster<T>) -> V) -> AsyncBroadcaster<V.Element> {
+        AsyncBroadcaster(replay: replay, sequence: transfrom(broadcast))
+    }
+    
+    public func transfrom<V: AsyncSequence>(_ transfrom: @Sendable @escaping (AsyncBroadcaster<T>) -> V) -> V {
+        transfrom(broadcast)
     }
     
     public func finished() {
