@@ -29,6 +29,9 @@ public struct LinkRequestHeader: Equatable, Sendable {
         case acceptEncoding = "Accept-Encoding"
         case origin = "Origin"
         case contentType = "Content-Type"
+        case xXSRFToken = "X-XSRF-TOKEN"
+        case xCSRFToken = "X-CSRF-TOKEN"
+        case xRequestedWith = "X-Requested-With"
     }
     
     public let key: Key
@@ -37,12 +40,32 @@ public struct LinkRequestHeader: Equatable, Sendable {
     public static let allAccept = LinkRequestHeader(key: .accept, value: "*/*")
     public static let allCapAccept = LinkRequestHeader(key: .capAccept, value: "*/*")
     public static let generalAccept = LinkRequestHeader(key: .accept, value: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+    public static let generalShortAccept = LinkRequestHeader(key: .accept, value: "text/html, application/xhtml+xml")
     public static let enUSAcceptLanguage = LinkRequestHeader(key: .acceptLanguage, value: "en-US,en;q=0.9")
     public static let customUserAgent = LinkRequestHeader(key: .customUserAgent, value: userAgent)
     public static let keepAliveConnection = LinkRequestHeader(key: .connection, value: "keep-alive")
     public static let priority = LinkRequestHeader(key: .priority, value: "u=3, i")
     public static let gzipAcceptEncoding = LinkRequestHeader(key: .acceptEncoding, value: "gzip, deflate, br, zstd")
     public static let urlencodedContentType = LinkRequestHeader(key: .contentType, value: "application/x-www-form-urlencoded; charset=UTF-8")
+    public static let jsonContentType = LinkRequestHeader(key: .contentType, value: "application/json")
+    public static let xmlHttpRequest = LinkRequestHeader(key: .xRequestedWith, value: "XMLHttpRequest")
+    public static let zhHans = LinkRequestHeader(key: .acceptLanguage, value: "zh-CN,zh-Hans;q=0.9")
+    public static let allImageAccept = LinkRequestHeader(key: .accept, value: "image/webp,image/avif,image/jxl,image/heic,image/heic-sequence,video/*;q=0.8,image/png,image/svg+xml,image/*;q=0.8,*/*;q=0.5")
+}
+
+extension URLRequestBuilder {
+    @inlinable
+    public func add(value: String?, forKey key: LinkRequestHeader.Key) -> URLRequestBuilder {
+        if let value {
+            return self.add(value: value, forKey: key.rawValue)
+        }
+        return self.deop(key: key.rawValue)
+    }
+    
+    @inlinable
+    public func add(_ header: LinkRequestHeader) -> URLRequestBuilder {
+        return self.add(value: header.value, forKey: header.key.rawValue)
+    }
 }
 
 public struct File116Download: DownloadRequestBuilder {

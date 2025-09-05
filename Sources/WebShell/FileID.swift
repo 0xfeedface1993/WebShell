@@ -111,6 +111,14 @@ extension FileIDFinder where Self == FileIDMatch {
     public static var notVip: Self {
         FileIDMatch(pattern: "You are not yet a VIP", template: .dollar(0))
     }
+    
+    public static var redirectDashboardLogined: Self {
+        FileIDMatch(pattern: "Redirecting to [^\\s]+dashboard", template: .dollar(0))
+    }
+    
+    public static var csrfMetaToken: Self {
+        FileIDMatch(pattern: "name=\"csrf\\-token\" content=\"([^\"]+)\"", template: .dollar(1))
+    }
 }
 
 /// 从链接中提取fileid，`http://xxxx/file-123456.html`提取fileid`123456`

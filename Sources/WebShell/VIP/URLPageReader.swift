@@ -31,14 +31,18 @@ public struct URLPageReader: SessionableDirtyware {
         let string = try await inputValue.string(stringKey)
         let request = try JustRequest(url: string).make()
         let context = try await AsyncSession(configures).context(key)
-        let (data, response) = try await context.download(with: request)
-        let next = inputValue
+        var (data, response) = try await context.download(with: request)
+        let nextURL: String
+        if let redirectURL = validRedirectResponse(response, request: request.url) {
+            nextURL = redirectURL.absoluteString
+            (data, response) = try await context.download(with: request.url(redirectURL.absoluteString))
+        } else {
+            nextURL = string
+        }
+        let next = extractCookies(from: response, to: inputValue)
             .assign(request, forKey: .lastRequest)
             .assign(data, forKey: .htmlFile)
-        if let redirectURL = validRedirectResponse(response, request: request.url) {
-            return next.assign(redirectURL.absoluteString, forKey: .output)
-        }
-        return next.assign(string, forKey: .output)
+        return next.assign(nextURL, forKey: .output)
     }
     
     private func validRedirectResponse(_ value: URLResponse, request: String?) -> URL? {

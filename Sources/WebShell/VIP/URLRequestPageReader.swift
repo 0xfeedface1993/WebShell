@@ -30,8 +30,8 @@ public struct URLRequestPageReader: SessionableDirtyware {
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
         let request = try await inputValue.request(stringKey)
         let context = try await AsyncSession(configures).context(key)
-        let (data, _) = try await context.download(with: request)
-        let next = inputValue
+        let (data, response) = try await context.download(with: request)
+        let next = extractCookies(from: response, to: inputValue)
             .assign(request, forKey: .lastRequest)
             .assign(data, forKey: .htmlFile)
         return next.assign(data, forKey: .output)
@@ -66,4 +66,21 @@ public struct URLRequestPageReaderV2: Dirtyware {
             .assign(data, forKey: .htmlFile)
         return next.assign(data, forKey: .output)
     }
+}
+
+extension HTTPCookie: ContextValue {
+    public var valueDescription: String {
+        self.description
+    }
+}
+
+@discardableResult
+func extractCookies(from response: URLResponse, to keyStore: KeyStore) -> KeyStore {
+    guard let response = response as? HTTPURLResponse,
+        let url = response.url,
+        let headers = response.allHeaderFields as? [String: String] else {
+        return keyStore
+    }
+    let cookies = HTTPCookie.cookies(withResponseHeaderFields: headers, for: url.removeURLPath())
+    return keyStore.assign(cookies, forKey: .setCookies)
 }

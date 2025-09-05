@@ -18,7 +18,7 @@ public actor KeyStoreActor {
 }
 
 public final class KeyStore: ContextValue {
-    public struct Key: Hashable, Sendable {
+    public struct Key: Hashable, Sendable, CustomStringConvertible {
         public enum Base: Hashable, Sendable {
             case string(String)
             case int(Int)
@@ -33,6 +33,10 @@ public final class KeyStore: ContextValue {
         
         public init(_ text: String) {
             self.base = .string(text)
+        }
+        
+        public var description: String {
+            "\(self.base)"
         }
     }
     
@@ -90,42 +94,49 @@ public final class KeyStore: ContextValue {
     @KeyStoreActor
     public func take<T>(forKey key: Key) throws -> T {
         guard let next: T = value(forKey: key) else {
-            shellLogger.error("no key [\(key)] store as \(T.self), maybe \(String(describing: cached[key]))")
+            shellLogger.error("no key [\("\(key)")] store as \(T.self), maybe \(String(describing: self.cached[key]))")
             throw KeyStoreError.valueTransformTypeIncorrect
         }
         return next
     }
     
+    @inlinable
     @KeyStoreActor
     public func string(_ key: Key) throws -> String {
         try take(forKey: key)
     }
     
+    @inlinable
     @KeyStoreActor
     public func strings(_ key: Key) throws -> [String] {
         try take(forKey: key)
     }
     
+    @inlinable
     @KeyStoreActor
     public func request(_ key: Key) throws -> URLRequestBuilder {
         try take(forKey: key)
     }
     
+    @inlinable
     @KeyStoreActor
     public func requests(_ key: Key) throws -> [URLRequestBuilder] {
         try take(forKey: key)
     }
     
+    @inlinable
     @KeyStoreActor
     public func url(_ key: Key) throws -> URL {
         try take(forKey: key)
     }
     
+    @inlinable
     @KeyStoreActor
     public func configures(_ key: Key) throws -> AsyncURLSessionConfiguration {
         try take(forKey: key)
     }
     
+    @inlinable
     @KeyStoreActor
     public func sessionKey(_ key: Key) throws -> SessionKey {
         try take(forKey: key)
@@ -134,6 +145,18 @@ public final class KeyStore: ContextValue {
     @KeyStoreActor
     public var valueDescription: String {
         "\(self): \(cached)"
+    }
+    
+    @inlinable
+    @KeyStoreActor
+    public func cookies(_ key: Key) throws -> [HTTPCookie] {
+        try take(forKey: key)
+    }
+    
+    @inlinable
+    @KeyStoreActor
+    public func cookie(_ key: Key) throws -> HTTPCookie {
+        try take(forKey: key)
     }
 }
 
@@ -164,6 +187,11 @@ public extension KeyStore.Key {
     static let configures = KeyStore.Key("configures")
     static let paid = KeyStore.Key("paid")
     static let sessionKey = KeyStore.Key("session_key")
+    
+    static let xsrf = KeyStore.Key("xsrf")
+    static let csrf = KeyStore.Key("csrf")
+    static let setCookies = KeyStore.Key("set_cookies")
+    static let jsonUser = KeyStore.Key("json_user")
 }
 
 /// Set instant value to new key store

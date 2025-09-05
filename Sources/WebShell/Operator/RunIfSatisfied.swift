@@ -8,10 +8,7 @@
 import Foundation
 import Durex
 
-public struct RunIfKeyExists<T: Dirtyware<KeyStore, KeyStore>>: Dirtyware {
-    public typealias Input = KeyStore
-    public typealias Output = KeyStore
-    
+public struct RunIfKeyExists<T: UniversalDirtyware>: UniversalDirtyware {
     public let task: T
     public let key: KeyStore.Key
     
@@ -23,10 +20,10 @@ public struct RunIfKeyExists<T: Dirtyware<KeyStore, KeyStore>>: Dirtyware {
     public func execute(for inputValue: KeyStore) async throws -> KeyStore {
         let value: ContextValue? = await inputValue.value(forKey: key)
         if let value = value {
-            shellLogger.info("got \(value) for \(key), execute task \(task)")
+            shellLogger.info("got \("\(value)") for \(key), execute task \("\(task)")")
             return try await task.execute(for: inputValue)
         }
-        shellLogger.info("value for \(key) not found, not execute task \(task)")
+        shellLogger.info("value for \(key) not found, not execute task \("\(task)")")
         return inputValue
     }
 }
@@ -45,10 +42,10 @@ public struct RunIfSatisfied<T: Dirtyware>: Dirtyware where T.Output == KeyStore
     
     public func execute(for inputValue: T.Input) async throws -> T.Output {
         if await block(inputValue, task) {
-            shellLogger.info("permission granted, execute task \(task)")
+            shellLogger.info("permission granted, execute task \("\(task)")")
             return try await task.execute(for: inputValue)
         }
-        shellLogger.info("permission denied, not execute task \(task)")
+        shellLogger.info("permission denied, not execute task \("\(task)")")
         return inputValue
     }
 }

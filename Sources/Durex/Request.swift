@@ -79,6 +79,12 @@ public struct URLRequestBuilder: CustomStringConvertible, Sendable {
         return URLRequestBuilder(url: url, method: method, headers: temp, body: body)
     }
     
+    public func deop(key: String) -> URLRequestBuilder {
+        var temp = headers ?? [:]
+        temp[key] = nil
+        return URLRequestBuilder(url: url, method: method, headers: temp, body: body)
+    }
+    
     public func build() throws -> URLRequest {
         guard let urlString = url, let url = URL(string: urlString) else {
             throw URLRequestBuilderError.badURL(url)

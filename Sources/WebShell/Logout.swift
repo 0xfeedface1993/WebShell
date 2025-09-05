@@ -15,6 +15,7 @@ import FoundationNetworking
 public enum LogoutOptions: Sendable {
     case accountAction
     case accountLogout
+    case logout
     
     var path: String {
         switch self {
@@ -22,14 +23,13 @@ public enum LogoutOptions: Sendable {
             return "account.php?action=logout"
         case .accountLogout:
             return "account/logout"
+        case .logout:
+            return "logout"
         }
     }
 }
 
-public struct Logout: Dirtyware {
-    public typealias Input = KeyStore
-    public typealias Output = KeyStore
-    
+public struct Logout: UniversalDirtyware {
     public let configures: Durex.AsyncURLSessionConfiguration
     public let option: LogoutOptions
     
@@ -45,11 +45,30 @@ public struct Logout: Dirtyware {
         }
         let configures = try await inputValue.configures(.configures)
         let sessionKey = try await inputValue.sessionKey(.sessionKey)
-        let builder = URLRequestBuilder("\(scheme)://\(host)/\(option.path)")
-            .method(.get)
-            .add(value: LinkRequestHeader.generalAccept.value, forKey: LinkRequestHeader.generalAccept.key.rawValue)
-            .add(value: userAgent, forKey: LinkRequestHeader.customUserAgent.key.rawValue)
-            .add(value: host, forKey: "Host")
+        let builder: URLRequestBuilder
+        
+        switch option {
+        case .accountAction, .accountLogout:
+            builder = URLRequestBuilder("\(scheme)://\(host)/\(option.path)")
+                .method(.get)
+                .add(.generalAccept)
+                .add(value: userAgent, forKey: .customUserAgent)
+                .add(value: host, forKey: "Host")
+        case .logout:
+            builder = URLRequestBuilder("\(scheme)://\(host)/\(option.path)")
+                .method(.post)
+                .add(.generalShortAccept)
+                .add(.xmlHttpRequest)
+                .add(value: try? await inputValue.string(.xsrf), forKey: .xXSRFToken)
+                .add(value: "\(scheme)://\(host)", forKey: .origin)
+                .add(value: userAgent, forKey: .customUserAgent)
+                .add(value: "\(scheme)://\(host)/dashboard", forKey: .referer)
+                .add(.zhHans)
+                .add(.keepAliveConnection)
+                .add(.jsonContentType)
+                .body("{}".data(using: .utf8)!)
+        }
+        
         let url = try builder.build().url
         let (_, response) = try await DataTask(builder).configures(configures).sessionKey(sessionKey).asyncValueResponse()
         guard let response = response as? HTTPURLResponse else {

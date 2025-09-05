@@ -162,24 +162,18 @@ public struct AsyncSession: Sendable {
     
     public func context(_ key: SessionKey) async throws -> any AsyncCustomURLSession {
         let sessionKey = Sessions(key)
-        do {
-            let context = try await configures.resourcesPool.sessions.createIfNotExists(key: sessionKey, configurations: configures)
-            switch context {
-            case .new(let session):
-                await configures
-                    .resourcesPool
-                    .tasks
-                    .set(session, subject: configures.resourcesPool.subject, for: sessionKey)
-                logger.info("create session \("\(context)") for \("\(sessionKey)")")
-                return session
-            case .exists(let session):
-                logger.info("got session \("\(context)") for \("\(sessionKey)")")
-                return session
-            }
-        } catch {
-            logger.error("take session for \("\(sessionKey)") failed, \(error)")
-            logger.info("use default session \("\(configures.defaultSession)")")
-            return configures.defaultSession
+        let context = await configures.resourcesPool.sessions.createIfNotExists(key: sessionKey, configurations: configures)
+        switch context {
+        case .new(let session):
+            await configures
+                .resourcesPool
+                .tasks
+                .set(session, subject: configures.resourcesPool.subject, for: sessionKey)
+            logger.info("create session \("\(context)") for \("\(sessionKey)")")
+            return session
+        case .exists(let session):
+            logger.info("got session \("\(context)") for \("\(sessionKey)")")
+            return session
         }
     }
     

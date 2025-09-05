@@ -51,31 +51,31 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
 
     public func downloadWithProgress(_ request: URLRequestBuilder, tag: TaskTag) async throws -> AsyncStream<AsyncUpdateNews> {
         let publisher = AsyncDownloadURLProgressPublisher(request: request, tag: tag, delegtor: delegate, sessionProvider: self)
-        return AsyncStream { continuation in
-            let task = Task {
-                do {
-                    for try await item in try await publisher.download() {
+        let (stream, continuation) = AsyncStream.makeStream(of: AsyncUpdateNews.self, bufferingPolicy: .unbounded)
+        let task = Task {
+            do {
+                for try await item in try await publisher.download() {
 //                        logger.info("[\("\(tag)")] recevice \("\(item)")")
-                        continuation.yield(AsyncUpdateNews(value: item, tag: tag))
-                        switch item {
-                        case .error, .file:
-                            break
-                        default:
-                            continue
-                        }
+                    continuation.yield(AsyncUpdateNews(value: item, tag: tag))
+                    switch item {
+                    case .error, .file:
+                        break
+                    default:
+                        continue
                     }
-                } catch {
-                    continuation.yield(
-                        AsyncUpdateNews(value: .error(.init(error: error, identifier: 900)), tag: tag)
-                    )
                 }
+            } catch {
+                continuation.yield(
+                    AsyncUpdateNews(value: .error(.init(error: error, identifier: 900)), tag: tag)
+                )
+            }
 //                logger.info("[\("\(tag)")] finish continuation.")
-                continuation.finish()
-            }
-            continuation.onTermination = { t in
-                task.cancel()
-            }
+            continuation.finish()
         }
+        continuation.onTermination = { t in
+            task.cancel()
+        }
+        return stream
     }
 
     public func downloadNews(_ tag: TaskTag) -> AsyncStream<AsyncUpdateNews> {
@@ -105,12 +105,12 @@ public struct AsyncDownloadSession: AsyncCustomURLSession {
         let subject = delegate.statePassthroughSubject
         let (stream, continuation) = AsyncStream<AsyncUpdateNews>.makeStream(bufferingPolicy: .bufferingNewest(1))
         let task = Task {
-            for await value in subject.compactMap { item -> AsyncUpdateNews? in
+            for await value in subject.compactMap({ item -> AsyncUpdateNews? in
                 guard let tag = await tag(for: item.identifier) else {
                     return nil
                 }
                 return AsyncUpdateNews(value: item, tag: tag)
-            } {
+            }) {
                 continuation.yield(value)
             }
             continuation.finish()

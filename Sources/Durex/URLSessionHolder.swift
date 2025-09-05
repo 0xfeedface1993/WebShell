@@ -26,12 +26,17 @@ struct URLSessionHolder: Sendable {
         configure.timeoutIntervalForResource = 15 * 24 * 3600
 //        let cookies = HTTPCookieStorage()
 //        configure.httpCookieStorage = cookies
-        configure.httpCookieStorage?.removeCookies(since: Date(timeIntervalSinceReferenceDate: 0))
         configure.httpCookieStorage?.cookieAcceptPolicy = .always
         configure.httpShouldSetCookies = true
+        let queue = OperationQueue()
+        queue.name = "urlsesion"
+        queue.qualityOfService = .default
 
-        self.session = URLSession(configuration: configure, delegate: delegator, delegateQueue: nil)
+        self.session = URLSession(configuration: configure, delegate: delegator, delegateQueue: queue)
         if let storage = configure.httpCookieStorage {
+            DispatchQueue.global().async {
+                storage.removeCookies(since: Date(timeIntervalSinceReferenceDate: 0))
+            }
             self.cookies = storage
         }   else    {
             let message = "empty httpCookieStorage in configure \(configure)."
@@ -52,12 +57,17 @@ struct URLSessionHolder: Sendable {
         let configure = URLSessionConfiguration.default
         configure.timeoutIntervalForRequest = 20 * 60
         configure.timeoutIntervalForResource = 15 * 24 * 3600
-        configure.httpCookieStorage?.removeCookies(since: Date(timeIntervalSinceReferenceDate: 0))
         configure.httpCookieStorage?.cookieAcceptPolicy = .always
         configure.httpShouldSetCookies = true
+        let queue = OperationQueue()
+        queue.name = "urlsesion"
+        queue.qualityOfService = .default
 
-        self.session = URLSession(configuration: configure, delegate: delegate, delegateQueue: nil)
+        self.session = URLSession(configuration: configure, delegate: delegate, delegateQueue: queue)
         if let storage = configure.httpCookieStorage {
+            queue.addOperation({
+                storage.removeCookies(since: Date(timeIntervalSinceReferenceDate: 0))
+            })
             self.cookies = storage
         }   else    {
             let message = "empty httpCookieStorage in configure \(configure)."

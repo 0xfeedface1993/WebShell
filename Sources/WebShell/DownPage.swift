@@ -174,6 +174,7 @@ public struct JustRequest {
             .add(value: "1", forKey: "Upgrade-Insecure-Requests")
             .add(value: "zh-CN,zh-Hans;q=0.9", forKey: "Accept-Language")
             .add(value: "application/x-www-form-urlencoded; charset=UTF-8", forKey: "Content-Type")
+            .add(value: LinkRequestHeader.keepAliveConnection.value, forKey: LinkRequestHeader.keepAliveConnection.key.rawValue)
             .add(value: userAgent, forKey: "User-Agent")
     }
 }

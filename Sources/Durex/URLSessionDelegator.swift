@@ -8,16 +8,16 @@
 import Foundation
 #if COMBINE_LINUX && canImport(CombineX)
 @preconcurrency import CombineX
-import Logging
-internal let logger = Logger(label: "com.ascp.download")
 #else
 @preconcurrency import Combine
-#if canImport(os.Logger)
-internal let logger = Logger(subsystem: "AnyErase", category: "AnyErase")
+#endif
+
+#if !os(Linux)
+import OSLog
+internal let logger = Logger(subsystem: "Durex", category: "Durex")
 #else
 import Logging
-internal let logger = Logger(label: "com.webshell.anyerase")
-#endif
+internal let logger = Logger(label: "com.webshell.durex")
 #endif
 
 #if canImport(FoundationNetworking)

@@ -57,4 +57,6 @@ public enum ShellError: Error {
     case invalidAccount(username: String)
     /// 用户没有付费
     case unpaidUser(username: String)
+    /// data-part数据读取失败
+    case dataPartTransform
 }

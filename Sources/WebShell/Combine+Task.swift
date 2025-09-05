@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import Logging
 
 #if COMBINE_LINUX && canImport(CombineX)
 import CombineX
@@ -23,7 +22,13 @@ import Durex
 import FoundationNetworking
 #endif
 
+#if os(Linux)
+import Logging
 internal let shellLogger = Logger(label: "com.ascp.webshell")
+#else
+import OSLog
+internal let shellLogger = Logger(subsystem: "com.ascp.webshell", category: "")
+#endif
 
 #if DEBUG
 extension Publisher {

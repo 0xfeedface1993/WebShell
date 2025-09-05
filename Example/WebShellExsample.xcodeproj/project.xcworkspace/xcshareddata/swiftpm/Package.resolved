@@ -1,5 +1,5 @@
 {
-  "originHash" : "298325edcc2feba6d808efdc48b477c68f80cce529871c5124e230e2751d349a",
+  "originHash" : "3e09522ae7ff60b21bb8e686bd5751b784593b15e8e9a904df0ce284e8da4ccb",
   "pins" : [
     {
       "identity" : "combinex",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "f73eee728a7826a2855fabb380300187f42f5649",
         "version" : "0.4.1"
+      }
+    },
+    {
+      "identity" : "lrucache",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/nicklockwood/LRUCache.git",
+      "state" : {
+        "revision" : "e0e9e039b33db8f2ef39b8e25607e38f46b13584",
+        "version" : "1.1.2"
       }
     },
     {
@@ -33,8 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-atomics.git",
       "state" : {
-        "revision" : "6c89474e62719ddcc1e9614989fff2f68208fe10",
-        "version" : "1.1.0"
+        "revision" : "b601256eab081c0f92f059e12818ac1d4f178ff7",
+        "version" : "1.3.0"
       }
     },
     {
@@ -62,6 +71,15 @@
       "state" : {
         "revision" : "32e8d724467f8fe623624570367e3d50c5638e46",
         "version" : "1.5.2"
+      }
+    },
+    {
+      "identity" : "swiftsoup",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/scinfu/SwiftSoup.git",
+      "state" : {
+        "revision" : "db0428bcfced386943c05ba8ea3e607baa715e45",
+        "version" : "2.11.0"
       }
     }
   ],
