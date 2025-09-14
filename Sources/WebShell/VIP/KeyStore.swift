@@ -8,6 +8,10 @@
 import Foundation
 import Durex
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 public enum KeyStoreError: Error {
     case valueTransformTypeIncorrect
 }
