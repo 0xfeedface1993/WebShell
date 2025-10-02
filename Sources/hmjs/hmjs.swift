@@ -1,6 +1,10 @@
 import Foundation
 //import Playgrounds
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 public func extractHMAccount(_ text: String) throws -> String {
     if #available(macOS 13.0, *) {
         let regex = Regex(/hca:\s?'([^']+)'/)
