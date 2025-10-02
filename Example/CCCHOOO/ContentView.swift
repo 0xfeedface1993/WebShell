@@ -377,19 +377,19 @@ struct ContentView: View {
                     .title("koolaa-vip")
                     .url("https://koolaayun.com/872408c26bfe4a7a/A15607.zip"),
                     .init(
-//                        build116LoginCommands(.shared, key: .host("116"))
-                        RedirectFollowPage(.shared, key: .host("116"))
-                            .join(EraseOutValue(to: .fileidURL))
-                            .join(
-                                FileIDReader(finder: FileIDMatch.inQueryfileID)
-                            )
-                            .join(ExternalValueReader(AsyncURLSessionConfiguration.shared, forKey: .configures))
-                            .join(
-                                CodeImageRequest(.shared, path: .imageCodePHP, key: .host("116"))
-                            )
-                            .join(
-                                CodeImagePrediction(.shared, key: .host("116"), reader: UserImageCodeReader(tag: "116", userInput: userInput, completion: completion))
-                            )
+                        build116LoginCommandsV2(.shared, key: .host("116"), coder: UserImageCodeReader(tag: "116", userInput: userInput, completion: completion))
+//                        RedirectFollowPage(.shared, key: .host("116"))
+//                            .join(EraseOutValue(to: .fileidURL))
+//                            .join(
+//                                FileIDReader(finder: FileIDMatch.inQueryfileID)
+//                            )
+//                            .join(ExternalValueReader(AsyncURLSessionConfiguration.shared, forKey: .configures))
+//                            .join(
+//                                CodeImageRequest(.shared, path: .imageCodePHP, key: .host("116"))
+//                            )
+//                            .join(
+//                                CodeImagePrediction(.shared, key: .host("116"), reader: UserImageCodeReader(tag: "116", userInput: userInput, completion: completion))
+//                            )
                             .join(AjaxFileListPageRequest(.checkCode))
                             .join(
                                 DowloadsListWithSignFileIDReader(.shared, builder: File116Download(), finder: .httpHref, key: .host("116"))
@@ -418,7 +418,7 @@ struct ContentView: View {
             
             Task {
                 for await (image, tag) in self.completion {
-                    let object = list.first(where: { $0.tag == tag })
+                    let object = self.list.first(where: { $0.tag == tag })
                     object?.imageCode = image
                     object?.objectWillChange.send()
                 }

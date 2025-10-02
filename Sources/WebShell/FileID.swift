@@ -119,6 +119,10 @@ extension FileIDFinder where Self == FileIDMatch {
     public static var csrfMetaToken: Self {
         FileIDMatch(pattern: "name=\"csrf\\-token\" content=\"([^\"]+)\"", template: .dollar(1))
     }
+    
+    public static var hmsrc: Self {
+        FileIDMatch(pattern: "hm\\.src\\s*=\\s*\"([^\"]+)\"", template: .dollar(1))
+    }
 }
 
 /// 从链接中提取fileid，`http://xxxx/file-123456.html`提取fileid`123456`

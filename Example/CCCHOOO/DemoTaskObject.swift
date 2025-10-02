@@ -94,7 +94,7 @@ final class DemoTaskObject: ObservableObject, Identifiable, @unchecked Sendable 
     
     func observerState() async throws {
         let config = AsyncURLSessionConfiguration.shared
-        let session = try await AsyncSession(config).context("default")
+        let session = try await AsyncSession(config).context(.host("default"))
         let states = session.downloadNews(.string(tag))
         for try await state in states {
             switch state.value {

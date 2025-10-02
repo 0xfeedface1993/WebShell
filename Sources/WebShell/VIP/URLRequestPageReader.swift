@@ -61,6 +61,10 @@ public struct URLRequestPageReaderV2: Dirtyware {
         let context = try await AsyncSession(configures).context(key)
         let (data, _) = try await context.download(with: request)
         shellLogger.info("[\(stringKey)] download at \(data)")
+        if let fileURL = try? await inputValue.string(.fileidURL),
+            let string = try? String(contentsOf: data, encoding: .utf8) {
+            await updateHMCookies(string, fileURL: fileURL, key: key, configures: configures, store: inputValue)
+        }
         let next = inputValue
             .assign(request, forKey: .lastRequest)
             .assign(data, forKey: .htmlFile)

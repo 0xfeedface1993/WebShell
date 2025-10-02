@@ -20,7 +20,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
         .package(url: "https://github.com/0xfeedface1993/CombineX.git", from: "0.4.1"),
         .package(url: "https://github.com/0xfeedface1993/swift-async-broadcaster.git", from: "0.0.2"),
-        .package(url: "https://github.com/scinfu/SwiftSoup.git", from: "2.11.0")
+        .package(url: "https://github.com/scinfu/SwiftSoup.git", from: "2.11.0"),
     ],
     targets: [
         .target(
@@ -33,8 +33,16 @@ let package = Package(
             swiftSettings: swiftSettings
         ),
         .target(
+            name: "hmjs",
+            swiftSettings: swiftSettings
+        ),
+        .target(
             name: "WebShell",
-            dependencies: ["Durex", .product(name: "SwiftSoup", package: "SwiftSoup")],
+            dependencies: [
+                "Durex",
+                .product(name: "SwiftSoup", package: "SwiftSoup"),
+                .target(name: "hmjs")
+            ],
             swiftSettings: swiftSettings
         ),
         .testTarget(

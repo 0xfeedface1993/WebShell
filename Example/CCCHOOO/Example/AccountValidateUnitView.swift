@@ -9,11 +9,29 @@
 import SwiftUI
 
 struct AccountValidateUnitView: View {
+    @State private var code = ""
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        HStack {
+            Text("State")
+            
+            VStack(alignment: .leading) {
+                Text("Account")
+                Text("password")
+            }
+            
+            Image(systemName: "phone")
+            TextField("Code", text: $code)
+            Button {
+                
+            } label: {
+                Text("Submit Code")
+            }
+        }
     }
 }
 
 #Preview {
     AccountValidateUnitView()
+        .padding()
 }

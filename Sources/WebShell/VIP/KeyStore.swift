@@ -196,6 +196,8 @@ public extension KeyStore.Key {
     static let csrf = KeyStore.Key("csrf")
     static let setCookies = KeyStore.Key("set_cookies")
     static let jsonUser = KeyStore.Key("json_user")
+    static let lvt = KeyStore.Key("lvt")
+    static let lpvt = KeyStore.Key("lpvt")
 }
 
 /// Set instant value to new key store
