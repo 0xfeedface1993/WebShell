@@ -107,24 +107,24 @@ public func updateHmCookies(
     let lastPv = Int(existingLpvt ?? "0") ?? 0
     let now = nowSeconds
     
-    // 删除窗口之外的最老记录（30天之外）
+    // 删除超过 30 天的旧记录
     while let first = arr.first, (now - first) > windowSeconds {
         arr.removeFirst()
     }
     
-    // 如果与上次 pageview 的时间差大于 vdur，视为新一次 pageview -> 加入当前时间
+    // 如果与上次访问时间差超过 vdur，算新 session -> 加入 lvt
     if (now - lastPv) > vdur {
         arr.append(now)
     }
     
-    // 保留最多 maxEntries（保留最近的几条）
-    while arr.count > maxEntries {
-        arr.removeFirst()
-    }
-    
-    // 如果之前没有 lvt（首次），确保至少有当前时间
+    // 保证 lvt 不为空
     if arr.isEmpty {
         arr = [now]
+    }
+    
+    // 保留最多 maxEntries 条
+    while arr.count > maxEntries {
+        arr.removeFirst()
     }
     
     let newLvt = arr.map(String.init).joined(separator: ",")
@@ -139,9 +139,7 @@ public func updateHmCookies(
             .domain: domain,
             .expires: Date(timeIntervalSinceNow: TimeInterval(ageSeconds))
         ]
-        // 可选：设置 HttpOnly/secure 等，根据需要调整
         props[.secure] = true
-        // props[.init("HttpOnly")] = true // HTTPCookie 不直接支持 HttpOnly 属性设置为 true via keys in all contexts
         
         return HTTPCookie(properties: props)
     }
