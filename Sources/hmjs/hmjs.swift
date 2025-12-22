@@ -6,7 +6,7 @@ import FoundationNetworking
 #endif
 
 public func extractHMAccount(_ text: String) throws -> String {
-    if #available(macOS 13.0, *) {
+    if #available(macOS 13.0, iOS 16.0, *) {
         let regex = Regex(/hca:\s?'([^']+)'/)
         guard let hca = try regex.firstMatch(in: text)?[1].substring else {
             return ""
@@ -23,7 +23,7 @@ public func extractHMAccount(_ text: String) throws -> String {
 }
 
 public func extractID(_ text: String) throws -> String {
-    if #available(macOS 13.0, *) {
+    if #available(macOS 13.0, iOS 16.0, *) {
         let regex = Regex(/id:\s?"([^"]+)"/)
         guard let hca = try regex.firstMatch(in: text)?[1].substring else {
             return ""
@@ -40,7 +40,7 @@ public func extractID(_ text: String) throws -> String {
 }
 
 public func extractDomains(_ text: String) throws -> [String] {
-    if #available(macOS 13.0, *) {
+    if #available(macOS 13.0, iOS 16.0, *) {
         let regex = Regex(/dm:\s?\[(\.?"([^"]+)")*\]/)
         return text.matches(of: regex)
             .compactMap({ $0[1].substring })

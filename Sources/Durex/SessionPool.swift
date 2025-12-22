@@ -96,15 +96,14 @@ actor AsyncTaskPool {
     }
     
     func task<S: AsyncSequence>(_ updates: sending S, subject: ChannelSubject<AsyncUpdateNews>, forKey key: Sessions) -> TaskValue where S.Element == AsyncUpdateNews, S: Sendable {
-        return TaskValue(operation: {
+        return Task<Void, Never>(operation: {
             logger.info("observer session \("\(key)")")
             defer {
                 logger.info("finished observer session \("\(key)")")
             }
             do {
                 for try await news in updates {
-                    // logger.info("send news [\(news)] to [\(key)]")
-                    print("send news [\(news)] to [\(key)]")
+                    logger.info("send news [\("\(news)")] to [\("\(key)")]")
                     await subject.send(news)
                 }
             } catch {

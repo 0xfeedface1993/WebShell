@@ -9,7 +9,7 @@ import Foundation
 #if COMBINE_LINUX && canImport(CombineX)
 @preconcurrency import CombineX
 #else
-@preconcurrency import Combine
+import Combine
 #endif
 
 #if !os(Linux)
@@ -29,7 +29,7 @@ import AnyErase
 import AsyncAlgorithms
 import AsyncBroadcaster
 
-final class URLSessionDelegator: NSObject, URLSessionDownloadDelegate, Sendable {
+final class URLSessionDelegator: NSObject, URLSessionDownloadDelegate, @unchecked Sendable {
     private let downloadTaskUpdate = PassthroughSubject<SessionTaskState, Never>()
     private let downloadTaskCompletion = PassthroughSubject<Result<SessionComplete, DownloadURLError>, Never>()
     /// 状态更新，可监听此Subject进行下载进度、下载完成、下载失败三种类型类型事件更新
@@ -162,7 +162,15 @@ final class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate 
             try FileManager.default.moveItem(at: location, to: url)
             logger.info("move tmp file to \(location)")
             let news = SessionComplete(task: downloadTask, data: url).fileStone()
+            logger.info("downloadTask.countOfBytesExpectedToReceive \(downloadTask.countOfBytesExpectedToReceive)")
+            let bytes = downloadTask.countOfBytesExpectedToReceive > 0 ? downloadTask.countOfBytesExpectedToReceive:Int64((try? url.resourceValues(forKeys: Set([.fileSizeKey])).fileSize) ?? 0)
+            let state = SessionTaskState(downloadTask)
+                .reciveBytes(bytes)
+                .totalBytesWritten(bytes)
+                .totalBytesExpectedToWrite(bytes)
+                .newsState()
             Task {
+                await stateSubject.send(.state(state))
                 await stateSubject.send(news)
             }
         } catch {
@@ -189,11 +197,11 @@ final class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate 
     }
     
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
-//        #if DEBUG
-//                print(">>> [\(type(of: self))] file download state update: \(downloadTask), \(bytesWritten) / \(totalBytesExpectedToWrite)")
-//        #endif
-//        logger.info("file download state update: \(downloadTask), \(totalBytesWritten) / \(totalBytesExpectedToWrite)")
-//        logger.info("[\(downloadTask.taskIdentifier)] downloading response: \((downloadTask.response as? HTTPURLResponse)?.allHeaderFields ?? [:])")
+        //        #if DEBUG
+        print(">>> [\(type(of: self))] file download state update: \(downloadTask), \(bytesWritten) / \(totalBytesExpectedToWrite)")
+        //        #endif
+        //        logger.info("file download state update: \(downloadTask), \(totalBytesWritten) / \(totalBytesExpectedToWrite)")
+        //        logger.info("[\(downloadTask.taskIdentifier)] downloading response: \((downloadTask.response as? HTTPURLResponse)?.allHeaderFields ?? [:])")
         
         let bytes: Int64
         if totalBytesExpectedToWrite < bytesWritten, let contentLength = (downloadTask.response as? HTTPURLResponse)?.allHeaderFields["Content-Length"] as? Int64 {
@@ -201,6 +209,11 @@ final class AsyncURLSessionDelegator: NSObject, AsyncURLSessiobDownloadDelegate 
             logger.info("[\(downloadTask.taskIdentifier)] downloading totalBytesExpectedToWrite \(totalBytesExpectedToWrite) bytes invalid, use task response Content-Length \(bytes) bytes.")
         } else {
             bytes = totalBytesExpectedToWrite
+        }
+        
+        if bytesWritten == totalBytesWritten, totalBytesWritten > 0 {
+            logger.info("[\(downloadTask.taskIdentifier)] not update 100% progress in \(#function).")
+            return
         }
         
         let state = SessionTaskState(downloadTask)

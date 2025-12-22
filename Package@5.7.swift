@@ -11,7 +11,7 @@ let package = Package(
     name: "WebShell",
     platforms: [
         .macOS(.v11),
-        .iOS(.v13)
+        .iOS(.v14)
     ],
     products: [
         .library(name: "WebShell", targets: ["WebShell"]),

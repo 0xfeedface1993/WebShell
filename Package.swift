@@ -10,7 +10,7 @@ let swiftSettings: [SwiftSetting] = [.define("COMBINE_LINUX", .when(platforms: p
 let package = Package(
     name: "WebShell",
     platforms: [
-        .iOS(.v13), .macOS(.v11), .tvOS(.v13), .watchOS(.v6), .visionOS(.v1)
+        .iOS(.v14), .macOS(.v11), .tvOS(.v13), .watchOS(.v6), .visionOS(.v1)
     ],
     products: [
         .library(name: "WebShell", targets: ["WebShell"]),

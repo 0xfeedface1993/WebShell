@@ -24,8 +24,6 @@ struct URLSessionHolder: Sendable {
         let configure = URLSessionConfiguration.default
         configure.timeoutIntervalForRequest = 20 * 60
         configure.timeoutIntervalForResource = 15 * 24 * 3600
-//        let cookies = HTTPCookieStorage()
-//        configure.httpCookieStorage = cookies
         configure.httpCookieStorage?.cookieAcceptPolicy = .always
         configure.httpShouldSetCookies = true
         let queue = OperationQueue()
