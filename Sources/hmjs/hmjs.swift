@@ -7,51 +7,76 @@ import FoundationNetworking
 
 public func extractHMAccount(_ text: String) throws -> String {
     if #available(macOS 13.0, iOS 16.0, *) {
-        let regex = Regex(/hca:\s?'([^']+)'/)
-        guard let hca = try regex.firstMatch(in: text)?[1].substring else {
+        let regex = /hca:\s*'([^']+)'/
+        guard let match = text.firstMatch(of: regex) else {
             return ""
         }
-        return String(hca)
+        return String(match.output.1)
     } else {
-        // Fallback on earlier versions
-        let regex = try NSRegularExpression(pattern: "hca:\\s?'([^']+)'")
-        let hca = regex
-        return hca.matches(in: text, range: NSRange(location: 0, length: text.utf16.count))
-            .map { regex.replacementString(for: $0, in: text, offset: 0, template: "$1") }
-            .first ?? ""
+        return try extractHMAccountFallback(text)
     }
+}
+
+func extractHMAccountFallback(_ text: String) throws -> String {
+    let regex = try NSRegularExpression(pattern: "hca:\\s?'([^']+)'")
+    let hca = regex
+    return hca.matches(in: text, range: NSRange(location: 0, length: text.utf16.count))
+        .map { regex.replacementString(for: $0, in: text, offset: 0, template: "$1") }
+        .first ?? ""
 }
 
 public func extractID(_ text: String) throws -> String {
     if #available(macOS 13.0, iOS 16.0, *) {
-        let regex = Regex(/id:\s?"([^"]+)"/)
-        guard let hca = try regex.firstMatch(in: text)?[1].substring else {
+        let regex = /id:\s*"([^"]+)"/
+        guard let match = text.firstMatch(of: regex) else {
             return ""
         }
-        return String(hca)
+        return String(match.output.1)
     } else {
-        // Fallback on earlier versions
-        let regex = try NSRegularExpression(pattern: "id:\\s?\"([^\"]+)\"")
-        let hca = regex
-        return hca.matches(in: text, range: NSRange(location: 0, length: text.utf16.count))
-            .map { regex.replacementString(for: $0, in: text, offset: 0, template: "$1") }
-            .first ?? ""
+        return try extractIDFallback(text)
     }
+}
+
+func extractIDFallback(_ text: String) throws -> String {
+    let regex = try NSRegularExpression(pattern: "id:\\s?\"([^\"]+)\"")
+    let hca = regex
+    return hca.matches(in: text, range: NSRange(location: 0, length: text.utf16.count))
+        .map { regex.replacementString(for: $0, in: text, offset: 0, template: "$1") }
+        .first ?? ""
 }
 
 public func extractDomains(_ text: String) throws -> [String] {
     if #available(macOS 13.0, iOS 16.0, *) {
-        let regex = Regex(/dm:\s?\[(\.?"([^"]+)")*\]/)
-        return text.matches(of: regex)
-            .compactMap({ $0[1].substring })
-            .map(String.init(_:))
+        let listRegex = /dm:\s*\[([\s\S]*?)\]/
+        guard let match = text.firstMatch(of: listRegex) else {
+            return []
+        }
+        let inner = match.output.1
+        let domainRegex = /"([^"]+)"/
+        return inner.matches(of: domainRegex)
+            .map { String($0.output.1) }
     } else {
-        // Fallback on earlier versions
-        let regex = try NSRegularExpression(pattern: "dm:\\s?\\[(\\.?\"([^\"]+)\")*\\]")
-        let hca = regex
-        return hca.matches(in: text, range: NSRange(location: 0, length: text.utf16.count))
-            .map { regex.replacementString(for: $0, in: text, offset: 0, template: "$2") }
+        return try extractDomainsFallback(text)
     }
+}
+
+func extractDomainsFallback(_ text: String) throws -> [String] {
+    let listRegex = try NSRegularExpression(pattern: "dm:\\s*\\[([\\s\\S]*?)\\]")
+    let listRange = NSRange(text.startIndex..., in: text)
+    guard let listMatch = listRegex.firstMatch(in: text, range: listRange),
+          let innerRange = Range(listMatch.range(at: 1), in: text) else {
+        return []
+    }
+    let inner = String(text[innerRange])
+    let domainRegex = try NSRegularExpression(pattern: "\"([^\"]+)\"")
+    let innerRangeNs = NSRange(inner.startIndex..., in: inner)
+    return domainRegex.matches(in: inner, range: innerRangeNs)
+        .compactMap { match in
+            guard let valueRange = Range(match.range(at: 1), in: inner) else {
+                return nil
+            }
+            return String(inner[valueRange])
+        }
 }
 
 public func updateHmCookies(
@@ -64,7 +89,7 @@ public func updateHmCookies(
     windowSeconds: Int = 2_592_000,
     ageSeconds: Int = 31_536_000
 ) throws -> (lvt: String, lpvt: String, cookies: [HTTPCookie]) {
-    let account = try extractHMAccount(js)
+    _ = try extractHMAccount(js)
     let id = try extractID(js)
     let domains = try extractDomains(js)
     return updateHmCookies(siteId: id, existingLvt: existingLvt, existingLpvt: existingLpvt, nowSeconds: nowSeconds, vdur: vdur, maxEntries: maxEntries, windowSeconds: windowSeconds, ageSeconds: ageSeconds, domain: domains.first ?? "/")
