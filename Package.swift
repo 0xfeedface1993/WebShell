@@ -1,10 +1,8 @@
 // swift-tools-version:6.0
-// The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let platforms: [PackageDescription.Platform] = [.linux]
-//let platforms: [PackageDescription.Platform] = [.macOS]
 let swiftSettings: [SwiftSetting] = [.define("COMBINE_LINUX", .when(platforms: platforms))]
 
 let package = Package(
@@ -24,6 +22,21 @@ let package = Package(
     ],
     targets: [
         .target(
+            name: "WebShell",
+            dependencies: [
+                .product(name: "Crypto", package: "swift-crypto", condition: .when(platforms: platforms))
+            ],
+            path: "Sources/WebShellEngine",
+            resources: [
+                .process("Resources")
+            ]
+        ),
+        .testTarget(
+            name: "WebShellEngineTests",
+            dependencies: ["WebShell"],
+            path: "Tests/WebShellEngineTests"
+        ),
+        .target(
             name: "AnyErase",
             dependencies: [
                 .product(name: "Logging", package: "swift-log"),
@@ -37,25 +50,21 @@ let package = Package(
             swiftSettings: swiftSettings
         ),
         .target(
-            name: "WebShell",
-            dependencies: [
-                "Durex",
-                .product(name: "SwiftSoup", package: "SwiftSoup"),
-                .target(name: "hmjs")
-            ],
-            swiftSettings: swiftSettings
-        ),
-        .testTarget(
-            name: "WebShellCoreTests",
-            dependencies: ["WebShell"],
-            swiftSettings: swiftSettings
-        ),
-        .target(
             name: "Durex",
             dependencies: [
                 "AnyErase",
                 .product(name: "Crypto", package: "swift-crypto")
             ],
+            swiftSettings: swiftSettings
+        ),
+        .target(
+            name: "WebShellLegacy",
+            dependencies: [
+                "Durex",
+                .product(name: "SwiftSoup", package: "SwiftSoup"),
+                .target(name: "hmjs")
+            ],
+            path: "Sources/WebShell",
             swiftSettings: swiftSettings
         ),
     ]

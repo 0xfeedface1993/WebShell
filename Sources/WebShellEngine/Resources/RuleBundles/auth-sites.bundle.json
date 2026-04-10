@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "bundleVersion": "2026.04.10.auth-sites.1",
+  "providers": [
+    {
+      "id": "jkpan-vip",
+      "providerFamily": "jkpan-vip",
+      "matchers": [
+        {
+          "hosts": [
+            "www.jkpan.com",
+            "jkpan.com"
+          ],
+          "hostSuffixes": [],
+          "pathPattern": "/file-\\d+\\.html$"
+        }
+      ],
+      "accountScope": "providerFamily",
+      "downloadWorkflowID": "secure.download",
+      "authWorkflowID": "legacy.vip.formhashCaptcha.auth",
+      "authPolicy": {
+        "requiresAuthentication": true,
+        "expireConditions": [
+          {
+            "source": "securePage.body",
+            "comparator": "contains",
+            "expected": "AUTH_REQUIRED",
+            "expectedValues": null
+          }
+        ],
+        "materialKeys": [
+          "username",
+          "password",
+          "captcha"
+        ],
+        "accountIDTemplate": null
+      },
+      "metadata": {
+        "site": "jkpan.com",
+        "kind": "verified-auth-site",
+        "legacyFlow": "LoginByFormhashAndCode + LoginVerifyCode",
+        "source": "captcha login shape verified from public article"
+      }
+    }
+  ],
+  "sharedFragments": [],
+  "authWorkflows": [],
+  "downloadWorkflows": [
+    {
+      "description": "Fetch a protected page, detect expiry, then emit the extracted direct link.",
+      "id": "secure.download",
+      "steps": [
+        {
+          "http": {
+            "attachAuthSession": true,
+            "headers": {
+              "Accept": "text/html"
+            },
+            "method": "GET",
+            "output": "securePage",
+            "persistResponseCookies": true,
+            "urlTemplate": "{{input.sourceURL}}"
+          },
+          "type": "http"
+        },
+        {
+          "branch": {
+            "conditions": [
+              {
+                "comparator": "contains",
+                "expected": "AUTH_REQUIRED",
+                "source": "securePage.body"
+              }
+            ],
+            "elseSteps": [
+              {
+                "extract": {
+                  "group": 1,
+                  "kind": "regexFirst",
+                  "pattern": "data-direct=\\\"([^\\\"]+)\\\"",
+                  "source": "securePage.body",
+                  "target": "secureDirectURL"
+                },
+                "type": "extract"
+              }
+            ],
+            "ifSteps": [
+              {
+                "assign": {
+                  "source": "input.sourceURL",
+                  "storage": "runtime",
+                  "target": "secureDirectURL"
+                },
+                "type": "assign"
+              }
+            ],
+            "mode": "all"
+          },
+          "type": "branch"
+        },
+        {
+          "emitRequest": {
+            "attachAuthSession": true,
+            "filenameHints": {
+              "provider": "jkpan-vip"
+            },
+            "headers": {
+              "Referer": "{{input.sourceURL}}"
+            },
+            "method": "GET",
+            "retryHints": {
+              "backoffSeconds": 1,
+              "maxAttempts": 2,
+              "retryableStatusCodes": [
+                401,
+                429,
+                503
+              ]
+            },
+            "urlTemplate": "{{secureDirectURL}}"
+          },
+          "type": "emitRequest"
+        }
+      ]
+    }
+  ],
+  "capabilityRefs": [
+    {
+      "name": "url.origin",
+      "required": true
+    },
+    {
+      "name": "cookies.valueForName",
+      "required": true
+    }
+  ]
+}

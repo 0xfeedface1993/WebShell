@@ -1,0 +1,937 @@
+{
+  "schemaVersion": 1,
+  "bundleVersion": "2026.04.09.public.1",
+  "providers": [
+    {
+      "accountScope": "providerFamily",
+      "downloadWorkflowID": "rosefile.download",
+      "id": "rosefile-public",
+      "matchers": [
+        {
+          "hostSuffixes": [],
+          "hosts": [
+            "rosefile.net",
+            "www.rosefile.net"
+          ]
+        }
+      ],
+      "metadata": {
+        "kind": "public",
+        "site": "rosefile.net"
+      },
+      "providerFamily": "rosefile"
+    },
+    {
+      "accountScope": "providerFamily",
+      "downloadWorkflowID": "generic.loadDownAddr1.dlphp",
+      "id": "xueqiupan-public",
+      "matchers": [
+        {
+          "hostSuffixes": [],
+          "hosts": [
+            "www.xueqiupan.com",
+            "xueqiupan.com"
+          ],
+          "pathPattern": "/file-[\\w\\d]+\\.\\w+$"
+        }
+      ],
+      "metadata": {
+        "kind": "public",
+        "legacyFlow": "DownPage + PHPLinks",
+        "site": "xueqiupan.com"
+      },
+      "providerFamily": "xueqiupan"
+    },
+    {
+      "accountScope": "providerFamily",
+      "downloadWorkflowID": "generic.loadDownAddr1.dlphp",
+      "id": "xunniufile-public",
+      "matchers": [
+        {
+          "hostSuffixes": [],
+          "hosts": [
+            "www.xunniufile.com",
+            "xunniufile.com"
+          ],
+          "pathPattern": "/file-[\\w\\d]+\\.\\w+$"
+        }
+      ],
+      "metadata": {
+        "kind": "public",
+        "legacyFlow": "DownPage + PHPLinks",
+        "site": "xunniufile.com"
+      },
+      "providerFamily": "xunniufile"
+    },
+    {
+      "accountScope": "providerFamily",
+      "downloadWorkflowID": "generic.redirect.loadDownAddr5.dlphp",
+      "id": "xingyaoclouds-public",
+      "matchers": [
+        {
+          "hostSuffixes": [],
+          "hosts": [
+            "www.xingyaoclouds.com",
+            "xingyaoclouds.com"
+          ]
+        }
+      ],
+      "metadata": {
+        "kind": "public",
+        "legacyFlow": "RedirectEnablePage + ActionDownPage + PHPLinks",
+        "site": "xingyaoclouds.com"
+      },
+      "providerFamily": "xingyaoclouds"
+    },
+    {
+      "accountScope": "providerFamily",
+      "downloadWorkflowID": "generic.redirect.pageFileId.loadDownAddr1.dlphp",
+      "id": "rarp-public",
+      "matchers": [
+        {
+          "hostSuffixes": [],
+          "hosts": [
+            "www.rarp.cc",
+            "rarp.cc"
+          ]
+        }
+      ],
+      "metadata": {
+        "kind": "public",
+        "legacyFlow": "HTTPString + RedirectEnablePage + FileListURLRequestInPageGenerator + PHPLinks",
+        "site": "rarp.cc"
+      },
+      "providerFamily": "rarp"
+    },
+    {
+      "accountScope": "providerFamily",
+      "downloadWorkflowID": "generic.redirect.sign.loadDownAddr10.dlphp",
+      "id": "567file-public",
+      "matchers": [
+        {
+          "hostSuffixes": [],
+          "hosts": [
+            "www.567file.com",
+            "567file.com"
+          ]
+        }
+      ],
+      "metadata": {
+        "kind": "public",
+        "legacyFlow": "RedirectEnablePage + SignFileListURLRequestGenerator + PHPLinks",
+        "site": "567file.com"
+      },
+      "providerFamily": "567file"
+    },
+    {
+      "accountScope": "providerFamily",
+      "downloadWorkflowID": "generic.tower.loadDownAddr1.dlphp",
+      "id": "iycdn-public",
+      "matchers": [
+        {
+          "hostSuffixes": [],
+          "hosts": [
+            "www.iycdn.com",
+            "iycdn.com"
+          ],
+          "pathPattern": "/file-[\\w\\d]+\\.\\w+$"
+        }
+      ],
+      "metadata": {
+        "kind": "public",
+        "legacyFlow": "TowerGroup + PHPLinks",
+        "site": "iycdn.com"
+      },
+      "providerFamily": "iycdn"
+    }
+  ],
+  "sharedFragments": [],
+  "authWorkflows": [],
+  "downloadWorkflows": [
+    {
+      "description": "Append /d, fetch the intermediate page, extract direct links, emit the first usable URL.",
+      "id": "rosefile.download",
+      "steps": [
+        {
+          "invokeCapability": {
+            "arguments": {},
+            "bindings": {
+              "sourceURL": "input.sourceURL"
+            },
+            "capability": "rosefile.appendDownPath",
+            "target": "roseDownURL"
+          },
+          "type": "invokeCapability"
+        },
+        {
+          "http": {
+            "attachAuthSession": false,
+            "headers": {
+              "Referer": "{{input.sourceURL}}"
+            },
+            "method": "GET",
+            "output": "rosePage",
+            "persistResponseCookies": false,
+            "urlTemplate": "{{roseDownURL}}"
+          },
+          "type": "http"
+        },
+        {
+          "invokeCapability": {
+            "arguments": {},
+            "bindings": {
+              "html": "rosePage.body"
+            },
+            "capability": "extract.regexLinks",
+            "target": "roseLinks"
+          },
+          "type": "invokeCapability"
+        },
+        {
+          "emitRequest": {
+            "attachAuthSession": false,
+            "filenameHints": {
+              "provider": "rosefile"
+            },
+            "headers": {
+              "Referer": "{{input.sourceURL}}"
+            },
+            "method": "GET",
+            "retryHints": {
+              "backoffSeconds": 1,
+              "maxAttempts": 2,
+              "retryableStatusCodes": [
+                429,
+                503
+              ]
+            },
+            "urlTemplate": "{{roseLinks.0}}"
+          },
+          "type": "emitRequest"
+        }
+      ]
+    },
+    {
+      "description": "Extract fileid from /file-<id>.html, call ajax.php with load_down_addr1, emit dl.php request.",
+      "id": "generic.loadDownAddr1.dlphp",
+      "steps": [
+        {
+          "invokeCapability": {
+            "arguments": {},
+            "bindings": {
+              "sourceURL": "input.sourceURL"
+            },
+            "capability": "url.origin",
+            "target": "pageOrigin"
+          },
+          "type": "invokeCapability"
+        },
+        {
+          "extract": {
+            "kind": "urlPath",
+            "source": "input.sourceURL",
+            "target": "sourcePath"
+          },
+          "type": "extract"
+        },
+        {
+          "extract": {
+            "group": 1,
+            "kind": "regexFirst",
+            "pattern": "-([\\w\\d]+)\\.\\w+$",
+            "source": "sourcePath",
+            "target": "fileID"
+          },
+          "type": "extract"
+        },
+        {
+          "template": {
+            "target": "ajaxBody",
+            "template": "action=load_down_addr1&file_id={{fileID}}"
+          },
+          "type": "template"
+        },
+        {
+          "http": {
+            "attachAuthSession": false,
+            "bodyTemplate": "{{ajaxBody}}",
+            "headers": {
+              "Accept": "text/plain, */*; q=0.01",
+              "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+              "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+              "Origin": "{{pageOrigin}}",
+              "Referer": "{{input.sourceURL}}",
+              "User-Agent": "WebShellRuleEngine/1.0",
+              "X-Requested-With": "XMLHttpRequest"
+            },
+            "method": "POST",
+            "output": "ajaxResponse",
+            "persistResponseCookies": false,
+            "urlTemplate": "{{pageOrigin}}/ajax.php"
+          },
+          "type": "http"
+        },
+        {
+          "extract": {
+            "group": 0,
+            "kind": "regexFirst",
+            "pattern": "https?://[^\\s]+/dl\\w*\\.php\\?[^\\\"]+",
+            "source": "ajaxResponse.body",
+            "target": "downloadURL"
+          },
+          "type": "extract"
+        },
+        {
+          "emitRequest": {
+            "attachAuthSession": false,
+            "filenameHints": {
+              "directType": "dl.php",
+              "resolverFamily": "load_down_addr1"
+            },
+            "headers": {
+              "Referer": "{{pageOrigin}}",
+              "User-Agent": "WebShellRuleEngine/1.0"
+            },
+            "method": "GET",
+            "retryHints": {
+              "backoffSeconds": 1,
+              "maxAttempts": 2,
+              "retryableStatusCodes": [
+                429,
+                503
+              ]
+            },
+            "urlTemplate": "{{downloadURL}}"
+          },
+          "type": "emitRequest"
+        }
+      ]
+    },
+    {
+      "description": "Follow the landing page redirect, extract fileid from the redirected path, call ajax.php with load_down_addr5, emit dl.php request.",
+      "id": "generic.redirect.loadDownAddr5.dlphp",
+      "steps": [
+        {
+          "http": {
+            "attachAuthSession": false,
+            "headers": {
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "User-Agent": "WebShellRuleEngine/1.0"
+            },
+            "method": "GET",
+            "output": "redirectPage",
+            "persistResponseCookies": false,
+            "urlTemplate": "{{input.sourceURL}}"
+          },
+          "type": "http"
+        },
+        {
+          "invokeCapability": {
+            "arguments": {},
+            "bindings": {
+              "sourceURL": "redirectPage.url"
+            },
+            "capability": "url.origin",
+            "target": "pageOrigin"
+          },
+          "type": "invokeCapability"
+        },
+        {
+          "extract": {
+            "kind": "urlPath",
+            "source": "redirectPage.url",
+            "target": "redirectPath"
+          },
+          "type": "extract"
+        },
+        {
+          "extract": {
+            "group": 1,
+            "kind": "regexFirst",
+            "pattern": "/([\\w\\d]+)$",
+            "source": "redirectPath",
+            "target": "fileID"
+          },
+          "type": "extract"
+        },
+        {
+          "template": {
+            "target": "ajaxBody",
+            "template": "action=load_down_addr5&file_id={{fileID}}"
+          },
+          "type": "template"
+        },
+        {
+          "http": {
+            "attachAuthSession": false,
+            "bodyTemplate": "{{ajaxBody}}",
+            "headers": {
+              "Accept": "text/plain, */*; q=0.01",
+              "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+              "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+              "Origin": "{{pageOrigin}}",
+              "Referer": "{{redirectPage.url}}",
+              "User-Agent": "WebShellRuleEngine/1.0",
+              "X-Requested-With": "XMLHttpRequest"
+            },
+            "method": "POST",
+            "output": "ajaxResponse",
+            "persistResponseCookies": false,
+            "urlTemplate": "{{pageOrigin}}/ajax.php"
+          },
+          "type": "http"
+        },
+        {
+          "extract": {
+            "group": 0,
+            "kind": "regexFirst",
+            "pattern": "https?://[^\\s]+/dl\\w*\\.php\\?[^\\\"]+",
+            "source": "ajaxResponse.body",
+            "target": "downloadURL"
+          },
+          "type": "extract"
+        },
+        {
+          "emitRequest": {
+            "attachAuthSession": false,
+            "filenameHints": {
+              "directType": "dl.php",
+              "resolverFamily": "redirect_load_down_addr5"
+            },
+            "headers": {
+              "Referer": "{{pageOrigin}}",
+              "User-Agent": "WebShellRuleEngine/1.0"
+            },
+            "method": "GET",
+            "retryHints": {
+              "backoffSeconds": 1,
+              "maxAttempts": 2,
+              "retryableStatusCodes": [
+                429,
+                503
+              ]
+            },
+            "urlTemplate": "{{downloadURL}}"
+          },
+          "type": "emitRequest"
+        }
+      ]
+    },
+    {
+      "description": "Follow the landing page redirect, request /down/<lastPath>, extract fileid from page JavaScript, call ajax.php with load_down_addr1, emit dl.php request.",
+      "id": "generic.redirect.pageFileId.loadDownAddr1.dlphp",
+      "steps": [
+        {
+          "http": {
+            "attachAuthSession": false,
+            "headers": {
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "User-Agent": "WebShellRuleEngine/1.0"
+            },
+            "method": "GET",
+            "output": "redirectPage",
+            "persistResponseCookies": false,
+            "urlTemplate": "{{input.sourceURL}}"
+          },
+          "type": "http"
+        },
+        {
+          "invokeCapability": {
+            "arguments": {},
+            "bindings": {
+              "sourceURL": "redirectPage.url"
+            },
+            "capability": "url.origin",
+            "target": "pageOrigin"
+          },
+          "type": "invokeCapability"
+        },
+        {
+          "extract": {
+            "kind": "urlPath",
+            "source": "redirectPage.url",
+            "target": "redirectPath"
+          },
+          "type": "extract"
+        },
+        {
+          "extract": {
+            "group": 1,
+            "kind": "regexFirst",
+            "pattern": "([^/]+)$",
+            "source": "redirectPath",
+            "target": "redirectLastPath"
+          },
+          "type": "extract"
+        },
+        {
+          "template": {
+            "target": "downPageURL",
+            "template": "{{pageOrigin}}/down/{{redirectLastPath}}"
+          },
+          "type": "template"
+        },
+        {
+          "http": {
+            "attachAuthSession": false,
+            "headers": {
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+              "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+              "Referer": "{{redirectPage.url}}",
+              "Upgrade-Insecure-Requests": "1",
+              "User-Agent": "WebShellRuleEngine/1.0"
+            },
+            "method": "GET",
+            "output": "downPage",
+            "persistResponseCookies": false,
+            "urlTemplate": "{{downPageURL}}"
+          },
+          "type": "http"
+        },
+        {
+          "extract": {
+            "group": 1,
+            "kind": "regexFirst",
+            "pattern": "load_down_addr1\\('([\\w\\d]+)'\\)",
+            "source": "downPage.body",
+            "target": "fileID"
+          },
+          "type": "extract"
+        },
+        {
+          "template": {
+            "target": "ajaxBody",
+            "template": "action=load_down_addr1&file_id={{fileID}}"
+          },
+          "type": "template"
+        },
+        {
+          "http": {
+            "attachAuthSession": false,
+            "bodyTemplate": "{{ajaxBody}}",
+            "headers": {
+              "Accept": "text/plain, */*; q=0.01",
+              "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+              "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+              "Origin": "{{pageOrigin}}",
+              "Referer": "{{redirectPage.url}}",
+              "User-Agent": "WebShellRuleEngine/1.0",
+              "X-Requested-With": "XMLHttpRequest"
+            },
+            "method": "POST",
+            "output": "ajaxResponse",
+            "persistResponseCookies": false,
+            "urlTemplate": "{{pageOrigin}}/ajax.php"
+          },
+          "type": "http"
+        },
+        {
+          "extract": {
+            "group": 0,
+            "kind": "regexFirst",
+            "pattern": "https?://[^\\s]+/dl\\w*\\.php\\?[^\\\"]+",
+            "source": "ajaxResponse.body",
+            "target": "downloadURL"
+          },
+          "type": "extract"
+        },
+        {
+          "emitRequest": {
+            "attachAuthSession": false,
+            "filenameHints": {
+              "directType": "dl.php",
+              "resolverFamily": "redirect_page_fileid_load_down_addr1"
+            },
+            "headers": {
+              "Referer": "{{pageOrigin}}",
+              "User-Agent": "WebShellRuleEngine/1.0"
+            },
+            "method": "GET",
+            "retryHints": {
+              "backoffSeconds": 1,
+              "maxAttempts": 2,
+              "retryableStatusCodes": [
+                429,
+                503
+              ]
+            },
+            "urlTemplate": "{{downloadURL}}"
+          },
+          "type": "emitRequest"
+        }
+      ]
+    },
+    {
+      "description": "Follow the landing page redirect, fetch sign from /down-<fileid>.html, call ajax.php with load_down_addr10, emit dl.php request.",
+      "id": "generic.redirect.sign.loadDownAddr10.dlphp",
+      "steps": [
+        {
+          "http": {
+            "attachAuthSession": false,
+            "headers": {
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "User-Agent": "WebShellRuleEngine/1.0"
+            },
+            "method": "GET",
+            "output": "redirectPage",
+            "persistResponseCookies": false,
+            "urlTemplate": "{{input.sourceURL}}"
+          },
+          "type": "http"
+        },
+        {
+          "invokeCapability": {
+            "arguments": {},
+            "bindings": {
+              "sourceURL": "redirectPage.url"
+            },
+            "capability": "url.origin",
+            "target": "pageOrigin"
+          },
+          "type": "invokeCapability"
+        },
+        {
+          "extract": {
+            "kind": "urlPath",
+            "source": "redirectPage.url",
+            "target": "redirectPath"
+          },
+          "type": "extract"
+        },
+        {
+          "extract": {
+            "group": 1,
+            "kind": "regexFirst",
+            "pattern": "-([\\w\\d]+)\\.\\w+$",
+            "source": "redirectPath",
+            "target": "fileID"
+          },
+          "type": "extract"
+        },
+        {
+          "template": {
+            "target": "signPageURL",
+            "template": "{{pageOrigin}}/down-{{fileID}}.html"
+          },
+          "type": "template"
+        },
+        {
+          "http": {
+            "attachAuthSession": false,
+            "headers": {
+              "Accept": "text/plain, */*",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Content-Type": "application/x-www-form-urlencoded",
+              "Origin": "{{pageOrigin}}",
+              "Referer": "{{redirectPage.url}}",
+              "User-Agent": "WebShellRuleEngine/1.0",
+              "X-Requested-With": "XMLHttpRequest"
+            },
+            "method": "GET",
+            "output": "signPage",
+            "persistResponseCookies": false,
+            "urlTemplate": "{{signPageURL}}"
+          },
+          "type": "http"
+        },
+        {
+          "extract": {
+            "group": 1,
+            "kind": "regexFirst",
+            "pattern": "&sign=(\\w+)&",
+            "source": "signPage.body",
+            "target": "signValue"
+          },
+          "type": "extract"
+        },
+        {
+          "template": {
+            "target": "ajaxBody",
+            "template": "action=load_down_addr10&sign={{signValue}}&file_id={{fileID}}"
+          },
+          "type": "template"
+        },
+        {
+          "http": {
+            "attachAuthSession": false,
+            "bodyTemplate": "{{ajaxBody}}",
+            "headers": {
+              "Accept": "text/plain, */*; q=0.01",
+              "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+              "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+              "Origin": "{{pageOrigin}}",
+              "Referer": "{{redirectPage.url}}",
+              "User-Agent": "WebShellRuleEngine/1.0",
+              "X-Requested-With": "XMLHttpRequest"
+            },
+            "method": "POST",
+            "output": "ajaxResponse",
+            "persistResponseCookies": false,
+            "urlTemplate": "{{pageOrigin}}/ajax.php"
+          },
+          "type": "http"
+        },
+        {
+          "extract": {
+            "group": 0,
+            "kind": "regexFirst",
+            "pattern": "https?://[^\\s]+/dl\\w*\\.php\\?[^\\\"]+",
+            "source": "ajaxResponse.body",
+            "target": "downloadURL"
+          },
+          "type": "extract"
+        },
+        {
+          "emitRequest": {
+            "attachAuthSession": false,
+            "filenameHints": {
+              "directType": "dl.php",
+              "resolverFamily": "redirect_sign_load_down_addr10"
+            },
+            "headers": {
+              "Referer": "{{pageOrigin}}",
+              "User-Agent": "WebShellRuleEngine/1.0"
+            },
+            "method": "GET",
+            "retryHints": {
+              "backoffSeconds": 1,
+              "maxAttempts": 2,
+              "retryableStatusCodes": [
+                429,
+                503
+              ]
+            },
+            "urlTemplate": "{{downloadURL}}"
+          },
+          "type": "emitRequest"
+        }
+      ]
+    },
+    {
+      "description": "Fetch tower JS, derive the cookie update URL, populate transient cookies, call ajax.php with load_down_addr1, emit dl.php request.",
+      "id": "generic.tower.loadDownAddr1.dlphp",
+      "steps": [
+        {
+          "invokeCapability": {
+            "arguments": {},
+            "bindings": {
+              "sourceURL": "input.sourceURL"
+            },
+            "capability": "url.origin",
+            "target": "pageOrigin"
+          },
+          "type": "invokeCapability"
+        },
+        {
+          "extract": {
+            "kind": "urlPath",
+            "source": "input.sourceURL",
+            "target": "sourcePath"
+          },
+          "type": "extract"
+        },
+        {
+          "extract": {
+            "group": 1,
+            "kind": "regexFirst",
+            "pattern": "-([\\w\\d]+)\\.\\w+$",
+            "source": "sourcePath",
+            "target": "fileID"
+          },
+          "type": "extract"
+        },
+        {
+          "http": {
+            "attachAuthSession": false,
+            "headers": {
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "User-Agent": "WebShellRuleEngine/1.0"
+            },
+            "method": "GET",
+            "output": "filePage",
+            "persistResponseCookies": false,
+            "urlTemplate": "{{input.sourceURL}}"
+          },
+          "type": "http"
+        },
+        {
+          "extract": {
+            "group": 1,
+            "kind": "regexFirst",
+            "pattern": "src=\\\"([^\\\"]+)\\\"",
+            "source": "filePage.body",
+            "target": "jsPath"
+          },
+          "type": "extract"
+        },
+        {
+          "template": {
+            "target": "jsURL",
+            "template": "{{pageOrigin}}{{jsPath}}"
+          },
+          "type": "template"
+        },
+        {
+          "http": {
+            "attachAuthSession": false,
+            "headers": {
+              "Accept": "*/*",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "{{input.sourceURL}}",
+              "User-Agent": "WebShellRuleEngine/1.0"
+            },
+            "method": "GET",
+            "output": "jsResponse",
+            "persistResponseCookies": true,
+            "urlTemplate": "{{jsURL}}"
+          },
+          "type": "http"
+        },
+        {
+          "extract": {
+            "group": 1,
+            "kind": "regexFirst",
+            "pattern": "\\\"([^\\?\\\"]+\\?type=\\w+&key=)\\\"",
+            "source": "jsResponse.body",
+            "target": "towerPrefix"
+          },
+          "type": "extract"
+        },
+        {
+          "extract": {
+            "group": 1,
+            "kind": "regexFirst",
+            "pattern": "key=\\\"(\\w+)\\\"",
+            "source": "jsResponse.body",
+            "target": "towerKey"
+          },
+          "type": "extract"
+        },
+        {
+          "extract": {
+            "group": 1,
+            "kind": "regexFirst",
+            "pattern": "value=\\\"(\\w+)\\\"",
+            "source": "jsResponse.body",
+            "target": "towerRawValue"
+          },
+          "type": "extract"
+        },
+        {
+          "invokeCapability": {
+            "arguments": {},
+            "bindings": {
+              "text": "towerRawValue"
+            },
+            "capability": "string.asciiHexMD5",
+            "target": "towerHashedValue"
+          },
+          "type": "invokeCapability"
+        },
+        {
+          "template": {
+            "target": "towerCookieURL",
+            "template": "{{pageOrigin}}{{towerPrefix}}{{towerKey}}&value={{towerHashedValue}}"
+          },
+          "type": "template"
+        },
+        {
+          "http": {
+            "attachAuthSession": true,
+            "headers": {
+              "Accept": "*/*",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "{{input.sourceURL}}",
+              "User-Agent": "WebShellRuleEngine/1.0"
+            },
+            "method": "GET",
+            "output": "towerCookieResponse",
+            "persistResponseCookies": true,
+            "urlTemplate": "{{towerCookieURL}}"
+          },
+          "type": "http"
+        },
+        {
+          "template": {
+            "target": "ajaxBody",
+            "template": "action=load_down_addr1&file_id={{fileID}}"
+          },
+          "type": "template"
+        },
+        {
+          "http": {
+            "attachAuthSession": true,
+            "bodyTemplate": "{{ajaxBody}}",
+            "headers": {
+              "Accept": "text/plain, */*; q=0.01",
+              "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+              "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+              "Origin": "{{pageOrigin}}",
+              "Referer": "{{pageOrigin}}",
+              "User-Agent": "WebShellRuleEngine/1.0",
+              "X-Requested-With": "XMLHttpRequest"
+            },
+            "method": "POST",
+            "output": "ajaxResponse",
+            "persistResponseCookies": false,
+            "urlTemplate": "{{pageOrigin}}/ajax.php"
+          },
+          "type": "http"
+        },
+        {
+          "extract": {
+            "group": 0,
+            "kind": "regexFirst",
+            "pattern": "https?://[^\\s]+/dl\\w*\\.php\\?[^\\\"]+",
+            "source": "ajaxResponse.body",
+            "target": "downloadURL"
+          },
+          "type": "extract"
+        },
+        {
+          "emitRequest": {
+            "attachAuthSession": false,
+            "filenameHints": {
+              "directType": "dl.php",
+              "resolverFamily": "tower_load_down_addr1"
+            },
+            "headers": {
+              "Referer": "{{pageOrigin}}",
+              "User-Agent": "WebShellRuleEngine/1.0"
+            },
+            "method": "GET",
+            "retryHints": {
+              "backoffSeconds": 1,
+              "maxAttempts": 2,
+              "retryableStatusCodes": [
+                429,
+                503
+              ]
+            },
+            "urlTemplate": "{{downloadURL}}"
+          },
+          "type": "emitRequest"
+        }
+      ]
+    }
+  ],
+  "capabilityRefs": [
+    {
+      "name": "extract.regexLinks",
+      "required": true
+    },
+    {
+      "name": "string.asciiHexMD5",
+      "required": true
+    },
+    {
+      "name": "url.origin",
+      "required": true
+    },
+    {
+      "name": "rosefile.appendDownPath",
+      "required": true
+    }
+  ]
+}

@@ -1,0 +1,261 @@
+{
+  "schemaVersion": 1,
+  "bundleVersion": "2026.04.10.auth-templates.1",
+  "providers": [
+    {
+      "accountScope": "providerFamily",
+      "authPolicy": {
+        "expireConditions": [
+          {
+            "comparator": "contains",
+            "expected": "AUTH_REQUIRED",
+            "source": "securePage.body"
+          }
+        ],
+        "materialKeys": [
+          "username",
+          "password"
+        ],
+        "requiresAuthentication": false
+      },
+      "authWorkflowID": "secure.auth",
+      "downloadWorkflowID": "secure.template.download",
+      "id": "secure-demo",
+      "matchers": [
+        {
+          "hostSuffixes": [],
+          "hosts": [
+            "secure.example.com",
+            "download.secure.example.com"
+          ]
+        }
+      ],
+      "metadata": {
+        "kind": "auth-demo",
+        "site": "secure.example.com"
+      },
+      "providerFamily": "secure-demo"
+    },
+    {
+      "id": "xrcf-vip",
+      "providerFamily": "xrcf-vip",
+      "matchers": [
+        {
+          "hosts": [
+            "vip.example.com"
+          ],
+          "hostSuffixes": [],
+          "pathPattern": "/f/[^/?]+$"
+        }
+      ],
+      "accountScope": "providerFamily",
+      "downloadWorkflowID": "legacy.vip.generateDownload",
+      "authWorkflowID": "legacy.vip.xsrfCaptcha.auth",
+      "authPolicy": {
+        "requiresAuthentication": true,
+        "expireConditions": [
+          {
+            "source": "generateResponse.statusCode",
+            "comparator": "equals",
+            "expected": 401,
+            "expectedValues": null
+          }
+        ],
+        "materialKeys": [
+          "username",
+          "password",
+          "captcha"
+        ],
+        "accountIDTemplate": null
+      },
+      "metadata": {
+        "site": "vip.example.com",
+        "kind": "auth-template-demo",
+        "legacyFlow": "LoginXSRFVerifyCode + GenerateDownloadRequest"
+      }
+    }
+  ],
+  "sharedFragments": [],
+  "authWorkflows": [],
+  "downloadWorkflows": [
+    {
+      "description": "Fetch a protected page, detect expiry, then emit the extracted direct link.",
+      "id": "secure.template.download",
+      "steps": [
+        {
+          "http": {
+            "attachAuthSession": true,
+            "headers": {
+              "Accept": "text/html"
+            },
+            "method": "GET",
+            "output": "securePage",
+            "persistResponseCookies": true,
+            "urlTemplate": "{{input.sourceURL}}"
+          },
+          "type": "http"
+        },
+        {
+          "branch": {
+            "conditions": [
+              {
+                "comparator": "contains",
+                "expected": "AUTH_REQUIRED",
+                "source": "securePage.body"
+              }
+            ],
+            "elseSteps": [
+              {
+                "extract": {
+                  "group": 1,
+                  "kind": "regexFirst",
+                  "pattern": "data-direct=\\\"([^\\\"]+)\\\"",
+                  "source": "securePage.body",
+                  "target": "secureDirectURL"
+                },
+                "type": "extract"
+              }
+            ],
+            "ifSteps": [
+              {
+                "assign": {
+                  "source": "input.sourceURL",
+                  "storage": "runtime",
+                  "target": "secureDirectURL"
+                },
+                "type": "assign"
+              }
+            ],
+            "mode": "all"
+          },
+          "type": "branch"
+        },
+        {
+          "emitRequest": {
+            "attachAuthSession": true,
+            "filenameHints": {
+              "provider": "secure-demo"
+            },
+            "headers": {
+              "Referer": "{{input.sourceURL}}"
+            },
+            "method": "GET",
+            "retryHints": {
+              "backoffSeconds": 1,
+              "maxAttempts": 2,
+              "retryableStatusCodes": [
+                401,
+                429,
+                503
+              ]
+            },
+            "urlTemplate": "{{secureDirectURL}}"
+          },
+          "type": "emitRequest"
+        }
+      ]
+    },
+    {
+      "description": "Legacy authenticated generate-download flow migrated from GenerateDownloadRequest.",
+      "id": "legacy.vip.generateDownload",
+      "steps": [
+        {
+          "invokeCapability": {
+            "arguments": {},
+            "bindings": {
+              "sourceURL": "input.sourceURL"
+            },
+            "capability": "url.origin",
+            "target": "pageOrigin"
+          },
+          "type": "invokeCapability"
+        },
+        {
+          "extract": {
+            "kind": "urlPath",
+            "source": "input.sourceURL",
+            "target": "sourcePath"
+          },
+          "type": "extract"
+        },
+        {
+          "extract": {
+            "group": 1,
+            "kind": "regexFirst",
+            "pattern": "/f/([^/?]+)",
+            "source": "sourcePath",
+            "target": "fileID"
+          },
+          "type": "extract"
+        },
+        {
+          "http": {
+            "attachAuthSession": true,
+            "bodyTemplate": "{\"type\":\"vip\",\"click_pos\":\"690,689\",\"screen\":\"1920x1080\",\"ref\":\"download_vip\"}",
+            "headers": {
+              "Accept": "application/json, text/plain, */*",
+              "Content-Type": "application/json",
+              "Origin": "{{pageOrigin}}",
+              "Referer": "{{pageOrigin}}/login",
+              "User-Agent": "WebShellRuleEngine/1.0",
+              "X-CSRF-TOKEN": "{{auth.values.csrfToken}}",
+              "X-Requested-With": "XMLHttpRequest",
+              "X-XSRF-TOKEN": "{{auth.values.xsrfToken}}"
+            },
+            "method": "POST",
+            "output": "generateResponse",
+            "persistResponseCookies": false,
+            "urlTemplate": "{{pageOrigin}}/f/{{fileID}}/generate-download"
+          },
+          "type": "http"
+        },
+        {
+          "extract": {
+            "kind": "jsonPath",
+            "path": [
+              "download_url"
+            ],
+            "source": "generateResponse.body",
+            "target": "downloadURL"
+          },
+          "type": "extract"
+        },
+        {
+          "emitRequest": {
+            "attachAuthSession": true,
+            "filenameHints": {
+              "directType": "generate-download",
+              "provider": "xrcf-vip"
+            },
+            "headers": {
+              "Referer": "{{input.sourceURL}}",
+              "User-Agent": "WebShellRuleEngine/1.0"
+            },
+            "method": "GET",
+            "retryHints": {
+              "backoffSeconds": 1,
+              "maxAttempts": 2,
+              "retryableStatusCodes": [
+                401,
+                429,
+                503
+              ]
+            },
+            "urlTemplate": "{{downloadURL}}"
+          },
+          "type": "emitRequest"
+        }
+      ]
+    }
+  ],
+  "capabilityRefs": [
+    {
+      "name": "url.origin",
+      "required": true
+    },
+    {
+      "name": "cookies.valueForName",
+      "required": true
+    }
+  ]
+}
