@@ -36,10 +36,10 @@ Validate the second real vertical slice across the current product system:
 - `POST /devices/register` in the control plane was hardened into an idempotent registration path so concurrent launch registration and APNs token linking no longer fail on duplicate primary keys.
 
 Relevant source:
-- [WebShellClientiOS-Info.plist](/Users/yorl/Downloads/GitHub-Cool/WebShellClient-Apple/App/iOS/WebShellClientiOS-Info.plist)
-- [project.yml](/Users/yorl/Downloads/GitHub-Cool/WebShellClient-Apple/project.yml)
+- [WebShellClientiOS-Info.plist](/Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellClient-Apple/App/iOS/WebShellClientiOS-Info.plist)
+- [project.yml](/Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellClient-Apple/project.yml)
 - [webshell-platform-real-apns-slice.sh](/Users/yorl/Downloads/GitHub-Cool/WebShell/WebShell-SPM/scripts/webshell-platform-real-apns-slice.sh)
-- [ControlPlaneController.swift](/Users/yorl/Downloads/GitHub-Cool/WebShellControlPlane/Sources/WebShellControlPlane/Controllers/ControlPlaneController.swift)
+- [ControlPlaneController.swift](/Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellControlPlane/Sources/WebShellControlPlane/Controllers/ControlPlaneController.swift)
 
 ## Real APNs Slice
 
@@ -99,8 +99,8 @@ AUTH_DOWNLOAD_OPEN_OK filename=vip.txt
 
 ## Verification Commands
 ```bash
-cd /Users/yorl/Downloads/GitHub-Cool/WebShellControlPlane && swift test
-cd /Users/yorl/Downloads/GitHub-Cool/WebShellClient-Apple/Packages/WebShellClientKit && swift test
+cd /Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellControlPlane && swift test
+cd /Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellClient-Apple/Packages/WebShellClientKit && swift test
 cd /Users/yorl/Downloads/GitHub-Cool/WebShell && ./WebShell-SPM/scripts/webshell-platform-real-apns-slice.sh
 cd /Users/yorl/Downloads/GitHub-Cool/WebShell && ./WebShell-SPM/scripts/webshell-platform-auth-download-slice.sh
 ```

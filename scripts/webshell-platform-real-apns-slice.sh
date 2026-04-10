@@ -4,8 +4,8 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd -- "$(dirname "$0")" && pwd)
 WORKSPACE_ROOT=$(cd -- "$SCRIPT_DIR/../.." && pwd)
-CLIENT_REPO="$WORKSPACE_ROOT/../WebShellClient-Apple"
-CONTROL_REPO="$WORKSPACE_ROOT/../WebShellControlPlane"
+CLIENT_REPO="$WORKSPACE_ROOT/WebShellClient-Apple"
+CONTROL_REPO="$WORKSPACE_ROOT/WebShellControlPlane"
 PACKAGE_DIR="$CLIENT_REPO/Packages/WebShellClientKit"
 
 DEVICE_UDID="${WEBSHELL_IOS_DEVICE_UDID:-00008027-000939693422002E}"

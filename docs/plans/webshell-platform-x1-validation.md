@@ -18,7 +18,7 @@ Validate the first real vertical slice across the current product system:
 Commands used to prepare the backend:
 
 ```bash
-cd /Users/yorl/Downloads/GitHub-Cool/WebShellControlPlane
+cd /Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellControlPlane
 DATABASE_USERNAME=yorl DATABASE_PASSWORD='' DATABASE_NAME=webshell_control_plane PORT=8088 swift run WebShellControlPlane migrate -y
 DATABASE_USERNAME=yorl DATABASE_PASSWORD='' DATABASE_NAME=webshell_control_plane PORT=8088 swift run WebShellControlPlane serve --hostname 127.0.0.1 --port 8088
 ```
@@ -29,7 +29,7 @@ DATABASE_USERNAME=yorl DATABASE_PASSWORD='' DATABASE_NAME=webshell_control_plane
 - After that route fix, live publish worked with the real bundle payload size.
 
 Relevant source:
-- [ControlPlaneController.swift](/Users/yorl/Downloads/GitHub-Cool/WebShellControlPlane/Sources/WebShellControlPlane/Controllers/ControlPlaneController.swift)
+- [ControlPlaneController.swift](/Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellControlPlane/Sources/WebShellControlPlane/Controllers/ControlPlaneController.swift)
 
 ## Slice Runner
 A temporary smoke executable was used to drive the live slice against the running control plane while reusing the real client-side services:
@@ -73,22 +73,22 @@ X1 auth challenge fields: username,password,captcha
 - The implemented screens cover the PRD states for URL entry, queue/status, files, accounts, settings, auth required, and auth expired.
 
 Relevant source:
-- [Views.swift](/Users/yorl/Downloads/GitHub-Cool/WebShellClient-Apple/Packages/WebShellClientKit/Sources/WebShellClientKit/Views.swift)
+- [Views.swift](/Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellClient-Apple/Packages/WebShellClientKit/Sources/WebShellClientKit/Views.swift)
 
 ### WebShellAdmin-macOS
 - Implemented a matching graphite admin shell with fixed navigation and dedicated rules, releases, devices, diagnostics, and auth preview surfaces.
 - The rules editor and diagnostics layout now reflect the Figma hierarchy more closely, including strong card separation and operator-focused density.
 
 Relevant source:
-- [Views.swift](/Users/yorl/Downloads/GitHub-Cool/WebShellAdmin-macOS/Packages/WebShellAdminKit/Sources/WebShellAdminKit/Views.swift)
+- [Views.swift](/Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellAdmin-macOS/Packages/WebShellAdminKit/Sources/WebShellAdminKit/Views.swift)
 
 ### Verification Commands
 ```bash
-cd /Users/yorl/Downloads/GitHub-Cool/WebShellClient-Apple/Packages/WebShellClientKit && swift test
-cd /Users/yorl/Downloads/GitHub-Cool/WebShellClient-Apple && xcodebuild -project WebShellClientApple.xcodeproj -scheme WebShellClientMac -destination 'platform=macOS' build
-cd /Users/yorl/Downloads/GitHub-Cool/WebShellAdmin-macOS/Packages/WebShellAdminKit && swift test
-cd /Users/yorl/Downloads/GitHub-Cool/WebShellAdmin-macOS && xcodebuild -project WebShellAdmin.xcodeproj -scheme WebShellAdmin -destination 'platform=macOS' build
-cd /Users/yorl/Downloads/GitHub-Cool/WebShellControlPlane && swift test
+cd /Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellClient-Apple/Packages/WebShellClientKit && swift test
+cd /Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellClient-Apple && xcodebuild -project WebShellClientApple.xcodeproj -scheme WebShellClientMac -destination 'platform=macOS' build
+cd /Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellAdmin-macOS/Packages/WebShellAdminKit && swift test
+cd /Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellAdmin-macOS && xcodebuild -project WebShellAdmin.xcodeproj -scheme WebShellAdmin -destination 'platform=macOS' build
+cd /Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellControlPlane && swift test
 ```
 
 ## Next Step

@@ -49,9 +49,9 @@ The roadmap focuses on the first stable product checkpoint, not the full long-te
 1. `docs/product/webshell-platform-prd.md` for product boundary
 2. `docs/plans/webshell-platform-task-queue.md` for current execution order and status
 3. repo source code in:
-   - `/Users/yorl/Downloads/GitHub-Cool/WebShellClient-Apple`
-   - `/Users/yorl/Downloads/GitHub-Cool/WebShellAdmin-macOS`
-   - `/Users/yorl/Downloads/GitHub-Cool/WebShellControlPlane`
+   - `/Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellClient-Apple`
+   - `/Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellAdmin-macOS`
+   - `/Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellControlPlane`
    - `/Users/yorl/Downloads/GitHub-Cool/WebShell/WebShell-SPM`
 
 ## Phase Roadmap

@@ -4,7 +4,7 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd -- "$(dirname "$0")" && pwd)
 WORKSPACE_ROOT=$(cd -- "$SCRIPT_DIR/../.." && pwd)
-CLIENT_REPO="$WORKSPACE_ROOT/../WebShellClient-Apple"
+CLIENT_REPO="$WORKSPACE_ROOT/WebShellClient-Apple"
 FIXTURE_SERVER="$CLIENT_REPO/scripts/auth_download_fixture_server.py"
 PACKAGE_DIR="$CLIENT_REPO/Packages/WebShellClientKit"
 

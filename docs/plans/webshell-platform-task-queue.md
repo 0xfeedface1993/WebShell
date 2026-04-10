@@ -69,7 +69,7 @@
   - push result recording
   - route and env documentation
 - Write boundary:
-  - `/Users/yorl/Downloads/GitHub-Cool/WebShellControlPlane`
+  - `/Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellControlPlane`
 - Must preserve:
   - current route surface
   - current tests unless replacing with stronger coverage
@@ -85,7 +85,7 @@
   - resolve retry after auth
   - secure local storage usage
 - Write boundary:
-  - `/Users/yorl/Downloads/GitHub-Cool/WebShellClient-Apple`
+  - `/Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellClient-Apple`
 - Read-only references:
   - `/Users/yorl/Downloads/GitHub-Cool/WebShell/WebShell-SPM`
 - Result:
@@ -106,11 +106,11 @@
 
 ## Latest Evidence
 - Figma design handoff: `https://www.figma.com/design/iONAby0elf2Qz8CU8CEVoj`
-- Client verification: `cd /Users/yorl/Downloads/GitHub-Cool/WebShellClient-Apple/Packages/WebShellClientKit && swift test`
-- Backend verification: `cd /Users/yorl/Downloads/GitHub-Cool/WebShellControlPlane && swift test`
-- Client macOS build: `cd /Users/yorl/Downloads/GitHub-Cool/WebShellClient-Apple && xcodebuild -project WebShellClientApple.xcodeproj -scheme WebShellClientMac -destination 'platform=macOS' build`
-- Admin verification: `cd /Users/yorl/Downloads/GitHub-Cool/WebShellAdmin-macOS/Packages/WebShellAdminKit && swift test`
-- Admin macOS build: `cd /Users/yorl/Downloads/GitHub-Cool/WebShellAdmin-macOS && xcodebuild -project WebShellAdmin.xcodeproj -scheme WebShellAdmin -destination 'platform=macOS' build`
+- Client verification: `cd /Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellClient-Apple/Packages/WebShellClientKit && swift test`
+- Backend verification: `cd /Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellControlPlane && swift test`
+- Client macOS build: `cd /Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellClient-Apple && xcodebuild -project WebShellClientApple.xcodeproj -scheme WebShellClientMac -destination 'platform=macOS' build`
+- Admin verification: `cd /Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellAdmin-macOS/Packages/WebShellAdminKit && swift test`
+- Admin macOS build: `cd /Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellAdmin-macOS && xcodebuild -project WebShellAdmin.xcodeproj -scheme WebShellAdmin -destination 'platform=macOS' build`
 - X1 validation notes: `docs/plans/webshell-platform-x1-validation.md`
 - X2 validation notes: `docs/plans/webshell-platform-x2-validation.md`
 - Real APNs slice: `cd /Users/yorl/Downloads/GitHub-Cool/WebShell && ./WebShell-SPM/scripts/webshell-platform-real-apns-slice.sh`
