@@ -5,7 +5,7 @@ final class RuleCompilerTests: XCTestCase {
     func testFixtureBundleLoadsFromJSONResource() throws {
         let bundle = RuleBundleFixtures.defaultBundle
 
-        XCTAssertEqual(bundle.bundleVersion, "2026.04.12.catalog.116pan.1")
+        XCTAssertEqual(bundle.bundleVersion, "2026.04.12.catalog.116pan.2")
         XCTAssertEqual(bundle.providers.map(\.providerFamily).sorted(), ["116pan-vip", "jkpan-vip"])
         XCTAssertTrue(bundle.providers.contains { $0.providerFamily == "jkpan-vip" })
         XCTAssertTrue(bundle.providers.contains { $0.providerFamily == "116pan-vip" })
@@ -43,6 +43,18 @@ final class RuleCompilerTests: XCTestCase {
             50
         )
         XCTAssertEqual(bundle.capabilityRefs.map(\.name), ["captcha.ocr", "cookies.valueForName", "url.origin", "url.percentDecode"])
+    }
+
+    func test116PanProviderMatchesCanonicalXyzAndComHosts() throws {
+        let provider = try XCTUnwrap(
+            RuleBundleFixtures.defaultBundle.providers.first { $0.providerFamily == "116pan-vip" }
+        )
+
+        XCTAssertTrue(provider.matchers.contains { $0.matches(url: URL(string: "https://www.116pan.xyz/f/0V02j0lxvpSl")!) })
+        XCTAssertTrue(provider.matchers.contains { $0.matches(url: URL(string: "https://116pan.xyz/f/0V02j0lxvpSl")!) })
+        XCTAssertTrue(provider.matchers.contains { $0.matches(url: URL(string: "https://www.116pan.com/f/0V02j0lxvpSl")!) })
+        XCTAssertTrue(provider.matchers.contains { $0.matches(url: URL(string: "https://116pan.com/f/0V02j0lxvpSl")!) })
+        XCTAssertFalse(provider.matchers.contains { $0.matches(url: URL(string: "https://www.116pan.com/viewfile.php?file_id=471463")!) })
     }
 
     func testSyncPersistsAndActivatesBundle() async throws {

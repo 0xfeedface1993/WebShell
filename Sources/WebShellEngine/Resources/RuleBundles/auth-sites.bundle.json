@@ -49,7 +49,9 @@
         {
           "hosts": [
             "www.116pan.xyz",
-            "116pan.xyz"
+            "116pan.xyz",
+            "www.116pan.com",
+            "116pan.com"
           ],
           "hostSuffixes": [],
           "pathPattern": "/f/[A-Za-z0-9]+$"
