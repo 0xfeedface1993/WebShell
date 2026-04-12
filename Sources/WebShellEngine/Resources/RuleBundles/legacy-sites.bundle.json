@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "bundleVersion": "2026.04.09.public.1",
+  "bundleVersion": "2026.04.11.legacy-sites.1",
   "providers": [
     {
       "accountScope": "providerFamily",

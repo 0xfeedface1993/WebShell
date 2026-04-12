@@ -18,6 +18,9 @@ public enum RuleEngineError: LocalizedError, Sendable {
     case authDidNotProduceSession(String)
     case authExpiredAfterRetry(String)
     case httpFailure(String)
+    case authCaptchaRejected(String)
+    case authCaptchaRetryLimitExceeded(String, Int)
+    case authCredentialsRejected(String)
 
     public var errorDescription: String? {
         switch self {
@@ -43,6 +46,12 @@ public enum RuleEngineError: LocalizedError, Sendable {
             return "Provider requires an auth workflow: \(value)"
         case .authDidNotProduceSession(let value):
             return "Auth workflow did not produce a reusable session: \(value)"
+        case .authCaptchaRejected(let value):
+            return "Auth captcha was rejected by provider: \(value)"
+        case .authCaptchaRetryLimitExceeded(let value, let attempts):
+            return "Auth captcha retry limit exceeded after \(attempts) attempts: \(value)"
+        case .authCredentialsRejected(let value):
+            return "Auth credentials were rejected by provider: \(value)"
         case .authExpiredAfterRetry(let value):
             return "Auth expired again after retry: \(value)"
         case .httpFailure(let value):
@@ -270,12 +279,37 @@ public struct HTTPRequestData: Codable, Sendable, Equatable {
     public let url: URL
     public let headers: [String: String]
     public let body: String?
+    public let followRedirects: Bool
 
-    public init(method: HTTPMethod, url: URL, headers: [String: String] = [:], body: String? = nil) {
+    private enum CodingKeys: String, CodingKey {
+        case method
+        case url
+        case headers
+        case body
+        case followRedirects
+    }
+
+    public init(
+        method: HTTPMethod,
+        url: URL,
+        headers: [String: String] = [:],
+        body: String? = nil,
+        followRedirects: Bool = true
+    ) {
         self.method = method
         self.url = url
         self.headers = headers
         self.body = body
+        self.followRedirects = followRedirects
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.method = try container.decode(HTTPMethod.self, forKey: .method)
+        self.url = try container.decode(URL.self, forKey: .url)
+        self.headers = try container.decode([String: String].self, forKey: .headers)
+        self.body = try container.decodeIfPresent(String.self, forKey: .body)
+        self.followRedirects = try container.decodeIfPresent(Bool.self, forKey: .followRedirects) ?? true
     }
 }
 
@@ -284,6 +318,7 @@ public struct HTTPResponseData: Codable, Sendable, Equatable {
     public let url: URL
     public let headers: [String: String]
     public let body: String
+    public let bodyBase64: String?
     public let cookies: [SerializableCookie]
 
     public init(
@@ -291,12 +326,14 @@ public struct HTTPResponseData: Codable, Sendable, Equatable {
         url: URL,
         headers: [String: String] = [:],
         body: String,
+        bodyBase64: String? = nil,
         cookies: [SerializableCookie] = []
     ) {
         self.statusCode = statusCode
         self.url = url
         self.headers = headers
         self.body = body
+        self.bodyBase64 = bodyBase64
         self.cookies = cookies
     }
 }
@@ -484,6 +521,7 @@ extension HTTPRequestData {
             "url": .string(url.absoluteString),
             "headers": .object(headers.mapValues(RuntimeValue.string)),
             "body": body.map(RuntimeValue.string) ?? .null,
+            "followRedirects": .bool(followRedirects),
         ])
     }
 }
@@ -495,6 +533,7 @@ extension HTTPResponseData {
             "url": .string(url.absoluteString),
             "headers": .object(headers.mapValues(RuntimeValue.string)),
             "body": .string(body),
+            "bodyBase64": bodyBase64.map(RuntimeValue.string) ?? .null,
             "cookies": .array(cookies.map(\.runtimeValue)),
         ])
     }

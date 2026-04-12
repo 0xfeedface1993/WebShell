@@ -5,15 +5,44 @@ final class RuleCompilerTests: XCTestCase {
     func testFixtureBundleLoadsFromJSONResource() throws {
         let bundle = RuleBundleFixtures.defaultBundle
 
-        XCTAssertEqual(bundle.bundleVersion, "2026.04.10.catalog.1")
+        XCTAssertEqual(bundle.bundleVersion, "2026.04.12.catalog.116pan.1")
+        XCTAssertEqual(bundle.providers.map(\.providerFamily).sorted(), ["116pan-vip", "jkpan-vip"])
         XCTAssertTrue(bundle.providers.contains { $0.providerFamily == "jkpan-vip" })
+        XCTAssertTrue(bundle.providers.contains { $0.providerFamily == "116pan-vip" })
+        XCTAssertFalse(bundle.providers.contains { $0.providerFamily == "rosefile" })
+        XCTAssertFalse(bundle.providers.contains { $0.providerFamily == "xueqiupan" })
+        XCTAssertFalse(bundle.providers.contains { $0.providerFamily == "xunniufile" })
+        XCTAssertFalse(bundle.providers.contains { $0.providerFamily == "xingyaoclouds" })
+        XCTAssertFalse(bundle.providers.contains { $0.providerFamily == "rarp" })
+        XCTAssertFalse(bundle.providers.contains { $0.providerFamily == "567file" })
+        XCTAssertFalse(bundle.providers.contains { $0.providerFamily == "iycdn" })
         XCTAssertFalse(bundle.providers.contains { $0.providerFamily == "xrcf-vip" })
         XCTAssertFalse(bundle.providers.contains { $0.providerFamily == "secure-demo" })
-        XCTAssertTrue(bundle.authWorkflows.contains { $0.id == "legacy.vip.xsrfCaptcha.auth" })
+        XCTAssertEqual(bundle.authWorkflows.map(\.id).sorted(), ["116pan.vip.captcha.auth", "legacy.vip.formhashCaptcha.auth"])
+        XCTAssertTrue(bundle.authWorkflows.contains { $0.id == "116pan.vip.captcha.auth" })
         XCTAssertTrue(bundle.authWorkflows.contains { $0.id == "legacy.vip.formhashCaptcha.auth" })
-        XCTAssertTrue(bundle.authWorkflows.contains { $0.id == "legacy.vip.fastlogin.auth" })
+        XCTAssertFalse(bundle.authWorkflows.contains { $0.id == "secure.auth" })
+        XCTAssertFalse(bundle.authWorkflows.contains { $0.id == "legacy.vip.xsrfCaptcha.auth" })
+        XCTAssertFalse(bundle.authWorkflows.contains { $0.id == "legacy.vip.fastlogin.auth" })
+        XCTAssertTrue(bundle.downloadWorkflows.contains { $0.id == "116pan.vip.generateDownload" })
         XCTAssertFalse(bundle.downloadWorkflows.contains { $0.id == "legacy.vip.generateDownload" })
-        XCTAssertTrue(bundle.capabilityRefs.contains { $0.name == "cookies.valueForName" && $0.required })
+        XCTAssertEqual(
+            bundle.providers.first { $0.providerFamily == "116pan-vip" }?.authPolicy?.materialKeys,
+            ["username", "password"]
+        )
+        XCTAssertEqual(
+            bundle.providers.first { $0.providerFamily == "116pan-vip" }?.authPolicy?.captchaRetryPolicy?.mode,
+            .refreshCaptcha
+        )
+        XCTAssertEqual(
+            bundle.providers.first { $0.providerFamily == "116pan-vip" }?.authPolicy?.captchaRetryPolicy?.startAtOutput,
+            "captchaImage"
+        )
+        XCTAssertEqual(
+            bundle.providers.first { $0.providerFamily == "116pan-vip" }?.authPolicy?.captchaRetryPolicy?.maxAttempts,
+            50
+        )
+        XCTAssertEqual(bundle.capabilityRefs.map(\.name), ["captcha.ocr", "cookies.valueForName", "url.origin", "url.percentDecode"])
     }
 
     func testSyncPersistsAndActivatesBundle() async throws {
@@ -45,7 +74,7 @@ final class RuleCompilerTests: XCTestCase {
             _ = try await compiler.compile(snapshot: snapshot, previous: nil, capabilityRegistry: registry)
             XCTFail("Expected missing capability error")
         } catch let RuleEngineError.missingCapability(name) {
-            XCTAssertEqual(name, "cookies.valueForName")
+            XCTAssertEqual(name, "captcha.ocr")
         } catch {
             XCTFail("Unexpected error: \(error)")
         }

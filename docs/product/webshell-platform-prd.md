@@ -241,6 +241,7 @@ This PRD remains the product boundary reference even as implementation details c
 
 ## Relationship To Engineering Plans
 - Product scope and boundary: `docs/product/webshell-platform-prd.md`
+- Admin Rules management PRD: `docs/product/webshell-admin-rules-management-prd.md`
 - Platform execution roadmap: `docs/plans/webshell-platform-roadmap.md`
 - Platform execution queue: `docs/plans/webshell-platform-task-queue.md`
 - Shared engine implementation plan: `docs/plans/remote-rule-engine-plan.md`

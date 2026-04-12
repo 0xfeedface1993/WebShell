@@ -25,7 +25,7 @@ The roadmap focuses on the first stable product checkpoint, not the full long-te
 ## Status Summary
 - Overall state: `In Progress`
 - First stable checkpoint target: macOS foreground download + control plane publish/push + admin publish workflow + dynamic auth path
-- Current focus: convert the completed X2 scripted validation into a macOS-first, operator-driven checkpoint
+- Current focus: preserve X3 validation evidence and promote the shell runners into maintained tooling
 - Last updated: `2026-04-11`
 
 ## Scope Boundaries
@@ -94,7 +94,7 @@ The roadmap focuses on the first stable product checkpoint, not the full long-te
   - tests for auth-triggered resolution and auth-success retry
 
 ### Phase R4: Vertical Slice Stabilization
-- State: `In Progress`
+- State: `Done`
 - Purpose: validate the first end-to-end operator and user journey
 - Deliverables:
   - publish bundle from admin
@@ -107,7 +107,9 @@ The roadmap focuses on the first stable product checkpoint, not the full long-te
   - X1 proved live publish, device registration, live sync, heartbeat, push bookkeeping, and rule-driven auth challenge surfacing.
   - X2 is now complete and documented in `docs/plans/webshell-platform-x2-validation.md`.
   - X2 proved real APNs-delivered refresh on a physical iOS device and a controlled authenticated happy path ending in a delivered, opened file.
-  - Remaining R4 work is to prove the same behavior through the macOS-first operator path, including admin-driven publish and macOS client file delivery.
+  - X3 is now complete and documented in `docs/plans/webshell-platform-x3-validation.md`.
+  - X3 proved admin-repo publish, control-plane active bundle serving, macOS client sync/heartbeat, dynamic auth submission, authenticated download, and file open.
+  - Remaining work after R4 is hardening: promote runners to maintained tooling, decide on UI automation depth, and tighten transport policy.
 
 ## Workstreams
 | ID | Workstream | State | Depends On | Repos | Done When |

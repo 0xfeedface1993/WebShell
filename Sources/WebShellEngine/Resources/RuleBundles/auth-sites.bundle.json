@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "bundleVersion": "2026.04.10.auth-sites.1",
+  "bundleVersion": "2026.04.11.auth-sites.1",
   "providers": [
     {
       "id": "jkpan-vip",
@@ -40,6 +40,50 @@
         "kind": "verified-auth-site",
         "legacyFlow": "LoginByFormhashAndCode + LoginVerifyCode",
         "source": "captcha login shape verified from public article"
+      }
+    },
+    {
+      "id": "116pan-vip",
+      "providerFamily": "116pan-vip",
+      "matchers": [
+        {
+          "hosts": [
+            "www.116pan.xyz",
+            "116pan.xyz"
+          ],
+          "hostSuffixes": [],
+          "pathPattern": "/f/[A-Za-z0-9]+$"
+        }
+      ],
+      "accountScope": "providerFamily",
+      "downloadWorkflowID": "116pan.vip.generateDownload",
+      "authWorkflowID": "116pan.vip.captcha.auth",
+      "authPolicy": {
+        "requiresAuthentication": true,
+        "expireConditions": [
+          {
+            "source": "filePage.body",
+            "comparator": "contains",
+            "expected": "&quot;component&quot;:&quot;Auth\\/Login&quot;",
+            "expectedValues": null
+          }
+        ],
+        "materialKeys": [
+          "username",
+          "password"
+        ],
+        "accountIDTemplate": null,
+        "captchaRetryPolicy": {
+          "mode": "refreshCaptcha",
+          "maxAttempts": 50,
+          "startAtOutput": "captchaImage"
+        }
+      },
+      "metadata": {
+        "site": "116pan.xyz",
+        "kind": "verified-auth-site",
+        "legacyFlow": "Laravel/Inertia captcha login + VIP generate-download",
+        "source": "verified against https://www.116pan.xyz/f/0V02j0lxvpSl on 2026-04-11"
       }
     }
   ],
@@ -122,6 +166,208 @@
           "type": "emitRequest"
         }
       ]
+    },
+    {
+      "description": "Fetch the 116pan file page, detect auth expiry, call VIP generate-download, and emit the returned signed URL.",
+      "id": "116pan.vip.generateDownload",
+      "steps": [
+        {
+          "invokeCapability": {
+            "arguments": {},
+            "bindings": {
+              "sourceURL": "input.sourceURL"
+            },
+            "capability": "url.origin",
+            "target": "pageOrigin"
+          },
+          "type": "invokeCapability"
+        },
+        {
+          "extract": {
+            "kind": "urlPath",
+            "source": "input.sourceURL",
+            "target": "sourcePath"
+          },
+          "type": "extract"
+        },
+        {
+          "extract": {
+            "group": 1,
+            "kind": "regexFirst",
+            "pattern": "/f/([A-Za-z0-9]+)$",
+            "source": "sourcePath",
+            "target": "fileShortURL"
+          },
+          "type": "extract"
+        },
+        {
+          "http": {
+            "attachAuthSession": true,
+            "headers": {
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+              "Accept-Language": "zh-CN",
+              "Priority": "u=0, i",
+              "Sec-CH-UA": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+              "Sec-CH-UA-Mobile": "?0",
+              "Sec-CH-UA-Platform": "\"macOS\"",
+              "Sec-Fetch-Dest": "document",
+              "Sec-Fetch-Mode": "navigate",
+              "Sec-Fetch-Site": "none",
+              "Sec-Fetch-User": "?1",
+              "Upgrade-Insecure-Requests": "1",
+              "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+            },
+            "method": "GET",
+            "output": "filePage",
+            "persistResponseCookies": true,
+            "urlTemplate": "{{input.sourceURL}}"
+          },
+          "type": "http"
+        },
+        {
+          "branch": {
+            "conditions": [
+              {
+                "comparator": "contains",
+                "expected": "&quot;component&quot;:&quot;Auth\\/Login&quot;",
+                "source": "filePage.body"
+              }
+            ],
+            "elseSteps": [
+              {
+                "extract": {
+                  "group": 1,
+                  "kind": "regexFirst",
+                  "pattern": "csrf-token\\\" content=\\\"([^\\\"]+)\\\"",
+                  "source": "filePage.body",
+                  "target": "csrfToken"
+                },
+                "type": "extract"
+              },
+              {
+                "invokeCapability": {
+                  "arguments": {
+                    "name": "XSRF-TOKEN"
+                  },
+                  "bindings": {
+                    "cookies": "filePage.cookies"
+                  },
+                  "capability": "cookies.valueForName",
+                  "target": "xsrfTokenEncoded"
+                },
+                "type": "invokeCapability"
+              },
+              {
+                "invokeCapability": {
+                  "arguments": {},
+                  "bindings": {
+                    "value": "xsrfTokenEncoded"
+                  },
+                  "capability": "url.percentDecode",
+                  "target": "xsrfToken"
+                },
+                "type": "invokeCapability"
+              },
+              {
+                "template": {
+                  "target": "generateBody",
+                  "template": "{\"type\":\"vip\",\"click_pos\":\"690,689\",\"screen\":\"1920x1080\",\"ref\":\"download_vip\"}"
+                },
+                "type": "template"
+              },
+              {
+                "http": {
+                  "attachAuthSession": true,
+                  "bodyTemplate": "{{generateBody}}",
+                  "headers": {
+                    "Accept": "application/json, text/plain, */*",
+                    "Accept-Language": "zh-CN",
+                    "Content-Type": "application/json",
+                    "Origin": "{{pageOrigin}}",
+                    "Priority": "u=1, i",
+                    "Referer": "{{input.sourceURL}}",
+                    "Sec-CH-UA": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+                    "Sec-CH-UA-Mobile": "?0",
+                    "Sec-CH-UA-Platform": "\"macOS\"",
+                    "Sec-Fetch-Dest": "empty",
+                    "Sec-Fetch-Mode": "cors",
+                    "Sec-Fetch-Site": "same-origin",
+                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+                    "X-CSRF-TOKEN": "{{csrfToken}}",
+                    "X-XSRF-TOKEN": "{{xsrfToken}}",
+                    "X-Requested-With": "XMLHttpRequest"
+                  },
+                  "method": "POST",
+                  "output": "generateResponse",
+                  "persistResponseCookies": true,
+                  "urlTemplate": "{{pageOrigin}}/f/{{fileShortURL}}/generate-download"
+                },
+                "type": "http"
+              },
+              {
+                "extract": {
+                  "kind": "jsonPath",
+                  "path": [
+                    "download_url"
+                  ],
+                  "source": "generateResponse.body",
+                  "target": "downloadURL"
+                },
+                "type": "extract"
+              }
+            ],
+            "ifSteps": [
+              {
+                "assign": {
+                  "source": "input.sourceURL",
+                  "storage": "runtime",
+                  "target": "downloadURL"
+                },
+                "type": "assign"
+              }
+            ],
+            "mode": "any"
+          },
+          "type": "branch"
+        },
+        {
+          "emitRequest": {
+            "attachAuthSession": false,
+            "filenameHints": {
+              "directType": "116pan.vip.generate-download",
+              "provider": "116pan-vip"
+            },
+            "headers": {
+              "Accept": "*/*",
+              "Accept-Encoding": "gzip, deflate, br, zstd",
+              "Accept-Language": "zh-CN",
+              "Connection": "keep-alive",
+              "Priority": "u=3, i",
+              "Referer": "{{input.sourceURL}}",
+              "Sec-CH-UA": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+              "Sec-CH-UA-Mobile": "?0",
+              "Sec-CH-UA-Platform": "\"macOS\"",
+              "Sec-Fetch-Dest": "empty",
+              "Sec-Fetch-Mode": "cors",
+              "Sec-Fetch-Site": "same-origin",
+              "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+            },
+            "method": "GET",
+            "retryHints": {
+              "backoffSeconds": 1,
+              "maxAttempts": 2,
+              "retryableStatusCodes": [
+                401,
+                419,
+                429,
+                503
+              ]
+            },
+            "urlTemplate": "{{downloadURL}}"
+          },
+          "type": "emitRequest"
+        }
+      ]
     }
   ],
   "capabilityRefs": [
@@ -131,6 +377,10 @@
     },
     {
       "name": "cookies.valueForName",
+      "required": true
+    },
+    {
+      "name": "url.percentDecode",
       "required": true
     }
   ]

@@ -82,12 +82,22 @@ let resolver = DownloadResolver(
     httpClient: URLSessionHTTPClient(),
     capabilityRegistry: registry,
     authSessionStore: AuthSessionStore(),
-    authMaterialProvider: NoopAuthMaterialProvider()
+    authMaterialProvider: StaticAuthMaterialProvider(
+        storage: [
+            "jkpan-vip": [
+                "default": [
+                    "username": .string("<username>"),
+                    "password": .string("<password>"),
+                    "captcha": .string("<captcha>"),
+                ]
+            ]
+        ]
+    )
 )
 
 let resolved = try await resolver.resolve(
     DownloadResolveRequest(
-        sourceURL: URL(string: "http://www.xueqiupan.com/file-672734.html")!
+        sourceURL: URL(string: "http://www.jkpan.com/file-7.html")!
     )
 )
 
@@ -145,14 +155,9 @@ let resolved = try await resolver.resolve(
   - the feature would turn the rule engine into arbitrary code execution
 
 ## Current migrated provider families
-- `rosefile`
-- `xueqiupan`
-- `xunniufile`
-- `xingyaoclouds`
-- `rarp`
-- `567file`
-- `iycdn`
-- `secure-demo` (auth-required demo provider)
+- Active default catalog: `jkpan-vip`, `116pan-vip`
+- Legacy-only public providers: `rosefile`, `xueqiupan`, `xunniufile`, `xingyaoclouds`, `rarp`, `567file`, `iycdn`
+- Template-only auth providers: `secure-demo`, `xrcf-vip`
 
 ## Recommended migration order for downstream consumers
 1. Switch imports and entrypoints to the new `WebShell` API.

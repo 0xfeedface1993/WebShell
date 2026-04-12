@@ -23,8 +23,12 @@ public typealias CapabilityHandler = @Sendable (CapabilityInvocation) async thro
 public actor CapabilityRegistry {
     private var handlers: [String: CapabilityHandler]
 
-    public init(registerBuiltins: Bool = true) {
-        self.handlers = registerBuiltins ? Self.builtinHandlers() : [:]
+    public init(registerBuiltins: Bool = true, extraHandlers: [String: CapabilityHandler] = [:]) {
+        var handlers = registerBuiltins ? Self.builtinHandlers() : [:]
+        for (name, handler) in extraHandlers {
+            handlers[name] = handler
+        }
+        self.handlers = handlers
     }
 
     public static func standard() -> CapabilityRegistry {
@@ -127,6 +131,12 @@ public actor CapabilityRegistry {
                 let separator = stringArgument(named: "separator", in: invocation.arguments) ?? ""
                 return .string(values.joined(separator: separator))
             },
+            "url.percentDecode": { invocation in
+                guard let value = stringArgument(named: "value", in: invocation.arguments) else {
+                    throw RuleEngineError.invalidTemplate("url.percentDecode requires value")
+                }
+                return .string(value.removingPercentEncoding ?? value)
+            },
             "string.asciiHexMD5": { invocation in
                 guard let text = stringArgument(named: "text", in: invocation.arguments) else {
                     throw RuleEngineError.invalidTemplate("string.asciiHexMD5 requires text")
@@ -147,6 +157,12 @@ public actor CapabilityRegistry {
                 }
                 let portSuffix = url.port.map { ":\($0)" } ?? ""
                 return .string("\(scheme)://\(host)\(portSuffix)")
+            },
+            "captcha.ocr": { invocation in
+                if let fallback = stringArgument(named: "fallback", in: invocation.arguments), !fallback.isEmpty {
+                    return .string(fallback)
+                }
+                throw RuleEngineError.invalidRule("captcha.ocr requires a client-side OCR capability handler")
             },
             "rosefile.appendDownPath": { invocation in
                 guard let source = stringArgument(named: "sourceURL", in: invocation.arguments),

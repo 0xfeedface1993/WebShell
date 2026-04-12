@@ -80,6 +80,18 @@ public struct AuthPolicy: Codable, Sendable, Equatable {
     public let expireConditions: [RuleCondition]
     public let materialKeys: [String]
     public let accountIDTemplate: String?
+    public let captchaRetryPolicy: CaptchaRetryPolicy?
+}
+
+public struct CaptchaRetryPolicy: Codable, Sendable, Equatable {
+    public let mode: CaptchaRetryMode
+    public let maxAttempts: Int?
+    public let startAtOutput: String?
+}
+
+public enum CaptchaRetryMode: String, Codable, Sendable {
+    case fullWorkflow
+    case refreshCaptcha
 }
 
 public struct RuleCondition: Codable, Sendable, Equatable {
@@ -117,6 +129,50 @@ public struct HTTPStep: Codable, Sendable, Equatable {
     public let bodyTemplate: String?
     public let attachAuthSession: Bool
     public let persistResponseCookies: Bool
+    public let followRedirects: Bool
+
+    private enum CodingKeys: String, CodingKey {
+        case output
+        case method
+        case urlTemplate
+        case headers
+        case bodyTemplate
+        case attachAuthSession
+        case persistResponseCookies
+        case followRedirects
+    }
+
+    public init(
+        output: String,
+        method: HTTPMethod,
+        urlTemplate: String,
+        headers: [String: String],
+        bodyTemplate: String?,
+        attachAuthSession: Bool,
+        persistResponseCookies: Bool,
+        followRedirects: Bool = true
+    ) {
+        self.output = output
+        self.method = method
+        self.urlTemplate = urlTemplate
+        self.headers = headers
+        self.bodyTemplate = bodyTemplate
+        self.attachAuthSession = attachAuthSession
+        self.persistResponseCookies = persistResponseCookies
+        self.followRedirects = followRedirects
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.output = try container.decode(String.self, forKey: .output)
+        self.method = try container.decode(HTTPMethod.self, forKey: .method)
+        self.urlTemplate = try container.decode(String.self, forKey: .urlTemplate)
+        self.headers = try container.decode([String: String].self, forKey: .headers)
+        self.bodyTemplate = try container.decodeIfPresent(String.self, forKey: .bodyTemplate)
+        self.attachAuthSession = try container.decode(Bool.self, forKey: .attachAuthSession)
+        self.persistResponseCookies = try container.decode(Bool.self, forKey: .persistResponseCookies)
+        self.followRedirects = try container.decodeIfPresent(Bool.self, forKey: .followRedirects) ?? true
+    }
 }
 
 public struct ExtractStep: Codable, Sendable, Equatable {

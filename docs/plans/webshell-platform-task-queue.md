@@ -12,9 +12,11 @@
 - `Done`
 
 ## Current Focus
-- preserve X2 validation evidence and keep the real-device runner stable
-- move the next checkpoint back to the macOS-first product path instead of the iOS compatibility slice
-- reduce temporary transport allowances once the control-plane delivery path is finalized
+- X4: persist unfinished client runtime queue so queued/resolving/auth-waiting tasks do not disappear across restarts
+- X4: add app-internal trace plus oslog capture for real provider E2E diagnosis
+- X4: prove the 116pan VIP path by validating the downloaded file on disk, not just UI status or HTTP success
+- X4: retry provider captcha/OCR auth failures; lightweight captcha refresh providers can use a higher retry budget before surfacing a terminal failure
+- X4: prefer same-session captcha refresh for providers that support it; 116pan probe confirms this mode works
 
 ## Queue
 | ID | Title | Status | Owner | Depends On | Repo / Surface | Acceptance Summary |
@@ -38,6 +40,25 @@
 | F4 | Add tests for auth-required flows | Done | Pasteur | F2, F3 | `WebShellClient-Apple` | reducer/integration coverage exists for auth prompt and retry |
 | X1 | Validate first end-to-end slice | Done | Codex | D4, B4, F4 | all repos | one documented vertical slice can be demonstrated end-to-end |
 | X2 | Validate real APNs refresh and authenticated file-delivery slice | Done | Codex | X1 | all repos | physical-device push refresh and auth-to-file-open path are documented end-to-end |
+| X3 | Validate macOS-first operator-driven path | Done | Codex | X2 | all repos | admin repo publishes, control plane serves, and macOS client completes auth-download-open |
+| A1 | Add product-grade Admin Rules document workspace | Done | Codex | X3 | `WebShellAdmin-macOS`, `WebShell-SPM/docs` | rules have list management, autosaved drafts, visible dirty/version state, local recovery, and tests |
+| X4 | Harden live 116pan client queue and E2E truth source | In Progress | Codex + Nash | X3 | `WebShellClient-Apple`, `WebShell-SPM` | unfinished queue persists, runtime trace/oslog artifacts are collected, and real VIP download validates full-size file on disk |
+
+## Completed Batch A1: Admin Rules Management
+- PRD: `docs/product/webshell-admin-rules-management-prd.md`
+- Scope:
+  - list-based local rule documents
+  - selected document recovery
+  - dirty/autosave state
+  - local draft revision recovery
+  - validate/publish against the selected document
+- Write boundary:
+  - `/Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellAdmin-macOS/Packages/WebShellAdminKit`
+  - `/Users/yorl/Downloads/GitHub-Cool/WebShell/WebShell-SPM/docs/product`
+- Done when:
+  - AdminKit reducer tests pass for create/edit/autosave/revert/delete/publish transitions
+  - Admin macOS app builds from the top-level workspace
+  - the Rules screen shows document list, editor, and inspector state
 
 ## Active Batch Notes
 
@@ -94,9 +115,10 @@
   - auth slice now proves `auth success -> resolve retry -> download -> file open`
 
 ## Immediate Next Actions
-1. Add a macOS-first X3 slice that publishes from `WebShellAdmin-macOS` and validates the primary product path instead of the iOS compatibility path.
-2. Promote the real APNs runner and auth fixture utilities from temporary validation helpers into maintained tooling with explicit env setup docs.
-3. Replace the current broad iOS ATS allowance with a tighter transport policy once the control plane endpoint strategy is stable.
+1. Complete `TaskQueueStore` integration for unfinished queue restoration and cancellation-safe persistence.
+2. Update the live 116pan runner to collect `client-runtime-trace.ndjson` and `client-oslog.log` for every run.
+3. Run one gated real 116pan VIP E2E after the provider auth/download chain is confirmed, with file-size validation blocking 100KB HTML fallback downloads.
+4. If login fails only due to captcha/OCR, allow the resolver to retry the auth workflow up to 10 times before returning a terminal captcha retry-limit error.
 
 ## Evidence Expectations
 - Design work: Figma links plus concise interaction notes
@@ -113,5 +135,10 @@
 - Admin macOS build: `cd /Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellAdmin-macOS && xcodebuild -project WebShellAdmin.xcodeproj -scheme WebShellAdmin -destination 'platform=macOS' build`
 - X1 validation notes: `docs/plans/webshell-platform-x1-validation.md`
 - X2 validation notes: `docs/plans/webshell-platform-x2-validation.md`
+- X3 validation notes: `docs/plans/webshell-platform-x3-validation.md`
 - Real APNs slice: `cd /Users/yorl/Downloads/GitHub-Cool/WebShell && ./WebShell-SPM/scripts/webshell-platform-real-apns-slice.sh`
 - Auth download/open slice: `cd /Users/yorl/Downloads/GitHub-Cool/WebShell && ./WebShell-SPM/scripts/webshell-platform-auth-download-slice.sh`
+- X3 operator slice: `cd /Users/yorl/Downloads/GitHub-Cool/WebShell && ./WebShell-SPM/scripts/webshell-platform-x3-operator-slice.sh`
+- X4 captcha retry unit evidence: `cd /Users/yorl/Downloads/GitHub-Cool/WebShell/WebShell-SPM && swift test`
+- X4 client package compatibility evidence: `cd /Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellClient-Apple/Packages/WebShellClientKit && swift test`
+- X4 116pan auth/OCR notes: `docs/plans/webshell-116pan-auth-ocr-notes.md`

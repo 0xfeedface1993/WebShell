@@ -37,14 +37,25 @@ public protocol HTTPClient: Sendable {
 
 public actor URLSessionHTTPClient: HTTPClient {
     private let session: URLSession
+    private let noRedirectSession: URLSession
+    private let noRedirectDelegate: NoRedirectURLSessionDelegate
+    private let cookieStorage: HTTPCookieStorage?
 
     public init(configuration: URLSessionConfiguration = .ephemeral) {
+        self.cookieStorage = configuration.httpCookieStorage
         self.session = URLSession(configuration: configuration)
+        self.noRedirectDelegate = NoRedirectURLSessionDelegate()
+        self.noRedirectSession = URLSession(
+            configuration: configuration,
+            delegate: noRedirectDelegate,
+            delegateQueue: nil
+        )
     }
 
     public func send(_ request: HTTPRequestData) async throws -> HTTPResponseData {
         let urlRequest = request.asURLRequest()
-        let (data, response) = try await session.data(for: urlRequest)
+        let activeSession = request.followRedirects ? session : noRedirectSession
+        let (data, response) = try await activeSession.data(for: urlRequest)
         guard let httpResponse = response as? HTTPURLResponse else {
             throw RuleEngineError.httpFailure("Expected HTTPURLResponse for \(request.url.absoluteString)")
         }
@@ -52,15 +63,77 @@ public actor URLSessionHTTPClient: HTTPClient {
         let headers = httpResponse.allHeaderFields.reduce(into: [String: String]()) { result, item in
             result[String(describing: item.key)] = String(describing: item.value)
         }
-        let cookies = HTTPCookie.cookies(withResponseHeaderFields: headers, for: request.url).map(SerializableCookie.init)
+        let responseCookies = HTTPCookie.cookies(withResponseHeaderFields: headers, for: request.url)
+            .map(SerializableCookie.init)
+        let storedCookies = Self.storedCookies(
+            from: cookieStorage,
+            requestURL: request.url,
+            responseURL: httpResponse.url
+        )
+        let cookies = Self.mergeCookies(responseCookies + storedCookies)
         let body = String(data: data, encoding: .utf8) ?? String(decoding: data, as: UTF8.self)
         return HTTPResponseData(
             statusCode: httpResponse.statusCode,
             url: httpResponse.url ?? request.url,
             headers: headers,
             body: body,
+            bodyBase64: data.base64EncodedString(),
             cookies: cookies
         )
+    }
+
+    private static func storedCookies(
+        from cookieStorage: HTTPCookieStorage?,
+        requestURL: URL,
+        responseURL: URL?
+    ) -> [SerializableCookie] {
+        guard let cookieStorage else {
+            return []
+        }
+
+        var urls = [requestURL]
+        if let responseURL, responseURL != requestURL {
+            urls.append(responseURL)
+        }
+
+        return urls.flatMap { url in
+            cookieStorage.cookies(for: url) ?? []
+        }
+        .map(SerializableCookie.init)
+    }
+
+    private static func mergeCookies(_ cookies: [SerializableCookie]) -> [SerializableCookie] {
+        var merged = [CookieIdentity: SerializableCookie]()
+        for cookie in cookies {
+            merged[CookieIdentity(cookie)] = cookie
+        }
+        return merged.values.sorted { lhs, rhs in
+            lhs.name == rhs.name ? lhs.domain < rhs.domain : lhs.name < rhs.name
+        }
+    }
+}
+
+private final class NoRedirectURLSessionDelegate: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
+    func urlSession(
+        _ session: URLSession,
+        task: URLSessionTask,
+        willPerformHTTPRedirection response: HTTPURLResponse,
+        newRequest request: URLRequest,
+        completionHandler: @escaping @Sendable (URLRequest?) -> Void
+    ) {
+        completionHandler(nil)
+    }
+}
+
+private struct CookieIdentity: Hashable {
+    let name: String
+    let domain: String
+    let path: String
+
+    init(_ cookie: SerializableCookie) {
+        self.name = cookie.name.lowercased()
+        self.domain = cookie.domain.lowercased()
+        self.path = cookie.path
     }
 }
 

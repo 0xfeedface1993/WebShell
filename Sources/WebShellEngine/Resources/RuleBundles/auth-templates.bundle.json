@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "bundleVersion": "2026.04.10.auth-templates.1",
+  "bundleVersion": "2026.04.11.auth-templates.1",
   "providers": [
     {
       "accountScope": "providerFamily",
@@ -76,7 +76,227 @@
     }
   ],
   "sharedFragments": [],
-  "authWorkflows": [],
+  "authWorkflows": [
+    {
+      "description": "Rule-driven login using externally supplied credential material.",
+      "id": "secure.auth",
+      "steps": [
+        {
+          "template": {
+            "target": "loginBody",
+            "template": "username={{materials.username}}&password={{materials.password}}"
+          },
+          "type": "template"
+        },
+        {
+          "http": {
+            "attachAuthSession": false,
+            "bodyTemplate": "{{loginBody}}",
+            "headers": {
+              "Content-Type": "application/x-www-form-urlencoded"
+            },
+            "method": "POST",
+            "output": "loginResponse",
+            "persistResponseCookies": true,
+            "urlTemplate": "https://secure.example.com/login"
+          },
+          "type": "http"
+        },
+        {
+          "assign": {
+            "source": "materials.username",
+            "storage": "authSession",
+            "target": "username"
+          },
+          "type": "assign"
+        }
+      ]
+    },
+    {
+      "description": "Legacy XSRF + CSRF + captcha login flow migrated from LoginXSRFVerifyCode.",
+      "id": "legacy.vip.xsrfCaptcha.auth",
+      "steps": [
+        {
+          "invokeCapability": {
+            "arguments": {},
+            "bindings": {
+              "sourceURL": "input.sourceURL"
+            },
+            "capability": "url.origin",
+            "target": "pageOrigin"
+          },
+          "type": "invokeCapability"
+        },
+        {
+          "http": {
+            "attachAuthSession": false,
+            "headers": {
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+              "User-Agent": "WebShellRuleEngine/1.0"
+            },
+            "method": "GET",
+            "output": "loginPage",
+            "persistResponseCookies": true,
+            "urlTemplate": "{{pageOrigin}}/login"
+          },
+          "type": "http"
+        },
+        {
+          "extract": {
+            "group": 1,
+            "kind": "regexFirst",
+            "pattern": "csrf-token\\\" content=\\\"([^\\\"]+)\\\"",
+            "source": "loginPage.body",
+            "target": "csrfToken"
+          },
+          "type": "extract"
+        },
+        {
+          "invokeCapability": {
+            "arguments": {
+              "name": "XSRF-TOKEN"
+            },
+            "bindings": {
+              "cookies": "auth.cookies"
+            },
+            "capability": "cookies.valueForName",
+            "target": "xsrfToken"
+          },
+          "type": "invokeCapability"
+        },
+        {
+          "template": {
+            "target": "loginBody",
+            "template": "{\"login\":\"{{materials.username}}\",\"password\":\"{{materials.password}}\",\"captcha\":\"{{materials.captcha}}\",\"remember\":false}"
+          },
+          "type": "template"
+        },
+        {
+          "http": {
+            "attachAuthSession": true,
+            "bodyTemplate": "{{loginBody}}",
+            "headers": {
+              "Accept": "application/json, text/plain, */*",
+              "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+              "Content-Type": "application/json",
+              "Origin": "{{pageOrigin}}",
+              "Referer": "{{pageOrigin}}/login",
+              "User-Agent": "WebShellRuleEngine/1.0",
+              "X-CSRF-TOKEN": "{{csrfToken}}",
+              "X-Requested-With": "XMLHttpRequest",
+              "X-XSRF-TOKEN": "{{xsrfToken}}"
+            },
+            "method": "POST",
+            "output": "loginResponse",
+            "persistResponseCookies": true,
+            "urlTemplate": "{{pageOrigin}}/login"
+          },
+          "type": "http"
+        },
+        {
+          "assign": {
+            "source": "materials.username",
+            "storage": "authSession",
+            "target": "username"
+          },
+          "type": "assign"
+        },
+        {
+          "assign": {
+            "source": "csrfToken",
+            "storage": "authSession",
+            "target": "csrfToken"
+          },
+          "type": "assign"
+        },
+        {
+          "assign": {
+            "source": "xsrfToken",
+            "storage": "authSession",
+            "target": "xsrfToken"
+          },
+          "type": "assign"
+        }
+      ]
+    },
+    {
+      "description": "Legacy formhash-based fast login flow migrated from LoginNoCode.",
+      "id": "legacy.vip.fastlogin.auth",
+      "steps": [
+        {
+          "invokeCapability": {
+            "arguments": {},
+            "bindings": {
+              "sourceURL": "input.sourceURL"
+            },
+            "capability": "url.origin",
+            "target": "pageOrigin"
+          },
+          "type": "invokeCapability"
+        },
+        {
+          "http": {
+            "attachAuthSession": false,
+            "headers": {
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+              "User-Agent": "WebShellRuleEngine/1.0"
+            },
+            "method": "GET",
+            "output": "loginPage",
+            "persistResponseCookies": true,
+            "urlTemplate": "{{pageOrigin}}/account.php?action=login&ref=/mydisk.php?item=profile&menu=cp"
+          },
+          "type": "http"
+        },
+        {
+          "extract": {
+            "group": 1,
+            "kind": "regexFirst",
+            "pattern": "name=\\\"formhash\\\" value=\\\"([^\\\"]+)\\\"",
+            "source": "loginPage.body",
+            "target": "formhash"
+          },
+          "type": "extract"
+        },
+        {
+          "template": {
+            "target": "loginBody",
+            "template": "action=fastlogin&task=login&ref=&formhash={{formhash}}&username={{materials.username}}&password={{materials.password}}"
+          },
+          "type": "template"
+        },
+        {
+          "http": {
+            "attachAuthSession": true,
+            "bodyTemplate": "{{loginBody}}",
+            "headers": {
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+              "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+              "Origin": "{{pageOrigin}}",
+              "Referer": "{{pageOrigin}}/account.php?action=login",
+              "User-Agent": "WebShellRuleEngine/1.0"
+            },
+            "method": "POST",
+            "output": "loginResponse",
+            "persistResponseCookies": true,
+            "urlTemplate": "{{pageOrigin}}/account.php"
+          },
+          "type": "http"
+        },
+        {
+          "assign": {
+            "source": "materials.username",
+            "storage": "authSession",
+            "target": "username"
+          },
+          "type": "assign"
+        }
+      ]
+    }
+  ],
   "downloadWorkflows": [
     {
       "description": "Fetch a protected page, detect expiry, then emit the extracted direct link.",

@@ -5,11 +5,10 @@ public enum RuleBundleFixtures {
         do {
             return try loadMergedBundle(
                 named: [
-                    "public-sites.bundle",
                     "auth-workflows.bundle",
                     "auth-sites.bundle",
                 ],
-                bundleVersion: "2026.04.10.catalog.1"
+                bundleVersion: "2026.04.12.catalog.116pan.1"
             )
         } catch {
             preconditionFailure("Failed to load bundled rule fixture: \(error)")

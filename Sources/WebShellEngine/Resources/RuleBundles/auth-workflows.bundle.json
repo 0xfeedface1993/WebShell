@@ -1,47 +1,12 @@
 {
   "schemaVersion": 1,
-  "bundleVersion": "2026.04.09.auth-workflows.1",
+  "bundleVersion": "2026.04.11.auth-workflows.active.1",
   "providers": [],
   "sharedFragments": [],
   "authWorkflows": [
     {
-      "description": "Rule-driven login using externally supplied credential material.",
-      "id": "secure.auth",
-      "steps": [
-        {
-          "template": {
-            "target": "loginBody",
-            "template": "username={{materials.username}}&password={{materials.password}}"
-          },
-          "type": "template"
-        },
-        {
-          "http": {
-            "attachAuthSession": false,
-            "bodyTemplate": "{{loginBody}}",
-            "headers": {
-              "Content-Type": "application/x-www-form-urlencoded"
-            },
-            "method": "POST",
-            "output": "loginResponse",
-            "persistResponseCookies": true,
-            "urlTemplate": "https://secure.example.com/login"
-          },
-          "type": "http"
-        },
-        {
-          "assign": {
-            "source": "materials.username",
-            "storage": "authSession",
-            "target": "username"
-          },
-          "type": "assign"
-        }
-      ]
-    },
-    {
-      "description": "Legacy XSRF + CSRF + captcha login flow migrated from LoginXSRFVerifyCode.",
-      "id": "legacy.vip.xsrfCaptcha.auth",
+      "description": "116pan Laravel/Inertia captcha login flow using local credentials and client-side OCR.",
+      "id": "116pan.vip.captcha.auth",
       "steps": [
         {
           "invokeCapability": {
@@ -58,9 +23,18 @@
           "http": {
             "attachAuthSession": false,
             "headers": {
-              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-              "Accept-Language": "zh-CN,zh-Hans;q=0.9",
-              "User-Agent": "WebShellRuleEngine/1.0"
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+              "Accept-Language": "zh-CN",
+              "Priority": "u=0, i",
+              "Sec-CH-UA": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+              "Sec-CH-UA-Mobile": "?0",
+              "Sec-CH-UA-Platform": "\"macOS\"",
+              "Sec-Fetch-Dest": "document",
+              "Sec-Fetch-Mode": "navigate",
+              "Sec-Fetch-Site": "none",
+              "Sec-Fetch-User": "?1",
+              "Upgrade-Insecure-Requests": "1",
+              "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
             },
             "method": "GET",
             "output": "loginPage",
@@ -80,6 +54,50 @@
           "type": "extract"
         },
         {
+          "extract": {
+            "group": 1,
+            "kind": "regexFirst",
+            "pattern": "&quot;version&quot;:&quot;([^&]+)&quot;",
+            "source": "loginPage.body",
+            "target": "inertiaVersion"
+          },
+          "type": "extract"
+        },
+        {
+          "http": {
+            "attachAuthSession": true,
+            "headers": {
+              "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+              "Accept-Language": "zh-CN",
+              "Priority": "i",
+              "Referer": "{{pageOrigin}}/login",
+              "Sec-CH-UA": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+              "Sec-CH-UA-Mobile": "?0",
+              "Sec-CH-UA-Platform": "\"macOS\"",
+              "Sec-Fetch-Dest": "image",
+              "Sec-Fetch-Mode": "no-cors",
+              "Sec-Fetch-Site": "same-origin",
+              "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+            },
+            "method": "GET",
+            "output": "captchaImage",
+            "persistResponseCookies": true,
+            "urlTemplate": "{{pageOrigin}}/captcha/20"
+          },
+          "type": "http"
+        },
+        {
+          "invokeCapability": {
+            "arguments": {},
+            "bindings": {
+              "imageBase64": "captchaImage.bodyBase64"
+            },
+            "capability": "captcha.ocr",
+            "target": "captchaText"
+          },
+          "type": "invokeCapability"
+        },
+        {
           "invokeCapability": {
             "arguments": {
               "name": "XSRF-TOKEN"
@@ -88,6 +106,17 @@
               "cookies": "auth.cookies"
             },
             "capability": "cookies.valueForName",
+            "target": "xsrfTokenEncoded"
+          },
+          "type": "invokeCapability"
+        },
+        {
+          "invokeCapability": {
+            "arguments": {},
+            "bindings": {
+              "value": "xsrfTokenEncoded"
+            },
+            "capability": "url.percentDecode",
             "target": "xsrfToken"
           },
           "type": "invokeCapability"
@@ -95,7 +124,7 @@
         {
           "template": {
             "target": "loginBody",
-            "template": "{\"login\":\"{{materials.username}}\",\"password\":\"{{materials.password}}\",\"captcha\":\"{{materials.captcha}}\",\"remember\":false}"
+            "template": "{\"login\":\"{{materials.username}}\",\"password\":\"{{materials.password}}\",\"captcha\":\"{{captchaText}}\",\"remember\":false}"
           },
           "type": "template"
         },
@@ -104,20 +133,58 @@
             "attachAuthSession": true,
             "bodyTemplate": "{{loginBody}}",
             "headers": {
-              "Accept": "application/json, text/plain, */*",
-              "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+              "Accept": "text/html, application/xhtml+xml",
+              "Accept-Language": "zh-CN",
               "Content-Type": "application/json",
               "Origin": "{{pageOrigin}}",
+              "Priority": "u=1, i",
               "Referer": "{{pageOrigin}}/login",
-              "User-Agent": "WebShellRuleEngine/1.0",
+              "Sec-CH-UA": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+              "Sec-CH-UA-Mobile": "?0",
+              "Sec-CH-UA-Platform": "\"macOS\"",
+              "Sec-Fetch-Dest": "empty",
+              "Sec-Fetch-Mode": "cors",
+              "Sec-Fetch-Site": "same-origin",
+              "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
               "X-CSRF-TOKEN": "{{csrfToken}}",
+              "X-Inertia": "true",
+              "X-Inertia-Version": "{{inertiaVersion}}",
               "X-Requested-With": "XMLHttpRequest",
               "X-XSRF-TOKEN": "{{xsrfToken}}"
             },
+            "followRedirects": false,
             "method": "POST",
             "output": "loginResponse",
             "persistResponseCookies": true,
             "urlTemplate": "{{pageOrigin}}/login"
+          },
+          "type": "http"
+        },
+        {
+          "http": {
+            "attachAuthSession": true,
+            "headers": {
+              "Accept": "text/html, application/xhtml+xml",
+              "Accept-Language": "zh-CN",
+              "Priority": "u=1, i",
+              "Referer": "{{pageOrigin}}/login",
+              "Sec-CH-UA": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+              "Sec-CH-UA-Mobile": "?0",
+              "Sec-CH-UA-Platform": "\"macOS\"",
+              "Sec-Fetch-Dest": "empty",
+              "Sec-Fetch-Mode": "cors",
+              "Sec-Fetch-Site": "same-origin",
+              "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+              "X-CSRF-TOKEN": "{{csrfToken}}",
+              "X-Inertia": "true",
+              "X-Inertia-Version": "{{inertiaVersion}}",
+              "X-Requested-With": "XMLHttpRequest",
+              "X-XSRF-TOKEN": "{{xsrfToken}}"
+            },
+            "method": "GET",
+            "output": "dashboardPage",
+            "persistResponseCookies": true,
+            "urlTemplate": "{{pageOrigin}}/dashboard"
           },
           "type": "http"
         },
@@ -134,90 +201,6 @@
             "source": "csrfToken",
             "storage": "authSession",
             "target": "csrfToken"
-          },
-          "type": "assign"
-        },
-        {
-          "assign": {
-            "source": "xsrfToken",
-            "storage": "authSession",
-            "target": "xsrfToken"
-          },
-          "type": "assign"
-        }
-      ]
-    },
-    {
-      "description": "Legacy formhash-based fast login flow migrated from LoginNoCode.",
-      "id": "legacy.vip.fastlogin.auth",
-      "steps": [
-        {
-          "invokeCapability": {
-            "arguments": {},
-            "bindings": {
-              "sourceURL": "input.sourceURL"
-            },
-            "capability": "url.origin",
-            "target": "pageOrigin"
-          },
-          "type": "invokeCapability"
-        },
-        {
-          "http": {
-            "attachAuthSession": false,
-            "headers": {
-              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-              "Accept-Language": "zh-CN,zh-Hans;q=0.9",
-              "User-Agent": "WebShellRuleEngine/1.0"
-            },
-            "method": "GET",
-            "output": "loginPage",
-            "persistResponseCookies": true,
-            "urlTemplate": "{{pageOrigin}}/account.php?action=login&ref=/mydisk.php?item=profile&menu=cp"
-          },
-          "type": "http"
-        },
-        {
-          "extract": {
-            "group": 1,
-            "kind": "regexFirst",
-            "pattern": "name=\\\"formhash\\\" value=\\\"([^\\\"]+)\\\"",
-            "source": "loginPage.body",
-            "target": "formhash"
-          },
-          "type": "extract"
-        },
-        {
-          "template": {
-            "target": "loginBody",
-            "template": "action=fastlogin&task=login&ref=&formhash={{formhash}}&username={{materials.username}}&password={{materials.password}}"
-          },
-          "type": "template"
-        },
-        {
-          "http": {
-            "attachAuthSession": true,
-            "bodyTemplate": "{{loginBody}}",
-            "headers": {
-              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-              "Accept-Language": "zh-CN,zh-Hans;q=0.9",
-              "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-              "Origin": "{{pageOrigin}}",
-              "Referer": "{{pageOrigin}}/account.php?action=login",
-              "User-Agent": "WebShellRuleEngine/1.0"
-            },
-            "method": "POST",
-            "output": "loginResponse",
-            "persistResponseCookies": true,
-            "urlTemplate": "{{pageOrigin}}/account.php"
-          },
-          "type": "http"
-        },
-        {
-          "assign": {
-            "source": "materials.username",
-            "storage": "authSession",
-            "target": "username"
           },
           "type": "assign"
         }
@@ -312,11 +295,19 @@
   "downloadWorkflows": [],
   "capabilityRefs": [
     {
-      "name": "url.origin",
+      "name": "captcha.ocr",
       "required": true
     },
     {
       "name": "cookies.valueForName",
+      "required": true
+    },
+    {
+      "name": "url.percentDecode",
+      "required": true
+    },
+    {
+      "name": "url.origin",
       "required": true
     }
   ]

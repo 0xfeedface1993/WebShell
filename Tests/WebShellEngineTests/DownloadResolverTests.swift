@@ -33,7 +33,61 @@ private struct CountingAuthMaterialProvider: AuthMaterialProvider {
     }
 }
 
+private actor CaptchaRetryRecorder {
+    private let values: [String]
+    private var captchaIndex = 0
+    private var captchaFetches = 0
+    private var loginPageFetches = 0
+    private var loginBodies: [String] = []
+
+    init(values: [String]) {
+        self.values = values
+    }
+
+    func nextCaptcha() -> String {
+        guard !values.isEmpty else {
+            return ""
+        }
+        let index = min(captchaIndex, max(values.count - 1, 0))
+        captchaIndex += 1
+        return values[index]
+    }
+
+    func recordLoginBody(_ body: String?) {
+        loginBodies.append(body ?? "")
+    }
+
+    func recordCaptchaFetch() {
+        captchaFetches += 1
+    }
+
+    func captchaFetchCount() -> Int {
+        captchaFetches
+    }
+
+    func recordLoginPageFetch() {
+        loginPageFetches += 1
+    }
+
+    func loginPageFetchCount() -> Int {
+        loginPageFetches
+    }
+
+    func loginAttemptCount() -> Int {
+        loginBodies.count
+    }
+}
+
 final class DownloadResolverTests: XCTestCase {
+    private func makeLegacySitesBundle() throws -> RuleBundle {
+        try RuleBundleFixtures.loadMergedBundle(
+            named: [
+                "legacy-sites.bundle",
+            ],
+            bundleVersion: "2026.04.11.legacy-sites.1"
+        )
+    }
+
     private func makeSyncedCatalog(
         bundle: RuleBundle = RuleBundleFixtures.defaultBundle
     ) async throws -> (CapabilityRegistry, RuleCatalog) {
@@ -52,7 +106,7 @@ final class DownloadResolverTests: XCTestCase {
     }
 
     func testRosefileProviderResolvesDirectDownloadRequest() async throws {
-        let (registry, catalog) = try await makeSyncedCatalog()
+        let (registry, catalog) = try await makeSyncedCatalog(bundle: try makeLegacySitesBundle())
 
         let httpClient = StubHTTPClient { request in
             if request.url.host?.contains("rosefile.net") == true, request.url.path.hasPrefix("/d/") {
@@ -84,7 +138,7 @@ final class DownloadResolverTests: XCTestCase {
     }
 
     func testXueqiupanProviderResolvesAjaxDownloadRequest() async throws {
-        let (registry, catalog) = try await makeSyncedCatalog()
+        let (registry, catalog) = try await makeSyncedCatalog(bundle: try makeLegacySitesBundle())
 
         let httpClient = StubHTTPClient { request in
             if request.url.absoluteString == "http://www.xueqiupan.com/ajax.php" {
@@ -118,7 +172,7 @@ final class DownloadResolverTests: XCTestCase {
     }
 
     func testXingyaocloudsProviderResolvesRedirectThenAjaxDownloadRequest() async throws {
-        let (registry, catalog) = try await makeSyncedCatalog()
+        let (registry, catalog) = try await makeSyncedCatalog(bundle: try makeLegacySitesBundle())
 
         let httpClient = StubHTTPClient { request in
             switch request.url.absoluteString {
@@ -162,7 +216,7 @@ final class DownloadResolverTests: XCTestCase {
     }
 
     func testRarpProviderResolvesRedirectPageFileIDFlow() async throws {
-        let (registry, catalog) = try await makeSyncedCatalog()
+        let (registry, catalog) = try await makeSyncedCatalog(bundle: try makeLegacySitesBundle())
 
         let httpClient = StubHTTPClient { request in
             switch request.url.absoluteString {
@@ -215,7 +269,7 @@ final class DownloadResolverTests: XCTestCase {
     }
 
     func test567FileProviderResolvesRedirectSignFlow() async throws {
-        let (registry, catalog) = try await makeSyncedCatalog()
+        let (registry, catalog) = try await makeSyncedCatalog(bundle: try makeLegacySitesBundle())
 
         let httpClient = StubHTTPClient { request in
             switch request.url.absoluteString {
@@ -268,7 +322,7 @@ final class DownloadResolverTests: XCTestCase {
     }
 
     func testIYCDNProviderResolvesTowerFlow() async throws {
-        let (registry, catalog) = try await makeSyncedCatalog()
+        let (registry, catalog) = try await makeSyncedCatalog(bundle: try makeLegacySitesBundle())
 
         let httpClient = StubHTTPClient { request in
             switch request.url.absoluteString {
@@ -333,7 +387,6 @@ final class DownloadResolverTests: XCTestCase {
     func testAuthWorkflowRefreshesAndReusesProviderFamilySession() async throws {
         let bundle = try RuleBundleFixtures.loadMergedBundle(
             named: [
-                "public-sites.bundle",
                 "auth-workflows.bundle",
                 "auth-sites.bundle",
                 "auth-templates.bundle",
@@ -407,7 +460,6 @@ final class DownloadResolverTests: XCTestCase {
     func testLegacyXSRFLoginAndGenerateDownloadWorkflowResolvesAuthenticatedRequest() async throws {
         let bundle = try RuleBundleFixtures.loadMergedBundle(
             named: [
-                "public-sites.bundle",
                 "auth-workflows.bundle",
                 "auth-sites.bundle",
                 "auth-templates.bundle",
@@ -574,5 +626,729 @@ final class DownloadResolverTests: XCTestCase {
         XCTAssertEqual(resolved.authContext?.providerFamily, "jkpan-vip")
         XCTAssertEqual(resolved.authContext?.accountID, "formhash-demo")
         XCTAssertEqual(resolved.authContext?.sessionValues["formhash"], .string("fh-789"))
+    }
+
+    func test116PanVIPAuthWorkflowResolvesGenerateDownloadRequest() async throws {
+        let (registry, catalog) = try await makeSyncedCatalog()
+        await registry.register("captcha.ocr") { invocation in
+            XCTAssertEqual(invocation.arguments["imageBase64"], .string(Data("captcha-image".utf8).base64EncodedString()))
+            return .string("H2YY")
+        }
+
+        let httpClient = StubHTTPClient { request in
+            switch request.url.absoluteString {
+            case "https://www.116pan.xyz/login" where request.method == .get:
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: ["Set-Cookie": "XSRF-TOKEN=xsrf-116; Path=/; Domain=www.116pan.xyz"],
+                    body: #"<meta name="csrf-token" content="csrf-116">"#,
+                    cookies: [SerializableCookie(name: "XSRF-TOKEN", value: "xsrf-116", domain: "www.116pan.xyz", path: "/")]
+                )
+            case "https://www.116pan.xyz/captcha/20" where request.method == .get:
+                XCTAssertEqual(request.headers["Referer"], "https://www.116pan.xyz/login")
+                XCTAssertTrue((request.headers["Cookie"] ?? "").contains("XSRF-TOKEN=xsrf-116"))
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: "captcha-image",
+                    bodyBase64: Data("captcha-image".utf8).base64EncodedString(),
+                    cookies: []
+                )
+            case "https://www.116pan.xyz/login" where request.method == .post:
+                XCTAssertEqual(
+                    request.body,
+                    #"{"login":"demo-user","password":"secret-password","captcha":"H2YY","remember":false}"#
+                )
+                XCTAssertEqual(request.headers["Content-Type"], "application/json")
+                XCTAssertEqual(request.headers["X-CSRF-TOKEN"], "csrf-116")
+                XCTAssertEqual(request.headers["X-XSRF-TOKEN"], "xsrf-116")
+                XCTAssertEqual(request.headers["X-Requested-With"], "XMLHttpRequest")
+                XCTAssertTrue((request.headers["Cookie"] ?? "").contains("XSRF-TOKEN=xsrf-116"))
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: URL(string: "https://www.116pan.xyz/dashboard")!,
+                    headers: ["Set-Cookie": "116_session=session-116; Path=/; Domain=www.116pan.xyz"],
+                    body: #"<div id="app" data-page="{&quot;component&quot;:&quot;Dashboard\/Index&quot;}"></div>"#,
+                    cookies: [SerializableCookie(name: "116_session", value: "session-116", domain: "www.116pan.xyz", path: "/")]
+                )
+            case "https://www.116pan.xyz/dashboard" where request.method == .get:
+                XCTAssertTrue((request.headers["Cookie"] ?? "").contains("116_session=session-116"))
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: #"<div id="app" data-page="{&quot;component&quot;:&quot;Dashboard\/Index&quot;,&quot;props&quot;:{&quot;auth&quot;:{&quot;user&quot;:{&quot;id&quot;:1}},&quot;isVip&quot;:true}}"></div>"#,
+                    cookies: []
+                )
+            case "https://www.116pan.xyz/f/0V02j0lxvpSl" where request.method == .get:
+                XCTAssertTrue((request.headers["Cookie"] ?? "").contains("116_session=session-116"))
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: ["Set-Cookie": "XSRF-TOKEN=xsrf-file; Path=/; Domain=www.116pan.xyz"],
+                    body: #"<meta name="csrf-token" content="csrf-file"><div id="app" data-page="{&quot;isAuthenticated&quot;:true,&quot;isVip&quot;:true,&quot;file&quot;:{&quot;file_short_url&quot;:&quot;0V02j0lxvpSl&quot;}}"></div>"#,
+                    cookies: [SerializableCookie(name: "XSRF-TOKEN", value: "xsrf-file", domain: "www.116pan.xyz", path: "/")]
+                )
+            case "https://www.116pan.xyz/f/0V02j0lxvpSl/generate-download" where request.method == .post:
+                XCTAssertEqual(
+                    request.body,
+                    #"{"type":"vip","click_pos":"690,689","screen":"1920x1080","ref":"download_vip"}"#
+                )
+                XCTAssertEqual(request.headers["X-CSRF-TOKEN"], "csrf-file")
+                XCTAssertEqual(request.headers["X-XSRF-TOKEN"], "xsrf-file")
+                XCTAssertEqual(request.headers["Referer"], "https://www.116pan.xyz/f/0V02j0lxvpSl")
+                XCTAssertTrue((request.headers["Cookie"] ?? "").contains("116_session=session-116"))
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: #"{"success":true,"download_url":"https:\/\/vip-n2.116pan.xyz\/2026\/02\/18\/archive.zip?sig=abc&expires=1775869623000&dlname=A14639.zip","is_repeated":false}"#,
+                    cookies: []
+                )
+            default:
+                XCTFail("Unexpected request: \(request.method.rawValue) \(request.url.absoluteString)")
+                return HTTPResponseData(statusCode: 500, url: request.url, headers: [:], body: "unexpected")
+            }
+        }
+
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: httpClient,
+            capabilityRegistry: registry,
+            authMaterialProvider: StaticAuthMaterialProvider(
+                storage: [
+                    "116pan-vip": [
+                        "116pan-demo": [
+                            "username": .string("demo-user"),
+                            "password": .string("secret-password"),
+                        ]
+                    ]
+                ]
+            )
+        )
+
+        let resolved = try await resolver.resolve(
+            DownloadResolveRequest(
+                sourceURL: URL(string: "https://www.116pan.xyz/f/0V02j0lxvpSl")!,
+                accountID: "116pan-demo"
+            )
+        )
+
+        XCTAssertEqual(
+            resolved.url.absoluteString,
+            "https://vip-n2.116pan.xyz/2026/02/18/archive.zip?sig=abc&expires=1775869623000&dlname=A14639.zip"
+        )
+        XCTAssertEqual(resolved.headers["Accept"], "*/*")
+        XCTAssertEqual(resolved.headers["Accept-Encoding"], "gzip, deflate, br, zstd")
+        XCTAssertEqual(resolved.headers["Accept-Language"], "zh-CN")
+        XCTAssertEqual(resolved.headers["Connection"], "keep-alive")
+        XCTAssertEqual(resolved.headers["Priority"], "u=3, i")
+        XCTAssertEqual(resolved.headers["Referer"], "https://www.116pan.xyz/f/0V02j0lxvpSl")
+        XCTAssertEqual(resolved.headers["Sec-CH-UA"], "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"")
+        XCTAssertEqual(resolved.headers["Sec-CH-UA-Mobile"], "?0")
+        XCTAssertEqual(resolved.headers["Sec-CH-UA-Platform"], "\"macOS\"")
+        XCTAssertEqual(resolved.headers["Sec-Fetch-Dest"], "empty")
+        XCTAssertEqual(resolved.headers["Sec-Fetch-Mode"], "cors")
+        XCTAssertEqual(resolved.headers["Sec-Fetch-Site"], "same-origin")
+        XCTAssertEqual(
+            resolved.headers["User-Agent"],
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+        )
+        XCTAssertEqual(resolved.filenameHints["provider"], "116pan-vip")
+        XCTAssertNil(resolved.authContext)
+    }
+
+    func test116PanVIPAuthWorkflowRetriesCaptchaRejectionsBeforeGenerateDownload() async throws {
+        let (registry, catalog) = try await makeSyncedCatalog()
+        let recorder = CaptchaRetryRecorder(values: ["BAD1", "BAD2", "H2YY"])
+        await registry.register("captcha.ocr") { _ in
+            .string(await recorder.nextCaptcha())
+        }
+
+        let httpClient = StubHTTPClient { request in
+            switch request.url.absoluteString {
+            case "https://www.116pan.xyz/login" where request.method == .get:
+                await recorder.recordLoginPageFetch()
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: ["Set-Cookie": "XSRF-TOKEN=xsrf-116; Path=/; Domain=www.116pan.xyz"],
+                    body: #"<meta name="csrf-token" content="csrf-116">"#,
+                    cookies: [SerializableCookie(name: "XSRF-TOKEN", value: "xsrf-116", domain: "www.116pan.xyz", path: "/")]
+                )
+            case "https://www.116pan.xyz/captcha/20" where request.method == .get:
+                await recorder.recordCaptchaFetch()
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: "captcha-image",
+                    bodyBase64: Data("captcha-image".utf8).base64EncodedString(),
+                    cookies: []
+                )
+            case "https://www.116pan.xyz/login" where request.method == .post:
+                await recorder.recordLoginBody(request.body)
+                if request.body?.contains(#""captcha":"H2YY""#) == true {
+                    return HTTPResponseData(
+                        statusCode: 200,
+                        url: URL(string: "https://www.116pan.xyz/dashboard")!,
+                        headers: ["Set-Cookie": "116_session=session-116; Path=/; Domain=www.116pan.xyz"],
+                        body: #"<div id="app" data-page="{&quot;component&quot;:&quot;Dashboard\/Index&quot;}"></div>"#,
+                        cookies: [SerializableCookie(name: "116_session", value: "session-116", domain: "www.116pan.xyz", path: "/")]
+                    )
+                }
+                return HTTPResponseData(
+                    statusCode: 422,
+                    url: request.url,
+                    headers: [:],
+                    body: #"<div id="app" data-page="{&quot;component&quot;:&quot;Auth\/Login&quot;,&quot;props&quot;:{&quot;captchaError&quot;:&quot;验证码错误&quot;,&quot;login&quot;:&quot;demo-user&quot;,&quot;password&quot;:&quot;&quot;}}"></div>"#,
+                    cookies: []
+                )
+            case "https://www.116pan.xyz/dashboard" where request.method == .get:
+                if (request.headers["Cookie"] ?? "").contains("116_session=session-116") {
+                    return HTTPResponseData(
+                        statusCode: 200,
+                        url: request.url,
+                        headers: [:],
+                        body: #"<div id="app" data-page="{&quot;component&quot;:&quot;Dashboard\/Index&quot;,&quot;props&quot;:{&quot;auth&quot;:{&quot;user&quot;:{&quot;id&quot;:1}},&quot;isVip&quot;:true}}"></div>"#,
+                        cookies: []
+                    )
+                }
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: URL(string: "https://www.116pan.xyz/login")!,
+                    headers: [:],
+                    body: #"<div id="app" data-page="{&quot;component&quot;:&quot;Auth\/Login&quot;,&quot;props&quot;:{&quot;errors&quot;:{},&quot;auth&quot;:{&quot;user&quot;:null}}}"></div>"#,
+                    cookies: []
+                )
+            case "https://www.116pan.xyz/f/0V02j0lxvpSl" where request.method == .get:
+                XCTAssertTrue((request.headers["Cookie"] ?? "").contains("116_session=session-116"))
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: ["Set-Cookie": "XSRF-TOKEN=xsrf-file; Path=/; Domain=www.116pan.xyz"],
+                    body: #"<meta name="csrf-token" content="csrf-file"><div id="app" data-page="{&quot;isAuthenticated&quot;:true,&quot;isVip&quot;:true,&quot;file&quot;:{&quot;file_short_url&quot;:&quot;0V02j0lxvpSl&quot;}}"></div>"#,
+                    cookies: [SerializableCookie(name: "XSRF-TOKEN", value: "xsrf-file", domain: "www.116pan.xyz", path: "/")]
+                )
+            case "https://www.116pan.xyz/f/0V02j0lxvpSl/generate-download" where request.method == .post:
+                XCTAssertEqual(request.headers["X-CSRF-TOKEN"], "csrf-file")
+                XCTAssertEqual(request.headers["X-XSRF-TOKEN"], "xsrf-file")
+                XCTAssertTrue((request.headers["Cookie"] ?? "").contains("116_session=session-116"))
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: #"{"success":true,"download_url":"https:\/\/vip-n2.116pan.xyz\/archive.zip?sig=abc","is_repeated":false}"#,
+                    cookies: []
+                )
+            default:
+                XCTFail("Unexpected request: \(request.method.rawValue) \(request.url.absoluteString)")
+                return HTTPResponseData(statusCode: 500, url: request.url, headers: [:], body: "unexpected")
+            }
+        }
+
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: httpClient,
+            capabilityRegistry: registry,
+            authMaterialProvider: StaticAuthMaterialProvider(
+                storage: [
+                    "116pan-vip": [
+                        "116pan-demo": [
+                            "username": .string("demo-user"),
+                            "password": .string("secret-password"),
+                        ]
+                    ]
+                ]
+            )
+        )
+
+        let resolved = try await resolver.resolve(
+            DownloadResolveRequest(
+                sourceURL: URL(string: "https://www.116pan.xyz/f/0V02j0lxvpSl")!,
+                accountID: "116pan-demo"
+            )
+        )
+
+        XCTAssertEqual(resolved.url.absoluteString, "https://vip-n2.116pan.xyz/archive.zip?sig=abc")
+        let loginPageFetchCount = await recorder.loginPageFetchCount()
+        XCTAssertEqual(loginPageFetchCount, 1)
+        let captchaFetchCount = await recorder.captchaFetchCount()
+        XCTAssertEqual(captchaFetchCount, 3)
+        let loginAttemptCount = await recorder.loginAttemptCount()
+        XCTAssertEqual(loginAttemptCount, 3)
+    }
+
+    func test116PanVIPAuthWorkflowRejectsInertiaCredentialErrors() async throws {
+        let (registry, catalog) = try await makeSyncedCatalog()
+        await registry.register("captcha.ocr") { _ in
+            .string("H2YY")
+        }
+
+        let httpClient = StubHTTPClient { request in
+            switch request.url.absoluteString {
+            case "https://www.116pan.xyz/login" where request.method == .get:
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: ["Set-Cookie": "XSRF-TOKEN=xsrf-116; Path=/; Domain=www.116pan.xyz"],
+                    body: #"<meta name="csrf-token" content="csrf-116"><div id="app" data-page="{&quot;version&quot;:&quot;fixture-version&quot;}"></div>"#,
+                    cookies: [SerializableCookie(name: "XSRF-TOKEN", value: "xsrf-116", domain: "www.116pan.xyz", path: "/")]
+                )
+            case "https://www.116pan.xyz/captcha/20" where request.method == .get:
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: "captcha-image",
+                    bodyBase64: Data("captcha-image".utf8).base64EncodedString(),
+                    cookies: []
+                )
+            case "https://www.116pan.xyz/login" where request.method == .post:
+                XCTAssertEqual(request.headers["Accept"], "text/html, application/xhtml+xml")
+                XCTAssertEqual(request.headers["X-Inertia"], "true")
+                XCTAssertEqual(request.headers["X-Inertia-Version"], "fixture-version")
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: #"{"component":"Auth/Login","props":{"errors":{"login":"賬號或密碼錯誤"}}}"#,
+                    cookies: []
+                )
+            case "https://www.116pan.xyz/dashboard" where request.method == .get:
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: URL(string: "https://www.116pan.xyz/login")!,
+                    headers: [:],
+                    body: #"<div id="app" data-page="{&quot;component&quot;:&quot;Auth\/Login&quot;,&quot;props&quot;:{&quot;errors&quot;:{},&quot;auth&quot;:{&quot;user&quot;:null}}}"></div>"#,
+                    cookies: []
+                )
+            default:
+                XCTFail("Unexpected request: \(request.method.rawValue) \(request.url.absoluteString)")
+                return HTTPResponseData(statusCode: 500, url: request.url, headers: [:], body: "unexpected")
+            }
+        }
+
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: httpClient,
+            capabilityRegistry: registry,
+            authMaterialProvider: StaticAuthMaterialProvider(
+                storage: [
+                    "116pan-vip": [
+                        "116pan-demo": [
+                            "username": .string("demo-user"),
+                            "password": .string("secret-password"),
+                        ]
+                    ]
+                ]
+            )
+        )
+
+        do {
+            _ = try await resolver.resolve(
+                DownloadResolveRequest(
+                    sourceURL: URL(string: "https://www.116pan.xyz/f/0V02j0lxvpSl")!,
+                    accountID: "116pan-demo"
+                )
+            )
+            XCTFail("Expected credentials rejection")
+        } catch let RuleEngineError.authCredentialsRejected(providerFamily) {
+            XCTAssertEqual(providerFamily, "116pan-vip")
+        }
+    }
+
+    func test116PanVIPAuthWorkflowRetriesBlankInertiaLoginPage() async throws {
+        let (registry, catalog) = try await makeSyncedCatalog()
+        let recorder = CaptchaRetryRecorder(values: ["BAD1", "H2YY"])
+        await registry.register("captcha.ocr") { _ in
+            .string(await recorder.nextCaptcha())
+        }
+
+        let httpClient = StubHTTPClient { request in
+            switch request.url.absoluteString {
+            case "https://www.116pan.xyz/login" where request.method == .get:
+                await recorder.recordLoginPageFetch()
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: ["Set-Cookie": "XSRF-TOKEN=xsrf-116; Path=/; Domain=www.116pan.xyz"],
+                    body: #"<meta name="csrf-token" content="csrf-116"><div id="app" data-page="{&quot;version&quot;:&quot;fixture-version&quot;}"></div>"#,
+                    cookies: [SerializableCookie(name: "XSRF-TOKEN", value: "xsrf-116", domain: "www.116pan.xyz", path: "/")]
+                )
+            case "https://www.116pan.xyz/captcha/20" where request.method == .get:
+                await recorder.recordCaptchaFetch()
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: "captcha-image",
+                    bodyBase64: Data("captcha-image".utf8).base64EncodedString(),
+                    cookies: []
+                )
+            case "https://www.116pan.xyz/login" where request.method == .post:
+                await recorder.recordLoginBody(request.body)
+                if request.body?.contains(#""captcha":"H2YY""#) == true {
+                    return HTTPResponseData(
+                        statusCode: 200,
+                        url: URL(string: "https://www.116pan.xyz/dashboard")!,
+                        headers: ["Set-Cookie": "116_session=session-116; Path=/; Domain=www.116pan.xyz"],
+                        body: #"<div id="app" data-page="{&quot;component&quot;:&quot;Dashboard\/Index&quot;}"></div>"#,
+                        cookies: [SerializableCookie(name: "116_session", value: "session-116", domain: "www.116pan.xyz", path: "/")]
+                    )
+                }
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: #"{"component":"Auth/Login","props":{"errors":{},"auth":{"user":null},"flash":{"success":null,"error":null},"status":null},"url":"/login"}"#,
+                    cookies: []
+                )
+            case "https://www.116pan.xyz/dashboard" where request.method == .get:
+                if (request.headers["Cookie"] ?? "").contains("116_session=session-116") {
+                    return HTTPResponseData(
+                        statusCode: 200,
+                        url: request.url,
+                        headers: [:],
+                        body: #"<div id="app" data-page="{&quot;component&quot;:&quot;Dashboard\/Index&quot;,&quot;props&quot;:{&quot;auth&quot;:{&quot;user&quot;:{&quot;id&quot;:1}},&quot;isVip&quot;:true}}"></div>"#,
+                        cookies: []
+                    )
+                }
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: URL(string: "https://www.116pan.xyz/login")!,
+                    headers: [:],
+                    body: #"<div id="app" data-page="{&quot;component&quot;:&quot;Auth\/Login&quot;,&quot;props&quot;:{&quot;errors&quot;:{},&quot;auth&quot;:{&quot;user&quot;:null}}}"></div>"#,
+                    cookies: []
+                )
+            case "https://www.116pan.xyz/f/0V02j0lxvpSl" where request.method == .get:
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: ["Set-Cookie": "XSRF-TOKEN=xsrf-file; Path=/; Domain=www.116pan.xyz"],
+                    body: #"<meta name="csrf-token" content="csrf-file"><div id="app" data-page="{&quot;isAuthenticated&quot;:true,&quot;isVip&quot;:true,&quot;file&quot;:{&quot;file_short_url&quot;:&quot;0V02j0lxvpSl&quot;}}"></div>"#,
+                    cookies: [SerializableCookie(name: "XSRF-TOKEN", value: "xsrf-file", domain: "www.116pan.xyz", path: "/")]
+                )
+            case "https://www.116pan.xyz/f/0V02j0lxvpSl/generate-download" where request.method == .post:
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: #"{"success":true,"download_url":"https:\/\/vip-n2.116pan.xyz\/archive.zip?sig=abc","is_repeated":false}"#,
+                    cookies: []
+                )
+            default:
+                XCTFail("Unexpected request: \(request.method.rawValue) \(request.url.absoluteString)")
+                return HTTPResponseData(statusCode: 500, url: request.url, headers: [:], body: "unexpected")
+            }
+        }
+
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: httpClient,
+            capabilityRegistry: registry,
+            authMaterialProvider: StaticAuthMaterialProvider(
+                storage: [
+                    "116pan-vip": [
+                        "116pan-demo": [
+                            "username": .string("demo-user"),
+                            "password": .string("secret-password"),
+                        ]
+                    ]
+                ]
+            )
+        )
+
+        let resolved = try await resolver.resolve(
+            DownloadResolveRequest(
+                sourceURL: URL(string: "https://www.116pan.xyz/f/0V02j0lxvpSl")!,
+                accountID: "116pan-demo"
+            )
+        )
+
+        XCTAssertEqual(resolved.url.absoluteString, "https://vip-n2.116pan.xyz/archive.zip?sig=abc")
+        let loginPageFetchCount = await recorder.loginPageFetchCount()
+        XCTAssertEqual(loginPageFetchCount, 1)
+        let captchaFetchCount = await recorder.captchaFetchCount()
+        XCTAssertEqual(captchaFetchCount, 2)
+        let loginAttemptCount = await recorder.loginAttemptCount()
+        XCTAssertEqual(loginAttemptCount, 2)
+    }
+
+    func test116PanVIPAuthWorkflowAcceptsDashboardAfterBlankLoginResponse() async throws {
+        let (registry, catalog) = try await makeSyncedCatalog()
+        let recorder = CaptchaRetryRecorder(values: ["H2YY"])
+        await registry.register("captcha.ocr") { _ in
+            .string(await recorder.nextCaptcha())
+        }
+
+        let httpClient = StubHTTPClient { request in
+            switch request.url.absoluteString {
+            case "https://www.116pan.xyz/login" where request.method == .get:
+                await recorder.recordLoginPageFetch()
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: ["Set-Cookie": "XSRF-TOKEN=xsrf-116; Path=/; Domain=www.116pan.xyz"],
+                    body: #"<meta name="csrf-token" content="csrf-116"><div id="app" data-page="{&quot;version&quot;:&quot;fixture-version&quot;}"></div>"#,
+                    cookies: [SerializableCookie(name: "XSRF-TOKEN", value: "xsrf-116", domain: "www.116pan.xyz", path: "/")]
+                )
+            case "https://www.116pan.xyz/captcha/20" where request.method == .get:
+                await recorder.recordCaptchaFetch()
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: "captcha-image",
+                    bodyBase64: Data("captcha-image".utf8).base64EncodedString(),
+                    cookies: []
+                )
+            case "https://www.116pan.xyz/login" where request.method == .post:
+                await recorder.recordLoginBody(request.body)
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: ["Set-Cookie": "116_session=session-116; Path=/; Domain=www.116pan.xyz"],
+                    body: #"{"component":"Auth/Login","props":{"errors":{},"auth":{"user":null},"flash":{"success":null,"error":null},"status":null},"url":"/login"}"#,
+                    cookies: [SerializableCookie(name: "116_session", value: "session-116", domain: "www.116pan.xyz", path: "/")]
+                )
+            case "https://www.116pan.xyz/dashboard" where request.method == .get:
+                XCTAssertTrue((request.headers["Cookie"] ?? "").contains("116_session=session-116"))
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: #"<div id="app" data-page="{&quot;component&quot;:&quot;Dashboard\/Index&quot;,&quot;props&quot;:{&quot;auth&quot;:{&quot;user&quot;:{&quot;id&quot;:1}},&quot;isVip&quot;:true}}"></div>"#,
+                    cookies: []
+                )
+            case "https://www.116pan.xyz/f/0V02j0lxvpSl" where request.method == .get:
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: ["Set-Cookie": "XSRF-TOKEN=xsrf-file; Path=/; Domain=www.116pan.xyz"],
+                    body: #"<meta name="csrf-token" content="csrf-file"><div id="app" data-page="{&quot;isAuthenticated&quot;:true,&quot;isVip&quot;:true,&quot;file&quot;:{&quot;file_short_url&quot;:&quot;0V02j0lxvpSl&quot;}}"></div>"#,
+                    cookies: [SerializableCookie(name: "XSRF-TOKEN", value: "xsrf-file", domain: "www.116pan.xyz", path: "/")]
+                )
+            case "https://www.116pan.xyz/f/0V02j0lxvpSl/generate-download" where request.method == .post:
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: #"{"success":true,"download_url":"https:\/\/vip-n2.116pan.xyz\/archive.zip?sig=abc","is_repeated":false}"#,
+                    cookies: []
+                )
+            default:
+                XCTFail("Unexpected request: \(request.method.rawValue) \(request.url.absoluteString)")
+                return HTTPResponseData(statusCode: 500, url: request.url, headers: [:], body: "unexpected")
+            }
+        }
+
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: httpClient,
+            capabilityRegistry: registry,
+            authMaterialProvider: StaticAuthMaterialProvider(
+                storage: [
+                    "116pan-vip": [
+                        "116pan-demo": [
+                            "username": .string("demo-user"),
+                            "password": .string("secret-password"),
+                        ]
+                    ]
+                ]
+            )
+        )
+
+        let resolved = try await resolver.resolve(
+            DownloadResolveRequest(
+                sourceURL: URL(string: "https://www.116pan.xyz/f/0V02j0lxvpSl")!,
+                accountID: "116pan-demo"
+            )
+        )
+
+        XCTAssertEqual(resolved.url.absoluteString, "https://vip-n2.116pan.xyz/archive.zip?sig=abc")
+        let loginPageFetchCount = await recorder.loginPageFetchCount()
+        XCTAssertEqual(loginPageFetchCount, 1)
+        let captchaFetchCount = await recorder.captchaFetchCount()
+        XCTAssertEqual(captchaFetchCount, 1)
+        let loginAttemptCount = await recorder.loginAttemptCount()
+        XCTAssertEqual(loginAttemptCount, 1)
+    }
+
+    func test116PanVIPAuthWorkflowStopsAfterRepeatedBlankInertiaLoginPages() async throws {
+        let (registry, catalog) = try await makeSyncedCatalog()
+        let recorder = CaptchaRetryRecorder(values: ["BAD1", "BAD2", "BAD3"])
+        await registry.register("captcha.ocr") { _ in
+            .string(await recorder.nextCaptcha())
+        }
+
+        let httpClient = StubHTTPClient { request in
+            switch request.url.absoluteString {
+            case "https://www.116pan.xyz/login" where request.method == .get:
+                await recorder.recordLoginPageFetch()
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: ["Set-Cookie": "XSRF-TOKEN=xsrf-116; Path=/; Domain=www.116pan.xyz"],
+                    body: #"<meta name="csrf-token" content="csrf-116"><div id="app" data-page="{&quot;version&quot;:&quot;fixture-version&quot;}"></div>"#,
+                    cookies: [SerializableCookie(name: "XSRF-TOKEN", value: "xsrf-116", domain: "www.116pan.xyz", path: "/")]
+                )
+            case "https://www.116pan.xyz/captcha/20" where request.method == .get:
+                await recorder.recordCaptchaFetch()
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: "captcha-image",
+                    bodyBase64: Data("captcha-image".utf8).base64EncodedString(),
+                    cookies: []
+                )
+            case "https://www.116pan.xyz/login" where request.method == .post:
+                await recorder.recordLoginBody(request.body)
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: #"{"component":"Auth/Login","props":{"errors":{},"auth":{"user":null},"flash":{"success":null,"error":null},"status":null},"url":"/login"}"#,
+                    cookies: []
+                )
+            case "https://www.116pan.xyz/dashboard" where request.method == .get:
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: URL(string: "https://www.116pan.xyz/login")!,
+                    headers: [:],
+                    body: #"<div id="app" data-page="{&quot;component&quot;:&quot;Auth\/Login&quot;,&quot;props&quot;:{&quot;errors&quot;:{},&quot;auth&quot;:{&quot;user&quot;:null}}}"></div>"#,
+                    cookies: []
+                )
+            default:
+                XCTFail("Unexpected request: \(request.method.rawValue) \(request.url.absoluteString)")
+                return HTTPResponseData(statusCode: 500, url: request.url, headers: [:], body: "unexpected")
+            }
+        }
+
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: httpClient,
+            capabilityRegistry: registry,
+            authMaterialProvider: StaticAuthMaterialProvider(
+                storage: [
+                    "116pan-vip": [
+                        "116pan-demo": [
+                            "username": .string("demo-user"),
+                            "password": .string("secret-password"),
+                        ]
+                    ]
+                ]
+            )
+        )
+
+        do {
+            _ = try await resolver.resolve(
+                DownloadResolveRequest(
+                    sourceURL: URL(string: "https://www.116pan.xyz/f/0V02j0lxvpSl")!,
+                    accountID: "116pan-demo"
+                )
+            )
+            XCTFail("Expected credentials rejection")
+        } catch let RuleEngineError.authCredentialsRejected(providerFamily) {
+            XCTAssertEqual(providerFamily, "116pan-vip")
+        }
+
+        let loginPageFetchCount = await recorder.loginPageFetchCount()
+        XCTAssertEqual(loginPageFetchCount, 1)
+        let captchaFetchCount = await recorder.captchaFetchCount()
+        XCTAssertEqual(captchaFetchCount, 3)
+        let loginAttemptCount = await recorder.loginAttemptCount()
+        XCTAssertEqual(loginAttemptCount, 3)
+    }
+
+    func test116PanVIPAuthWorkflowStopsAfterFiftyLightweightCaptchaRejections() async throws {
+        let (registry, catalog) = try await makeSyncedCatalog()
+        let recorder = CaptchaRetryRecorder(values: (1...50).map { "BAD\($0)" })
+        await registry.register("captcha.ocr") { _ in
+            .string(await recorder.nextCaptcha())
+        }
+
+        let httpClient = StubHTTPClient { request in
+            switch request.url.absoluteString {
+            case "https://www.116pan.xyz/login" where request.method == .get:
+                await recorder.recordLoginPageFetch()
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: ["Set-Cookie": "XSRF-TOKEN=xsrf-116; Path=/; Domain=www.116pan.xyz"],
+                    body: #"<meta name="csrf-token" content="csrf-116">"#,
+                    cookies: [SerializableCookie(name: "XSRF-TOKEN", value: "xsrf-116", domain: "www.116pan.xyz", path: "/")]
+                )
+            case "https://www.116pan.xyz/captcha/20" where request.method == .get:
+                await recorder.recordCaptchaFetch()
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: "captcha-image",
+                    bodyBase64: Data("captcha-image".utf8).base64EncodedString(),
+                    cookies: []
+                )
+            case "https://www.116pan.xyz/login" where request.method == .post:
+                await recorder.recordLoginBody(request.body)
+                return HTTPResponseData(
+                    statusCode: 422,
+                    url: request.url,
+                    headers: [:],
+                    body: #"<div id="app" data-page="{&quot;component&quot;:&quot;Auth\/Login&quot;,&quot;props&quot;:{&quot;captchaError&quot;:&quot;验证码错误&quot;,&quot;login&quot;:&quot;demo-user&quot;,&quot;password&quot;:&quot;&quot;}}"></div>"#,
+                    cookies: []
+                )
+            case "https://www.116pan.xyz/dashboard" where request.method == .get:
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: URL(string: "https://www.116pan.xyz/login")!,
+                    headers: [:],
+                    body: #"<div id="app" data-page="{&quot;component&quot;:&quot;Auth\/Login&quot;,&quot;props&quot;:{&quot;errors&quot;:{},&quot;auth&quot;:{&quot;user&quot;:null}}}"></div>"#,
+                    cookies: []
+                )
+            default:
+                XCTFail("Unexpected request: \(request.method.rawValue) \(request.url.absoluteString)")
+                return HTTPResponseData(statusCode: 500, url: request.url, headers: [:], body: "unexpected")
+            }
+        }
+
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: httpClient,
+            capabilityRegistry: registry,
+            authMaterialProvider: StaticAuthMaterialProvider(
+                storage: [
+                    "116pan-vip": [
+                        "116pan-demo": [
+                            "username": .string("demo-user"),
+                            "password": .string("secret-password"),
+                        ]
+                    ]
+                ]
+            )
+        )
+
+        do {
+            _ = try await resolver.resolve(
+                DownloadResolveRequest(
+                    sourceURL: URL(string: "https://www.116pan.xyz/f/0V02j0lxvpSl")!,
+                    accountID: "116pan-demo"
+                )
+            )
+            XCTFail("Expected captcha retry limit error")
+        } catch let RuleEngineError.authCaptchaRetryLimitExceeded(providerFamily, attempts) {
+            XCTAssertEqual(providerFamily, "116pan-vip")
+            XCTAssertEqual(attempts, 50)
+        }
+
+        let loginAttemptCount = await recorder.loginAttemptCount()
+        XCTAssertEqual(loginAttemptCount, 50)
+        let captchaFetchCount = await recorder.captchaFetchCount()
+        XCTAssertEqual(captchaFetchCount, 50)
+        let loginPageFetchCount = await recorder.loginPageFetchCount()
+        XCTAssertEqual(loginPageFetchCount, 1)
     }
 }

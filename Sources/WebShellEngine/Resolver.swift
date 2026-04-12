@@ -155,11 +155,14 @@ public struct RuleCompiler: Sendable {
         var families = Set<String>()
         var matcherOwners = [String: String]()
         for provider in providers {
+            try Task.checkCancellation()
             guard families.insert(provider.providerFamily).inserted else {
                 throw RuleEngineError.invalidRule("Duplicate providerFamily \(provider.providerFamily)")
             }
             for matcher in provider.matchers {
+                try Task.checkCancellation()
                 for key in matcher.conflictKeys() {
+                    try Task.checkCancellation()
                     if let owner = matcherOwners[key], owner != provider.providerFamily {
                         throw RuleEngineError.invalidRule(
                             "Matcher conflict between \(owner) and \(provider.providerFamily) for \(key)"
@@ -176,6 +179,7 @@ public struct RuleCompiler: Sendable {
         capabilityRegistry: CapabilityRegistry
     ) async throws {
         for reference in bundle.capabilityRefs where reference.required {
+            try Task.checkCancellation()
             guard await capabilityRegistry.contains(reference.name) else {
                 throw RuleEngineError.missingCapability(reference.name)
             }
@@ -188,6 +192,7 @@ public struct RuleCompiler: Sendable {
         )
 
         for capability in workflowCapabilities {
+            try Task.checkCancellation()
             guard await capabilityRegistry.contains(capability) else {
                 throw RuleEngineError.missingCapability(capability)
             }
@@ -211,6 +216,10 @@ public struct RuleCompiler: Sendable {
 }
 
 public struct DownloadResolver: Sendable {
+    private static let defaultAuthAttemptLimit = 2
+    private static let fullWorkflowCaptchaAuthAttemptLimit = 10
+    private static let refreshCaptchaAuthAttemptLimit = 50
+
     private let catalog: RuleCatalog
     private let httpClient: any HTTPClient
     private let capabilityRegistry: CapabilityRegistry
@@ -242,35 +251,60 @@ public struct DownloadResolver: Sendable {
         let accountID = try resolveAccountID(for: provider, request: request)
         let sessionKey = AuthSessionKey(providerFamily: provider.rule.providerFamily, accountID: accountID)
         var session = await authSessionStore.session(for: sessionKey)
+        let maxAuthAttempts = maxAuthenticationAttempts(for: provider)
+        var authAttempts = 0
 
         if provider.rule.authPolicy?.requiresAuthentication == true && session == nil {
-            session = try await authenticate(provider: provider, request: request, sessionKey: sessionKey, existingSession: session)
+            let authResult = try await authenticateWithCaptchaRetry(
+                provider: provider,
+                request: request,
+                sessionKey: sessionKey,
+                existingSession: session,
+                attempts: authAttempts,
+                maxAttempts: maxAuthAttempts
+            )
+            session = authResult.session
+            authAttempts = authResult.attempts
         }
 
-        let firstRun = try await runDownloadWorkflow(provider: provider, request: request, sessionKey: sessionKey, authSession: session)
-        if let session = firstRun.authSession, !session.isEmpty {
-            await authSessionStore.store(session)
-        }
+        while true {
+            try Task.checkCancellation()
+            let run = try await runDownloadWorkflow(provider: provider, request: request, sessionKey: sessionKey, authSession: session)
+            if let refreshedSession = run.authSession, !refreshedSession.isEmpty {
+                await authSessionStore.store(refreshedSession)
+                session = refreshedSession
+            }
 
-        if firstRun.authExpired {
-            session = try await authenticate(provider: provider, request: request, sessionKey: sessionKey, existingSession: firstRun.authSession)
-            let secondRun = try await runDownloadWorkflow(provider: provider, request: request, sessionKey: sessionKey, authSession: session)
-            if let session = secondRun.authSession, !session.isEmpty {
-                await authSessionStore.store(session)
+            if run.authExpired {
+                guard provider.authWorkflow != nil else {
+                    throw RuleEngineError.authExpiredAfterRetry(provider.rule.providerFamily)
+                }
+                guard authAttempts < maxAuthAttempts else {
+                    if authWorkflowUsesCaptcha(provider) {
+                        throw RuleEngineError.authCaptchaRetryLimitExceeded(provider.rule.providerFamily, maxAuthAttempts)
+                    }
+                    throw RuleEngineError.authExpiredAfterRetry(provider.rule.providerFamily)
+                }
+
+                await authSessionStore.invalidate(sessionKey)
+                let authResult = try await authenticateWithCaptchaRetry(
+                    provider: provider,
+                    request: request,
+                    sessionKey: sessionKey,
+                    existingSession: run.authSession ?? session,
+                    attempts: authAttempts,
+                    maxAttempts: maxAuthAttempts
+                )
+                session = authResult.session
+                authAttempts = authResult.attempts
+                continue
             }
-            guard !secondRun.authExpired else {
-                throw RuleEngineError.authExpiredAfterRetry(provider.rule.providerFamily)
-            }
-            guard let resolved = secondRun.emittedRequest else {
+
+            guard let resolved = run.emittedRequest else {
                 throw RuleEngineError.noEmittedRequest(provider.rule.providerFamily)
             }
             return resolved
         }
-
-        guard let resolved = firstRun.emittedRequest else {
-            throw RuleEngineError.noEmittedRequest(provider.rule.providerFamily)
-        }
-        return resolved
     }
 
     private func resolveAccountID(for provider: CompiledProvider, request: DownloadResolveRequest) throws -> String {
@@ -287,12 +321,239 @@ public struct DownloadResolver: Sendable {
         return "default"
     }
 
+    private func maxAuthenticationAttempts(for provider: CompiledProvider) -> Int {
+        guard authWorkflowUsesCaptcha(provider) else {
+            return Self.defaultAuthAttemptLimit
+        }
+        if let configured = provider.rule.authPolicy?.captchaRetryPolicy?.maxAttempts {
+            return max(1, configured)
+        }
+        if provider.rule.authPolicy?.captchaRetryPolicy?.mode == .refreshCaptcha {
+            return Self.refreshCaptchaAuthAttemptLimit
+        }
+        return Self.fullWorkflowCaptchaAuthAttemptLimit
+    }
+
+    private func authWorkflowUsesCaptcha(_ provider: CompiledProvider) -> Bool {
+        guard let workflow = provider.authWorkflow else {
+            return false
+        }
+        return workflow.steps.contains { stepContainsCaptchaCapability($0) }
+    }
+
+    private func stepContainsCaptchaCapability(_ step: WorkflowStep) -> Bool {
+        switch step {
+        case .invokeCapability(let value):
+            return value.capability == "captcha.ocr"
+        case .branch(let value):
+            return value.ifSteps.contains { stepContainsCaptchaCapability($0) }
+                || value.elseSteps.contains { stepContainsCaptchaCapability($0) }
+        case .loop(let value):
+            return value.steps.contains { stepContainsCaptchaCapability($0) }
+        case .http, .extract, .assign, .template, .emitRequest:
+            return false
+        }
+    }
+
+    private func authenticateWithCaptchaRetry(
+        provider: CompiledProvider,
+        request: DownloadResolveRequest,
+        sessionKey: AuthSessionKey,
+        existingSession: AuthSession?,
+        attempts: Int,
+        maxAttempts: Int
+    ) async throws -> (session: AuthSession, attempts: Int) {
+        if provider.rule.authPolicy?.captchaRetryPolicy?.mode == .refreshCaptcha {
+            return try await authenticateWithRefreshCaptchaRetry(
+                provider: provider,
+                request: request,
+                sessionKey: sessionKey,
+                existingSession: existingSession,
+                attempts: attempts,
+                maxAttempts: maxAttempts
+            )
+        }
+
+        var currentAttempts = attempts
+        while true {
+            try Task.checkCancellation()
+            guard currentAttempts < maxAttempts else {
+                throw RuleEngineError.authCaptchaRetryLimitExceeded(provider.rule.providerFamily, maxAttempts)
+            }
+
+            currentAttempts += 1
+            do {
+                let session = try await authenticate(
+                    provider: provider,
+                    request: request,
+                    sessionKey: sessionKey,
+                    existingSession: existingSession
+                )
+                return (session, currentAttempts)
+            } catch {
+                guard isRetryableCaptchaAuthError(error, provider: provider) else {
+                    throw error
+                }
+                await authSessionStore.invalidate(sessionKey)
+                guard currentAttempts < maxAttempts else {
+                    throw RuleEngineError.authCaptchaRetryLimitExceeded(provider.rule.providerFamily, maxAttempts)
+                }
+            }
+        }
+    }
+
+    private func authenticateWithRefreshCaptchaRetry(
+        provider: CompiledProvider,
+        request: DownloadResolveRequest,
+        sessionKey: AuthSessionKey,
+        existingSession: AuthSession?,
+        attempts: Int,
+        maxAttempts: Int
+    ) async throws -> (session: AuthSession, attempts: Int) {
+        let retryStartIndex = try captchaRetryStartIndex(for: provider)
+        var runtime = try await makeAuthRuntime(
+            provider: provider,
+            request: request,
+            sessionKey: sessionKey,
+            existingSession: existingSession
+        )
+        var currentAttempts = attempts
+        var startIndex = 0
+        var ambiguousLoginPageRetries = 0
+
+        while true {
+            try Task.checkCancellation()
+            guard currentAttempts < maxAttempts else {
+                throw RuleEngineError.authCaptchaRetryLimitExceeded(provider.rule.providerFamily, maxAttempts)
+            }
+
+            currentAttempts += 1
+            var recordedResult = false
+            do {
+                let result = try await runtime.run(from: startIndex)
+                recordAuthAttemptDebug(result: result, provider: provider, attempt: currentAttempts, error: nil)
+                recordedResult = true
+                if !authDashboardIsAuthenticated(result),
+                   let inertiaFailure = authInertiaFailureKind(in: result),
+                   case .ambiguousLoginPage = inertiaFailure,
+                   ambiguousLoginPageRetries < 2 {
+                    ambiguousLoginPageRetries += 1
+                    throw RuleEngineError.authCaptchaRejected(provider.rule.providerFamily)
+                }
+                try validateAuthWorkflowResult(result, provider: provider)
+                let session = try authSession(from: result, provider: provider)
+                await authSessionStore.store(session)
+                return (session, currentAttempts)
+            } catch {
+                if !recordedResult {
+                    recordAuthAttemptDebug(result: nil, provider: provider, attempt: currentAttempts, error: error)
+                }
+                guard isRetryableCaptchaAuthError(error, provider: provider) else {
+                    throw error
+                }
+                await authSessionStore.invalidate(sessionKey)
+                guard currentAttempts < maxAttempts else {
+                    throw RuleEngineError.authCaptchaRetryLimitExceeded(provider.rule.providerFamily, maxAttempts)
+                }
+                startIndex = retryStartIndex
+            }
+        }
+    }
+
+    private func captchaRetryStartIndex(for provider: CompiledProvider) throws -> Int {
+        guard let workflow = provider.authWorkflow else {
+            throw RuleEngineError.authWorkflowRequired(provider.rule.providerFamily)
+        }
+        guard let startAtOutput = provider.rule.authPolicy?.captchaRetryPolicy?.startAtOutput,
+              !startAtOutput.isEmpty else {
+            throw RuleEngineError.invalidRule(
+                "Captcha refresh retry for \(provider.rule.providerFamily) requires captchaRetryPolicy.startAtOutput"
+            )
+        }
+        guard let index = workflow.steps.firstIndex(where: { stepProducesOutput($0, output: startAtOutput) }) else {
+            throw RuleEngineError.invalidRule(
+                "Captcha refresh retry for \(provider.rule.providerFamily) could not find output \(startAtOutput)"
+            )
+        }
+        return index
+    }
+
+    private func stepProducesOutput(_ step: WorkflowStep, output: String) -> Bool {
+        switch step {
+        case .http(let value):
+            return value.output == output
+        case .extract(let value):
+            return value.target == output
+        case .assign(let value):
+            return value.target == output
+        case .template(let value):
+            return value.target == output
+        case .invokeCapability(let value):
+            return value.target == output
+        case .branch, .loop, .emitRequest:
+            return false
+        }
+    }
+
+    private func isRetryableCaptchaAuthError(_ error: any Error, provider: CompiledProvider) -> Bool {
+        guard authWorkflowUsesCaptcha(provider) else {
+            return false
+        }
+
+        if let ruleError = error as? RuleEngineError {
+            switch ruleError {
+            case .authCaptchaRejected:
+                return true
+            case .authCaptchaRetryLimitExceeded,
+                 .authCredentialsRejected,
+                 .authMaterialUnavailable,
+                 .authWorkflowRequired,
+                 .authDidNotProduceSession,
+                 .authExpiredAfterRetry,
+                 .missingActiveBundle,
+                 .noMatchingProvider,
+                 .missingWorkflow,
+                 .missingCapability,
+                 .noEmittedRequest,
+                 .httpFailure:
+                return false
+            case .invalidRule(let message), .invalidTemplate(let message), .missingVariable(let message):
+                let lowercased = message.lowercased()
+                return lowercased.contains("captcha")
+                    && !lowercased.contains("requires a client-side ocr capability handler")
+            }
+        }
+
+        let description = "\(error) \(error.localizedDescription)".lowercased()
+        return description.contains("captcha")
+    }
+
     private func authenticate(
         provider: CompiledProvider,
         request: DownloadResolveRequest,
         sessionKey: AuthSessionKey,
         existingSession: AuthSession?
     ) async throws -> AuthSession {
+        var runtime = try await makeAuthRuntime(
+            provider: provider,
+            request: request,
+            sessionKey: sessionKey,
+            existingSession: existingSession
+        )
+        let result = try await runtime.run()
+        recordAuthAttemptDebug(result: result, provider: provider, attempt: nil, error: nil)
+        try validateAuthWorkflowResult(result, provider: provider)
+        let session = try authSession(from: result, provider: provider)
+        await authSessionStore.store(session)
+        return session
+    }
+
+    private func makeAuthRuntime(
+        provider: CompiledProvider,
+        request: DownloadResolveRequest,
+        sessionKey: AuthSessionKey,
+        existingSession: AuthSession?
+    ) async throws -> WorkflowRuntime {
         guard let workflow = provider.authWorkflow else {
             throw RuleEngineError.authWorkflowRequired(provider.rule.providerFamily)
         }
@@ -306,7 +567,7 @@ public struct DownloadResolver: Sendable {
             )
         )
 
-        var runtime = WorkflowRuntime(
+        return WorkflowRuntime(
             provider: provider,
             workflow: workflow,
             request: request,
@@ -317,12 +578,392 @@ public struct DownloadResolver: Sendable {
             materials: materials,
             authExpireConditions: []
         )
-        let result = try await runtime.run()
+    }
+
+    private func authSession(from result: WorkflowRunResult, provider: CompiledProvider) throws -> AuthSession {
         guard let session = result.authSession, !session.isEmpty else {
             throw RuleEngineError.authDidNotProduceSession(provider.rule.providerFamily)
         }
-        await authSessionStore.store(session)
         return session
+    }
+
+    private func validateAuthWorkflowResult(_ result: WorkflowRunResult, provider: CompiledProvider) throws {
+        let bodies = [
+            lookup(path: "loginResponse.body", in: result.variables)?.renderedString(),
+            lookup(path: "dashboardPage.body", in: result.variables)?.renderedString(),
+            lookup(path: "lastResponse.body", in: result.variables)?.renderedString(),
+        ].compactMap { $0 }
+
+        guard !bodies.isEmpty else {
+            return
+        }
+
+        let joined = bodies.joined(separator: "\n")
+        if authDashboardIsAuthenticated(result) {
+            return
+        }
+        if let inertiaFailure = authInertiaFailureKind(in: result) {
+            switch inertiaFailure {
+            case .captcha:
+                throw RuleEngineError.authCaptchaRejected(provider.rule.providerFamily)
+            case .credentials:
+                throw RuleEngineError.authCredentialsRejected(provider.rule.providerFamily)
+            case .ambiguousLoginPage:
+                throw RuleEngineError.authCredentialsRejected(provider.rule.providerFamily)
+            }
+        }
+        if containsCredentialRejection(joined) {
+            throw RuleEngineError.authCredentialsRejected(provider.rule.providerFamily)
+        }
+        if containsCaptchaRejection(joined) {
+            throw RuleEngineError.authCaptchaRejected(provider.rule.providerFamily)
+        }
+        if let statusCode = authLoginStatusCode(result), statusCode >= 400 {
+            if statusCode == 401 || statusCode == 403 {
+                throw RuleEngineError.authCredentialsRejected(provider.rule.providerFamily)
+            }
+            throw RuleEngineError.httpFailure(
+                "Auth workflow login failed with HTTP \(statusCode): \(provider.rule.providerFamily)"
+            )
+        }
+    }
+
+    private func authLoginStatusCode(_ result: WorkflowRunResult) -> Int? {
+        guard let rendered = lookup(path: "loginResponse.statusCode", in: result.variables)?.renderedString(),
+              !rendered.isEmpty else {
+            return nil
+        }
+        return Int(rendered)
+    }
+
+    private enum AuthFailureKind {
+        case captcha
+        case credentials
+        case ambiguousLoginPage
+    }
+
+    private func authInertiaFailureKind(in result: WorkflowRunResult) -> AuthFailureKind? {
+        [
+            lookup(path: "loginResponse.body", in: result.variables)?.renderedString(),
+            lookup(path: "dashboardPage.body", in: result.variables)?.renderedString(),
+            lookup(path: "lastResponse.body", in: result.variables)?.renderedString(),
+        ]
+        .compactMap { $0 }
+        .compactMap(authFailureKind)
+        .first
+    }
+
+    private func authDashboardIsAuthenticated(_ result: WorkflowRunResult) -> Bool {
+        [
+            lookup(path: "dashboardPage.body", in: result.variables)?.renderedString(),
+            lookup(path: "lastResponse.body", in: result.variables)?.renderedString(),
+            lookup(path: "loginResponse.body", in: result.variables)?.renderedString(),
+        ]
+        .compactMap { $0 }
+        .contains(where: authSuccessKind)
+    }
+
+    private func authSuccessKind(in body: String) -> Bool {
+        guard let page = parseInertiaPage(from: body) else {
+            return containsAny(body, [
+                #""isAuthenticated":true"#,
+                #"&quot;isAuthenticated&quot;:true"#,
+                #""isVip":true"#,
+                #"&quot;isVip&quot;:true"#,
+            ])
+        }
+        let component = page["component"] as? String ?? ""
+        guard component != "Auth/Login" else {
+            return false
+        }
+        if component.localizedCaseInsensitiveContains("dashboard") {
+            return true
+        }
+        if let props = page["props"] as? [String: Any],
+           authUserPresent(from: props["auth"]) {
+            return true
+        }
+        return false
+    }
+
+    private func authFailureKind(in body: String) -> AuthFailureKind? {
+        guard let page = parseInertiaPage(from: body),
+              let component = page["component"] as? String,
+              component == "Auth/Login" else {
+            return nil
+        }
+        guard let props = page["props"] as? [String: Any] else {
+            return .credentials
+        }
+
+        if let captchaError = props["captchaError"] as? String, !captchaError.isEmpty {
+            return .captcha
+        }
+
+        let keys = Set(errorKeys(from: props["errors"]))
+        if keys.contains("captcha") {
+            return .captcha
+        }
+        if keys.contains("login") || keys.contains("password") {
+            return .credentials
+        }
+
+        let messages = errorMessages(from: props["errors"])
+        if messages.contains(where: containsCaptchaRejection) {
+            return .captcha
+        }
+        if messages.contains(where: containsCredentialRejection) {
+            return .credentials
+        }
+        return .ambiguousLoginPage
+    }
+
+    private func containsCredentialRejection(_ body: String) -> Bool {
+        let lowercased = body.lowercased()
+        return body.contains("密码错误")
+            || body.contains("密碼錯誤")
+            || body.contains("账号或密码")
+            || body.contains("賬號或密碼")
+            || body.contains("帐号或密码")
+            || body.contains("帳號或密碼")
+            || lowercased.contains("invalid password")
+            || lowercased.contains("incorrect password")
+    }
+
+    private func containsCaptchaRejection(_ body: String) -> Bool {
+        let lowercased = body.lowercased()
+        return lowercased.contains("captchaerror")
+            || body.contains("验证码错误")
+            || body.contains("驗證碼錯誤")
+            || body.contains("验证码")
+            || body.contains("驗證碼")
+            || (lowercased.contains("errors") && lowercased.contains("captcha"))
+    }
+
+    private func recordAuthAttemptDebug(
+        result: WorkflowRunResult?,
+        provider: CompiledProvider,
+        attempt: Int?,
+        error: (any Error)?
+    ) {
+        guard let rawDirectory = ProcessInfo.processInfo.environment["WEBSHELL_AUTH_DEBUG_DIR"]?
+            .trimmingCharacters(in: .whitespacesAndNewlines),
+              !rawDirectory.isEmpty else {
+            return
+        }
+
+        var record: [String: Any] = [
+            "timestamp": ISO8601DateFormatter().string(from: Date()),
+            "provider": provider.rule.providerFamily,
+        ]
+        if let attempt {
+            record["attempt"] = attempt
+        }
+        if let error {
+            record["error"] = String(describing: error)
+            record["localized_error"] = error.localizedDescription
+        }
+        if let result {
+            record.merge(authDebugFields(from: result), uniquingKeysWith: { _, new in new })
+        }
+
+        let directory = URL(fileURLWithPath: rawDirectory, isDirectory: true)
+        let filename = "auth-attempts-\(debugFileComponent(provider.rule.providerFamily)).ndjson"
+        let fileURL = directory.appendingPathComponent(filename)
+        do {
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            var data = try JSONSerialization.data(withJSONObject: record, options: [.sortedKeys])
+            data.append(0x0a)
+            if FileManager.default.fileExists(atPath: fileURL.path) {
+                let handle = try FileHandle(forWritingTo: fileURL)
+                try handle.seekToEnd()
+                try handle.write(contentsOf: data)
+                try handle.close()
+            } else {
+                try data.write(to: fileURL, options: .atomic)
+            }
+        } catch {
+            // Debug-only path: never let auth diagnostics change resolver behavior.
+        }
+    }
+
+    private func authDebugFields(from result: WorkflowRunResult) -> [String: Any] {
+        let loginBody = lookup(path: "loginResponse.body", in: result.variables)?.renderedString()
+        let dashboardBody = lookup(path: "dashboardPage.body", in: result.variables)?.renderedString()
+        let lastBody = lookup(path: "lastResponse.body", in: result.variables)?.renderedString()
+        let bodies = [loginBody, dashboardBody, lastBody].compactMap { $0 }
+        let joined = bodies.joined(separator: "\n")
+
+        var fields: [String: Any] = [
+            "contains_captcha_rejection": containsCaptchaRejection(joined),
+            "contains_credential_rejection": containsCredentialRejection(joined),
+            "body_count": bodies.count,
+            "captcha_text": lookup(path: "captchaText", in: result.variables)?.renderedString() ?? "",
+            "auth_cookie_names": cookieNames(path: "auth.cookies", in: result.variables),
+            "login_cookie_names": cookieNames(path: "loginResponse.cookies", in: result.variables),
+            "login_status": lookup(path: "loginResponse.statusCode", in: result.variables)?.renderedString() ?? "",
+            "login_url": lookup(path: "loginResponse.url", in: result.variables)?.renderedString() ?? "",
+            "login_body_length": loginBody?.count ?? 0,
+            "dashboard_status": lookup(path: "dashboardPage.statusCode", in: result.variables)?.renderedString() ?? "",
+            "dashboard_url": lookup(path: "dashboardPage.url", in: result.variables)?.renderedString() ?? "",
+            "dashboard_body_length": dashboardBody?.count ?? 0,
+            "dashboard_authenticated": authDashboardIsAuthenticated(result),
+            "material_value_lengths": materialValueLengths(in: result.variables),
+            "inertia_is_authenticated_true": containsAny(joined, [
+                #""isAuthenticated":true"#,
+                #"&quot;isAuthenticated&quot;:true"#,
+            ]),
+            "inertia_is_authenticated_false": containsAny(joined, [
+                #""isAuthenticated":false"#,
+                #"&quot;isAuthenticated&quot;:false"#,
+            ]),
+        ]
+
+        if let page = loginBody.flatMap(parseInertiaPage) ?? lastBody.flatMap(parseInertiaPage) {
+            fields["inertia_component"] = page["component"] as? String ?? ""
+            fields["inertia_url"] = page["url"] as? String ?? ""
+            if let props = page["props"] as? [String: Any] {
+                fields["inertia_props_keys"] = props.keys.sorted()
+                fields["inertia_captcha_error"] = props["captchaError"] as? String ?? ""
+                fields["inertia_error_keys"] = errorKeys(from: props["errors"])
+                fields["inertia_error_messages"] = errorMessages(from: props["errors"]).map {
+                    truncatedDebugString($0, maxLength: 160)
+                }
+                fields["inertia_flash_error"] = debugString(props["flash"].flatMap(flashErrorValue)) ?? ""
+                fields["inertia_status"] = debugString(props["status"]) ?? ""
+                fields["inertia_auth_user_present"] = authUserPresent(from: props["auth"])
+            }
+        }
+        if let page = dashboardBody.flatMap(parseInertiaPage) {
+            fields["dashboard_inertia_component"] = page["component"] as? String ?? ""
+            fields["dashboard_inertia_url"] = page["url"] as? String ?? ""
+            if let props = page["props"] as? [String: Any] {
+                fields["dashboard_inertia_props_keys"] = props.keys.sorted()
+                fields["dashboard_inertia_auth_user_present"] = authUserPresent(from: props["auth"])
+            }
+        }
+        return fields
+    }
+
+    private func materialValueLengths(in variables: [String: RuntimeValue]) -> [String: Int] {
+        guard let materials = lookup(path: "materials", in: variables)?.objectValue else {
+            return [:]
+        }
+        return Dictionary(
+            uniqueKeysWithValues: materials.map { key, value in
+                (key, value.renderedString().count)
+            }
+        )
+    }
+
+    private func flashErrorValue(from value: Any) -> Any? {
+        guard let object = value as? [String: Any] else {
+            return nil
+        }
+        return object["error"]
+    }
+
+    private func debugString(_ value: Any?) -> String? {
+        switch value {
+        case let string as String:
+            return truncatedDebugString(string, maxLength: 160)
+        case let number as NSNumber:
+            return number.stringValue
+        default:
+            return nil
+        }
+    }
+
+    private func truncatedDebugString(_ value: String, maxLength: Int) -> String {
+        guard value.count > maxLength else {
+            return value
+        }
+        let endIndex = value.index(value.startIndex, offsetBy: maxLength)
+        return String(value[..<endIndex]) + "..."
+    }
+
+    private func cookieNames(path: String, in variables: [String: RuntimeValue]) -> [String] {
+        lookup(path: path, in: variables)?.arrayValue?.compactMap { item in
+            item.objectValue?["name"]?.stringValue
+        } ?? []
+    }
+
+    private func parseInertiaPage(from body: String) -> [String: Any]? {
+        let trimmed = body.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.hasPrefix("{"),
+           let data = trimmed.data(using: .utf8),
+           let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           object["component"] != nil {
+            return object
+        }
+
+        guard let range = body.range(of: #"data-page="([^"]+)""#, options: .regularExpression) else {
+            return nil
+        }
+        let matched = String(body[range])
+        guard let start = matched.firstIndex(of: "\""),
+              let end = matched.lastIndex(of: "\""),
+              start < end else {
+            return nil
+        }
+        let encoded = String(matched[matched.index(after: start)..<end])
+        let decoded = encoded
+            .replacingOccurrences(of: "&quot;", with: "\"")
+            .replacingOccurrences(of: "&#039;", with: "'")
+            .replacingOccurrences(of: "&apos;", with: "'")
+            .replacingOccurrences(of: "&amp;", with: "&")
+            .replacingOccurrences(of: "&lt;", with: "<")
+            .replacingOccurrences(of: "&gt;", with: ">")
+        guard let data = decoded.data(using: .utf8),
+              let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return nil
+        }
+        return object
+    }
+
+    private func errorKeys(from value: Any?) -> [String] {
+        if let object = value as? [String: Any] {
+            return object.keys.sorted()
+        }
+        if let array = value as? [Any], !array.isEmpty {
+            return ["array"]
+        }
+        return []
+    }
+
+    private func errorMessages(from value: Any?) -> [String] {
+        if let string = value as? String {
+            return [string]
+        }
+        if let strings = value as? [String] {
+            return strings
+        }
+        if let array = value as? [Any] {
+            return array.flatMap(errorMessages)
+        }
+        if let object = value as? [String: Any] {
+            return object.values.flatMap(errorMessages)
+        }
+        return []
+    }
+
+    private func authUserPresent(from value: Any?) -> Bool {
+        guard let object = value as? [String: Any], let user = object["user"] else {
+            return false
+        }
+        return !(user is NSNull)
+    }
+
+    private func containsAny(_ body: String, _ needles: [String]) -> Bool {
+        needles.contains { body.contains($0) }
+    }
+
+    private func debugFileComponent(_ rawValue: String) -> String {
+        rawValue.unicodeScalars.map { scalar in
+            CharacterSet.alphanumerics.contains(scalar) || scalar == "-" || scalar == "_"
+                ? String(scalar)
+                : "-"
+        }.joined()
     }
 
     private func runDownloadWorkflow(
@@ -350,6 +991,7 @@ private struct WorkflowRunResult {
     let emittedRequest: ResolvedDownloadRequest?
     let authSession: AuthSession?
     let authExpired: Bool
+    let variables: [String: RuntimeValue]
 }
 
 private struct WorkflowRuntime {
@@ -399,18 +1041,21 @@ private struct WorkflowRuntime {
         self.variables = initialVariables
     }
 
-    mutating func run() async throws -> WorkflowRunResult {
-        try await execute(workflow.steps)
+    mutating func run(from startIndex: Int = 0) async throws -> WorkflowRunResult {
+        let clampedStartIndex = min(max(startIndex, 0), workflow.steps.count)
+        try await execute(Array(workflow.steps.dropFirst(clampedStartIndex)))
         let authExpired = authExpireConditions.contains { evaluate($0) }
         return WorkflowRunResult(
             emittedRequest: emittedRequest,
             authSession: authSession,
-            authExpired: authExpired
+            authExpired: authExpired,
+            variables: variables
         )
     }
 
     private mutating func execute(_ steps: [WorkflowStep]) async throws {
         for step in steps {
+            try Task.checkCancellation()
             switch step {
             case .http(let value):
                 try await executeHTTP(value)
@@ -429,6 +1074,7 @@ private struct WorkflowRuntime {
             case .loop(let value):
                 var iteration = 0
                 while iteration < value.maxIterations && evaluate(value.conditions, mode: value.mode) {
+                    try Task.checkCancellation()
                     try await execute(value.steps)
                     iteration += 1
                 }
@@ -451,7 +1097,13 @@ private struct WorkflowRuntime {
             headers["Cookie"] = cookieHeader
         }
         let body = try step.bodyTemplate.map { try renderTemplate($0, variables: variables) }
-        let request = HTTPRequestData(method: step.method, url: url, headers: headers, body: body)
+        let request = HTTPRequestData(
+            method: step.method,
+            url: url,
+            headers: headers,
+            body: body,
+            followRedirects: step.followRedirects
+        )
         let response = try await httpClient.send(request)
 
         if step.persistResponseCookies, !response.cookies.isEmpty {
@@ -539,6 +1191,7 @@ private struct WorkflowRuntime {
     private mutating func executeCapability(_ step: CapabilityStep) async throws {
         var arguments = step.arguments
         for (key, source) in step.bindings {
+            try Task.checkCancellation()
             guard let value = lookup(path: source, in: variables) else {
                 throw RuleEngineError.missingVariable(source)
             }
