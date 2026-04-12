@@ -160,12 +160,15 @@ public struct DownloadURLProgressPublisher: Publisher {
         }
         
         private func receiveValue(_ news: TaskNews) {
+            lock.lock()
             guard demand > 0, parent != nil, let downstream = downstream else {
+                lock.unlock()
 #if DEBUG
                 logger.info("[\(type(of: self))] \(#function) no downstream or parent or demand = 0.")
 #endif
                 return
             }
+            lock.unlock()
             
             _ = downstream.receive(news)
         }
