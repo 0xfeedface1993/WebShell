@@ -98,6 +98,15 @@ This contract is consumed by the Apple client, the admin console, and the contro
   - file size
   - local path
   - creation timestamp
+- Foreground download progress must expose:
+  - current phase
+  - downloaded bytes
+  - expected file size when known
+  - percent complete when total size is known
+  - current speed
+  - estimated remaining time when speed and total size are known
+- Downloading progress UI updates are throttled to at most once per second per task. Non-downloading events such as queued, resolving, auth required, staging, completed, failed, and cancelled must update immediately.
+- The client must support single-task and multi-task progress subscriptions so SwiftUI can observe reducer-owned progress state without rendering on every `URLSessionDownloadDelegate` callback.
 - iOS does not support background downloads in v1.
 
 ### Client Architecture Constraints
