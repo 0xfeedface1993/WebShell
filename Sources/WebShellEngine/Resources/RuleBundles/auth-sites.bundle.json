@@ -203,6 +203,38 @@
           "type": "extract"
         },
         {
+          "branch": {
+            "conditions": [
+              {
+                "comparator": "contains",
+                "expected": "116pan.com",
+                "source": "input.sourceURL"
+              }
+            ],
+            "elseSteps": [
+              {
+                "assign": {
+                  "source": "input.sourceURL",
+                  "storage": "runtime",
+                  "target": "filePageURL"
+                },
+                "type": "assign"
+              }
+            ],
+            "ifSteps": [
+              {
+                "template": {
+                  "target": "filePageURL",
+                  "template": "https://www.116pan.xyz{{sourcePath}}"
+                },
+                "type": "template"
+              }
+            ],
+            "mode": "all"
+          },
+          "type": "branch"
+        },
+        {
           "http": {
             "attachAuthSession": true,
             "headers": {
@@ -222,9 +254,20 @@
             "method": "GET",
             "output": "filePage",
             "persistResponseCookies": true,
-            "urlTemplate": "{{input.sourceURL}}"
+            "urlTemplate": "{{filePageURL}}"
           },
           "type": "http"
+        },
+        {
+          "invokeCapability": {
+            "arguments": {},
+            "bindings": {
+              "sourceURL": "filePage.url"
+            },
+            "capability": "url.origin",
+            "target": "pageOrigin"
+          },
+          "type": "invokeCapability"
         },
         {
           "branch": {
@@ -287,7 +330,7 @@
                     "Content-Type": "application/json",
                     "Origin": "{{pageOrigin}}",
                     "Priority": "u=1, i",
-                    "Referer": "{{input.sourceURL}}",
+                    "Referer": "{{filePage.url}}",
                     "Sec-CH-UA": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
                     "Sec-CH-UA-Mobile": "?0",
                     "Sec-CH-UA-Platform": "\"macOS\"",
@@ -316,6 +359,17 @@
                   "target": "downloadURL"
                 },
                 "type": "extract"
+              },
+              {
+                "invokeCapability": {
+                  "arguments": {},
+                  "bindings": {
+                    "sourceURL": "downloadURL"
+                  },
+                  "capability": "url.origin",
+                  "target": "downloadOrigin"
+                },
+                "type": "invokeCapability"
               }
             ],
             "ifSteps": [
@@ -345,7 +399,7 @@
               "Accept-Language": "zh-CN",
               "Connection": "keep-alive",
               "Priority": "u=3, i",
-              "Referer": "{{input.sourceURL}}",
+              "Referer": "{{filePage.url}}",
               "Sec-CH-UA": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
               "Sec-CH-UA-Mobile": "?0",
               "Sec-CH-UA-Platform": "\"macOS\"",

@@ -760,6 +760,137 @@ final class DownloadResolverTests: XCTestCase {
         XCTAssertNil(resolved.authContext)
     }
 
+    func test116PanComCanonicalFileURLUsesRedirectedOriginForGenerateDownload() async throws {
+        let (registry, catalog) = try await makeSyncedCatalog()
+        let authStore = AuthSessionStore()
+        let sessionKey = AuthSessionKey(providerFamily: "116pan-vip", accountID: "default-116")
+        await authStore.store(
+            AuthSession(
+                key: sessionKey,
+                cookies: [
+                    SerializableCookie(
+                        name: "116_session",
+                        value: "session-116",
+                        domain: "www.116pan.xyz",
+                        path: "/"
+                    )
+                ]
+            )
+        )
+
+        let httpClient = StubHTTPClient { request in
+            switch request.url.absoluteString {
+            case "https://www.116pan.xyz/f/Jo89da23lsy5" where request.method == .get:
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: URL(string: "https://www.116pan.xyz/f/Jo89da23lsy5")!,
+                    headers: ["Set-Cookie": "XSRF-TOKEN=xsrf-file; Path=/; Domain=www.116pan.xyz"],
+                    body: #"<meta name="csrf-token" content="csrf-file"><div id="app" data-page="{&quot;isAuthenticated&quot;:true,&quot;isVip&quot;:true,&quot;file&quot;:{&quot;file_short_url&quot;:&quot;Jo89da23lsy5&quot;}}"></div>"#,
+                    cookies: [SerializableCookie(name: "XSRF-TOKEN", value: "xsrf-file", domain: "www.116pan.xyz", path: "/")]
+                )
+            case "https://www.116pan.xyz/f/Jo89da23lsy5/generate-download" where request.method == .post:
+                XCTAssertEqual(request.headers["Origin"], "https://www.116pan.xyz")
+                XCTAssertEqual(request.headers["Referer"], "https://www.116pan.xyz/f/Jo89da23lsy5")
+                XCTAssertEqual(request.headers["X-CSRF-TOKEN"], "csrf-file")
+                XCTAssertEqual(request.headers["X-XSRF-TOKEN"], "xsrf-file")
+                XCTAssertTrue((request.headers["Cookie"] ?? "").contains("116_session=session-116"))
+                XCTAssertTrue((request.headers["Cookie"] ?? "").contains("XSRF-TOKEN=xsrf-file"))
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: #"{"success":true,"download_url":"https:\/\/vip-n2.116pan.xyz\/factory.zip?sig=abc","is_repeated":false}"#,
+                    cookies: []
+                )
+            default:
+                XCTFail("Unexpected request: \(request.method.rawValue) \(request.url.absoluteString)")
+                return HTTPResponseData(statusCode: 500, url: request.url, headers: [:], body: "unexpected")
+            }
+        }
+
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: httpClient,
+            capabilityRegistry: registry,
+            authSessionStore: authStore
+        )
+
+        let resolved = try await resolver.resolve(
+            DownloadResolveRequest(
+                sourceURL: URL(string: "https://www.116pan.com/f/Jo89da23lsy5")!,
+                accountID: "default-116"
+            )
+        )
+
+        XCTAssertEqual(resolved.url.absoluteString, "https://vip-n2.116pan.xyz/factory.zip?sig=abc")
+        XCTAssertEqual(resolved.headers["Referer"], "https://www.116pan.xyz/f/Jo89da23lsy5")
+        XCTAssertEqual(resolved.filenameHints["provider"], "116pan-vip")
+    }
+
+    func test116PanGenerateDownloadMissingURLFailsBeforeEmitRequest() async throws {
+        let (registry, catalog) = try await makeSyncedCatalog()
+        let authStore = AuthSessionStore()
+        let sessionKey = AuthSessionKey(providerFamily: "116pan-vip", accountID: "default-116")
+        await authStore.store(
+            AuthSession(
+                key: sessionKey,
+                cookies: [
+                    SerializableCookie(
+                        name: "116_session",
+                        value: "session-116",
+                        domain: "www.116pan.xyz",
+                        path: "/"
+                    )
+                ]
+            )
+        )
+
+        let httpClient = StubHTTPClient { request in
+            switch request.url.absoluteString {
+            case "https://www.116pan.xyz/f/Jo89da23lsy5" where request.method == .get:
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: URL(string: "https://www.116pan.xyz/f/Jo89da23lsy5")!,
+                    headers: ["Set-Cookie": "XSRF-TOKEN=xsrf-file; Path=/; Domain=www.116pan.xyz"],
+                    body: #"<meta name="csrf-token" content="csrf-file"><div id="app" data-page="{&quot;isAuthenticated&quot;:true,&quot;isVip&quot;:true,&quot;file&quot;:{&quot;file_short_url&quot;:&quot;Jo89da23lsy5&quot;}}"></div>"#,
+                    cookies: [SerializableCookie(name: "XSRF-TOKEN", value: "xsrf-file", domain: "www.116pan.xyz", path: "/")]
+                )
+            case "https://www.116pan.xyz/f/Jo89da23lsy5/generate-download" where request.method == .post:
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: #"{"success":false,"message":"provider returned an intermediate page"}"#,
+                    cookies: []
+                )
+            default:
+                XCTFail("Unexpected request: \(request.method.rawValue) \(request.url.absoluteString)")
+                return HTTPResponseData(statusCode: 500, url: request.url, headers: [:], body: "unexpected")
+            }
+        }
+
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: httpClient,
+            capabilityRegistry: registry,
+            authSessionStore: authStore
+        )
+
+        do {
+            _ = try await resolver.resolve(
+                DownloadResolveRequest(
+                    sourceURL: URL(string: "https://www.116pan.com/f/Jo89da23lsy5")!,
+                    accountID: "default-116"
+                )
+            )
+            XCTFail("Expected URL validation failure when download_url is missing.")
+        } catch let RuleEngineError.invalidTemplate(message) {
+            XCTAssertEqual(message, "url.origin requires a valid sourceURL")
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+    }
+
     func test116PanVIPAuthWorkflowRetriesCaptchaRejectionsBeforeGenerateDownload() async throws {
         let (registry, catalog) = try await makeSyncedCatalog()
         let recorder = CaptchaRetryRecorder(values: ["BAD1", "BAD2", "H2YY"])

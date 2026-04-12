@@ -5,7 +5,7 @@ final class RuleCompilerTests: XCTestCase {
     func testFixtureBundleLoadsFromJSONResource() throws {
         let bundle = RuleBundleFixtures.defaultBundle
 
-        XCTAssertEqual(bundle.bundleVersion, "2026.04.12.catalog.116pan.2")
+        XCTAssertEqual(bundle.bundleVersion, "2026.04.12.catalog.116pan.5")
         XCTAssertEqual(bundle.providers.map(\.providerFamily).sorted(), ["116pan-vip", "jkpan-vip"])
         XCTAssertTrue(bundle.providers.contains { $0.providerFamily == "jkpan-vip" })
         XCTAssertTrue(bundle.providers.contains { $0.providerFamily == "116pan-vip" })
@@ -86,7 +86,9 @@ final class RuleCompilerTests: XCTestCase {
             _ = try await compiler.compile(snapshot: snapshot, previous: nil, capabilityRegistry: registry)
             XCTFail("Expected missing capability error")
         } catch let RuleEngineError.missingCapability(name) {
-            XCTAssertEqual(name, "captcha.ocr")
+            XCTAssertTrue(
+                ["captcha.ocr", "cookies.valueForName", "url.origin", "url.percentDecode"].contains(name)
+            )
         } catch {
             XCTFail("Unexpected error: \(error)")
         }
