@@ -81,6 +81,9 @@ public struct AuthPolicy: Codable, Sendable, Equatable {
     public let materialKeys: [String]
     public let accountIDTemplate: String?
     public let captchaRetryPolicy: CaptchaRetryPolicy?
+    public let successConditions: [RuleCondition]?
+    public let credentialRejectConditions: [RuleCondition]?
+    public let captchaRejectConditions: [RuleCondition]?
 }
 
 public struct CaptchaRetryPolicy: Codable, Sendable, Equatable {

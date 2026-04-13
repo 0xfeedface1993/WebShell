@@ -49,6 +49,6 @@ Move a provider from `auth-templates.bundle.json` to `auth-sites.bundle.json` on
   - use `captchaRetryPolicy.mode = fullWorkflow` or omit the policy when the provider requires a fresh login page or cookie before each captcha attempt
 
 ## Current status
-- Verified auth sites in default catalog: `jkpan-vip`, `116pan-vip`
+- Verified auth sites in default catalog: `jkpan-vip`, `116pan-vip`, `koolaayun-vip`
 - Legacy-only public providers: `rosefile`, `xueqiupan`, `xunniufile`, `xingyaoclouds`, `rarp`, `567file`, `iycdn`
 - Template-only auth providers: `secure-demo`, `xrcf-vip`

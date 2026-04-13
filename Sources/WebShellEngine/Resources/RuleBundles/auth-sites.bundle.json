@@ -87,6 +87,81 @@
         "legacyFlow": "Laravel/Inertia captcha login + VIP generate-download",
         "source": "verified against https://www.116pan.xyz/f/0V02j0lxvpSl on 2026-04-11"
       }
+    },
+    {
+      "id": "koolaayun-vip",
+      "providerFamily": "koolaayun-vip",
+      "matchers": [
+        {
+          "hosts": [
+            "koolaayun.com",
+            "www.koolaayun.com"
+          ],
+          "hostSuffixes": [],
+          "pathPattern": "/[A-Za-z0-9]+/[^/]+\\.zip$"
+        }
+      ],
+      "accountScope": "providerFamily",
+      "downloadWorkflowID": "koolaayun.vip.ptRedirectDownload",
+      "authWorkflowID": "koolaayun.account.form.auth",
+      "authPolicy": {
+        "requiresAuthentication": true,
+        "expireConditions": [
+          {
+            "source": "filePage.body",
+            "comparator": "contains",
+            "expected": "免费低速下载",
+            "expectedValues": null
+          },
+          {
+            "source": "ptDownloadURL",
+            "comparator": "missing",
+            "expected": null,
+            "expectedValues": null
+          },
+          {
+            "source": "tokenDownloadURL",
+            "comparator": "missing",
+            "expected": null,
+            "expectedValues": null
+          },
+          {
+            "source": "directRedirect.headers.Location",
+            "comparator": "missing",
+            "expected": null,
+            "expectedValues": null
+          }
+        ],
+        "materialKeys": [
+          "username",
+          "password"
+        ],
+        "accountIDTemplate": null,
+        "captchaRetryPolicy": null,
+        "successConditions": [
+          {
+            "source": "accountPage.body",
+            "comparator": "contains",
+            "expected": "account/logout",
+            "expectedValues": null
+          }
+        ],
+        "credentialRejectConditions": [
+          {
+            "source": "loginResponse.body",
+            "comparator": "contains",
+            "expected": "Your username and password are invalid",
+            "expectedValues": null
+          }
+        ],
+        "captchaRejectConditions": []
+      },
+      "metadata": {
+        "site": "koolaayun.com",
+        "kind": "verified-auth-site",
+        "legacyFlow": "Account login form + pt redirect download",
+        "source": "verified against https://koolaayun.com/cf6163a33d9e6555/A17684.zip on 2026-04-13"
+      }
     }
   ],
   "sharedFragments": [],
@@ -420,6 +495,248 @@
               ]
             },
             "urlTemplate": "{{downloadURL}}"
+          },
+          "type": "emitRequest"
+        }
+      ]
+    },
+    {
+      "description": "Fetch a logged-in Koolaayun file page, follow the pt and download_token redirect chain without leaking auth cookies to the final CDN URL, and emit the direct file request.",
+      "id": "koolaayun.vip.ptRedirectDownload",
+      "steps": [
+        {
+          "http": {
+            "attachAuthSession": true,
+            "headers": {
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "zh-CN",
+              "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+            },
+            "method": "GET",
+            "output": "filePage",
+            "persistResponseCookies": true,
+            "urlTemplate": "{{input.sourceURL}}"
+          },
+          "type": "http"
+        },
+        {
+          "branch": {
+            "conditions": [
+              {
+                "source": "filePage.body",
+                "comparator": "contains",
+                "expected": "免费低速下载"
+              }
+            ],
+            "elseSteps": [
+              {
+                "extract": {
+                  "group": 1,
+                  "kind": "regexFirst",
+                  "pattern": "[\"'](https://(?:www\\.)?koolaayun\\.com/[^\"']+\\?pt=[^\"']+)[\"']",
+                  "source": "filePage.body",
+                  "target": "ptDownloadURL"
+                },
+                "type": "extract"
+              },
+              {
+                "branch": {
+                  "conditions": [
+                    {
+                      "source": "ptDownloadURL",
+                      "comparator": "missing"
+                    }
+                  ],
+                  "elseSteps": [
+                    {
+                      "invokeCapability": {
+                        "arguments": {},
+                        "bindings": {
+                          "sourceURL": "ptDownloadURL"
+                        },
+                        "capability": "url.origin",
+                        "target": "ptOrigin"
+                      },
+                      "type": "invokeCapability"
+                    },
+                    {
+                      "http": {
+                        "attachAuthSession": true,
+                        "followRedirects": false,
+                        "headers": {
+                          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                          "Accept-Language": "zh-CN",
+                          "Referer": "{{filePage.url}}",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+                        },
+                        "method": "GET",
+                        "output": "ptRedirect",
+                        "persistResponseCookies": true,
+                        "urlTemplate": "{{ptDownloadURL}}"
+                      },
+                      "type": "http"
+                    },
+                    {
+                      "extract": {
+                        "header": "Location",
+                        "kind": "responseHeader",
+                        "source": "ptRedirect",
+                        "target": "tokenDownloadURL"
+                      },
+                      "type": "extract"
+                    },
+                    {
+                      "branch": {
+                        "conditions": [
+                          {
+                            "source": "tokenDownloadURL",
+                            "comparator": "missing"
+                          }
+                        ],
+                        "elseSteps": [
+                          {
+                            "invokeCapability": {
+                              "arguments": {},
+                              "bindings": {
+                                "sourceURL": "tokenDownloadURL"
+                              },
+                              "capability": "url.origin",
+                              "target": "tokenOrigin"
+                            },
+                            "type": "invokeCapability"
+                          },
+                          {
+                            "http": {
+                              "attachAuthSession": true,
+                              "followRedirects": false,
+                              "headers": {
+                                "Accept": "*/*",
+                                "Accept-Language": "zh-CN",
+                                "Referer": "{{filePage.url}}",
+                                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+                              },
+                              "method": "HEAD",
+                              "output": "directRedirect",
+                              "persistResponseCookies": true,
+                              "urlTemplate": "{{tokenDownloadURL}}"
+                            },
+                            "type": "http"
+                          },
+                          {
+                            "extract": {
+                              "header": "Location",
+                              "kind": "responseHeader",
+                              "source": "directRedirect",
+                              "target": "directDownloadURL"
+                            },
+                            "type": "extract"
+                          },
+                          {
+                            "branch": {
+                              "conditions": [
+                                {
+                                  "source": "directDownloadURL",
+                                  "comparator": "missing"
+                                }
+                              ],
+                              "elseSteps": [
+                                {
+                                  "invokeCapability": {
+                                    "arguments": {},
+                                    "bindings": {
+                                      "sourceURL": "directDownloadURL"
+                                    },
+                                    "capability": "url.origin",
+                                    "target": "directOrigin"
+                                  },
+                                  "type": "invokeCapability"
+                                }
+                              ],
+                              "ifSteps": [
+                                {
+                                  "assign": {
+                                    "source": "input.sourceURL",
+                                    "storage": "runtime",
+                                    "target": "directDownloadURL"
+                                  },
+                                  "type": "assign"
+                                }
+                              ],
+                              "mode": "all"
+                            },
+                            "type": "branch"
+                          }
+                        ],
+                        "ifSteps": [
+                          {
+                            "assign": {
+                              "source": "input.sourceURL",
+                              "storage": "runtime",
+                              "target": "directDownloadURL"
+                            },
+                            "type": "assign"
+                          }
+                        ],
+                        "mode": "all"
+                      },
+                      "type": "branch"
+                    }
+                  ],
+                  "ifSteps": [
+                    {
+                      "assign": {
+                        "source": "input.sourceURL",
+                        "storage": "runtime",
+                        "target": "directDownloadURL"
+                      },
+                      "type": "assign"
+                    }
+                  ],
+                  "mode": "all"
+                },
+                "type": "branch"
+              }
+            ],
+            "ifSteps": [
+              {
+                "assign": {
+                  "source": "input.sourceURL",
+                  "storage": "runtime",
+                  "target": "directDownloadURL"
+                },
+                "type": "assign"
+              }
+            ],
+            "mode": "all"
+          },
+          "type": "branch"
+        },
+        {
+          "emitRequest": {
+            "attachAuthSession": false,
+            "filenameHints": {
+              "directType": "koolaayun.vip.pt-redirect",
+              "provider": "koolaayun-vip"
+            },
+            "headers": {
+              "Accept": "*/*",
+              "Accept-Language": "zh-CN",
+              "Referer": "{{filePage.url}}",
+              "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+            },
+            "method": "GET",
+            "retryHints": {
+              "backoffSeconds": 1,
+              "maxAttempts": 2,
+              "retryableStatusCodes": [
+                401,
+                403,
+                410,
+                429,
+                503
+              ]
+            },
+            "urlTemplate": "{{directDownloadURL}}"
           },
           "type": "emitRequest"
         }

@@ -1482,4 +1482,282 @@ final class DownloadResolverTests: XCTestCase {
         let loginPageFetchCount = await recorder.loginPageFetchCount()
         XCTAssertEqual(loginPageFetchCount, 1)
     }
+
+    func testKoolaayunVIPAuthWorkflowResolvesRedirectDownloadRequest() async throws {
+        let (registry, catalog) = try await makeSyncedCatalog()
+        let filePageURL = "https://koolaayun.com/cf6163a33d9e6555/A17684.zip"
+        let ptURL = "https://koolaayun.com/cf6163a33d9e6555?pt=encoded-token"
+        let tokenURL = "https://koolaayun.com/cf6163a33d9e6555/A17684.zip?download_token=download-token"
+        let directURL = "https://xzs2.koalaclouds.com/bf/bf87bc4e90430784836e429cda3996fd?response-content-disposition=attachment;filename%3DA17684.zip"
+
+        let httpClient = StubHTTPClient { request in
+            switch request.url.absoluteString {
+            case "https://koolaayun.com/account/login" where request.method == .get:
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: ["Set-Cookie": "filehosting=session-koola; Path=/"],
+                    body: #"<form method="post" action="https://koolaayun.com/account/login"><input name="username"><input name="password"></form>"#,
+                    cookies: [SerializableCookie(name: "filehosting", value: "session-koola", domain: "koolaayun.com", path: "/")]
+                )
+            case "https://koolaayun.com/account/login" where request.method == .post:
+                XCTAssertFalse(request.followRedirects)
+                XCTAssertEqual(request.headers["Content-Type"], "application/x-www-form-urlencoded")
+                XCTAssertEqual(request.headers["Origin"], "https://koolaayun.com")
+                XCTAssertEqual(request.headers["Referer"], "https://koolaayun.com/account/login")
+                XCTAssertEqual(request.body, "password=secret%20password%26x%3D1&submitme=1&username=demo-user")
+                XCTAssertTrue((request.headers["Cookie"] ?? "").contains("filehosting=session-koola"))
+                return HTTPResponseData(
+                    statusCode: 302,
+                    url: request.url,
+                    headers: ["Location": "https://koolaayun.com/account"],
+                    body: "",
+                    cookies: []
+                )
+            case "https://koolaayun.com/account" where request.method == .get:
+                XCTAssertTrue((request.headers["Cookie"] ?? "").contains("filehosting=session-koola"))
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: #"<a href="https://koolaayun.com/account/logout">登出</a><span>您的文件</span>"#,
+                    cookies: []
+                )
+            case let url where url == filePageURL && request.method == .get:
+                XCTAssertTrue((request.headers["Cookie"] ?? "").contains("filehosting=session-koola"))
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: #"<button onclick='window.location.href = "https://koolaayun.com/cf6163a33d9e6555?pt=encoded-token"; return false;'>Download</button>"#,
+                    cookies: []
+                )
+            case let url where url == ptURL && request.method == .get:
+                XCTAssertFalse(request.followRedirects)
+                XCTAssertEqual(request.headers["Referer"], filePageURL)
+                XCTAssertTrue((request.headers["Cookie"] ?? "").contains("filehosting=session-koola"))
+                return HTTPResponseData(
+                    statusCode: 302,
+                    url: request.url,
+                    headers: ["Location": tokenURL],
+                    body: "",
+                    cookies: []
+                )
+            case let url where url == tokenURL && request.method == .head:
+                XCTAssertFalse(request.followRedirects)
+                XCTAssertEqual(request.headers["Referer"], filePageURL)
+                XCTAssertTrue((request.headers["Cookie"] ?? "").contains("filehosting=session-koola"))
+                return HTTPResponseData(
+                    statusCode: 302,
+                    url: request.url,
+                    headers: [
+                        "Content-Disposition": #"attachment; filename="A17684.zip""#,
+                        "Content-Length": "636980123",
+                        "Location": directURL,
+                    ],
+                    body: "",
+                    cookies: []
+                )
+            default:
+                XCTFail("Unexpected request: \(request.method.rawValue) \(request.url.absoluteString)")
+                return HTTPResponseData(statusCode: 500, url: request.url, headers: [:], body: "unexpected")
+            }
+        }
+
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: httpClient,
+            capabilityRegistry: registry,
+            authMaterialProvider: StaticAuthMaterialProvider(
+                storage: [
+                    "koolaayun-vip": [
+                        "koola-demo": [
+                            "username": .string("demo-user"),
+                            "password": .string("secret password&x=1"),
+                        ]
+                    ]
+                ]
+            )
+        )
+
+        let resolved = try await resolver.resolve(
+            DownloadResolveRequest(
+                sourceURL: URL(string: filePageURL)!,
+                accountID: "koola-demo"
+            )
+        )
+
+        XCTAssertEqual(resolved.url.absoluteString, directURL)
+        XCTAssertEqual(resolved.headers["Referer"], filePageURL)
+        XCTAssertEqual(resolved.filenameHints["provider"], "koolaayun-vip")
+        XCTAssertEqual(resolved.filenameHints["directType"], "koolaayun.vip.pt-redirect")
+        XCTAssertTrue(resolved.cookies.isEmpty)
+        XCTAssertNil(resolved.authContext)
+    }
+
+    func testKoolaayunVIPMissingFinalRedirectLocationTriggersAuthRetryNotInvalidTemplate() async throws {
+        let (registry, catalog) = try await makeSyncedCatalog()
+        let filePageURL = "https://koolaayun.com/cf6163a33d9e6555/A17684.zip"
+        let ptURL = "https://koolaayun.com/cf6163a33d9e6555?pt=encoded-token"
+        let tokenURL = "https://koolaayun.com/cf6163a33d9e6555/A17684.zip?download_token=download-token"
+
+        let httpClient = StubHTTPClient { request in
+            switch request.url.absoluteString {
+            case "https://koolaayun.com/account/login" where request.method == .get:
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: ["Set-Cookie": "filehosting=session-koola; Path=/"],
+                    body: #"<form method="post" action="https://koolaayun.com/account/login"><input name="username"><input name="password"></form>"#,
+                    cookies: [SerializableCookie(name: "filehosting", value: "session-koola", domain: "koolaayun.com", path: "/")]
+                )
+            case "https://koolaayun.com/account/login" where request.method == .post:
+                return HTTPResponseData(
+                    statusCode: 302,
+                    url: request.url,
+                    headers: ["Location": "https://koolaayun.com/account"],
+                    body: "",
+                    cookies: []
+                )
+            case "https://koolaayun.com/account" where request.method == .get:
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: #"<a href="https://koolaayun.com/account/logout">登出</a><span>您的文件</span>"#,
+                    cookies: []
+                )
+            case let url where url == filePageURL && request.method == .get:
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: #"<button onclick='window.location.href = "https://koolaayun.com/cf6163a33d9e6555?pt=encoded-token"; return false;'>Download</button>"#,
+                    cookies: []
+                )
+            case let url where url == ptURL && request.method == .get:
+                XCTAssertFalse(request.followRedirects)
+                return HTTPResponseData(
+                    statusCode: 302,
+                    url: request.url,
+                    headers: ["Location": tokenURL],
+                    body: "",
+                    cookies: []
+                )
+            case let url where url == tokenURL && request.method == .head:
+                XCTAssertFalse(request.followRedirects)
+                return HTTPResponseData(
+                    statusCode: 302,
+                    url: request.url,
+                    headers: [
+                        "Content-Disposition": #"attachment; filename="A17684.zip""#,
+                        "Content-Length": "636980123",
+                    ],
+                    body: "",
+                    cookies: []
+                )
+            default:
+                XCTFail("Unexpected request: \(request.method.rawValue) \(request.url.absoluteString)")
+                return HTTPResponseData(statusCode: 500, url: request.url, headers: [:], body: "unexpected")
+            }
+        }
+
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: httpClient,
+            capabilityRegistry: registry,
+            authMaterialProvider: StaticAuthMaterialProvider(
+                storage: [
+                    "koolaayun-vip": [
+                        "koola-demo": [
+                            "username": .string("demo-user"),
+                            "password": .string("secret password"),
+                        ]
+                    ]
+                ]
+            )
+        )
+
+        do {
+            _ = try await resolver.resolve(
+                DownloadResolveRequest(
+                    sourceURL: URL(string: filePageURL)!,
+                    accountID: "koola-demo"
+                )
+            )
+            XCTFail("Expected auth retry exhaustion when the final redirect Location is missing.")
+        } catch let RuleEngineError.authExpiredAfterRetry(providerFamily) {
+            XCTAssertEqual(providerFamily, "koolaayun-vip")
+        } catch let RuleEngineError.invalidTemplate(message) {
+            XCTFail("Missing redirect Location must not reach url.origin as an invalid template: \(message)")
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+    }
+
+    func testKoolaayunVIPAuthWorkflowRejectsInvalidCredentialsUsingConfiguredCondition() async throws {
+        let (registry, catalog) = try await makeSyncedCatalog()
+
+        let httpClient = StubHTTPClient { request in
+            switch request.url.absoluteString {
+            case "https://koolaayun.com/account/login" where request.method == .get:
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: ["Set-Cookie": "filehosting=session-koola; Path=/"],
+                    body: #"<form method="post" action="https://koolaayun.com/account/login"></form>"#,
+                    cookies: [SerializableCookie(name: "filehosting", value: "session-koola", domain: "koolaayun.com", path: "/")]
+                )
+            case "https://koolaayun.com/account/login" where request.method == .post:
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: [:],
+                    body: #"<div class="alert__body">Your username and password are invalid</div>"#,
+                    cookies: []
+                )
+            case "https://koolaayun.com/account" where request.method == .get:
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: URL(string: "https://koolaayun.com/account/login")!,
+                    headers: [:],
+                    body: #"<h2>登录</h2>"#,
+                    cookies: []
+                )
+            default:
+                XCTFail("Unexpected request: \(request.method.rawValue) \(request.url.absoluteString)")
+                return HTTPResponseData(statusCode: 500, url: request.url, headers: [:], body: "unexpected")
+            }
+        }
+
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: httpClient,
+            capabilityRegistry: registry,
+            authMaterialProvider: StaticAuthMaterialProvider(
+                storage: [
+                    "koolaayun-vip": [
+                        "koola-demo": [
+                            "username": .string("demo-user"),
+                            "password": .string("bad-password"),
+                        ]
+                    ]
+                ]
+            )
+        )
+
+        do {
+            _ = try await resolver.resolve(
+                DownloadResolveRequest(
+                    sourceURL: URL(string: "https://koolaayun.com/cf6163a33d9e6555/A17684.zip")!,
+                    accountID: "koola-demo"
+                )
+            )
+            XCTFail("Expected credential rejection")
+        } catch let RuleEngineError.authCredentialsRejected(providerFamily) {
+            XCTAssertEqual(providerFamily, "koolaayun-vip")
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+    }
 }

@@ -5,10 +5,11 @@ final class RuleCompilerTests: XCTestCase {
     func testFixtureBundleLoadsFromJSONResource() throws {
         let bundle = RuleBundleFixtures.defaultBundle
 
-        XCTAssertEqual(bundle.bundleVersion, "2026.04.12.catalog.116pan.5")
-        XCTAssertEqual(bundle.providers.map(\.providerFamily).sorted(), ["116pan-vip", "jkpan-vip"])
+        XCTAssertEqual(bundle.bundleVersion, "2026.04.13.catalog.koolaayun.3")
+        XCTAssertEqual(bundle.providers.map(\.providerFamily).sorted(), ["116pan-vip", "jkpan-vip", "koolaayun-vip"])
         XCTAssertTrue(bundle.providers.contains { $0.providerFamily == "jkpan-vip" })
         XCTAssertTrue(bundle.providers.contains { $0.providerFamily == "116pan-vip" })
+        XCTAssertTrue(bundle.providers.contains { $0.providerFamily == "koolaayun-vip" })
         XCTAssertFalse(bundle.providers.contains { $0.providerFamily == "rosefile" })
         XCTAssertFalse(bundle.providers.contains { $0.providerFamily == "xueqiupan" })
         XCTAssertFalse(bundle.providers.contains { $0.providerFamily == "xunniufile" })
@@ -18,13 +19,15 @@ final class RuleCompilerTests: XCTestCase {
         XCTAssertFalse(bundle.providers.contains { $0.providerFamily == "iycdn" })
         XCTAssertFalse(bundle.providers.contains { $0.providerFamily == "xrcf-vip" })
         XCTAssertFalse(bundle.providers.contains { $0.providerFamily == "secure-demo" })
-        XCTAssertEqual(bundle.authWorkflows.map(\.id).sorted(), ["116pan.vip.captcha.auth", "legacy.vip.formhashCaptcha.auth"])
+        XCTAssertEqual(bundle.authWorkflows.map(\.id).sorted(), ["116pan.vip.captcha.auth", "koolaayun.account.form.auth", "legacy.vip.formhashCaptcha.auth"])
         XCTAssertTrue(bundle.authWorkflows.contains { $0.id == "116pan.vip.captcha.auth" })
+        XCTAssertTrue(bundle.authWorkflows.contains { $0.id == "koolaayun.account.form.auth" })
         XCTAssertTrue(bundle.authWorkflows.contains { $0.id == "legacy.vip.formhashCaptcha.auth" })
         XCTAssertFalse(bundle.authWorkflows.contains { $0.id == "secure.auth" })
         XCTAssertFalse(bundle.authWorkflows.contains { $0.id == "legacy.vip.xsrfCaptcha.auth" })
         XCTAssertFalse(bundle.authWorkflows.contains { $0.id == "legacy.vip.fastlogin.auth" })
         XCTAssertTrue(bundle.downloadWorkflows.contains { $0.id == "116pan.vip.generateDownload" })
+        XCTAssertTrue(bundle.downloadWorkflows.contains { $0.id == "koolaayun.vip.ptRedirectDownload" })
         XCTAssertFalse(bundle.downloadWorkflows.contains { $0.id == "legacy.vip.generateDownload" })
         XCTAssertEqual(
             bundle.providers.first { $0.providerFamily == "116pan-vip" }?.authPolicy?.materialKeys,
@@ -42,7 +45,7 @@ final class RuleCompilerTests: XCTestCase {
             bundle.providers.first { $0.providerFamily == "116pan-vip" }?.authPolicy?.captchaRetryPolicy?.maxAttempts,
             50
         )
-        XCTAssertEqual(bundle.capabilityRefs.map(\.name), ["captcha.ocr", "cookies.valueForName", "url.origin", "url.percentDecode"])
+        XCTAssertEqual(bundle.capabilityRefs.map(\.name), ["captcha.ocr", "cookies.valueForName", "payload.formURLEncoded", "url.origin", "url.percentDecode"])
     }
 
     func test116PanProviderMatchesCanonicalXyzAndComHosts() throws {
@@ -55,6 +58,17 @@ final class RuleCompilerTests: XCTestCase {
         XCTAssertTrue(provider.matchers.contains { $0.matches(url: URL(string: "https://www.116pan.com/f/0V02j0lxvpSl")!) })
         XCTAssertTrue(provider.matchers.contains { $0.matches(url: URL(string: "https://116pan.com/f/0V02j0lxvpSl")!) })
         XCTAssertFalse(provider.matchers.contains { $0.matches(url: URL(string: "https://www.116pan.com/viewfile.php?file_id=471463")!) })
+    }
+
+    func testKoolaayunProviderMatchesVerifiedZipPathOnly() throws {
+        let provider = try XCTUnwrap(
+            RuleBundleFixtures.defaultBundle.providers.first { $0.providerFamily == "koolaayun-vip" }
+        )
+
+        XCTAssertTrue(provider.matchers.contains { $0.matches(url: URL(string: "https://koolaayun.com/cf6163a33d9e6555/A17684.zip")!) })
+        XCTAssertTrue(provider.matchers.contains { $0.matches(url: URL(string: "https://www.koolaayun.com/cf6163a33d9e6555/A17684.zip")!) })
+        XCTAssertFalse(provider.matchers.contains { $0.matches(url: URL(string: "https://koolaayun.com/cf6163a33d9e6555")!) })
+        XCTAssertFalse(provider.matchers.contains { $0.matches(url: URL(string: "https://koolaayun.com/account/login")!) })
     }
 
     func testSyncPersistsAndActivatesBundle() async throws {
@@ -87,7 +101,7 @@ final class RuleCompilerTests: XCTestCase {
             XCTFail("Expected missing capability error")
         } catch let RuleEngineError.missingCapability(name) {
             XCTAssertTrue(
-                ["captcha.ocr", "cookies.valueForName", "url.origin", "url.percentDecode"].contains(name)
+                ["captcha.ocr", "cookies.valueForName", "payload.formURLEncoded", "url.origin", "url.percentDecode"].contains(name)
             )
         } catch {
             XCTFail("Unexpected error: \(error)")

@@ -8,7 +8,7 @@ public enum RuleBundleFixtures {
                     "auth-workflows.bundle",
                     "auth-sites.bundle",
                 ],
-                bundleVersion: "2026.04.12.catalog.116pan.5"
+                bundleVersion: "2026.04.13.catalog.koolaayun.3"
             )
         } catch {
             preconditionFailure("Failed to load bundled rule fixture: \(error)")

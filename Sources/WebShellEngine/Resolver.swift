@@ -599,6 +599,19 @@ public struct DownloadResolver: Sendable {
         }
 
         let joined = bodies.joined(separator: "\n")
+        if (provider.rule.authPolicy?.credentialRejectConditions ?? []).contains(where: { evaluateRuleCondition($0, variables: result.variables) }) {
+            throw RuleEngineError.authCredentialsRejected(provider.rule.providerFamily)
+        }
+        if (provider.rule.authPolicy?.captchaRejectConditions ?? []).contains(where: { evaluateRuleCondition($0, variables: result.variables) }) {
+            throw RuleEngineError.authCaptchaRejected(provider.rule.providerFamily)
+        }
+        if let successConditions = provider.rule.authPolicy?.successConditions,
+           !successConditions.isEmpty {
+            guard successConditions.allSatisfy({ evaluateRuleCondition($0, variables: result.variables) }) else {
+                throw RuleEngineError.authCredentialsRejected(provider.rule.providerFamily)
+            }
+            return
+        }
         if authDashboardIsAuthenticated(result) {
             return
         }
@@ -1240,38 +1253,42 @@ private struct WorkflowRuntime {
     }
 
     private func evaluate(_ condition: RuleCondition) -> Bool {
-        let value = lookup(path: condition.source, in: variables)
-        switch condition.comparator {
-        case .exists:
-            return value != nil && value != .null
-        case .missing:
-            return value == nil || value == .null
-        case .equals:
-            guard let value, let expected = condition.expected else {
-                return false
-            }
-            return value == expected || value.renderedString() == expected.renderedString()
-        case .notEquals:
-            guard let value, let expected = condition.expected else {
-                return false
-            }
-            return value != expected && value.renderedString() != expected.renderedString()
-        case .contains:
-            guard let value, let expected = condition.expected?.renderedString() else {
-                return false
-            }
-            return value.renderedString().contains(expected)
-        case .matchesRegex:
-            guard let value, let pattern = condition.expected?.renderedString() else {
-                return false
-            }
-            return value.renderedString().range(of: pattern, options: .regularExpression) != nil
-        case .anyOf:
-            guard let value, let expectedValues = condition.expectedValues else {
-                return false
-            }
-            return expectedValues.contains(value.renderedString())
+        evaluateRuleCondition(condition, variables: variables)
+    }
+}
+
+private func evaluateRuleCondition(_ condition: RuleCondition, variables: [String: RuntimeValue]) -> Bool {
+    let value = lookup(path: condition.source, in: variables)
+    switch condition.comparator {
+    case .exists:
+        return value != nil && value != .null
+    case .missing:
+        return value == nil || value == .null
+    case .equals:
+        guard let value, let expected = condition.expected else {
+            return false
         }
+        return value == expected || value.renderedString() == expected.renderedString()
+    case .notEquals:
+        guard let value, let expected = condition.expected else {
+            return false
+        }
+        return value != expected && value.renderedString() != expected.renderedString()
+    case .contains:
+        guard let value, let expected = condition.expected?.renderedString() else {
+            return false
+        }
+        return value.renderedString().contains(expected)
+    case .matchesRegex:
+        guard let value, let pattern = condition.expected?.renderedString() else {
+            return false
+        }
+        return value.renderedString().range(of: pattern, options: .regularExpression) != nil
+    case .anyOf:
+        guard let value, let expectedValues = condition.expectedValues else {
+            return false
+        }
+        return expectedValues.contains(value.renderedString())
     }
 }
 

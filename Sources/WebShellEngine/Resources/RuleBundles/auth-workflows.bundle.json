@@ -207,6 +207,99 @@
       ]
     },
     {
+      "description": "Koolaayun account login form flow using local username/password credentials.",
+      "id": "koolaayun.account.form.auth",
+      "steps": [
+        {
+          "invokeCapability": {
+            "arguments": {},
+            "bindings": {
+              "sourceURL": "input.sourceURL"
+            },
+            "capability": "url.origin",
+            "target": "pageOrigin"
+          },
+          "type": "invokeCapability"
+        },
+        {
+          "http": {
+            "attachAuthSession": false,
+            "headers": {
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "zh-CN",
+              "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+            },
+            "method": "GET",
+            "output": "loginPage",
+            "persistResponseCookies": true,
+            "urlTemplate": "{{pageOrigin}}/account/login"
+          },
+          "type": "http"
+        },
+        {
+          "invokeCapability": {
+            "arguments": {
+              "fieldBindings": {
+                "password": "materials.password",
+                "username": "materials.username"
+              },
+              "fields": {
+                "submitme": "1"
+              }
+            },
+            "bindings": {},
+            "capability": "payload.formURLEncoded",
+            "target": "loginBody"
+          },
+          "type": "invokeCapability"
+        },
+        {
+          "http": {
+            "attachAuthSession": true,
+            "bodyTemplate": "{{loginBody}}",
+            "followRedirects": false,
+            "headers": {
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "zh-CN",
+              "Content-Type": "application/x-www-form-urlencoded",
+              "Origin": "{{pageOrigin}}",
+              "Referer": "{{pageOrigin}}/account/login",
+              "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+            },
+            "method": "POST",
+            "output": "loginResponse",
+            "persistResponseCookies": true,
+            "urlTemplate": "{{pageOrigin}}/account/login"
+          },
+          "type": "http"
+        },
+        {
+          "http": {
+            "attachAuthSession": true,
+            "headers": {
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "zh-CN",
+              "Referer": "{{pageOrigin}}/account/login",
+              "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+            },
+            "method": "GET",
+            "output": "accountPage",
+            "persistResponseCookies": true,
+            "urlTemplate": "{{pageOrigin}}/account"
+          },
+          "type": "http"
+        },
+        {
+          "assign": {
+            "source": "materials.username",
+            "storage": "authSession",
+            "target": "username"
+          },
+          "type": "assign"
+        }
+      ]
+    },
+    {
       "description": "Legacy formhash + captcha login flow migrated from LoginByFormhashAndCode and LoginVerifyCode.",
       "id": "legacy.vip.formhashCaptcha.auth",
       "steps": [
@@ -300,6 +393,10 @@
     },
     {
       "name": "cookies.valueForName",
+      "required": true
+    },
+    {
+      "name": "payload.formURLEncoded",
       "required": true
     },
     {

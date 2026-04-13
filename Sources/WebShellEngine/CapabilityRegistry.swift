@@ -81,7 +81,15 @@ public actor CapabilityRegistry {
                 return lookup(path: path, from: root) ?? .null
             },
             "payload.formURLEncoded": { invocation in
-                let fields = invocation.arguments["fields"]?.objectValue ?? [:]
+                var fields = invocation.arguments["fields"]?.objectValue ?? [:]
+                let fieldBindings = invocation.arguments["fieldBindings"]?.objectValue ?? [:]
+                for (key, pathValue) in fieldBindings {
+                    guard let path = pathValue.stringValue,
+                          let value = lookupVariable(path: path, in: invocation.variables) else {
+                        continue
+                    }
+                    fields[key] = value
+                }
                 let pairs = fields
                     .sorted { $0.key < $1.key }
                     .map { key, value in
@@ -228,4 +236,12 @@ private func lookup(path: [String], from root: RuntimeValue) -> RuntimeValue? {
         current = next
     }
     return current
+}
+
+private func lookupVariable(path: String, in variables: [String: RuntimeValue]) -> RuntimeValue? {
+    let parts = path.split(separator: ".").map(String.init)
+    guard let first = parts.first, let root = variables[first] else {
+        return nil
+    }
+    return lookup(path: Array(parts.dropFirst()), from: root)
 }
