@@ -1,0 +1,69 @@
+{
+  "requiredFiles": [
+    "AGENTS.md",
+    "WebShell-SPM/docs/architecture/source-structure-governance.md",
+    "WebShell-SPM/docs/plans/source-structure-governance-migration.md"
+  ],
+  "requiredDirs": [
+    "WebShellClient-Apple/Packages/WebShellClientKit/Sources/WebShellClientKit/App",
+    "WebShellClient-Apple/Packages/WebShellClientKit/Sources/WebShellClientKit/Features",
+    "WebShellClient-Apple/Packages/WebShellClientKit/Sources/WebShellClientKit/Shared",
+    "WebShellClient-Apple/Packages/WebShellClientKit/Sources/WebShellClientKit/Shared/UI",
+    "WebShellClient-Apple/Packages/WebShellClientKit/Sources/WebShellClientKit/Shared/Models",
+    "WebShellClient-Apple/Packages/WebShellClientKit/Sources/WebShellClientKit/Shared/Clients",
+    "WebShellClient-Apple/Packages/WebShellClientKit/Sources/WebShellClientKit/Shared/Services",
+    "WebShellClient-Apple/Packages/WebShellClientKit/Sources/WebShellClientKit/Shared/Infrastructure",
+    "WebShellClient-Apple/Packages/WebShellClientKit/Sources/WebShellClientKit/Shared/PreviewSupport",
+    "WebShellAdmin-macOS/Packages/WebShellAdminKit/Sources/WebShellAdminKit/App",
+    "WebShellAdmin-macOS/Packages/WebShellAdminKit/Sources/WebShellAdminKit/Features",
+    "WebShellAdmin-macOS/Packages/WebShellAdminKit/Sources/WebShellAdminKit/Shared",
+    "WebShellAdmin-macOS/Packages/WebShellAdminKit/Sources/WebShellAdminKit/Shared/UI",
+    "WebShellAdmin-macOS/Packages/WebShellAdminKit/Sources/WebShellAdminKit/Shared/Models",
+    "WebShellAdmin-macOS/Packages/WebShellAdminKit/Sources/WebShellAdminKit/Shared/Clients",
+    "WebShellAdmin-macOS/Packages/WebShellAdminKit/Sources/WebShellAdminKit/Shared/Services",
+    "WebShellAdmin-macOS/Packages/WebShellAdminKit/Sources/WebShellAdminKit/Shared/Infrastructure",
+    "WebShellAdmin-macOS/Packages/WebShellAdminKit/Sources/WebShellAdminKit/Shared/PreviewSupport"
+  ],
+  "aggregateFiles": [
+    {
+      "path": "WebShellClient-Apple/Packages/WebShellClientKit/Sources/WebShellClientKit/Views.swift",
+      "maxLines": 300
+    },
+    {
+      "path": "WebShellClient-Apple/Packages/WebShellClientKit/Sources/WebShellClientKit/Features.swift",
+      "maxLines": 600
+    },
+    {
+      "path": "WebShellClient-Apple/Packages/WebShellClientKit/Sources/WebShellClientKit/Models.swift",
+      "maxLines": 500
+    },
+    {
+      "path": "WebShellClient-Apple/Packages/WebShellClientKit/Sources/WebShellClientKit/ClientsAndServices.swift",
+      "maxLines": 600
+    },
+    {
+      "path": "WebShellClient-Apple/Packages/WebShellClientKit/Tests/WebShellClientKitTests/WebShellClientKitTests.swift",
+      "maxLines": 800
+    },
+    {
+      "path": "WebShellAdmin-macOS/Packages/WebShellAdminKit/Sources/WebShellAdminKit/Views.swift",
+      "maxLines": 300
+    },
+    {
+      "path": "WebShellAdmin-macOS/Packages/WebShellAdminKit/Sources/WebShellAdminKit/Features.swift",
+      "maxLines": 600
+    },
+    {
+      "path": "WebShellAdmin-macOS/Packages/WebShellAdminKit/Sources/WebShellAdminKit/Models.swift",
+      "maxLines": 500
+    },
+    {
+      "path": "WebShellAdmin-macOS/Packages/WebShellAdminKit/Sources/WebShellAdminKit/ClientsAndServices.swift",
+      "maxLines": 600
+    },
+    {
+      "path": "WebShellAdmin-macOS/Packages/WebShellAdminKit/Tests/WebShellAdminKitTests/WebShellAdminKitTests.swift",
+      "maxLines": 600
+    }
+  ]
+}
