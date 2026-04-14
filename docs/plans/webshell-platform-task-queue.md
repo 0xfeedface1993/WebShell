@@ -142,3 +142,4 @@
 - X4 captcha retry unit evidence: `cd /Users/yorl/Downloads/GitHub-Cool/WebShell/WebShell-SPM && swift test`
 - X4 client package compatibility evidence: `cd /Users/yorl/Downloads/GitHub-Cool/WebShell/WebShellClient-Apple/Packages/WebShellClientKit && swift test`
 - X4 116pan auth/OCR notes: `docs/plans/webshell-116pan-auth-ocr-notes.md`
+- UI/Figma sync review: `docs/plans/webshell-platform-ui-figma-sync-review.md`
