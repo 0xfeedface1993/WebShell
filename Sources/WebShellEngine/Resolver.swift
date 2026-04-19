@@ -80,12 +80,61 @@ struct CompiledProvider: Sendable {
     }
 }
 
+/// Public return type of `DownloadResolver.runWorkflow(workflowID:…)`.
+/// Holds the final state of a standalone workflow run — the
+/// extracted-variables map plus any AuthSession / request the
+/// workflow emitted.
+///
+/// Most Phase 4C callers only read `variables`; they look up the
+/// field they explicitly declared in the workflow's last `assign`
+/// or `invokeCapability` step (e.g. `parsedArticles`, `pageHTML`).
+/// `authSession` surfaces when the workflow's HTTP steps set
+/// `persistResponseCookies: true`, so callers can grab a fresh
+/// session without a second `authenticate(…)` round-trip.
+/// `emittedRequest` is populated if the workflow's last step was
+/// `emitRequest` — useful for workflows that mix "fetch-and-parse"
+/// with "emit a follow-on download".
+public struct RuleEngineRunResult: Sendable {
+    public let variables: [String: RuntimeValue]
+    public let authSession: AuthSession?
+    public let emittedRequest: ResolvedDownloadRequest?
+
+    public init(
+        variables: [String: RuntimeValue],
+        authSession: AuthSession? = nil,
+        emittedRequest: ResolvedDownloadRequest? = nil
+    ) {
+        self.variables = variables
+        self.authSession = authSession
+        self.emittedRequest = emittedRequest
+    }
+}
+
 struct CompiledRuleBundle: Sendable {
     let snapshot: RuleBundleSnapshot
     let providers: [CompiledProvider]
 
     func provider(matching url: URL) -> CompiledProvider? {
         providers.first { $0.matches(url) }
+    }
+
+    /// Look up a workflow by its string `id` across every workflow
+    /// list in the active bundle (download + auth + shared
+    /// fragments). Used by `runWorkflow(workflowID:...)` which
+    /// invokes a workflow directly without requiring a provider
+    /// match — useful for list/detail page fetch + parse flows
+    /// where the caller already knows which workflow applies.
+    func workflow(id: String) -> WorkflowDefinition? {
+        if let hit = snapshot.bundle.downloadWorkflows.first(where: { $0.id == id }) {
+            return hit
+        }
+        if let hit = snapshot.bundle.authWorkflows.first(where: { $0.id == id }) {
+            return hit
+        }
+        if let hit = snapshot.bundle.sharedFragments.first(where: { $0.id == id }) {
+            return hit
+        }
+        return nil
     }
 }
 
@@ -238,6 +287,164 @@ public struct DownloadResolver: Sendable {
         self.capabilityRegistry = capabilityRegistry
         self.authSessionStore = authSessionStore
         self.authMaterialProvider = authMaterialProvider
+    }
+
+    /// Standalone authentication-only entry point.
+    ///
+    /// Matches a provider by `hostURL` (same logic as `resolve`),
+    /// verifies the provider has an auth workflow, and runs just
+    /// the auth branch through `authenticateWithCaptchaRetry`.
+    /// Returns the resulting `AuthSession`; also stored in the
+    /// `AuthSessionStore` so subsequent `resolve(...)` calls for
+    /// this provider skip re-auth.
+    ///
+    /// Use when the caller wants to pre-warm a session (e.g. boot
+    /// login) or refresh a known-expired one without going through
+    /// a download-URL resolve. Callers that resolve a real download
+    /// URL should use `resolve(_:)` which triggers auth implicitly
+    /// when needed.
+    public func authenticate(
+        hostURL: URL,
+        accountID: String? = nil,
+        variables: [String: RuntimeValue] = [:]
+    ) async throws -> AuthSession {
+        guard let compiledBundle = await catalog.currentCompiledBundle() else {
+            throw RuleEngineError.missingActiveBundle
+        }
+        guard let provider = compiledBundle.provider(matching: hostURL) else {
+            throw RuleEngineError.noMatchingProvider(hostURL.absoluteString)
+        }
+        // Auth-only flow must have an auth workflow + policy
+        // configured. Otherwise this call is a no-op and the caller
+        // deserves a clear error.
+        guard
+            provider.authWorkflow != nil,
+            provider.rule.authPolicy?.requiresAuthentication == true
+        else {
+            throw RuleEngineError.authWorkflowRequired(provider.rule.providerFamily)
+        }
+
+        let request = DownloadResolveRequest(
+            sourceURL: hostURL,
+            accountID: accountID,
+            variables: variables
+        )
+        let resolvedAccountID = try resolveAccountID(for: provider, request: request)
+        let sessionKey = AuthSessionKey(
+            providerFamily: provider.rule.providerFamily,
+            accountID: resolvedAccountID
+        )
+        let existingSession = await authSessionStore.session(for: sessionKey)
+        let maxAttempts = maxAuthenticationAttempts(for: provider)
+
+        let result = try await authenticateWithCaptchaRetry(
+            provider: provider,
+            request: request,
+            sessionKey: sessionKey,
+            existingSession: existingSession,
+            attempts: 0,
+            maxAttempts: maxAttempts
+        )
+        return result.session
+    }
+
+    /// Run an arbitrary workflow by ID without going through provider
+    /// URL matching. Use this when the caller already knows *which*
+    /// workflow to execute — e.g. a list/detail fetch + parse
+    /// pipeline where every URL on the target host flows through the
+    /// same named workflow regardless of the specific path. Unlike
+    /// `resolve(_:)`, the returned value is the *extracted-variables
+    /// map* from the final workflow state; callers pull out the
+    /// fields they declared via `extract`/`assign` steps (e.g.
+    /// `parsedArticles`, `pageHTML`).
+    ///
+    /// - Parameters:
+    ///   - workflowID: the `WorkflowDefinition.id` in the active
+    ///     bundle. Searches `downloadWorkflows` → `authWorkflows` →
+    ///     `sharedFragments`. First match wins; throws
+    ///     `missingWorkflow` if not found.
+    ///   - sourceURL: exposed to the workflow as
+    ///     `input.sourceURL`. Typically the page the workflow is
+    ///     about to fetch.
+    ///   - authSessionKey: pre-existing auth session to attach when
+    ///     `http` steps set `attachAuthSession: true`. If nil, a
+    ///     synthetic `("standalone", "default")` key is used; the
+    ///     workflow still runs but any `persistResponseCookies: true`
+    ///     store will go under the synthetic key. Pass the same key
+    ///     as `authenticate(...)` produced when you want workflows
+    ///     to share session state.
+    ///   - variables: extra runtime variables the workflow can
+    ///     template (`{{materials.xxx}}` / `{{input.variables.xxx}}`).
+    ///
+    /// - Note: unlike `resolve`/`authenticate`, this method does not
+    ///   require a provider matcher hit, so any workflow in the
+    ///   catalog is reachable. This is deliberate — it lets
+    ///   consumer-private bundles ship workflows that are
+    ///   invoked directly by the host app without the caller having
+    ///   to invent a placeholder URL matcher.
+    public func runWorkflow(
+        workflowID: String,
+        sourceURL: URL,
+        authSessionKey: AuthSessionKey? = nil,
+        variables: [String: RuntimeValue] = [:]
+    ) async throws -> RuleEngineRunResult {
+        guard let compiledBundle = await catalog.currentCompiledBundle() else {
+            throw RuleEngineError.missingActiveBundle
+        }
+        guard let workflow = compiledBundle.workflow(id: workflowID) else {
+            throw RuleEngineError.missingWorkflow(workflowID)
+        }
+
+        // Synthesize a minimal provider so we can reuse the existing
+        // `WorkflowRuntime`. All provider-dependent fields (id /
+        // family / metadata) are set to safe defaults; the runtime
+        // only surfaces them via `variables["provider"]` for
+        // workflow templates, so benign defaults are fine.
+        let stubProviderRule = ProviderRule(
+            id: "runWorkflow.standalone",
+            providerFamily: "standalone",
+            matchers: [],
+            accountScope: .providerFamily,
+            downloadWorkflowID: workflow.id,
+            authWorkflowID: nil,
+            authPolicy: nil,
+            metadata: [:]
+        )
+        let stubProvider = CompiledProvider(
+            rule: stubProviderRule,
+            downloadWorkflow: workflow,
+            authWorkflow: nil
+        )
+        let sessionKey = authSessionKey ?? AuthSessionKey(
+            providerFamily: "standalone",
+            accountID: "default"
+        )
+        let existingSession = await authSessionStore.session(for: sessionKey)
+        let request = DownloadResolveRequest(
+            sourceURL: sourceURL,
+            accountID: sessionKey.accountID,
+            variables: variables
+        )
+        var runtime = WorkflowRuntime(
+            provider: stubProvider,
+            workflow: workflow,
+            request: request,
+            httpClient: httpClient,
+            capabilityRegistry: capabilityRegistry,
+            sessionKey: sessionKey,
+            authSession: existingSession,
+            materials: [:],
+            authExpireConditions: []
+        )
+        let result = try await runtime.run()
+        if let refreshed = result.authSession, !refreshed.isEmpty {
+            await authSessionStore.store(refreshed)
+        }
+        return RuleEngineRunResult(
+            variables: result.variables,
+            authSession: result.authSession,
+            emittedRequest: result.emittedRequest
+        )
     }
 
     public func resolve(_ request: DownloadResolveRequest) async throws -> ResolvedDownloadRequest {
