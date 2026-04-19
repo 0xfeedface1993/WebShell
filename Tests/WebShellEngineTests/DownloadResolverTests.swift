@@ -1760,4 +1760,136 @@ final class DownloadResolverTests: XCTestCase {
             XCTFail("Unexpected error: \(error)")
         }
     }
+
+    // MARK: - Regression coverage for review feedback (2026-04-20)
+
+    /// `authenticate(hostURL:)` must NOT gate on
+    /// `authPolicy.requiresAuthentication == true`. The explicit
+    /// entry point is always "run this provider's auth workflow
+    /// now"; optional-auth providers (workflow configured + policy
+    /// relaxed) should still be able to prewarm / refresh through
+    /// it. `secure-demo` in the templates fixture has exactly
+    /// this shape (authWorkflowID: "secure.auth",
+    /// requiresAuthentication: false).
+    func testAuthenticateRunsAuthWorkflowForOptionalAuthProvider() async throws {
+        let bundle = try RuleBundleFixtures.loadMergedBundle(
+            named: [
+                "auth-workflows.bundle",
+                "auth-sites.bundle",
+                "auth-templates.bundle",
+            ],
+            bundleVersion: "2026.04.20.optional-auth-authenticate.1"
+        )
+        let (registry, catalog) = try await makeSyncedCatalog(bundle: bundle)
+
+        let authStore = AuthSessionStore()
+        let httpClient = StubHTTPClient { request in
+            switch request.url.absoluteString {
+            case "https://secure.example.com/login":
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: ["Set-Cookie": "session=valid; Path=/; Domain=secure.example.com"],
+                    body: "ok",
+                    cookies: [
+                        SerializableCookie(
+                            name: "session",
+                            value: "valid",
+                            domain: "secure.example.com",
+                            path: "/"
+                        )
+                    ]
+                )
+            default:
+                XCTFail("Unexpected request: \(request.url.absoluteString)")
+                return HTTPResponseData(statusCode: 500, url: request.url, headers: [:], body: "unexpected")
+            }
+        }
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: httpClient,
+            capabilityRegistry: registry,
+            authSessionStore: authStore,
+            authMaterialProvider: CountingAuthMaterialProvider(counter: MaterialCounter())
+        )
+
+        let session = try await resolver.authenticate(
+            hostURL: URL(string: "https://secure.example.com/")!,
+            accountID: "demo"
+        )
+
+        XCTAssertEqual(session.cookies.first?.name, "session")
+        XCTAssertEqual(session.cookies.first?.value, "valid")
+        let stored = await authStore.session(
+            for: AuthSessionKey(providerFamily: "secure-demo", accountID: "demo")
+        )
+        XCTAssertEqual(stored?.cookies.first?.value, "valid")
+    }
+
+    /// `runWorkflow(workflowID:)` walks `authWorkflows` during id
+    /// lookup, so auth workflows are reachable through this entry
+    /// point. Those workflows template `{{materials.username}}` /
+    /// `{{materials.password}}`; without a pluggable `materials`
+    /// dict, they deterministically throw `.missingVariable`.
+    /// Verifies the caller can thread credentials in directly.
+    func testRunWorkflowInjectsMaterialsIntoAuthWorkflow() async throws {
+        let bundle = try RuleBundleFixtures.loadMergedBundle(
+            named: [
+                "auth-workflows.bundle",
+                "auth-sites.bundle",
+                "auth-templates.bundle",
+            ],
+            bundleVersion: "2026.04.20.runWorkflow-materials.1"
+        )
+        let (registry, catalog) = try await makeSyncedCatalog(bundle: bundle)
+
+        let authStore = AuthSessionStore()
+        let httpClient = StubHTTPClient { request in
+            switch request.url.absoluteString {
+            case "https://secure.example.com/login":
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: ["Set-Cookie": "session=valid; Path=/; Domain=secure.example.com"],
+                    body: "ok",
+                    cookies: [
+                        SerializableCookie(
+                            name: "session",
+                            value: "valid",
+                            domain: "secure.example.com",
+                            path: "/"
+                        )
+                    ]
+                )
+            default:
+                XCTFail("Unexpected request: \(request.url.absoluteString)")
+                return HTTPResponseData(statusCode: 500, url: request.url, headers: [:], body: "unexpected")
+            }
+        }
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: httpClient,
+            capabilityRegistry: registry,
+            authSessionStore: authStore,
+            authMaterialProvider: CountingAuthMaterialProvider(counter: MaterialCounter())
+        )
+
+        let result = try await resolver.runWorkflow(
+            workflowID: "secure.auth",
+            sourceURL: URL(string: "https://secure.example.com/")!,
+            variables: [:],
+            materials: [
+                "username": .string("demo-user"),
+                "password": .string("secret-password"),
+            ]
+        )
+
+        // `secure.auth`: template → http POST /login
+        // (persistResponseCookies: true) → assign. Without the
+        // materials fix, the first template step throws
+        // .missingVariable. With the fix, the workflow completes
+        // and surfaces the session cookie in the result.
+        XCTAssertEqual(result.authSession?.cookies.first?.name, "session")
+        XCTAssertEqual(result.authSession?.cookies.first?.value, "valid")
+    }
 }

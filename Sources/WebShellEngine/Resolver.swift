@@ -314,13 +314,16 @@ public struct DownloadResolver: Sendable {
         guard let provider = compiledBundle.provider(matching: hostURL) else {
             throw RuleEngineError.noMatchingProvider(hostURL.absoluteString)
         }
-        // Auth-only flow must have an auth workflow + policy
-        // configured. Otherwise this call is a no-op and the caller
-        // deserves a clear error.
-        guard
-            provider.authWorkflow != nil,
-            provider.rule.authPolicy?.requiresAuthentication == true
-        else {
+        // Gate on auth-workflow availability only — NOT on whether
+        // the provider's auth policy makes auth automatic for
+        // `resolve(_:)`. An explicit `authenticate(hostURL:)` call
+        // is always "run this provider's auth workflow now",
+        // including for optional-auth providers (ones that work
+        // logged-out but surface more content / higher quotas when
+        // a session is attached). `requiresAuthentication` is the
+        // right gate for implicit auth inside `resolve(_:)`, but
+        // it's the wrong gate for this explicit entry point.
+        guard provider.authWorkflow != nil else {
             throw RuleEngineError.authWorkflowRequired(provider.rule.providerFamily)
         }
 
@@ -373,8 +376,16 @@ public struct DownloadResolver: Sendable {
     ///     store will go under the synthetic key. Pass the same key
     ///     as `authenticate(...)` produced when you want workflows
     ///     to share session state.
-    ///   - variables: extra runtime variables the workflow can
-    ///     template (`{{materials.xxx}}` / `{{input.variables.xxx}}`).
+    ///   - variables: extra runtime variables available to the
+    ///     workflow via the `{{input.variables.xxx}}` template path.
+    ///   - materials: credentials / static values injected into the
+    ///     runtime's `{{materials.xxx}}` template slots. Auth
+    ///     workflows (reachable through this entry point because
+    ///     `workflowID` lookup also searches `authWorkflows`)
+    ///     typically require `materials.username` /
+    ///     `materials.password` — pass those here when invoking
+    ///     one. Fetch+parse workflows that don't template
+    ///     materials can leave this empty.
     ///
     /// - Note: unlike `resolve`/`authenticate`, this method does not
     ///   require a provider matcher hit, so any workflow in the
@@ -386,7 +397,8 @@ public struct DownloadResolver: Sendable {
         workflowID: String,
         sourceURL: URL,
         authSessionKey: AuthSessionKey? = nil,
-        variables: [String: RuntimeValue] = [:]
+        variables: [String: RuntimeValue] = [:],
+        materials: [String: RuntimeValue] = [:]
     ) async throws -> RuleEngineRunResult {
         guard let compiledBundle = await catalog.currentCompiledBundle() else {
             throw RuleEngineError.missingActiveBundle
@@ -433,7 +445,7 @@ public struct DownloadResolver: Sendable {
             capabilityRegistry: capabilityRegistry,
             sessionKey: sessionKey,
             authSession: existingSession,
-            materials: [:],
+            materials: materials,
             authExpireConditions: []
         )
         let result = try await runtime.run()
