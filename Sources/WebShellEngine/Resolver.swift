@@ -126,17 +126,40 @@ struct CompiledRuleBundle: Sendable {
         providers.first { $0.matches(url) }
     }
 
-    /// Host-only variant of `provider(matching:)`. Scans providers
-    /// and returns the first whose matchers' `hosts` / `hostSuffixes`
-    /// include `url`'s host, ignoring `pathPattern`. Used by
-    /// `authenticate(hostURL:)` so callers can prewarm / refresh
-    /// a session from a plain host URL even when the provider's
-    /// download matchers require a specific path (e.g.
-    /// `/file-\d+\.html$` — such a matcher is correct for
-    /// `resolve(_:)` URL routing but wrong for host-identity
-    /// lookup).
-    func provider(hostMatching url: URL) -> CompiledProvider? {
-        providers.first { $0.matchesHost(of: url) }
+    /// Host-identity variant of `provider(matching:)`, for
+    /// `authenticate(hostURL:)`. Two-tier selection to cope with
+    /// bundles where multiple providers legally share a host
+    /// (they must differ by `pathPattern` — compile-time
+    /// conflict keys include path):
+    ///
+    /// 1. Prefer strict full match (`matches(url)`). If the
+    ///    caller's URL carries a path that only one provider's
+    ///    `pathPattern` accepts, this picks that one; if strict
+    ///    returns multiple candidates, the rules themselves have
+    ///    a conflict — surface it.
+    /// 2. Otherwise fall back to host-only (`matchesHost`).
+    ///    Single candidate → return it; multiple candidates →
+    ///    throw `.ambiguousHostMatch(host)` (the caller has to
+    ///    supply a URL with enough path to disambiguate); zero
+    ///    → return `nil` so the caller can map to
+    ///    `.noMatchingProvider`.
+    ///
+    /// Throwing rather than silently picking `first` prevents
+    /// `authenticate` from running the wrong provider's auth
+    /// workflow / persisting sessions under the wrong family
+    /// when a bundle has host-overloaded providers.
+    func provider(hostMatching url: URL) throws -> CompiledProvider? {
+        let strict = providers.filter { $0.matches(url) }
+        if strict.count == 1 { return strict.first }
+        if strict.count > 1 {
+            throw RuleEngineError.ambiguousHostMatch(url.host ?? url.absoluteString)
+        }
+        let byHost = providers.filter { $0.matchesHost(of: url) }
+        if byHost.count == 1 { return byHost.first }
+        if byHost.count > 1 {
+            throw RuleEngineError.ambiguousHostMatch(url.host ?? url.absoluteString)
+        }
+        return nil
     }
 
     /// Return the provider that declares `id` as its
@@ -383,15 +406,15 @@ public struct DownloadResolver: Sendable {
         guard let compiledBundle = await catalog.currentCompiledBundle() else {
             throw RuleEngineError.missingActiveBundle
         }
-        // Host-only match: providers whose matchers include a
-        // `pathPattern` (e.g. `/file-\d+\.html$` in auth-sites)
-        // are correctly restrictive for `resolve(_:)` URL
-        // routing, but the caller here has a host-identifying
-        // URL (e.g. `https://jkpan.com/` for prewarm), not a
-        // download URL. Matching on host only is what lets the
-        // documented "standalone auth prewarm" use case actually
-        // work.
-        guard let provider = compiledBundle.provider(hostMatching: hostURL) else {
+        // Host-identity match: strict full match first (useful
+        // when the caller does pass a URL with a distinguishing
+        // path), host-only fallback for plain prewarm URLs.
+        // Throws `.ambiguousHostMatch` when a host is shared by
+        // multiple providers (legal if their pathPatterns
+        // differ) and the caller's URL can't narrow it down —
+        // surfacing the ambiguity beats silently running the
+        // wrong provider's workflow.
+        guard let provider = try compiledBundle.provider(hostMatching: hostURL) else {
             throw RuleEngineError.noMatchingProvider(hostURL.absoluteString)
         }
         // Gate on auth-workflow availability only — NOT on whether
@@ -848,6 +871,7 @@ public struct DownloadResolver: Sendable {
                  .noMatchingProvider,
                  .missingWorkflow,
                  .ambiguousWorkflow,
+                 .ambiguousHostMatch,
                  .missingCapability,
                  .noEmittedRequest,
                  .httpFailure:

@@ -15,6 +15,14 @@ public enum RuleEngineError: LocalizedError, Sendable {
     /// this check lives on direct-lookup paths like
     /// `DownloadResolver.runWorkflow(workflowID:)`.
     case ambiguousWorkflow(String)
+    /// Thrown when a host-only URL matches more than one
+    /// provider and strict full-URL matching can't disambiguate
+    /// them (e.g. two providers sharing a host with different
+    /// `pathPattern`s). Surfaces on the
+    /// `DownloadResolver.authenticate(hostURL:)` path so callers
+    /// can supply a more specific URL. The associated value is
+    /// the ambiguous host.
+    case ambiguousHostMatch(String)
     case missingCapability(String)
     case missingVariable(String)
     case invalidTemplate(String)
@@ -40,6 +48,8 @@ public enum RuleEngineError: LocalizedError, Sendable {
             return "Missing workflow: \(value)"
         case .ambiguousWorkflow(let value):
             return "Workflow id \(value) is declared in more than one of downloadWorkflows / authWorkflows / sharedFragments."
+        case .ambiguousHostMatch(let value):
+            return "Host \(value) matches more than one provider and strict pathPattern matching did not disambiguate; caller must supply a URL that selects a single provider."
         case .missingCapability(let value):
             return "Missing capability: \(value)"
         case .missingVariable(let value):

@@ -2231,4 +2231,104 @@ final class DownloadResolverTests: XCTestCase {
         )
         XCTAssertNil(underDefault, "session must not land under 'default' when template is configured")
     }
+
+    /// Compilation allows two providers to share a host as long
+    /// as their `pathPattern`s differ. For that (legal) shape,
+    /// `authenticate(hostURL:)` with a plain host URL can't pick
+    /// a single provider — `.ambiguousHostMatch` must be thrown
+    /// rather than silently running the first provider's auth
+    /// workflow and persisting the session under its family.
+    /// A URL whose path hits exactly one provider's pathPattern
+    /// must still resolve cleanly.
+    func testAuthenticateThrowsAmbiguousHostMatchOnOverloadedHost() async throws {
+        let json = """
+        {
+          "schemaVersion": 1,
+          "bundleVersion": "2026.04.20.host-overlap.1",
+          "providers": [
+            {
+              "id": "overlap-a",
+              "providerFamily": "overlap-a",
+              "accountScope": "providerFamily",
+              "matchers": [
+                {
+                  "hosts": ["overlap.example.com"],
+                  "hostSuffixes": [],
+                  "pathPattern": "/a/.*"
+                }
+              ],
+              "downloadWorkflowID": "overlap.download",
+              "authWorkflowID": "overlap.auth",
+              "authPolicy": null,
+              "metadata": {}
+            },
+            {
+              "id": "overlap-b",
+              "providerFamily": "overlap-b",
+              "accountScope": "providerFamily",
+              "matchers": [
+                {
+                  "hosts": ["overlap.example.com"],
+                  "hostSuffixes": [],
+                  "pathPattern": "/b/.*"
+                }
+              ],
+              "downloadWorkflowID": "overlap.download",
+              "authWorkflowID": "overlap.auth",
+              "authPolicy": null,
+              "metadata": {}
+            }
+          ],
+          "sharedFragments": [],
+          "authWorkflows": [
+            {"id": "overlap.auth", "description": "", "steps": []}
+          ],
+          "downloadWorkflows": [
+            {"id": "overlap.download", "description": "", "steps": []}
+          ],
+          "capabilityRefs": []
+        }
+        """
+        let bundle = try JSONDecoder().decode(RuleBundle.self, from: Data(json.utf8))
+        let (registry, catalog) = try await makeSyncedCatalog(bundle: bundle)
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: StubHTTPClient { r in
+                HTTPResponseData(statusCode: 200, url: r.url, headers: [:], body: "")
+            },
+            capabilityRegistry: registry,
+            authSessionStore: AuthSessionStore(),
+            authMaterialProvider: CountingAuthMaterialProvider(counter: MaterialCounter())
+        )
+
+        // Plain host URL — cannot disambiguate between
+        // overlap-a and overlap-b.
+        do {
+            _ = try await resolver.authenticate(
+                hostURL: URL(string: "https://overlap.example.com/")!
+            )
+            XCTFail("expected ambiguousHostMatch for overloaded host without path")
+        } catch RuleEngineError.ambiguousHostMatch(let host) {
+            XCTAssertEqual(host, "overlap.example.com")
+        } catch {
+            XCTFail("unexpected error: \(error)")
+        }
+
+        // URL whose path satisfies only overlap-a's pathPattern
+        // — strict match picks overlap-a; no ambiguous error.
+        do {
+            _ = try await resolver.authenticate(
+                hostURL: URL(string: "https://overlap.example.com/a/1")!
+            )
+            // An empty-step auth workflow throws
+            // `.authDidNotProduceSession`; that's fine here,
+            // we're only asserting provider selection didn't
+            // throw `.ambiguousHostMatch`.
+        } catch RuleEngineError.ambiguousHostMatch {
+            XCTFail("strict pathPattern match should have disambiguated to overlap-a")
+        } catch {
+            // Any other error (e.g. authDidNotProduceSession) is
+            // acceptable — workflow execution isn't under test.
+        }
+    }
 }
