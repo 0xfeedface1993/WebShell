@@ -139,22 +139,44 @@ struct CompiledRuleBundle: Sendable {
         providers.first { $0.matchesHost(of: url) }
     }
 
-    /// Return the provider whose `downloadWorkflowID` or
-    /// `authWorkflowID` equals `id`, if any. Used by
-    /// `runWorkflow(workflowID:...)` to preserve provider context
-    /// (family / id / metadata) when invoking a workflow that a
-    /// specific provider declares — capabilities that key on
-    /// provider identity then see the correct owner instead of
-    /// a synthetic "standalone" stub.
+    /// Return the provider that declares `id` as its
+    /// `downloadWorkflowID` or `authWorkflowID`, using
+    /// `sourceURL` to disambiguate when multiple providers share
+    /// the same workflow ID. Used by `runWorkflow(workflowID:...)`
+    /// so capabilities that key on provider identity see the
+    /// correct owner (real family / id / metadata) instead of a
+    /// synthetic "standalone" stub.
     ///
-    /// Returns nil for shared-fragment workflow IDs not declared
-    /// by any provider; callers fall back to a synthetic stub in
-    /// that case.
-    func provider(declaringWorkflowID id: String) -> CompiledProvider? {
-        providers.first { provider in
+    /// Selection order:
+    ///   1. `candidates = providers whose downloadWorkflowID /
+    ///      authWorkflowID == id`
+    ///   2. If empty → nil (caller falls back to synthetic).
+    ///   3. If one → that provider.
+    ///   4. Otherwise disambiguate by `sourceURL`:
+    ///      a. strict full match (host + pathPattern)
+    ///      b. host-only match (for prewarm-style URLs)
+    ///      c. fall back to the first candidate
+    ///
+    /// Without (4), a shared workflow (e.g. `legacy-sites.bundle`'s
+    /// `generic.loadDownAddr1.dlphp`, declared by both `xueqiupan`
+    /// and `xunniufile`) would always route to whichever provider
+    /// was registered first — the second provider's runWorkflow
+    /// calls would inherit the wrong family / metadata and the
+    /// wrong default session key.
+    func provider(declaringWorkflowID id: String, sourceURL: URL) -> CompiledProvider? {
+        let candidates = providers.filter { provider in
             provider.rule.downloadWorkflowID == id
                 || provider.rule.authWorkflowID == id
         }
+        if candidates.isEmpty { return nil }
+        if candidates.count == 1 { return candidates.first }
+        if let strict = candidates.first(where: { $0.matches(sourceURL) }) {
+            return strict
+        }
+        if let byHost = candidates.first(where: { $0.matchesHost(of: sourceURL) }) {
+            return byHost
+        }
+        return candidates.first
     }
 
     /// Look up a workflow by its string `id` across every workflow
@@ -465,7 +487,10 @@ public struct DownloadResolver: Sendable {
         // capabilities in those workflows have nothing to key
         // against anyway).
         let stubProvider: CompiledProvider
-        if let owner = compiledBundle.provider(declaringWorkflowID: workflowID) {
+        if let owner = compiledBundle.provider(
+            declaringWorkflowID: workflowID,
+            sourceURL: sourceURL
+        ) {
             stubProvider = owner
         } else {
             let stubRule = ProviderRule(

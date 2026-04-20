@@ -2028,4 +2028,51 @@ final class DownloadResolverTests: XCTestCase {
         )
         XCTAssertNil(underStandalone, "session must not land under the synthetic standalone key")
     }
+
+    /// When a workflow id is declared by more than one provider
+    /// (e.g. legacy-sites.bundle has both `xueqiupan-public` and
+    /// `xunniufile-public` declaring `generic.loadDownAddr1.dlphp`),
+    /// `provider(declaringWorkflowID:sourceURL:)` must use the
+    /// caller's `sourceURL` to disambiguate. Otherwise
+    /// `providers.first` silently picks the wrong owner and
+    /// runWorkflow inherits the wrong family / metadata / default
+    /// session key.
+    func testProviderDeclaringWorkflowIDDisambiguatesByURL() async throws {
+        let bundle = try makeLegacySitesBundle()
+        let (_, catalog) = try await makeSyncedCatalog(bundle: bundle)
+        let compiled = await catalog.currentCompiledBundle()
+        XCTAssertNotNil(compiled)
+
+        // Full URL with pathPattern hit — strict match should
+        // pick the matching provider.
+        let xueqiupan = compiled?.provider(
+            declaringWorkflowID: "generic.loadDownAddr1.dlphp",
+            sourceURL: URL(string: "http://www.xueqiupan.com/file-672734.html")!
+        )
+        XCTAssertEqual(xueqiupan?.rule.providerFamily, "xueqiupan")
+
+        let xunniufile = compiled?.provider(
+            declaringWorkflowID: "generic.loadDownAddr1.dlphp",
+            sourceURL: URL(string: "http://www.xunniufile.com/file-672734.html")!
+        )
+        XCTAssertEqual(xunniufile?.rule.providerFamily, "xunniufile")
+
+        // Host-only URL (no pathPattern hit) — must fall through
+        // to host match and still pick the right provider.
+        let xunniufileHostOnly = compiled?.provider(
+            declaringWorkflowID: "generic.loadDownAddr1.dlphp",
+            sourceURL: URL(string: "https://www.xunniufile.com/")!
+        )
+        XCTAssertEqual(xunniufileHostOnly?.rule.providerFamily, "xunniufile")
+
+        // Unrelated host — neither strict nor host match; fall
+        // back to first candidate (deterministic; callers that
+        // care should pass a URL that actually identifies the
+        // intended provider).
+        let noHostMatch = compiled?.provider(
+            declaringWorkflowID: "generic.loadDownAddr1.dlphp",
+            sourceURL: URL(string: "https://unrelated.example.com/")!
+        )
+        XCTAssertNotNil(noHostMatch, "fallback must return a candidate, not nil")
+    }
 }
