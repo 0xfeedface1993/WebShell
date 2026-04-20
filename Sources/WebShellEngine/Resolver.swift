@@ -78,6 +78,44 @@ struct CompiledProvider: Sendable {
     func matches(_ url: URL) -> Bool {
         rule.matchers.contains { $0.matches(url: url) }
     }
+
+    /// Host-only variant of `matches(_:)`. Lets the standalone
+    /// `authenticate(hostURL:)` entry point resolve a provider
+    /// from just its host, without needing the caller to invent
+    /// a download URL that satisfies the matcher's `pathPattern`.
+    func matchesHost(of url: URL) -> Bool {
+        rule.matchers.contains { $0.matchesHost(of: url) }
+    }
+}
+
+/// Public return type of `DownloadResolver.runWorkflow(workflowID:…)`.
+/// Holds the final state of a standalone workflow run — the
+/// extracted-variables map plus any AuthSession / request the
+/// workflow emitted.
+///
+/// Most Phase 4C callers only read `variables`; they look up the
+/// field they explicitly declared in the workflow's last `assign`
+/// or `invokeCapability` step (e.g. `parsedArticles`, `pageHTML`).
+/// `authSession` surfaces when the workflow's HTTP steps set
+/// `persistResponseCookies: true`, so callers can grab a fresh
+/// session without a second `authenticate(…)` round-trip.
+/// `emittedRequest` is populated if the workflow's last step was
+/// `emitRequest` — useful for workflows that mix "fetch-and-parse"
+/// with "emit a follow-on download".
+public struct RuleEngineRunResult: Sendable {
+    public let variables: [String: RuntimeValue]
+    public let authSession: AuthSession?
+    public let emittedRequest: ResolvedDownloadRequest?
+
+    public init(
+        variables: [String: RuntimeValue],
+        authSession: AuthSession? = nil,
+        emittedRequest: ResolvedDownloadRequest? = nil
+    ) {
+        self.variables = variables
+        self.authSession = authSession
+        self.emittedRequest = emittedRequest
+    }
 }
 
 struct CompiledRuleBundle: Sendable {
@@ -86,6 +124,125 @@ struct CompiledRuleBundle: Sendable {
 
     func provider(matching url: URL) -> CompiledProvider? {
         providers.first { $0.matches(url) }
+    }
+
+    /// Host-identity variant of `provider(matching:)`, for
+    /// `authenticate(hostURL:)`. Two-tier selection to cope with
+    /// bundles where multiple providers legally share a host
+    /// (they must differ by `pathPattern` — compile-time
+    /// conflict keys include path):
+    ///
+    /// 1. Prefer strict full match (`matches(url)`). If the
+    ///    caller's URL carries a path that only one provider's
+    ///    `pathPattern` accepts, this picks that one; if strict
+    ///    returns multiple candidates, the rules themselves have
+    ///    a conflict — surface it.
+    /// 2. Otherwise fall back to host-only (`matchesHost`).
+    ///    Single candidate → return it; multiple candidates →
+    ///    throw `.ambiguousHostMatch(host)` (the caller has to
+    ///    supply a URL with enough path to disambiguate); zero
+    ///    → return `nil` so the caller can map to
+    ///    `.noMatchingProvider`.
+    ///
+    /// Throwing rather than silently picking `first` prevents
+    /// `authenticate` from running the wrong provider's auth
+    /// workflow / persisting sessions under the wrong family
+    /// when a bundle has host-overloaded providers.
+    func provider(hostMatching url: URL) throws -> CompiledProvider? {
+        let strict = providers.filter { $0.matches(url) }
+        if strict.count == 1 { return strict.first }
+        if strict.count > 1 {
+            throw RuleEngineError.ambiguousHostMatch(url.host ?? url.absoluteString)
+        }
+        let byHost = providers.filter { $0.matchesHost(of: url) }
+        if byHost.count == 1 { return byHost.first }
+        if byHost.count > 1 {
+            throw RuleEngineError.ambiguousHostMatch(url.host ?? url.absoluteString)
+        }
+        return nil
+    }
+
+    /// Return the provider that declares `id` as its
+    /// `downloadWorkflowID` or `authWorkflowID`, using
+    /// `sourceURL` to disambiguate when multiple providers share
+    /// the same workflow ID. Used by `runWorkflow(workflowID:...)`
+    /// so capabilities that key on provider identity see the
+    /// correct owner (real family / id / metadata) instead of a
+    /// synthetic "standalone" stub.
+    ///
+    /// Selection order:
+    ///   1. `candidates = providers whose downloadWorkflowID /
+    ///      authWorkflowID == id`
+    ///   2. If empty → nil (caller falls back to synthetic).
+    ///   3. If one → that provider.
+    ///   4. Otherwise disambiguate by `sourceURL`:
+    ///      a. strict full match (host + pathPattern).
+    ///         Exactly one → pick it; more than one → throw
+    ///         `.ambiguousWorkflowOwner(id)` (matcher regexes
+    ///         overlap at runtime — caller must narrow the URL).
+    ///      b. host-only match. Same rule: one → pick; many →
+    ///         throw.
+    ///      c. still no disambiguation → nil (synthetic stub
+    ///         fallback). Silently picking `first` here would
+    ///         run the workflow under an arbitrary owner's
+    ///         family / metadata / default session key — the
+    ///         synthetic stub at least labels the context
+    ///         honestly.
+    ///
+    /// This mirrors `provider(hostMatching:)`'s collect-and-
+    /// detect behaviour — a previous iteration of this method
+    /// silently picked `first`, which Codex flagged as a
+    /// correctness regression for bundles where the same
+    /// workflow id is declared by multiple providers with
+    /// overlapping matcher regexes.
+    func provider(declaringWorkflowID id: String, sourceURL: URL) throws -> CompiledProvider? {
+        let candidates = providers.filter { provider in
+            provider.rule.downloadWorkflowID == id
+                || provider.rule.authWorkflowID == id
+        }
+        if candidates.isEmpty { return nil }
+        if candidates.count == 1 { return candidates.first }
+        let strict = candidates.filter { $0.matches(sourceURL) }
+        if strict.count == 1 { return strict.first }
+        if strict.count > 1 {
+            throw RuleEngineError.ambiguousWorkflowOwner(id)
+        }
+        let byHost = candidates.filter { $0.matchesHost(of: sourceURL) }
+        if byHost.count == 1 { return byHost.first }
+        if byHost.count > 1 {
+            throw RuleEngineError.ambiguousWorkflowOwner(id)
+        }
+        return nil
+    }
+
+    /// Look up a workflow by its string `id` across every list
+    /// in the active bundle (`downloadWorkflows`, `authWorkflows`,
+    /// `sharedFragments`). Used by `runWorkflow(workflowID:...)`.
+    ///
+    /// Compilation only enforces uniqueness WITHIN each list;
+    /// a bundle can legally declare the same id in more than one
+    /// list. Returning `first hit` in that case would silently
+    /// pick one category (the download list is scanned first),
+    /// making the others unreachable by id — so this method
+    /// throws `.ambiguousWorkflow(id)` instead. Returns nil for
+    /// ids that don't appear anywhere; callers map that to
+    /// `.missingWorkflow` (since "missing" and "ambiguous" are
+    /// different error classes for the caller).
+    func workflow(id: String) throws -> WorkflowDefinition? {
+        var hits: [WorkflowDefinition] = []
+        if let hit = snapshot.bundle.downloadWorkflows.first(where: { $0.id == id }) {
+            hits.append(hit)
+        }
+        if let hit = snapshot.bundle.authWorkflows.first(where: { $0.id == id }) {
+            hits.append(hit)
+        }
+        if let hit = snapshot.bundle.sharedFragments.first(where: { $0.id == id }) {
+            hits.append(hit)
+        }
+        if hits.count > 1 {
+            throw RuleEngineError.ambiguousWorkflow(id)
+        }
+        return hits.first
     }
 }
 
@@ -238,6 +395,219 @@ public struct DownloadResolver: Sendable {
         self.capabilityRegistry = capabilityRegistry
         self.authSessionStore = authSessionStore
         self.authMaterialProvider = authMaterialProvider
+    }
+
+    /// Standalone authentication-only entry point.
+    ///
+    /// Matches a provider by `hostURL` (same logic as `resolve`),
+    /// verifies the provider has an auth workflow, and runs just
+    /// the auth branch through `authenticateWithCaptchaRetry`.
+    /// Returns the resulting `AuthSession`; also stored in the
+    /// `AuthSessionStore` so subsequent `resolve(...)` calls for
+    /// this provider skip re-auth.
+    ///
+    /// Use when the caller wants to pre-warm a session (e.g. boot
+    /// login) or refresh a known-expired one without going through
+    /// a download-URL resolve. Callers that resolve a real download
+    /// URL should use `resolve(_:)` which triggers auth implicitly
+    /// when needed.
+    public func authenticate(
+        hostURL: URL,
+        accountID: String? = nil,
+        variables: [String: RuntimeValue] = [:]
+    ) async throws -> AuthSession {
+        guard let compiledBundle = await catalog.currentCompiledBundle() else {
+            throw RuleEngineError.missingActiveBundle
+        }
+        // Host-identity match: strict full match first (useful
+        // when the caller does pass a URL with a distinguishing
+        // path), host-only fallback for plain prewarm URLs.
+        // Throws `.ambiguousHostMatch` when a host is shared by
+        // multiple providers (legal if their pathPatterns
+        // differ) and the caller's URL can't narrow it down —
+        // surfacing the ambiguity beats silently running the
+        // wrong provider's workflow.
+        guard let provider = try compiledBundle.provider(hostMatching: hostURL) else {
+            throw RuleEngineError.noMatchingProvider(hostURL.absoluteString)
+        }
+        // Gate on auth-workflow availability only — NOT on whether
+        // the provider's auth policy makes auth automatic for
+        // `resolve(_:)`. An explicit `authenticate(hostURL:)` call
+        // is always "run this provider's auth workflow now",
+        // including for optional-auth providers (ones that work
+        // logged-out but surface more content / higher quotas when
+        // a session is attached). `requiresAuthentication` is the
+        // right gate for implicit auth inside `resolve(_:)`, but
+        // it's the wrong gate for this explicit entry point.
+        guard provider.authWorkflow != nil else {
+            throw RuleEngineError.authWorkflowRequired(provider.rule.providerFamily)
+        }
+
+        let request = DownloadResolveRequest(
+            sourceURL: hostURL,
+            accountID: accountID,
+            variables: variables
+        )
+        let resolvedAccountID = try resolveAccountID(for: provider, request: request)
+        let sessionKey = AuthSessionKey(
+            providerFamily: provider.rule.providerFamily,
+            accountID: resolvedAccountID
+        )
+        let existingSession = await authSessionStore.session(for: sessionKey)
+        let maxAttempts = maxAuthenticationAttempts(for: provider)
+
+        let result = try await authenticateWithCaptchaRetry(
+            provider: provider,
+            request: request,
+            sessionKey: sessionKey,
+            existingSession: existingSession,
+            attempts: 0,
+            maxAttempts: maxAttempts
+        )
+        return result.session
+    }
+
+    /// Run an arbitrary workflow by ID without going through provider
+    /// URL matching. Use this when the caller already knows *which*
+    /// workflow to execute — e.g. a list/detail fetch + parse
+    /// pipeline where every URL on the target host flows through the
+    /// same named workflow regardless of the specific path. Unlike
+    /// `resolve(_:)`, the returned value is the *extracted-variables
+    /// map* from the final workflow state; callers pull out the
+    /// fields they declared via `extract`/`assign` steps (e.g.
+    /// `parsedArticles`, `pageHTML`).
+    ///
+    /// - Parameters:
+    ///   - workflowID: the `WorkflowDefinition.id` in the active
+    ///     bundle. Searches `downloadWorkflows` → `authWorkflows` →
+    ///     `sharedFragments`. First match wins; throws
+    ///     `missingWorkflow` if not found.
+    ///   - sourceURL: exposed to the workflow as
+    ///     `input.sourceURL`. Typically the page the workflow is
+    ///     about to fetch.
+    ///   - authSessionKey: pre-existing auth session to attach when
+    ///     `http` steps set `attachAuthSession: true`. If nil, a
+    ///     synthetic `("standalone", "default")` key is used; the
+    ///     workflow still runs but any `persistResponseCookies: true`
+    ///     store will go under the synthetic key. Pass the same key
+    ///     as `authenticate(...)` produced when you want workflows
+    ///     to share session state.
+    ///   - variables: extra runtime variables available to the
+    ///     workflow via the `{{input.variables.xxx}}` template path.
+    ///   - materials: credentials / static values injected into the
+    ///     runtime's `{{materials.xxx}}` template slots. Auth
+    ///     workflows (reachable through this entry point because
+    ///     `workflowID` lookup also searches `authWorkflows`)
+    ///     typically require `materials.username` /
+    ///     `materials.password` — pass those here when invoking
+    ///     one. Fetch+parse workflows that don't template
+    ///     materials can leave this empty.
+    ///
+    /// - Note: unlike `resolve`/`authenticate`, this method does not
+    ///   require a provider matcher hit, so any workflow in the
+    ///   catalog is reachable. This is deliberate — it lets
+    ///   consumer-private bundles ship workflows that are
+    ///   invoked directly by the host app without the caller having
+    ///   to invent a placeholder URL matcher.
+    public func runWorkflow(
+        workflowID: String,
+        sourceURL: URL,
+        authSessionKey: AuthSessionKey? = nil,
+        variables: [String: RuntimeValue] = [:],
+        materials: [String: RuntimeValue] = [:]
+    ) async throws -> RuleEngineRunResult {
+        guard let compiledBundle = await catalog.currentCompiledBundle() else {
+            throw RuleEngineError.missingActiveBundle
+        }
+        guard let workflow = try compiledBundle.workflow(id: workflowID) else {
+            throw RuleEngineError.missingWorkflow(workflowID)
+        }
+
+        // Preserve provider identity when the workflow is
+        // declared by a specific provider — `WorkflowRuntime`
+        // forwards `provider.rule.providerFamily` / `metadata`
+        // into `CapabilityInvocation`, so shared capabilities
+        // keyed off provider identity must see the real owner
+        // rather than a synthetic stub. For shared-fragment
+        // workflows declared by no provider, fall back to a
+        // synthetic "standalone" stub (provider-keyed
+        // capabilities in those workflows have nothing to key
+        // against anyway).
+        let stubProvider: CompiledProvider
+        if let owner = try compiledBundle.provider(
+            declaringWorkflowID: workflowID,
+            sourceURL: sourceURL
+        ) {
+            stubProvider = owner
+        } else {
+            let stubRule = ProviderRule(
+                id: "runWorkflow.standalone",
+                providerFamily: "standalone",
+                matchers: [],
+                accountScope: .providerFamily,
+                downloadWorkflowID: workflow.id,
+                authWorkflowID: nil,
+                authPolicy: nil,
+                metadata: [:]
+            )
+            stubProvider = CompiledProvider(
+                rule: stubRule,
+                downloadWorkflow: workflow,
+                authWorkflow: nil
+            )
+        }
+        // Default session key inherits the detected owner's family
+        // AND applies the owner's `authPolicy.accountIDTemplate`
+        // via the same `resolveAccountID` helper that `resolve(_:)`
+        // / `authenticate(_:)` use, so sessions persisted by this
+        // call land under the same key `resolve(_:)` would use —
+        // making them reusable across entry points. Providers
+        // without a template (and synthetic stubs) fall through
+        // to `"default"`. Caller-supplied `authSessionKey` always
+        // wins.
+        let resolvedAccountID: String
+        if let key = authSessionKey {
+            resolvedAccountID = key.accountID
+        } else {
+            resolvedAccountID = try resolveAccountID(
+                for: stubProvider,
+                request: DownloadResolveRequest(
+                    sourceURL: sourceURL,
+                    accountID: nil,
+                    variables: variables
+                )
+            )
+        }
+        let sessionKey = authSessionKey ?? AuthSessionKey(
+            providerFamily: stubProvider.rule.providerFamily,
+            accountID: resolvedAccountID
+        )
+        let existingSession = await authSessionStore.session(for: sessionKey)
+        let request = DownloadResolveRequest(
+            sourceURL: sourceURL,
+            accountID: resolvedAccountID,
+            variables: variables
+        )
+        var runtime = WorkflowRuntime(
+            provider: stubProvider,
+            workflow: workflow,
+            request: request,
+            httpClient: httpClient,
+            capabilityRegistry: capabilityRegistry,
+            sessionKey: sessionKey,
+            authSession: existingSession,
+            materials: materials,
+            authExpireConditions: []
+        )
+        let result = try await runtime.run()
+        if let refreshed = result.authSession, !refreshed.isEmpty {
+            await authSessionStore.store(refreshed)
+        }
+        return RuleEngineRunResult(
+            variables: result.variables,
+            authSession: result.authSession,
+            emittedRequest: result.emittedRequest
+        )
     }
 
     public func resolve(_ request: DownloadResolveRequest) async throws -> ResolvedDownloadRequest {
@@ -513,6 +883,9 @@ public struct DownloadResolver: Sendable {
                  .missingActiveBundle,
                  .noMatchingProvider,
                  .missingWorkflow,
+                 .ambiguousWorkflow,
+                 .ambiguousHostMatch,
+                 .ambiguousWorkflowOwner,
                  .missingCapability,
                  .noEmittedRequest,
                  .httpFailure:

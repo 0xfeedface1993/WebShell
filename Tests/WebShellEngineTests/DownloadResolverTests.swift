@@ -1760,4 +1760,655 @@ final class DownloadResolverTests: XCTestCase {
             XCTFail("Unexpected error: \(error)")
         }
     }
+
+    // MARK: - Regression coverage for review feedback (2026-04-20)
+
+    /// `authenticate(hostURL:)` must NOT gate on
+    /// `authPolicy.requiresAuthentication == true`. The explicit
+    /// entry point is always "run this provider's auth workflow
+    /// now"; optional-auth providers (workflow configured + policy
+    /// relaxed) should still be able to prewarm / refresh through
+    /// it. `secure-demo` in the templates fixture has exactly
+    /// this shape (authWorkflowID: "secure.auth",
+    /// requiresAuthentication: false).
+    func testAuthenticateRunsAuthWorkflowForOptionalAuthProvider() async throws {
+        let bundle = try RuleBundleFixtures.loadMergedBundle(
+            named: [
+                "auth-workflows.bundle",
+                "auth-sites.bundle",
+                "auth-templates.bundle",
+            ],
+            bundleVersion: "2026.04.20.optional-auth-authenticate.1"
+        )
+        let (registry, catalog) = try await makeSyncedCatalog(bundle: bundle)
+
+        let authStore = AuthSessionStore()
+        let httpClient = StubHTTPClient { request in
+            switch request.url.absoluteString {
+            case "https://secure.example.com/login":
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: ["Set-Cookie": "session=valid; Path=/; Domain=secure.example.com"],
+                    body: "ok",
+                    cookies: [
+                        SerializableCookie(
+                            name: "session",
+                            value: "valid",
+                            domain: "secure.example.com",
+                            path: "/"
+                        )
+                    ]
+                )
+            default:
+                XCTFail("Unexpected request: \(request.url.absoluteString)")
+                return HTTPResponseData(statusCode: 500, url: request.url, headers: [:], body: "unexpected")
+            }
+        }
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: httpClient,
+            capabilityRegistry: registry,
+            authSessionStore: authStore,
+            authMaterialProvider: CountingAuthMaterialProvider(counter: MaterialCounter())
+        )
+
+        let session = try await resolver.authenticate(
+            hostURL: URL(string: "https://secure.example.com/")!,
+            accountID: "demo"
+        )
+
+        XCTAssertEqual(session.cookies.first?.name, "session")
+        XCTAssertEqual(session.cookies.first?.value, "valid")
+        let stored = await authStore.session(
+            for: AuthSessionKey(providerFamily: "secure-demo", accountID: "demo")
+        )
+        XCTAssertEqual(stored?.cookies.first?.value, "valid")
+    }
+
+    /// `runWorkflow(workflowID:)` walks `authWorkflows` during id
+    /// lookup, so auth workflows are reachable through this entry
+    /// point. Those workflows template `{{materials.username}}` /
+    /// `{{materials.password}}`; without a pluggable `materials`
+    /// dict, they deterministically throw `.missingVariable`.
+    /// Verifies the caller can thread credentials in directly.
+    func testRunWorkflowInjectsMaterialsIntoAuthWorkflow() async throws {
+        let bundle = try RuleBundleFixtures.loadMergedBundle(
+            named: [
+                "auth-workflows.bundle",
+                "auth-sites.bundle",
+                "auth-templates.bundle",
+            ],
+            bundleVersion: "2026.04.20.runWorkflow-materials.1"
+        )
+        let (registry, catalog) = try await makeSyncedCatalog(bundle: bundle)
+
+        let authStore = AuthSessionStore()
+        let httpClient = StubHTTPClient { request in
+            switch request.url.absoluteString {
+            case "https://secure.example.com/login":
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: ["Set-Cookie": "session=valid; Path=/; Domain=secure.example.com"],
+                    body: "ok",
+                    cookies: [
+                        SerializableCookie(
+                            name: "session",
+                            value: "valid",
+                            domain: "secure.example.com",
+                            path: "/"
+                        )
+                    ]
+                )
+            default:
+                XCTFail("Unexpected request: \(request.url.absoluteString)")
+                return HTTPResponseData(statusCode: 500, url: request.url, headers: [:], body: "unexpected")
+            }
+        }
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: httpClient,
+            capabilityRegistry: registry,
+            authSessionStore: authStore,
+            authMaterialProvider: CountingAuthMaterialProvider(counter: MaterialCounter())
+        )
+
+        let result = try await resolver.runWorkflow(
+            workflowID: "secure.auth",
+            sourceURL: URL(string: "https://secure.example.com/")!,
+            variables: [:],
+            materials: [
+                "username": .string("demo-user"),
+                "password": .string("secret-password"),
+            ]
+        )
+
+        // `secure.auth`: template → http POST /login
+        // (persistResponseCookies: true) → assign. Without the
+        // materials fix, the first template step throws
+        // .missingVariable. With the fix, the workflow completes
+        // and surfaces the session cookie in the result.
+        XCTAssertEqual(result.authSession?.cookies.first?.name, "session")
+        XCTAssertEqual(result.authSession?.cookies.first?.value, "valid")
+    }
+
+    /// `authenticate(hostURL:)` must match providers by host
+    /// alone, not by full URL matcher (which includes
+    /// `pathPattern`). Providers whose matchers pin a download
+    /// path — e.g. `jkpan-vip` with `/file-\d+\.html$` — must
+    /// still resolve for a plain host URL like
+    /// `https://jkpan.com/`, otherwise prewarm/refresh is
+    /// unreachable from callers that don't already have a
+    /// specific download URL.
+    func testAuthenticateMatchesProviderByHostIgnoringPathPattern() async throws {
+        let bundle = try RuleBundleFixtures.loadMergedBundle(
+            named: [
+                "auth-workflows.bundle",
+                "auth-sites.bundle",
+                "auth-templates.bundle",
+            ],
+            bundleVersion: "2026.04.20.authenticate-host-only.1"
+        )
+        let (registry, catalog) = try await makeSyncedCatalog(bundle: bundle)
+
+        // Lenient client: we only care that provider resolution
+        // succeeds (no `noMatchingProvider`). The auth workflow
+        // for jkpan-vip would need full captcha / formhash
+        // mocking to actually complete — that's not what this
+        // test exercises.
+        let httpClient = StubHTTPClient { request in
+            HTTPResponseData(
+                statusCode: 200,
+                url: request.url,
+                headers: [:],
+                body: ""
+            )
+        }
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: httpClient,
+            capabilityRegistry: registry,
+            authSessionStore: AuthSessionStore(),
+            authMaterialProvider: CountingAuthMaterialProvider(counter: MaterialCounter())
+        )
+
+        do {
+            _ = try await resolver.authenticate(
+                hostURL: URL(string: "https://jkpan.com/")!,
+                accountID: "demo"
+            )
+            // A successful return is also fine — means the entire
+            // auth flow happened to tolerate the lenient responses.
+        } catch RuleEngineError.noMatchingProvider(let info) {
+            XCTFail("host-only URL should resolve jkpan-vip via matchesHost; got noMatchingProvider(\(info))")
+        } catch {
+            // Any other error is fine — we only assert the
+            // provider-lookup gate, not the workflow itself.
+        }
+    }
+
+    /// `runWorkflow(workflowID:)` must preserve the declaring
+    /// provider's identity. `WorkflowRuntime` forwards
+    /// `provider.rule.providerFamily` into `CapabilityInvocation`
+    /// and into the default session key; before the fix those
+    /// saw `"standalone"` even when the workflow was declared by
+    /// a real provider, so sessions persisted by runWorkflow
+    /// couldn't be reused by later `resolve(_:)` calls against
+    /// the same provider. This test asserts the session lands
+    /// under the owner's family (`secure-demo`), not the
+    /// synthetic stub.
+    func testRunWorkflowPreservesDeclaringProviderContext() async throws {
+        let bundle = try RuleBundleFixtures.loadMergedBundle(
+            named: [
+                "auth-workflows.bundle",
+                "auth-sites.bundle",
+                "auth-templates.bundle",
+            ],
+            bundleVersion: "2026.04.20.runWorkflow-provider-context.1"
+        )
+        let (registry, catalog) = try await makeSyncedCatalog(bundle: bundle)
+
+        let authStore = AuthSessionStore()
+        let httpClient = StubHTTPClient { request in
+            switch request.url.absoluteString {
+            case "https://secure.example.com/login":
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: ["Set-Cookie": "session=owner; Path=/; Domain=secure.example.com"],
+                    body: "ok",
+                    cookies: [
+                        SerializableCookie(
+                            name: "session",
+                            value: "owner",
+                            domain: "secure.example.com",
+                            path: "/"
+                        )
+                    ]
+                )
+            default:
+                XCTFail("Unexpected request: \(request.url.absoluteString)")
+                return HTTPResponseData(statusCode: 500, url: request.url, headers: [:], body: "unexpected")
+            }
+        }
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: httpClient,
+            capabilityRegistry: registry,
+            authSessionStore: authStore,
+            authMaterialProvider: CountingAuthMaterialProvider(counter: MaterialCounter())
+        )
+
+        _ = try await resolver.runWorkflow(
+            workflowID: "secure.auth",
+            sourceURL: URL(string: "https://secure.example.com/")!,
+            variables: [:],
+            materials: [
+                "username": .string("demo-user"),
+                "password": .string("secret-password"),
+            ]
+        )
+
+        // With the fix: sessionKey inherits the owning
+        // provider's family (`secure-demo`), so the persisted
+        // session is reachable under that key. Before the fix,
+        // it would only be reachable under
+        // `("standalone","default")`.
+        let underOwner = await authStore.session(
+            for: AuthSessionKey(providerFamily: "secure-demo", accountID: "default")
+        )
+        XCTAssertEqual(underOwner?.cookies.first?.value, "owner")
+
+        // Cross-check: the synthetic key used by the pre-fix
+        // code path should be empty — no session should have
+        // leaked there.
+        let underStandalone = await authStore.session(
+            for: AuthSessionKey(providerFamily: "standalone", accountID: "default")
+        )
+        XCTAssertNil(underStandalone, "session must not land under the synthetic standalone key")
+    }
+
+    /// When a workflow id is declared by more than one provider
+    /// (e.g. legacy-sites.bundle has both `xueqiupan-public` and
+    /// `xunniufile-public` declaring `generic.loadDownAddr1.dlphp`),
+    /// `provider(declaringWorkflowID:sourceURL:)` must use the
+    /// caller's `sourceURL` to disambiguate. Hosts that are
+    /// completely disjoint between the declaring providers can
+    /// be resolved deterministically.
+    func testProviderDeclaringWorkflowIDDisambiguatesByURL() async throws {
+        let bundle = try makeLegacySitesBundle()
+        let (_, catalog) = try await makeSyncedCatalog(bundle: bundle)
+        let compiled = await catalog.currentCompiledBundle()
+        XCTAssertNotNil(compiled)
+
+        // Full URL with pathPattern hit — strict match should
+        // pick the matching provider.
+        let xueqiupan = try compiled?.provider(
+            declaringWorkflowID: "generic.loadDownAddr1.dlphp",
+            sourceURL: URL(string: "http://www.xueqiupan.com/file-672734.html")!
+        )
+        XCTAssertEqual(xueqiupan?.rule.providerFamily, "xueqiupan")
+
+        let xunniufile = try compiled?.provider(
+            declaringWorkflowID: "generic.loadDownAddr1.dlphp",
+            sourceURL: URL(string: "http://www.xunniufile.com/file-672734.html")!
+        )
+        XCTAssertEqual(xunniufile?.rule.providerFamily, "xunniufile")
+
+        // Host-only URL (no pathPattern hit) — must fall through
+        // to host match and still pick the right provider.
+        let xunniufileHostOnly = try compiled?.provider(
+            declaringWorkflowID: "generic.loadDownAddr1.dlphp",
+            sourceURL: URL(string: "https://www.xunniufile.com/")!
+        )
+        XCTAssertEqual(xunniufileHostOnly?.rule.providerFamily, "xunniufile")
+
+        // Unrelated host — neither strict nor host match. No
+        // longer falls back to `.first` (that was a silent
+        // arbitrary pick flagged by review); returns nil so
+        // runWorkflow uses the honestly-labelled synthetic
+        // "standalone" stub instead.
+        let noHostMatch = try compiled?.provider(
+            declaringWorkflowID: "generic.loadDownAddr1.dlphp",
+            sourceURL: URL(string: "https://unrelated.example.com/")!
+        )
+        XCTAssertNil(noHostMatch, "unrelated host should yield nil, not an arbitrary first-candidate")
+    }
+
+    /// Compilation enforces uniqueness WITHIN each workflow list
+    /// but not across; a bundle can legally declare the same id
+    /// in both `downloadWorkflows` and `authWorkflows`.
+    /// `workflow(id:)` must surface the ambiguity as
+    /// `.ambiguousWorkflow(id)` rather than silently returning
+    /// whichever list is scanned first (which would make the
+    /// other category's definition unreachable by id through
+    /// `runWorkflow`).
+    func testWorkflowLookupThrowsOnCrossListAmbiguity() async throws {
+        let json = """
+        {
+          "schemaVersion": 1,
+          "bundleVersion": "2026.04.20.ambiguous-workflow.1",
+          "providers": [],
+          "sharedFragments": [],
+          "authWorkflows": [
+            {"id": "shared.id", "description": "auth copy", "steps": []}
+          ],
+          "downloadWorkflows": [
+            {"id": "shared.id", "description": "download copy", "steps": []}
+          ],
+          "capabilityRefs": []
+        }
+        """
+        let bundle = try JSONDecoder().decode(RuleBundle.self, from: Data(json.utf8))
+        let (_, catalog) = try await makeSyncedCatalog(bundle: bundle)
+        let compiled = await catalog.currentCompiledBundle()
+        XCTAssertNotNil(compiled)
+
+        do {
+            _ = try compiled?.workflow(id: "shared.id")
+            XCTFail("expected ambiguousWorkflow error")
+        } catch RuleEngineError.ambiguousWorkflow(let id) {
+            XCTAssertEqual(id, "shared.id")
+        } catch {
+            XCTFail("unexpected error: \(error)")
+        }
+
+        // Unknown id still returns nil (not thrown) — callers
+        // then map that to `.missingWorkflow`.
+        let unknown = try compiled?.workflow(id: "does-not-exist")
+        XCTAssertNil(unknown)
+    }
+
+    /// `runWorkflow(workflowID:)`'s default session key must
+    /// honour the owner's `authPolicy.accountIDTemplate`. Before
+    /// the fix, `accountID` was hard-coded to `"default"`, so
+    /// sessions prewarmed via `runWorkflow` for a templated
+    /// provider landed under a key that `resolve(_:)` would never
+    /// look up — breaking session reuse across entry points and
+    /// causing different logical accounts to overwrite each
+    /// other under the default key.
+    func testRunWorkflowDefaultAccountIDAppliesProviderTemplate() async throws {
+        let json = """
+        {
+          "schemaVersion": 1,
+          "bundleVersion": "2026.04.20.accountID-template.1",
+          "providers": [
+            {
+              "id": "templated-demo",
+              "providerFamily": "templated-demo",
+              "accountScope": "providerFamily",
+              "matchers": [
+                {"hosts": ["templated.example.com"], "hostSuffixes": []}
+              ],
+              "downloadWorkflowID": "templated.placeholder.download",
+              "authWorkflowID": "templated.auth",
+              "authPolicy": {
+                "expireConditions": [],
+                "materialKeys": ["username"],
+                "requiresAuthentication": false,
+                "accountIDTemplate": "{{input.variables.slug}}"
+              },
+              "metadata": {}
+            }
+          ],
+          "sharedFragments": [],
+          "authWorkflows": [
+            {
+              "id": "templated.auth",
+              "description": "Minimal auth flow just to exercise session persistence keying.",
+              "steps": [
+                {
+                  "type": "http",
+                  "http": {
+                    "method": "POST",
+                    "urlTemplate": "https://templated.example.com/login",
+                    "headers": {"Content-Type": "application/x-www-form-urlencoded"},
+                    "bodyTemplate": "ok",
+                    "output": "loginResponse",
+                    "persistResponseCookies": true,
+                    "attachAuthSession": false
+                  }
+                }
+              ]
+            }
+          ],
+          "downloadWorkflows": [
+            {
+              "id": "templated.placeholder.download",
+              "description": "Unused; satisfies ProviderRule.downloadWorkflowID.",
+              "steps": []
+            }
+          ],
+          "capabilityRefs": []
+        }
+        """
+        let bundle = try JSONDecoder().decode(RuleBundle.self, from: Data(json.utf8))
+        let (registry, catalog) = try await makeSyncedCatalog(bundle: bundle)
+
+        let authStore = AuthSessionStore()
+        let httpClient = StubHTTPClient { request in
+            HTTPResponseData(
+                statusCode: 200,
+                url: request.url,
+                headers: ["Set-Cookie": "session=t; Path=/; Domain=templated.example.com"],
+                body: "ok",
+                cookies: [
+                    SerializableCookie(
+                        name: "session",
+                        value: "t",
+                        domain: "templated.example.com",
+                        path: "/"
+                    )
+                ]
+            )
+        }
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: httpClient,
+            capabilityRegistry: registry,
+            authSessionStore: authStore,
+            authMaterialProvider: CountingAuthMaterialProvider(counter: MaterialCounter())
+        )
+
+        _ = try await resolver.runWorkflow(
+            workflowID: "templated.auth",
+            sourceURL: URL(string: "https://templated.example.com/")!,
+            variables: ["slug": .string("user42")]
+        )
+
+        // accountIDTemplate `{{input.variables.slug}}` resolves
+        // to "user42"; the persisted session must land there.
+        let underTemplated = await authStore.session(
+            for: AuthSessionKey(providerFamily: "templated-demo", accountID: "user42")
+        )
+        XCTAssertEqual(underTemplated?.cookies.first?.value, "t")
+
+        // Before the fix, the session would be keyed under
+        // "default". Cross-assert nothing leaked there.
+        let underDefault = await authStore.session(
+            for: AuthSessionKey(providerFamily: "templated-demo", accountID: "default")
+        )
+        XCTAssertNil(underDefault, "session must not land under 'default' when template is configured")
+    }
+
+    /// Compilation allows two providers to share a host as long
+    /// as their `pathPattern`s differ. For that (legal) shape,
+    /// `authenticate(hostURL:)` with a plain host URL can't pick
+    /// a single provider — `.ambiguousHostMatch` must be thrown
+    /// rather than silently running the first provider's auth
+    /// workflow and persisting the session under its family.
+    /// A URL whose path hits exactly one provider's pathPattern
+    /// must still resolve cleanly.
+    func testAuthenticateThrowsAmbiguousHostMatchOnOverloadedHost() async throws {
+        let json = """
+        {
+          "schemaVersion": 1,
+          "bundleVersion": "2026.04.20.host-overlap.1",
+          "providers": [
+            {
+              "id": "overlap-a",
+              "providerFamily": "overlap-a",
+              "accountScope": "providerFamily",
+              "matchers": [
+                {
+                  "hosts": ["overlap.example.com"],
+                  "hostSuffixes": [],
+                  "pathPattern": "/a/.*"
+                }
+              ],
+              "downloadWorkflowID": "overlap.download",
+              "authWorkflowID": "overlap.auth",
+              "authPolicy": null,
+              "metadata": {}
+            },
+            {
+              "id": "overlap-b",
+              "providerFamily": "overlap-b",
+              "accountScope": "providerFamily",
+              "matchers": [
+                {
+                  "hosts": ["overlap.example.com"],
+                  "hostSuffixes": [],
+                  "pathPattern": "/b/.*"
+                }
+              ],
+              "downloadWorkflowID": "overlap.download",
+              "authWorkflowID": "overlap.auth",
+              "authPolicy": null,
+              "metadata": {}
+            }
+          ],
+          "sharedFragments": [],
+          "authWorkflows": [
+            {"id": "overlap.auth", "description": "", "steps": []}
+          ],
+          "downloadWorkflows": [
+            {"id": "overlap.download", "description": "", "steps": []}
+          ],
+          "capabilityRefs": []
+        }
+        """
+        let bundle = try JSONDecoder().decode(RuleBundle.self, from: Data(json.utf8))
+        let (registry, catalog) = try await makeSyncedCatalog(bundle: bundle)
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: StubHTTPClient { r in
+                HTTPResponseData(statusCode: 200, url: r.url, headers: [:], body: "")
+            },
+            capabilityRegistry: registry,
+            authSessionStore: AuthSessionStore(),
+            authMaterialProvider: CountingAuthMaterialProvider(counter: MaterialCounter())
+        )
+
+        // Plain host URL — cannot disambiguate between
+        // overlap-a and overlap-b.
+        do {
+            _ = try await resolver.authenticate(
+                hostURL: URL(string: "https://overlap.example.com/")!
+            )
+            XCTFail("expected ambiguousHostMatch for overloaded host without path")
+        } catch RuleEngineError.ambiguousHostMatch(let host) {
+            XCTAssertEqual(host, "overlap.example.com")
+        } catch {
+            XCTFail("unexpected error: \(error)")
+        }
+
+        // URL whose path satisfies only overlap-a's pathPattern
+        // — strict match picks overlap-a; no ambiguous error.
+        do {
+            _ = try await resolver.authenticate(
+                hostURL: URL(string: "https://overlap.example.com/a/1")!
+            )
+            // An empty-step auth workflow throws
+            // `.authDidNotProduceSession`; that's fine here,
+            // we're only asserting provider selection didn't
+            // throw `.ambiguousHostMatch`.
+        } catch RuleEngineError.ambiguousHostMatch {
+            XCTFail("strict pathPattern match should have disambiguated to overlap-a")
+        } catch {
+            // Any other error (e.g. authDidNotProduceSession) is
+            // acceptable — workflow execution isn't under test.
+        }
+    }
+
+    /// `provider(declaringWorkflowID:sourceURL:)` must surface
+    /// ambiguity the same way `provider(hostMatching:)` does.
+    /// When multiple providers declare the same workflow id AND
+    /// their matcher regexes overlap at runtime for a given
+    /// URL, silently picking `first` is a correctness bug
+    /// (wrong family / metadata / default session key). Two
+    /// providers both accepting `overlap.example.com` + sharing
+    /// a `downloadWorkflowID` exercise both the strict-multi
+    /// and host-only-multi paths.
+    func testProviderDeclaringWorkflowIDThrowsOnAmbiguousSourceURL() async throws {
+        // overlap-a: pathPattern /.*      (matches everything)
+        // overlap-b: pathPattern /shared/.+ (subset of /.*)
+        // sourceURL /shared/x → strict match BOTH → throw
+        // sourceURL /          → strict match only overlap-a → clean pick
+        let json = """
+        {
+          "schemaVersion": 1,
+          "bundleVersion": "2026.04.20.owner-overlap.1",
+          "providers": [
+            {
+              "id": "overlap-a",
+              "providerFamily": "overlap-a",
+              "accountScope": "providerFamily",
+              "matchers": [
+                {"hosts": ["overlap.example.com"], "hostSuffixes": [], "pathPattern": "/.*"}
+              ],
+              "downloadWorkflowID": "overlap.shared.download",
+              "authWorkflowID": null,
+              "authPolicy": null,
+              "metadata": {}
+            },
+            {
+              "id": "overlap-b",
+              "providerFamily": "overlap-b",
+              "accountScope": "providerFamily",
+              "matchers": [
+                {"hosts": ["overlap.example.com"], "hostSuffixes": [], "pathPattern": "/shared/.+"}
+              ],
+              "downloadWorkflowID": "overlap.shared.download",
+              "authWorkflowID": null,
+              "authPolicy": null,
+              "metadata": {}
+            }
+          ],
+          "sharedFragments": [],
+          "authWorkflows": [],
+          "downloadWorkflows": [
+            {"id": "overlap.shared.download", "description": "", "steps": []}
+          ],
+          "capabilityRefs": []
+        }
+        """
+        let bundle = try JSONDecoder().decode(RuleBundle.self, from: Data(json.utf8))
+        let (_, catalog) = try await makeSyncedCatalog(bundle: bundle)
+        let compiled = await catalog.currentCompiledBundle()
+        XCTAssertNotNil(compiled)
+
+        // Ambiguous strict match: /shared/x hits both
+        // pathPatterns. Must throw.
+        do {
+            _ = try compiled?.provider(
+                declaringWorkflowID: "overlap.shared.download",
+                sourceURL: URL(string: "https://overlap.example.com/shared/item")!
+            )
+            XCTFail("expected ambiguousWorkflowOwner under strict-multi")
+        } catch RuleEngineError.ambiguousWorkflowOwner(let id) {
+            XCTAssertEqual(id, "overlap.shared.download")
+        } catch {
+            XCTFail("unexpected error: \(error)")
+        }
+
+        // Clean strict pick: / only matches overlap-a's
+        // greedy /.* pathPattern, not overlap-b's /shared/.+ .
+        let cleanPick = try compiled?.provider(
+            declaringWorkflowID: "overlap.shared.download",
+            sourceURL: URL(string: "https://overlap.example.com/")!
+        )
+        XCTAssertEqual(cleanPick?.rule.providerFamily, "overlap-a")
+    }
 }

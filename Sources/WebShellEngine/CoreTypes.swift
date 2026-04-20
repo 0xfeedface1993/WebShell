@@ -9,6 +9,27 @@ public enum RuleEngineError: LocalizedError, Sendable {
     case noMatchingProvider(String)
     case invalidRule(String)
     case missingWorkflow(String)
+    /// Thrown when a workflow id is declared in more than one of
+    /// `downloadWorkflows` / `authWorkflows` / `sharedFragments`.
+    /// Compilation only enforces uniqueness within each list, so
+    /// this check lives on direct-lookup paths like
+    /// `DownloadResolver.runWorkflow(workflowID:)`.
+    case ambiguousWorkflow(String)
+    /// Thrown when a host-only URL matches more than one
+    /// provider and strict full-URL matching can't disambiguate
+    /// them (e.g. two providers sharing a host with different
+    /// `pathPattern`s). Surfaces on the
+    /// `DownloadResolver.authenticate(hostURL:)` path so callers
+    /// can supply a more specific URL. The associated value is
+    /// the ambiguous host.
+    case ambiguousHostMatch(String)
+    /// Thrown when more than one provider declares the same
+    /// workflow id as its `downloadWorkflowID` or
+    /// `authWorkflowID` and the caller's `sourceURL` cannot
+    /// disambiguate between them. Surfaces on the
+    /// `DownloadResolver.runWorkflow(workflowID:sourceURL:)`
+    /// path. The associated value is the ambiguous workflow id.
+    case ambiguousWorkflowOwner(String)
     case missingCapability(String)
     case missingVariable(String)
     case invalidTemplate(String)
@@ -32,6 +53,12 @@ public enum RuleEngineError: LocalizedError, Sendable {
             return "Invalid rule bundle: \(value)"
         case .missingWorkflow(let value):
             return "Missing workflow: \(value)"
+        case .ambiguousWorkflow(let value):
+            return "Workflow id \(value) is declared in more than one of downloadWorkflows / authWorkflows / sharedFragments."
+        case .ambiguousHostMatch(let value):
+            return "Host \(value) matches more than one provider and strict pathPattern matching did not disambiguate; caller must supply a URL that selects a single provider."
+        case .ambiguousWorkflowOwner(let value):
+            return "Workflow id \(value) is declared by more than one provider and the supplied sourceURL did not disambiguate owner selection; caller must supply a URL that matches exactly one declaring provider."
         case .missingCapability(let value):
             return "Missing capability: \(value)"
         case .missingVariable(let value):

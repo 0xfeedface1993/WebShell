@@ -12,6 +12,29 @@ let package = Package(
     ],
     products: [
         .library(name: "WebShell", targets: ["WebShell"]),
+
+        // ─── TEMPORARY SCAFFOLD — DO NOT USE FOR NEW WORK ────────────
+        // Exposed so downstream consumers migrating off the legacy
+        // Dirtyware / pipeline-builder API can keep their existing
+        // `import WebShellLegacy` / `import Durex` / `import AnyErase`
+        // call sites compiling while they incrementally port them
+        // to the new rule-engine `DownloadResolver` API. These four
+        // product entries are intended to be removed once no
+        // downstream consumer still imports them.
+        //
+        // When removing:
+        //   * delete the four .library entries below
+        //   * consumer Package.swift must no longer reference
+        //     "WebShellLegacy" / "Durex" / "AnyErase" / "hmjs"
+        //     as products
+        //   * source files must no longer `import WebShellLegacy`
+        //
+        // The corresponding targets stay for in-package legacy
+        // tests; only their *product* surface goes away.
+        .library(name: "WebShellLegacy", targets: ["WebShellLegacy"]),
+        .library(name: "Durex",          targets: ["Durex"]),
+        .library(name: "AnyErase",       targets: ["AnyErase"]),
+        .library(name: "hmjs",           targets: ["hmjs"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.2"),
