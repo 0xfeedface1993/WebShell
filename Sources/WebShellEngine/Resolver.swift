@@ -78,6 +78,14 @@ struct CompiledProvider: Sendable {
     func matches(_ url: URL) -> Bool {
         rule.matchers.contains { $0.matches(url: url) }
     }
+
+    /// Host-only variant of `matches(_:)`. Lets the standalone
+    /// `authenticate(hostURL:)` entry point resolve a provider
+    /// from just its host, without needing the caller to invent
+    /// a download URL that satisfies the matcher's `pathPattern`.
+    func matchesHost(of url: URL) -> Bool {
+        rule.matchers.contains { $0.matchesHost(of: url) }
+    }
 }
 
 /// Public return type of `DownloadResolver.runWorkflow(workflowID:…)`.
@@ -116,6 +124,37 @@ struct CompiledRuleBundle: Sendable {
 
     func provider(matching url: URL) -> CompiledProvider? {
         providers.first { $0.matches(url) }
+    }
+
+    /// Host-only variant of `provider(matching:)`. Scans providers
+    /// and returns the first whose matchers' `hosts` / `hostSuffixes`
+    /// include `url`'s host, ignoring `pathPattern`. Used by
+    /// `authenticate(hostURL:)` so callers can prewarm / refresh
+    /// a session from a plain host URL even when the provider's
+    /// download matchers require a specific path (e.g.
+    /// `/file-\d+\.html$` — such a matcher is correct for
+    /// `resolve(_:)` URL routing but wrong for host-identity
+    /// lookup).
+    func provider(hostMatching url: URL) -> CompiledProvider? {
+        providers.first { $0.matchesHost(of: url) }
+    }
+
+    /// Return the provider whose `downloadWorkflowID` or
+    /// `authWorkflowID` equals `id`, if any. Used by
+    /// `runWorkflow(workflowID:...)` to preserve provider context
+    /// (family / id / metadata) when invoking a workflow that a
+    /// specific provider declares — capabilities that key on
+    /// provider identity then see the correct owner instead of
+    /// a synthetic "standalone" stub.
+    ///
+    /// Returns nil for shared-fragment workflow IDs not declared
+    /// by any provider; callers fall back to a synthetic stub in
+    /// that case.
+    func provider(declaringWorkflowID id: String) -> CompiledProvider? {
+        providers.first { provider in
+            provider.rule.downloadWorkflowID == id
+                || provider.rule.authWorkflowID == id
+        }
     }
 
     /// Look up a workflow by its string `id` across every workflow
@@ -311,7 +350,15 @@ public struct DownloadResolver: Sendable {
         guard let compiledBundle = await catalog.currentCompiledBundle() else {
             throw RuleEngineError.missingActiveBundle
         }
-        guard let provider = compiledBundle.provider(matching: hostURL) else {
+        // Host-only match: providers whose matchers include a
+        // `pathPattern` (e.g. `/file-\d+\.html$` in auth-sites)
+        // are correctly restrictive for `resolve(_:)` URL
+        // routing, but the caller here has a host-identifying
+        // URL (e.g. `https://jkpan.com/` for prewarm), not a
+        // download URL. Matching on host only is what lets the
+        // documented "standalone auth prewarm" use case actually
+        // work.
+        guard let provider = compiledBundle.provider(hostMatching: hostURL) else {
             throw RuleEngineError.noMatchingProvider(hostURL.absoluteString)
         }
         // Gate on auth-workflow availability only — NOT on whether
@@ -407,28 +454,42 @@ public struct DownloadResolver: Sendable {
             throw RuleEngineError.missingWorkflow(workflowID)
         }
 
-        // Synthesize a minimal provider so we can reuse the existing
-        // `WorkflowRuntime`. All provider-dependent fields (id /
-        // family / metadata) are set to safe defaults; the runtime
-        // only surfaces them via `variables["provider"]` for
-        // workflow templates, so benign defaults are fine.
-        let stubProviderRule = ProviderRule(
-            id: "runWorkflow.standalone",
-            providerFamily: "standalone",
-            matchers: [],
-            accountScope: .providerFamily,
-            downloadWorkflowID: workflow.id,
-            authWorkflowID: nil,
-            authPolicy: nil,
-            metadata: [:]
-        )
-        let stubProvider = CompiledProvider(
-            rule: stubProviderRule,
-            downloadWorkflow: workflow,
-            authWorkflow: nil
-        )
+        // Preserve provider identity when the workflow is
+        // declared by a specific provider — `WorkflowRuntime`
+        // forwards `provider.rule.providerFamily` / `metadata`
+        // into `CapabilityInvocation`, so shared capabilities
+        // keyed off provider identity must see the real owner
+        // rather than a synthetic stub. For shared-fragment
+        // workflows declared by no provider, fall back to a
+        // synthetic "standalone" stub (provider-keyed
+        // capabilities in those workflows have nothing to key
+        // against anyway).
+        let stubProvider: CompiledProvider
+        if let owner = compiledBundle.provider(declaringWorkflowID: workflowID) {
+            stubProvider = owner
+        } else {
+            let stubRule = ProviderRule(
+                id: "runWorkflow.standalone",
+                providerFamily: "standalone",
+                matchers: [],
+                accountScope: .providerFamily,
+                downloadWorkflowID: workflow.id,
+                authWorkflowID: nil,
+                authPolicy: nil,
+                metadata: [:]
+            )
+            stubProvider = CompiledProvider(
+                rule: stubRule,
+                downloadWorkflow: workflow,
+                authWorkflow: nil
+            )
+        }
+        // Default session key inherits the detected owner's family
+        // (so sessions persisted by this call are stored under the
+        // same key `resolve(_:)` would use, making them reusable).
+        // Caller-supplied `authSessionKey` always wins.
         let sessionKey = authSessionKey ?? AuthSessionKey(
-            providerFamily: "standalone",
+            providerFamily: stubProvider.rule.providerFamily,
             accountID: "default"
         )
         let existingSession = await authSessionStore.session(for: sessionKey)

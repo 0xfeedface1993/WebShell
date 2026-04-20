@@ -1892,4 +1892,140 @@ final class DownloadResolverTests: XCTestCase {
         XCTAssertEqual(result.authSession?.cookies.first?.name, "session")
         XCTAssertEqual(result.authSession?.cookies.first?.value, "valid")
     }
+
+    /// `authenticate(hostURL:)` must match providers by host
+    /// alone, not by full URL matcher (which includes
+    /// `pathPattern`). Providers whose matchers pin a download
+    /// path — e.g. `jkpan-vip` with `/file-\d+\.html$` — must
+    /// still resolve for a plain host URL like
+    /// `https://jkpan.com/`, otherwise prewarm/refresh is
+    /// unreachable from callers that don't already have a
+    /// specific download URL.
+    func testAuthenticateMatchesProviderByHostIgnoringPathPattern() async throws {
+        let bundle = try RuleBundleFixtures.loadMergedBundle(
+            named: [
+                "auth-workflows.bundle",
+                "auth-sites.bundle",
+                "auth-templates.bundle",
+            ],
+            bundleVersion: "2026.04.20.authenticate-host-only.1"
+        )
+        let (registry, catalog) = try await makeSyncedCatalog(bundle: bundle)
+
+        // Lenient client: we only care that provider resolution
+        // succeeds (no `noMatchingProvider`). The auth workflow
+        // for jkpan-vip would need full captcha / formhash
+        // mocking to actually complete — that's not what this
+        // test exercises.
+        let httpClient = StubHTTPClient { request in
+            HTTPResponseData(
+                statusCode: 200,
+                url: request.url,
+                headers: [:],
+                body: ""
+            )
+        }
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: httpClient,
+            capabilityRegistry: registry,
+            authSessionStore: AuthSessionStore(),
+            authMaterialProvider: CountingAuthMaterialProvider(counter: MaterialCounter())
+        )
+
+        do {
+            _ = try await resolver.authenticate(
+                hostURL: URL(string: "https://jkpan.com/")!,
+                accountID: "demo"
+            )
+            // A successful return is also fine — means the entire
+            // auth flow happened to tolerate the lenient responses.
+        } catch RuleEngineError.noMatchingProvider(let info) {
+            XCTFail("host-only URL should resolve jkpan-vip via matchesHost; got noMatchingProvider(\(info))")
+        } catch {
+            // Any other error is fine — we only assert the
+            // provider-lookup gate, not the workflow itself.
+        }
+    }
+
+    /// `runWorkflow(workflowID:)` must preserve the declaring
+    /// provider's identity. `WorkflowRuntime` forwards
+    /// `provider.rule.providerFamily` into `CapabilityInvocation`
+    /// and into the default session key; before the fix those
+    /// saw `"standalone"` even when the workflow was declared by
+    /// a real provider, so sessions persisted by runWorkflow
+    /// couldn't be reused by later `resolve(_:)` calls against
+    /// the same provider. This test asserts the session lands
+    /// under the owner's family (`secure-demo`), not the
+    /// synthetic stub.
+    func testRunWorkflowPreservesDeclaringProviderContext() async throws {
+        let bundle = try RuleBundleFixtures.loadMergedBundle(
+            named: [
+                "auth-workflows.bundle",
+                "auth-sites.bundle",
+                "auth-templates.bundle",
+            ],
+            bundleVersion: "2026.04.20.runWorkflow-provider-context.1"
+        )
+        let (registry, catalog) = try await makeSyncedCatalog(bundle: bundle)
+
+        let authStore = AuthSessionStore()
+        let httpClient = StubHTTPClient { request in
+            switch request.url.absoluteString {
+            case "https://secure.example.com/login":
+                return HTTPResponseData(
+                    statusCode: 200,
+                    url: request.url,
+                    headers: ["Set-Cookie": "session=owner; Path=/; Domain=secure.example.com"],
+                    body: "ok",
+                    cookies: [
+                        SerializableCookie(
+                            name: "session",
+                            value: "owner",
+                            domain: "secure.example.com",
+                            path: "/"
+                        )
+                    ]
+                )
+            default:
+                XCTFail("Unexpected request: \(request.url.absoluteString)")
+                return HTTPResponseData(statusCode: 500, url: request.url, headers: [:], body: "unexpected")
+            }
+        }
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: httpClient,
+            capabilityRegistry: registry,
+            authSessionStore: authStore,
+            authMaterialProvider: CountingAuthMaterialProvider(counter: MaterialCounter())
+        )
+
+        _ = try await resolver.runWorkflow(
+            workflowID: "secure.auth",
+            sourceURL: URL(string: "https://secure.example.com/")!,
+            variables: [:],
+            materials: [
+                "username": .string("demo-user"),
+                "password": .string("secret-password"),
+            ]
+        )
+
+        // With the fix: sessionKey inherits the owning
+        // provider's family (`secure-demo`), so the persisted
+        // session is reachable under that key. Before the fix,
+        // it would only be reachable under
+        // `("standalone","default")`.
+        let underOwner = await authStore.session(
+            for: AuthSessionKey(providerFamily: "secure-demo", accountID: "default")
+        )
+        XCTAssertEqual(underOwner?.cookies.first?.value, "owner")
+
+        // Cross-check: the synthetic key used by the pre-fix
+        // code path should be empty — no session should have
+        // leaked there.
+        let underStandalone = await authStore.session(
+            for: AuthSessionKey(providerFamily: "standalone", accountID: "default")
+        )
+        XCTAssertNil(underStandalone, "session must not land under the synthetic standalone key")
+    }
 }

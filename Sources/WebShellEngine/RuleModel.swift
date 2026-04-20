@@ -78,24 +78,25 @@ public struct URLMatcher: Codable, Sendable, Equatable {
     public let pathPattern: String?
 
     func matches(url: URL) -> Bool {
-        guard let host = url.host?.lowercased() else {
-            return false
-        }
+        guard matchesHost(of: url) else { return false }
+        guard let pathPattern else { return true }
+        return url.path.range(of: pathPattern, options: .regularExpression) != nil
+    }
 
+    /// Host-only match, ignoring `pathPattern`. Used by the
+    /// `authenticate(hostURL:)` entry point where the caller has
+    /// a provider-identifying host URL but no specific download
+    /// path to route on. Full `matches(url:)` would reject such
+    /// a URL whenever `pathPattern` is set (e.g. `/file-\d+\.html$`
+    /// in the auth-sites fixture).
+    func matchesHost(of url: URL) -> Bool {
+        guard let host = url.host?.lowercased() else { return false }
         let normalizedHosts = Set(hosts.map { $0.lowercased() })
         let normalizedSuffixes = hostSuffixes.map { $0.lowercased() }
-        let matchesHost = normalizedHosts.contains(host)
-        let matchesSuffix = normalizedSuffixes.contains { suffix in
+        if normalizedHosts.contains(host) { return true }
+        return normalizedSuffixes.contains { suffix in
             host == suffix || host.hasSuffix("." + suffix)
         }
-        guard matchesHost || matchesSuffix else {
-            return false
-        }
-
-        guard let pathPattern else {
-            return true
-        }
-        return url.path.range(of: pathPattern, options: .regularExpression) != nil
     }
 
     func conflictKeys() -> [String] {
