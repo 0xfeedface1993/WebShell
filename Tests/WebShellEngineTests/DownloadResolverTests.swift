@@ -2075,4 +2075,160 @@ final class DownloadResolverTests: XCTestCase {
         )
         XCTAssertNotNil(noHostMatch, "fallback must return a candidate, not nil")
     }
+
+    /// Compilation enforces uniqueness WITHIN each workflow list
+    /// but not across; a bundle can legally declare the same id
+    /// in both `downloadWorkflows` and `authWorkflows`.
+    /// `workflow(id:)` must surface the ambiguity as
+    /// `.ambiguousWorkflow(id)` rather than silently returning
+    /// whichever list is scanned first (which would make the
+    /// other category's definition unreachable by id through
+    /// `runWorkflow`).
+    func testWorkflowLookupThrowsOnCrossListAmbiguity() async throws {
+        let json = """
+        {
+          "schemaVersion": 1,
+          "bundleVersion": "2026.04.20.ambiguous-workflow.1",
+          "providers": [],
+          "sharedFragments": [],
+          "authWorkflows": [
+            {"id": "shared.id", "description": "auth copy", "steps": []}
+          ],
+          "downloadWorkflows": [
+            {"id": "shared.id", "description": "download copy", "steps": []}
+          ],
+          "capabilityRefs": []
+        }
+        """
+        let bundle = try JSONDecoder().decode(RuleBundle.self, from: Data(json.utf8))
+        let (_, catalog) = try await makeSyncedCatalog(bundle: bundle)
+        let compiled = await catalog.currentCompiledBundle()
+        XCTAssertNotNil(compiled)
+
+        do {
+            _ = try compiled?.workflow(id: "shared.id")
+            XCTFail("expected ambiguousWorkflow error")
+        } catch RuleEngineError.ambiguousWorkflow(let id) {
+            XCTAssertEqual(id, "shared.id")
+        } catch {
+            XCTFail("unexpected error: \(error)")
+        }
+
+        // Unknown id still returns nil (not thrown) — callers
+        // then map that to `.missingWorkflow`.
+        let unknown = try compiled?.workflow(id: "does-not-exist")
+        XCTAssertNil(unknown)
+    }
+
+    /// `runWorkflow(workflowID:)`'s default session key must
+    /// honour the owner's `authPolicy.accountIDTemplate`. Before
+    /// the fix, `accountID` was hard-coded to `"default"`, so
+    /// sessions prewarmed via `runWorkflow` for a templated
+    /// provider landed under a key that `resolve(_:)` would never
+    /// look up — breaking session reuse across entry points and
+    /// causing different logical accounts to overwrite each
+    /// other under the default key.
+    func testRunWorkflowDefaultAccountIDAppliesProviderTemplate() async throws {
+        let json = """
+        {
+          "schemaVersion": 1,
+          "bundleVersion": "2026.04.20.accountID-template.1",
+          "providers": [
+            {
+              "id": "templated-demo",
+              "providerFamily": "templated-demo",
+              "accountScope": "providerFamily",
+              "matchers": [
+                {"hosts": ["templated.example.com"], "hostSuffixes": []}
+              ],
+              "downloadWorkflowID": "templated.placeholder.download",
+              "authWorkflowID": "templated.auth",
+              "authPolicy": {
+                "expireConditions": [],
+                "materialKeys": ["username"],
+                "requiresAuthentication": false,
+                "accountIDTemplate": "{{input.variables.slug}}"
+              },
+              "metadata": {}
+            }
+          ],
+          "sharedFragments": [],
+          "authWorkflows": [
+            {
+              "id": "templated.auth",
+              "description": "Minimal auth flow just to exercise session persistence keying.",
+              "steps": [
+                {
+                  "type": "http",
+                  "http": {
+                    "method": "POST",
+                    "urlTemplate": "https://templated.example.com/login",
+                    "headers": {"Content-Type": "application/x-www-form-urlencoded"},
+                    "bodyTemplate": "ok",
+                    "output": "loginResponse",
+                    "persistResponseCookies": true,
+                    "attachAuthSession": false
+                  }
+                }
+              ]
+            }
+          ],
+          "downloadWorkflows": [
+            {
+              "id": "templated.placeholder.download",
+              "description": "Unused; satisfies ProviderRule.downloadWorkflowID.",
+              "steps": []
+            }
+          ],
+          "capabilityRefs": []
+        }
+        """
+        let bundle = try JSONDecoder().decode(RuleBundle.self, from: Data(json.utf8))
+        let (registry, catalog) = try await makeSyncedCatalog(bundle: bundle)
+
+        let authStore = AuthSessionStore()
+        let httpClient = StubHTTPClient { request in
+            HTTPResponseData(
+                statusCode: 200,
+                url: request.url,
+                headers: ["Set-Cookie": "session=t; Path=/; Domain=templated.example.com"],
+                body: "ok",
+                cookies: [
+                    SerializableCookie(
+                        name: "session",
+                        value: "t",
+                        domain: "templated.example.com",
+                        path: "/"
+                    )
+                ]
+            )
+        }
+        let resolver = DownloadResolver(
+            catalog: catalog,
+            httpClient: httpClient,
+            capabilityRegistry: registry,
+            authSessionStore: authStore,
+            authMaterialProvider: CountingAuthMaterialProvider(counter: MaterialCounter())
+        )
+
+        _ = try await resolver.runWorkflow(
+            workflowID: "templated.auth",
+            sourceURL: URL(string: "https://templated.example.com/")!,
+            variables: ["slug": .string("user42")]
+        )
+
+        // accountIDTemplate `{{input.variables.slug}}` resolves
+        // to "user42"; the persisted session must land there.
+        let underTemplated = await authStore.session(
+            for: AuthSessionKey(providerFamily: "templated-demo", accountID: "user42")
+        )
+        XCTAssertEqual(underTemplated?.cookies.first?.value, "t")
+
+        // Before the fix, the session would be keyed under
+        // "default". Cross-assert nothing leaked there.
+        let underDefault = await authStore.session(
+            for: AuthSessionKey(providerFamily: "templated-demo", accountID: "default")
+        )
+        XCTAssertNil(underDefault, "session must not land under 'default' when template is configured")
+    }
 }

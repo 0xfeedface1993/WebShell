@@ -179,23 +179,34 @@ struct CompiledRuleBundle: Sendable {
         return candidates.first
     }
 
-    /// Look up a workflow by its string `id` across every workflow
-    /// list in the active bundle (download + auth + shared
-    /// fragments). Used by `runWorkflow(workflowID:...)` which
-    /// invokes a workflow directly without requiring a provider
-    /// match — useful for list/detail page fetch + parse flows
-    /// where the caller already knows which workflow applies.
-    func workflow(id: String) -> WorkflowDefinition? {
+    /// Look up a workflow by its string `id` across every list
+    /// in the active bundle (`downloadWorkflows`, `authWorkflows`,
+    /// `sharedFragments`). Used by `runWorkflow(workflowID:...)`.
+    ///
+    /// Compilation only enforces uniqueness WITHIN each list;
+    /// a bundle can legally declare the same id in more than one
+    /// list. Returning `first hit` in that case would silently
+    /// pick one category (the download list is scanned first),
+    /// making the others unreachable by id — so this method
+    /// throws `.ambiguousWorkflow(id)` instead. Returns nil for
+    /// ids that don't appear anywhere; callers map that to
+    /// `.missingWorkflow` (since "missing" and "ambiguous" are
+    /// different error classes for the caller).
+    func workflow(id: String) throws -> WorkflowDefinition? {
+        var hits: [WorkflowDefinition] = []
         if let hit = snapshot.bundle.downloadWorkflows.first(where: { $0.id == id }) {
-            return hit
+            hits.append(hit)
         }
         if let hit = snapshot.bundle.authWorkflows.first(where: { $0.id == id }) {
-            return hit
+            hits.append(hit)
         }
         if let hit = snapshot.bundle.sharedFragments.first(where: { $0.id == id }) {
-            return hit
+            hits.append(hit)
         }
-        return nil
+        if hits.count > 1 {
+            throw RuleEngineError.ambiguousWorkflow(id)
+        }
+        return hits.first
     }
 }
 
@@ -472,7 +483,7 @@ public struct DownloadResolver: Sendable {
         guard let compiledBundle = await catalog.currentCompiledBundle() else {
             throw RuleEngineError.missingActiveBundle
         }
-        guard let workflow = compiledBundle.workflow(id: workflowID) else {
+        guard let workflow = try compiledBundle.workflow(id: workflowID) else {
             throw RuleEngineError.missingWorkflow(workflowID)
         }
 
@@ -510,17 +521,35 @@ public struct DownloadResolver: Sendable {
             )
         }
         // Default session key inherits the detected owner's family
-        // (so sessions persisted by this call are stored under the
-        // same key `resolve(_:)` would use, making them reusable).
-        // Caller-supplied `authSessionKey` always wins.
+        // AND applies the owner's `authPolicy.accountIDTemplate`
+        // via the same `resolveAccountID` helper that `resolve(_:)`
+        // / `authenticate(_:)` use, so sessions persisted by this
+        // call land under the same key `resolve(_:)` would use —
+        // making them reusable across entry points. Providers
+        // without a template (and synthetic stubs) fall through
+        // to `"default"`. Caller-supplied `authSessionKey` always
+        // wins.
+        let resolvedAccountID: String
+        if let key = authSessionKey {
+            resolvedAccountID = key.accountID
+        } else {
+            resolvedAccountID = try resolveAccountID(
+                for: stubProvider,
+                request: DownloadResolveRequest(
+                    sourceURL: sourceURL,
+                    accountID: nil,
+                    variables: variables
+                )
+            )
+        }
         let sessionKey = authSessionKey ?? AuthSessionKey(
             providerFamily: stubProvider.rule.providerFamily,
-            accountID: "default"
+            accountID: resolvedAccountID
         )
         let existingSession = await authSessionStore.session(for: sessionKey)
         let request = DownloadResolveRequest(
             sourceURL: sourceURL,
-            accountID: sessionKey.accountID,
+            accountID: resolvedAccountID,
             variables: variables
         )
         var runtime = WorkflowRuntime(
@@ -818,6 +847,7 @@ public struct DownloadResolver: Sendable {
                  .missingActiveBundle,
                  .noMatchingProvider,
                  .missingWorkflow,
+                 .ambiguousWorkflow,
                  .missingCapability,
                  .noEmittedRequest,
                  .httpFailure:

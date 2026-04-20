@@ -9,6 +9,12 @@ public enum RuleEngineError: LocalizedError, Sendable {
     case noMatchingProvider(String)
     case invalidRule(String)
     case missingWorkflow(String)
+    /// Thrown when a workflow id is declared in more than one of
+    /// `downloadWorkflows` / `authWorkflows` / `sharedFragments`.
+    /// Compilation only enforces uniqueness within each list, so
+    /// this check lives on direct-lookup paths like
+    /// `DownloadResolver.runWorkflow(workflowID:)`.
+    case ambiguousWorkflow(String)
     case missingCapability(String)
     case missingVariable(String)
     case invalidTemplate(String)
@@ -32,6 +38,8 @@ public enum RuleEngineError: LocalizedError, Sendable {
             return "Invalid rule bundle: \(value)"
         case .missingWorkflow(let value):
             return "Missing workflow: \(value)"
+        case .ambiguousWorkflow(let value):
+            return "Workflow id \(value) is declared in more than one of downloadWorkflows / authWorkflows / sharedFragments."
         case .missingCapability(let value):
             return "Missing capability: \(value)"
         case .missingVariable(let value):
