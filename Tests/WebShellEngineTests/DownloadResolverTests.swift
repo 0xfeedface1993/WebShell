@@ -2033,10 +2033,9 @@ final class DownloadResolverTests: XCTestCase {
     /// (e.g. legacy-sites.bundle has both `xueqiupan-public` and
     /// `xunniufile-public` declaring `generic.loadDownAddr1.dlphp`),
     /// `provider(declaringWorkflowID:sourceURL:)` must use the
-    /// caller's `sourceURL` to disambiguate. Otherwise
-    /// `providers.first` silently picks the wrong owner and
-    /// runWorkflow inherits the wrong family / metadata / default
-    /// session key.
+    /// caller's `sourceURL` to disambiguate. Hosts that are
+    /// completely disjoint between the declaring providers can
+    /// be resolved deterministically.
     func testProviderDeclaringWorkflowIDDisambiguatesByURL() async throws {
         let bundle = try makeLegacySitesBundle()
         let (_, catalog) = try await makeSyncedCatalog(bundle: bundle)
@@ -2045,13 +2044,13 @@ final class DownloadResolverTests: XCTestCase {
 
         // Full URL with pathPattern hit — strict match should
         // pick the matching provider.
-        let xueqiupan = compiled?.provider(
+        let xueqiupan = try compiled?.provider(
             declaringWorkflowID: "generic.loadDownAddr1.dlphp",
             sourceURL: URL(string: "http://www.xueqiupan.com/file-672734.html")!
         )
         XCTAssertEqual(xueqiupan?.rule.providerFamily, "xueqiupan")
 
-        let xunniufile = compiled?.provider(
+        let xunniufile = try compiled?.provider(
             declaringWorkflowID: "generic.loadDownAddr1.dlphp",
             sourceURL: URL(string: "http://www.xunniufile.com/file-672734.html")!
         )
@@ -2059,21 +2058,22 @@ final class DownloadResolverTests: XCTestCase {
 
         // Host-only URL (no pathPattern hit) — must fall through
         // to host match and still pick the right provider.
-        let xunniufileHostOnly = compiled?.provider(
+        let xunniufileHostOnly = try compiled?.provider(
             declaringWorkflowID: "generic.loadDownAddr1.dlphp",
             sourceURL: URL(string: "https://www.xunniufile.com/")!
         )
         XCTAssertEqual(xunniufileHostOnly?.rule.providerFamily, "xunniufile")
 
-        // Unrelated host — neither strict nor host match; fall
-        // back to first candidate (deterministic; callers that
-        // care should pass a URL that actually identifies the
-        // intended provider).
-        let noHostMatch = compiled?.provider(
+        // Unrelated host — neither strict nor host match. No
+        // longer falls back to `.first` (that was a silent
+        // arbitrary pick flagged by review); returns nil so
+        // runWorkflow uses the honestly-labelled synthetic
+        // "standalone" stub instead.
+        let noHostMatch = try compiled?.provider(
             declaringWorkflowID: "generic.loadDownAddr1.dlphp",
             sourceURL: URL(string: "https://unrelated.example.com/")!
         )
-        XCTAssertNotNil(noHostMatch, "fallback must return a candidate, not nil")
+        XCTAssertNil(noHostMatch, "unrelated host should yield nil, not an arbitrary first-candidate")
     }
 
     /// Compilation enforces uniqueness WITHIN each workflow list
@@ -2330,5 +2330,85 @@ final class DownloadResolverTests: XCTestCase {
             // Any other error (e.g. authDidNotProduceSession) is
             // acceptable — workflow execution isn't under test.
         }
+    }
+
+    /// `provider(declaringWorkflowID:sourceURL:)` must surface
+    /// ambiguity the same way `provider(hostMatching:)` does.
+    /// When multiple providers declare the same workflow id AND
+    /// their matcher regexes overlap at runtime for a given
+    /// URL, silently picking `first` is a correctness bug
+    /// (wrong family / metadata / default session key). Two
+    /// providers both accepting `overlap.example.com` + sharing
+    /// a `downloadWorkflowID` exercise both the strict-multi
+    /// and host-only-multi paths.
+    func testProviderDeclaringWorkflowIDThrowsOnAmbiguousSourceURL() async throws {
+        // overlap-a: pathPattern /.*      (matches everything)
+        // overlap-b: pathPattern /shared/.+ (subset of /.*)
+        // sourceURL /shared/x → strict match BOTH → throw
+        // sourceURL /          → strict match only overlap-a → clean pick
+        let json = """
+        {
+          "schemaVersion": 1,
+          "bundleVersion": "2026.04.20.owner-overlap.1",
+          "providers": [
+            {
+              "id": "overlap-a",
+              "providerFamily": "overlap-a",
+              "accountScope": "providerFamily",
+              "matchers": [
+                {"hosts": ["overlap.example.com"], "hostSuffixes": [], "pathPattern": "/.*"}
+              ],
+              "downloadWorkflowID": "overlap.shared.download",
+              "authWorkflowID": null,
+              "authPolicy": null,
+              "metadata": {}
+            },
+            {
+              "id": "overlap-b",
+              "providerFamily": "overlap-b",
+              "accountScope": "providerFamily",
+              "matchers": [
+                {"hosts": ["overlap.example.com"], "hostSuffixes": [], "pathPattern": "/shared/.+"}
+              ],
+              "downloadWorkflowID": "overlap.shared.download",
+              "authWorkflowID": null,
+              "authPolicy": null,
+              "metadata": {}
+            }
+          ],
+          "sharedFragments": [],
+          "authWorkflows": [],
+          "downloadWorkflows": [
+            {"id": "overlap.shared.download", "description": "", "steps": []}
+          ],
+          "capabilityRefs": []
+        }
+        """
+        let bundle = try JSONDecoder().decode(RuleBundle.self, from: Data(json.utf8))
+        let (_, catalog) = try await makeSyncedCatalog(bundle: bundle)
+        let compiled = await catalog.currentCompiledBundle()
+        XCTAssertNotNil(compiled)
+
+        // Ambiguous strict match: /shared/x hits both
+        // pathPatterns. Must throw.
+        do {
+            _ = try compiled?.provider(
+                declaringWorkflowID: "overlap.shared.download",
+                sourceURL: URL(string: "https://overlap.example.com/shared/item")!
+            )
+            XCTFail("expected ambiguousWorkflowOwner under strict-multi")
+        } catch RuleEngineError.ambiguousWorkflowOwner(let id) {
+            XCTAssertEqual(id, "overlap.shared.download")
+        } catch {
+            XCTFail("unexpected error: \(error)")
+        }
+
+        // Clean strict pick: / only matches overlap-a's
+        // greedy /.* pathPattern, not overlap-b's /shared/.+ .
+        let cleanPick = try compiled?.provider(
+            declaringWorkflowID: "overlap.shared.download",
+            sourceURL: URL(string: "https://overlap.example.com/")!
+        )
+        XCTAssertEqual(cleanPick?.rule.providerFamily, "overlap-a")
     }
 }

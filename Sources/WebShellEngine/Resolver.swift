@@ -176,30 +176,43 @@ struct CompiledRuleBundle: Sendable {
     ///   2. If empty → nil (caller falls back to synthetic).
     ///   3. If one → that provider.
     ///   4. Otherwise disambiguate by `sourceURL`:
-    ///      a. strict full match (host + pathPattern)
-    ///      b. host-only match (for prewarm-style URLs)
-    ///      c. fall back to the first candidate
+    ///      a. strict full match (host + pathPattern).
+    ///         Exactly one → pick it; more than one → throw
+    ///         `.ambiguousWorkflowOwner(id)` (matcher regexes
+    ///         overlap at runtime — caller must narrow the URL).
+    ///      b. host-only match. Same rule: one → pick; many →
+    ///         throw.
+    ///      c. still no disambiguation → nil (synthetic stub
+    ///         fallback). Silently picking `first` here would
+    ///         run the workflow under an arbitrary owner's
+    ///         family / metadata / default session key — the
+    ///         synthetic stub at least labels the context
+    ///         honestly.
     ///
-    /// Without (4), a shared workflow (e.g. `legacy-sites.bundle`'s
-    /// `generic.loadDownAddr1.dlphp`, declared by both `xueqiupan`
-    /// and `xunniufile`) would always route to whichever provider
-    /// was registered first — the second provider's runWorkflow
-    /// calls would inherit the wrong family / metadata and the
-    /// wrong default session key.
-    func provider(declaringWorkflowID id: String, sourceURL: URL) -> CompiledProvider? {
+    /// This mirrors `provider(hostMatching:)`'s collect-and-
+    /// detect behaviour — a previous iteration of this method
+    /// silently picked `first`, which Codex flagged as a
+    /// correctness regression for bundles where the same
+    /// workflow id is declared by multiple providers with
+    /// overlapping matcher regexes.
+    func provider(declaringWorkflowID id: String, sourceURL: URL) throws -> CompiledProvider? {
         let candidates = providers.filter { provider in
             provider.rule.downloadWorkflowID == id
                 || provider.rule.authWorkflowID == id
         }
         if candidates.isEmpty { return nil }
         if candidates.count == 1 { return candidates.first }
-        if let strict = candidates.first(where: { $0.matches(sourceURL) }) {
-            return strict
+        let strict = candidates.filter { $0.matches(sourceURL) }
+        if strict.count == 1 { return strict.first }
+        if strict.count > 1 {
+            throw RuleEngineError.ambiguousWorkflowOwner(id)
         }
-        if let byHost = candidates.first(where: { $0.matchesHost(of: sourceURL) }) {
-            return byHost
+        let byHost = candidates.filter { $0.matchesHost(of: sourceURL) }
+        if byHost.count == 1 { return byHost.first }
+        if byHost.count > 1 {
+            throw RuleEngineError.ambiguousWorkflowOwner(id)
         }
-        return candidates.first
+        return nil
     }
 
     /// Look up a workflow by its string `id` across every list
@@ -521,7 +534,7 @@ public struct DownloadResolver: Sendable {
         // capabilities in those workflows have nothing to key
         // against anyway).
         let stubProvider: CompiledProvider
-        if let owner = compiledBundle.provider(
+        if let owner = try compiledBundle.provider(
             declaringWorkflowID: workflowID,
             sourceURL: sourceURL
         ) {
@@ -872,6 +885,7 @@ public struct DownloadResolver: Sendable {
                  .missingWorkflow,
                  .ambiguousWorkflow,
                  .ambiguousHostMatch,
+                 .ambiguousWorkflowOwner,
                  .missingCapability,
                  .noEmittedRequest,
                  .httpFailure:
